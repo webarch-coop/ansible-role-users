@@ -6,7 +6,7 @@
     - groups: "{{ item.groups }}"
     - home: "{{ item.home }}"
     - system: "{{ item.system }}"
-  loop: "{{ user_accounts }}"
+  with_items: "{{ user_accounts }}"
 
 - name: SSH private directories present
   file:
