@@ -1,5 +1,5 @@
 ---
-# {{ item.home }} would ideally be populated with /home/{{ item.name }} if not set
+# item.home would ideally be populated with /home/item.name if not set
 - name: Add users
   user:
     - name: "{{ item.name }}"
