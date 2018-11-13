@@ -59,7 +59,7 @@
     group: "{{ item.name }}"
     mode: 0644 
   loop: "{{ user_accounts }}"
-  when: item.editor is defined and item.editor equals 'vim'
+  when: item.editor == 'vim' 
 
 - name: vim set to be default editor
   lineinfile:
