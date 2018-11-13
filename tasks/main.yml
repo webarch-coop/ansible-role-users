@@ -1,4 +1,10 @@
 ---
+- debug:
+    msg: "name: {{ item.name }} groups: {{ item.groups }} home: {{ item.home }} system: {{ item.system }} editor: {{ item.editor }}"
+    verbosity: 1
+  loop: "{{ user_accounts }}"
+
+# item.home would ideally be populated with /home/item.name if not set
 - name: Add user accounts
   user:
     name: "{{ item.name }}"
@@ -6,7 +12,6 @@
     home: "{{ item.home }}"
     system: "{{ item.system }}"
   loop: "{{ user_accounts }}"
-# item.home would ideally be populated with /home/item.name if not set
 
 - name: SSH private directories present
   file:
