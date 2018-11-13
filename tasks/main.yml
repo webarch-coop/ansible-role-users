@@ -14,7 +14,7 @@
     group: "{{ item.name }}"
     mode: 0700 
   loop: "{{ users }}"
-  when: item.ssh_public_keys != ""
+  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
 
 - name: SSH public keys present
   get_url:
@@ -24,4 +24,24 @@
     group: "{{ item.name }}"
     mode: 0600 
   loop: "{{ users }}"
-  when: item.ssh_public_keys != ""
+  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
+
+- name: Set default editor
+  copy:
+    src: "files/{{ item.editor }}/selected_editor"
+    dest: "{{ item.home }}/.selected_editor"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0644 
+  loop: "{{ users }}"
+  when: item.editor is defined and item.editor != ""
+
+- name: .vimrc in place
+  copy:
+    src: "files/{{ item.editor }}/vimrc"
+    dest: "{{ item.home }}/.vimrc"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0644 
+  loop: "{{ users }}"
+  when: item.editor is defined and item.editor = "vim"

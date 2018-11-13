@@ -47,12 +47,18 @@ The other repo should also contain a `users.yml` file that contains:
       home: /home/foo
       system: no
       groups: sudoers
+      # the following variables are optional
       ssh_public_keys: https://git.coop/foo.keys
+      # vim is currently the only supported editor
+      editor: vim
     - name: bar
       home: /var/www/foo
       system: yes
       groups: ssl-cert
-      ssh_public_keys: https://git.coop/bar.keys
+      # the following variables are optional
+      # ssh_public_keys: 
+      # vim is currently the only supported editor
+      editor: vim
     
   hosts:
     - users_servers
