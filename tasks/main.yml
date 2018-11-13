@@ -1,0 +1,27 @@
+---
+- name: Add users
+  user:
+    - name: "{{ item.name }}"
+    - groups: "{{ item.groups }}"
+    - system: "{{ item.system }}"
+  loop: "{{ users }}"
+
+- name: SSH private directories present
+  file:
+    path: "{{ item.home }}/.ssh"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0700 
+  loop: "{{ users }}"
+  when: item.ssh_public_keys != ""
+
+- name: SSH public keys present
+  get_url:
+    url: "{{ item.ssh_public_keys }}"    
+    dest: "{{ item.home }}/.ssh/authorized_keys"    
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0600 
+  loop: "{{ users }}"
+  when: item.ssh_public_keys != ""
