@@ -59,13 +59,14 @@
     group: "{{ item.name }}"
     mode: 0644 
   loop: "{{ user_accounts }}"
-  when: item.editor == 'vim' 
+  when: item.editor is defined and item.editor == 'vim' 
 
 - name: vim set to be default editor
   lineinfile:
     path: "{{ item.home }}/.bashrc"
     line: 'export EDITOR="vim"'
+    state: present
   loop: "{{ user_accounts }}"
-  when: item.editor is defined and item.editor = "vim"
+  when: item.editor is defined and item.editor == 'vim'
 
 
