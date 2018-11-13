@@ -1,12 +1,10 @@
 ---
-# {{ item.home }} would ideally be populated with /home/{{ item.name }} if not set
 - name: Add users
   user:
     - name: "{{ item.name }}"
     - groups: "{{ item.groups }}"
-    - home: "{{ item.home }}"
     - system: "{{ item.system }}"
-  loop: "{{ user_accounts }}"
+  loop: "{{ users }}"
 
 - name: SSH private directories present
   file:
@@ -15,7 +13,7 @@
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
     mode: 0700 
-  loop: "{{ user_accounts }}"
+  loop: "{{ users }}"
   when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
 
 - name: SSH public keys present
@@ -25,7 +23,7 @@
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
     mode: 0600 
-  loop: "{{ user_accounts }}"
+  loop: "{{ users }}"
   when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
 
 - name: Set default editor
@@ -35,16 +33,8 @@
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
     mode: 0644 
-  loop: "{{ user_accounts }}"
+  loop: "{{ users }}"
   when: item.editor is defined and item.editor != ""
-
-# Ideally this would get the unique list of editors needed on this server...
-- name: Editors installed
-  apt:
-    pkg: 
-      - vim
-    state: present
-    update_cache: yes
 
 - name: .vimrc in place
   copy:
@@ -53,13 +43,5 @@
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
     mode: 0644 
-  loop: "{{ user_accounts }}"
+  loop: "{{ users }}"
   when: item.editor is defined and item.editor = "vim"
-
-- name: vim set to be default editor
-  lineinfile:
-    path: "{{ item.home }}/.bashrc"
-    line: 'export EDITOR="vim"'
-  loop: "{{ user_accounts }}"
-  when: item.editor is defined and item.editor = "vim"
-

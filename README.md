@@ -42,7 +42,7 @@ The other repo should also contain a `users.yml` file that contains:
 - name: Add user accounts
   become: yes
 
-  user_accounts:
+  users:
     - name: foo
       home: /home/foo
       system: no
