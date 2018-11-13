@@ -1,12 +1,12 @@
 ---
-# item.home would ideally be populated with /home/item.name if not set
-- name: Add users
+- name: Add user accounts
   user:
     - name: "{{ item.name }}"
     - groups: "{{ item.groups }}"
     - home: "{{ item.home }}"
     - system: "{{ item.system }}"
   with_items: "{{ user_accounts }}"
+# item.home would ideally be populated with /home/item.name if not set
 
 - name: SSH private directories present
   file:
