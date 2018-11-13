@@ -45,6 +45,7 @@ The other repo should also contain a `users.yml` file that contains:
   user_accounts:
     - name: foo
       home: /home/foo
+      shell: /bin/bash
       system: no
       groups: sudoers
       # the following variables are optional
@@ -53,6 +54,7 @@ The other repo should also contain a `users.yml` file that contains:
       editor: vim
     - name: bar
       home: /var/www/foo
+      shell: /bin/false
       system: yes
       groups: ssl-cert
       # the following variables are optional

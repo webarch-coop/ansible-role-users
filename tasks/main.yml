@@ -10,6 +10,7 @@
     name: "{{ item.name }}"
     groups: "{{ item.groups }}"
     home: "{{ item.home }}"
+    shell: "{{ item.shell }}"
     system: "{{ item.system }}"
   loop: "{{ user_accounts }}"
 
