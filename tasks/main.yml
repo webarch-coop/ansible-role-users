@@ -48,7 +48,7 @@
 
 - name: .vimrc in place
   copy:
-    src: "files/{{ item.editor }}/vimrc"
+    src: "files/vim/vimrc"
     dest: "{{ item.home }}/.vimrc"
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
