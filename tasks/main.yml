@@ -8,13 +8,14 @@
 # item.home would ideally be populated with /home/item.name if not set
 # item.shell would ideally be set to /bin/bash if not set
 # item.system would ideally be set to "no" if not set
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#defaulting-undefined-variables
 - name: Add user accounts
   user:
     name: "{{ item.name }}"
-    groups: "{{ item.groups }}"
-    home: "{{ item.home }}"
-    shell: "{{ item.shell }}"
-    system: "{{ item.system }}"
+    groups: "{{ item.groups | default('', true) }}"
+    home: "{{ item.home | default('/home/{{ item.name }}', true) }}"
+    shell: "{{ item.shell | default('/bin/bash', true) }}"
+    system: "{{ item.system | default('no', true) }}"
   loop: "{{ user_accounts }}"
 
 - name: SSH private directories present
