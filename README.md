@@ -96,4 +96,5 @@ ansible-playbook users.yml
 
 ## TODO
 
+* Add the users dictionary to the `hosts.yml` file?
 * Add more options from the [Ansible user module](https://docs.ansible.com/ansible/latest/modules/user_module.html)
