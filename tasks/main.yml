@@ -1,6 +1,6 @@
 ---
 - debug:
-    msg: "name: {{ item.key }} | groups: {{ item.value.groups }} home: {{ item.value.home }} system: {{ item.value.system }} editor: {{ item.value.editor }}"
+    msg: "name: {{ item.key }} | groups: {{ item.value.groups | default(omit) }} | home: {{ item.value.home }} | system: {{ item.value.system }} | editor: {{ item.value.editor }}"
     verbosity: 1
   loop: "{{ lookup('dict', users) }}"
 
