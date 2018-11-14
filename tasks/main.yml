@@ -2,7 +2,8 @@
 - debug:
     msg: "name: {{ item.key }} | groups: {{ item.value.groups | default() }} | home: {{ item.value.home | default() }} | system: {{ item.value.system | default('no', false) }} | editor: {{ item.value.editor | default('vim', true) }}"
     verbosity: 1
-  loop: "{{ lookup('dict', users) }}"
+  loop: "{{ users | dict2items }}"
+#  loop: "{{ lookup('dict', users) }}"
 
 # item.groups would ideally be set to "" if not set
 # item.home would ideally be populated with /home/item.name if not set
