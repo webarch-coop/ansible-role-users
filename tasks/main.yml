@@ -78,6 +78,7 @@
     path: "{{ item.value.home | default(['/home/' + item.key]) }}/.bashrc"
     line: 'export EDITOR="vim"'
     state: present
+    unsafe_writes: true
   loop: "{{ users | dict2items }}"
   when: item.value.editor is defined and item.value.editor == 'vim'
 
