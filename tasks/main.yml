@@ -30,16 +30,16 @@
   loop: "{{ users | dict2items }}"
   when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != "" 
 
-#- name: SSH public keys present
-#  get_url:
-#    url: "{{ item.ssh_public_keys }}"    
-#    dest: "{{ item.home }}/.ssh/authorized_keys"    
-#    owner: "{{ item.name }}"
-#    group: "{{ item.name }}"
-#    mode: 0600 
-#  loop: "{{ users | dict2items }}"
-#  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
-#
+- name: SSH public keys present
+  get_url:
+    url: "{{ item.value.ssh_public_keys }}"    
+    dest: "{{ item.value.home | default(['/home/' + item.key]) }}/.ssh/authorized_keys"    
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: 0600 
+  loop: "{{ users | dict2items }}"
+  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
+
 #- name: Set default editor
 #  copy:
 #    src: "files/{{ item.editor }}/selected_editor"
