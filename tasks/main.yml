@@ -50,30 +50,30 @@
   loop: "{{ users | dict2items }}"
   when: item.value.editor is defined and item.value.editor != ""
 
-## Ideally this would get the unique list of editors needed on this server...
-#- name: Editors installed
-#  apt:
-#    pkg: 
-#      - vim
-#    state: present
-#    update_cache: yes
-#
-#- name: .vimrc in place
-#  copy:
-#    src: "files/vim/vimrc"
-#    dest: "{{ item.home }}/.vimrc"
-#    owner: "{{ item.name }}"
-#    group: "{{ item.name }}"
-#    mode: 0644 
-#  loop: "{{ users | dict2items }}"
-#  when: item.editor is defined and item.editor == 'vim' 
-#
-#- name: vim set to be default editor
-#  lineinfile:
-#    path: "{{ item.home }}/.bashrc"
-#    line: 'export EDITOR="vim"'
-#    state: present
-#  loop: "{{ users | dict2items }}"
-#  when: item.editor is defined and item.editor == 'vim'
-#
-#
+# Ideally this would get the unique list of editors needed on this server...
+- name: Editors installed
+  apt:
+    pkg: 
+      - vim
+    state: present
+    update_cache: yes
+
+- name: .vimrc in place
+  copy:
+    src: "files/vim/vimrc"
+    dest: "{{ item.value.home | default(['/home/' + item.key]) }}/.vimrc"
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: 0644 
+  loop: "{{ users | dict2items }}"
+  when: item.value.editor is defined and item.value.editor == 'vim' 
+
+- name: vim set to be default editor
+  lineinfile:
+    path: "{{ item.value.home | default(['/home/' + item.key]) }}/.bashrc"
+    line: 'export EDITOR="vim"'
+    state: present
+  loop: "{{ users | dict2items }}"
+  when: item.value.editor is defined and item.value.editor == 'vim'
+
+
