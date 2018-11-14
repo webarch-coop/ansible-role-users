@@ -1,6 +1,6 @@
 ---
 - debug:
-    msg: "name: {{ item.key }} | groups: {{ item.value.groups | default(omit) }} | home: {{ item.value.home | default(omit) }} | system: {{ item.value.system | default(omit) }} | editor: {{ item.value.editor | default(omit) }}"
+    msg: "name: {{ item.key }} | groups: {{ item.value.groups | default() }} | home: {{ item.value.home | default(omit) }} | system: {{ item.value.system | default(omit) }} | editor: {{ item.value.editor | default(omit) }}"
     verbosity: 1
   loop: "{{ lookup('dict', users) }}"
 
@@ -10,14 +10,14 @@
 # item.system would ideally be set to "no" if not set
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#defaulting-undefined-variables
 # https://stackoverflow.com/a/41727473
-- name: Add user accounts
-  user:
-    name: "{{ item.key }}"
-    groups: "{{ item.value.groups | default() }}"
-    home: "{{ item.value.home | default(omit) }}"
-    shell: "{{ item.value.shell | default('/bin/bash', true) }}"
-    system: "{{ item.value.system | default(omit) }}"
-  loop: "{{ lookup('dict', users) }}"
+#- name: Add user accounts
+#  user:
+#    name: "{{ item.key }}"
+#    groups: "{{ item.value.groups | default() }}"
+#    home: "{{ item.value.home | default(omit) }}"
+#    shell: "{{ item.value.shell | default('/bin/bash', true) }}"
+#    system: "{{ item.value.system | default(omit) }}"
+#  loop: "{{ lookup('dict', users) }}"
 
 #- name: SSH private directories present
 #  file:
