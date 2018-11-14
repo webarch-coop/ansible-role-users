@@ -14,7 +14,7 @@
     name: "{{ item.name }}"
     # https://stackoverflow.com/a/41727473
     #groups: "{{ (item | default({})).groups | default(omit) }}"
-    groups: "{{ item.groups | default('') }}"
+    groups: "{{ item.value.groups | default('') }}"
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default('/bin/bash', true) }}"
     system: "{{ item.system | default(omit) }}"
