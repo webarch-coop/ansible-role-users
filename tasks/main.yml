@@ -12,7 +12,7 @@
 - name: Add user accounts
   user:
     name: "{{ item.name }}"
-    groups: "{{ item.groups | default('', true) }}"
+    groups: "{{ item.groups | default(omit) }}"
     home: "{{ item.home | default('/home/{{ item.name }}', true) }}"
     shell: "{{ item.shell | default('/bin/bash', true) }}"
     system: "{{ item.system | default('no', true) }}"
