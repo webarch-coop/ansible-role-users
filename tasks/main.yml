@@ -68,6 +68,11 @@
   loop: "{{ users | dict2items }}"
   when: item.value.editor is defined and item.value.editor == 'vim' 
 
+- debug:
+    msg: "bashrc: {{ item.value.home | default(['/home/' + item.key]) }}/.bashrc"
+  loop: "{{ users | dict2items }}"
+  when: item.value.editor is defined and item.value.editor == 'vim'
+
 - name: vim set to be default editor
   lineinfile:
     path: "{{ item.value.home | default(['/home/' + item.key]) }}/.bashrc"

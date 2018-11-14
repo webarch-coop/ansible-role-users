@@ -52,6 +52,7 @@ The other repo should also contain a `users.yml` file that contains:
         home: /var/www/bar
         system: yes
         shell: /usr/sbin/nologin
+        editor: vim
         groups:
           - ssl-cert
       baz:
@@ -64,7 +65,6 @@ The other repo should also contain a `users.yml` file that contains:
           - sudoers
         editor: vim
         ssh_public_keys: https://git.coop/chris.keys 
-        
     
   hosts:
     - users_servers
