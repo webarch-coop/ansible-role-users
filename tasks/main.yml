@@ -11,12 +11,12 @@
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#defaulting-undefined-variables
 - name: Add user accounts
   user:
-    name: "{{ item.name }}"
-    groups: "{{ item.groups | default(omit) }}"
-    home: "{{ item.home | default('/home/{{ item.name }}', true) }}"
-    shell: "{{ item.shell | default('/bin/bash', true) }}"
-    system: "{{ item.system | default('no', true) }}"
-  loop: "{{ user_accounts }}"
+    name: {{ item.name }}
+    groups: {{ item.groups | default(omit) }}
+    home: {{ item.home | default('/home/{{ item.name }}', true) }}
+    shell: {{ item.shell | default('/bin/bash', true) }}
+    system: {{ item.system | default(omit) }}
+  loop: {{ user_accounts }}
 
 - name: SSH private directories present
   file:
