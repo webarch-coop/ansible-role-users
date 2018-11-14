@@ -19,60 +19,60 @@
     system: "{{ item.value.system | default(omit) }}"
   with_dict: "{{ user_accounts }}"
 
-- name: SSH private directories present
-  file:
-    path: "{{ item.home }}/.ssh"
-    state: directory
-    owner: "{{ item.name }}"
-    group: "{{ item.name }}"
-    mode: 0700 
-  loop: "{{ user_accounts }}"
-  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
-
-- name: SSH public keys present
-  get_url:
-    url: "{{ item.ssh_public_keys }}"    
-    dest: "{{ item.home }}/.ssh/authorized_keys"    
-    owner: "{{ item.name }}"
-    group: "{{ item.name }}"
-    mode: 0600 
-  loop: "{{ user_accounts }}"
-  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
-
-- name: Set default editor
-  copy:
-    src: "files/{{ item.editor }}/selected_editor"
-    dest: "{{ item.home }}/.selected_editor"
-    owner: "{{ item.name }}"
-    group: "{{ item.name }}"
-    mode: 0644 
-  loop: "{{ user_accounts }}"
-  when: item.editor is defined and item.editor != ""
-
-# Ideally this would get the unique list of editors needed on this server...
-- name: Editors installed
-  apt:
-    pkg: 
-      - vim
-    state: present
-    update_cache: yes
-
-- name: .vimrc in place
-  copy:
-    src: "files/vim/vimrc"
-    dest: "{{ item.home }}/.vimrc"
-    owner: "{{ item.name }}"
-    group: "{{ item.name }}"
-    mode: 0644 
-  loop: "{{ user_accounts }}"
-  when: item.editor is defined and item.editor == 'vim' 
-
-- name: vim set to be default editor
-  lineinfile:
-    path: "{{ item.home }}/.bashrc"
-    line: 'export EDITOR="vim"'
-    state: present
-  loop: "{{ user_accounts }}"
-  when: item.editor is defined and item.editor == 'vim'
-
-
+#- name: SSH private directories present
+#  file:
+#    path: "{{ item.home }}/.ssh"
+#    state: directory
+#    owner: "{{ item.name }}"
+#    group: "{{ item.name }}"
+#    mode: 0700 
+#  loop: "{{ user_accounts }}"
+#  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
+#
+#- name: SSH public keys present
+#  get_url:
+#    url: "{{ item.ssh_public_keys }}"    
+#    dest: "{{ item.home }}/.ssh/authorized_keys"    
+#    owner: "{{ item.name }}"
+#    group: "{{ item.name }}"
+#    mode: 0600 
+#  loop: "{{ user_accounts }}"
+#  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
+#
+#- name: Set default editor
+#  copy:
+#    src: "files/{{ item.editor }}/selected_editor"
+#    dest: "{{ item.home }}/.selected_editor"
+#    owner: "{{ item.name }}"
+#    group: "{{ item.name }}"
+#    mode: 0644 
+#  loop: "{{ user_accounts }}"
+#  when: item.editor is defined and item.editor != ""
+#
+## Ideally this would get the unique list of editors needed on this server...
+#- name: Editors installed
+#  apt:
+#    pkg: 
+#      - vim
+#    state: present
+#    update_cache: yes
+#
+#- name: .vimrc in place
+#  copy:
+#    src: "files/vim/vimrc"
+#    dest: "{{ item.home }}/.vimrc"
+#    owner: "{{ item.name }}"
+#    group: "{{ item.name }}"
+#    mode: 0644 
+#  loop: "{{ user_accounts }}"
+#  when: item.editor is defined and item.editor == 'vim' 
+#
+#- name: vim set to be default editor
+#  lineinfile:
+#    path: "{{ item.home }}/.bashrc"
+#    line: 'export EDITOR="vim"'
+#    state: present
+#  loop: "{{ user_accounts }}"
+#  when: item.editor is defined and item.editor == 'vim'
+#
+#
