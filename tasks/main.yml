@@ -17,7 +17,7 @@
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default('/bin/bash', true) }}"
     system: "{{ item.system | default(omit) }}"
-  with_dict: "{{ user_accounts }}"
+  loop: "{{ user_accounts | dict2items }}"
 
 - name: SSH private directories present
   file:
