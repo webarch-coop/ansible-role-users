@@ -42,25 +42,29 @@ The other repo should also contain a `users.yml` file that contains:
 - name: Add user accounts
   become: yes
 
-  user_accounts:
-    - name: foo
-      home: /home/foo
-      shell: /bin/bash
-      system: no
-      groups: sudoers
-      # the following variables are optional
-      ssh_public_keys: https://git.coop/foo.keys
-      # vim is currently the only supported editor
-      editor: vim
-    - name: bar
-      home: /var/www/foo
-      shell: /bin/false
-      system: yes
-      groups: ssl-cert
-      # the following variables are optional
-      # ssh_public_keys: 
-      # vim is currently the only supported editor
-      editor: vim
+  vars:
+    users:
+      foo:
+        home: /opt/foo
+        shell: /bin/false
+        system: yes
+      bar:
+        home: /var/www/bar
+        system: yes
+        shell: /usr/sbin/nologin
+        groups:
+          - ssl-cert
+      baz:
+        groups:
+          - staff
+          - users
+        editor: vim
+      chris:
+        groups:
+          - sudoers
+        editor: vim
+        ssh_public_keys: https://git.coop/chris.keys 
+        
     
   hosts:
     - users_servers
