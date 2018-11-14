@@ -4,7 +4,10 @@
     verbosity: 1
   loop: "{{ user_accounts }}"
 
+# item.groups woudl ideally be set to "" if not set
 # item.home would ideally be populated with /home/item.name if not set
+# item.shell would ideally be set to /bin/bash if not set
+# item.system would ideally be set to "no" if not set
 - name: Add user accounts
   user:
     name: "{{ item.name }}"

@@ -89,3 +89,11 @@ Then it can be run as follows:
 ```bash
 ansible-playbook users.yml 
 ```
+
+## TODO
+
+* Make these variables default to sensible values if not set:
+   * home: `/home/{{ item.name }}`
+   * shell: `/bin/bash`
+   * system: `no`
+   * groups: `""`
