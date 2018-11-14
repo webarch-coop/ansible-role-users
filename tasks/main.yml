@@ -9,21 +9,21 @@
   user:
     name: "{{ item.key }}"
     groups: "{{ item.value.groups | default([]) | join(',') or omit }}"
-    home: "{{ item.value.home | default(omit) }}"
+    home: "{{ item.value.home | default(['/home/' + item.key]) }}"
     shell: "{{ item.value.shell | default('/bin/bash', true) }}"
     system: "{{ item.value.system | default('no', false) }}"
   loop: "{{ users | dict2items }}"
 
-#- name: SSH private directories present
-#  file:
-#    path: "{{ item.value.home }}/.ssh"
-#    state: directory
-#    owner: "{{ item.value.name }}"
-#    group: "{{ item.value.name }}"
-#    mode: 0700 
-#  loop: "{{ users | dict2items }}"
-#  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != "" 
-#
+- name: SSH private directories present
+  file:
+    path: "{{ item.value.home | default(['/home/' + item.key]) }}/.ssh"
+    state: directory
+    owner: "{{ item.value.name }}"
+    group: "{{ item.value.name }}"
+    mode: 0700 
+  loop: "{{ users | dict2items }}"
+  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != "" 
+
 #- name: SSH public keys present
 #  get_url:
 #    url: "{{ item.ssh_public_keys }}"    
