@@ -40,16 +40,16 @@
   loop: "{{ users | dict2items }}"
   when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
 
-#- name: Set default editor
-#  copy:
-#    src: "files/{{ item.editor }}/selected_editor"
-#    dest: "{{ item.home }}/.selected_editor"
-#    owner: "{{ item.name }}"
-#    group: "{{ item.name }}"
-#    mode: 0644 
-#  loop: "{{ users | dict2items }}"
-#  when: item.editor is defined and item.editor != ""
-#
+- name: Set default editor
+  copy:
+    src: "files/{{ item.value.editor }}/selected_editor"
+    dest: "{{ item.value.home | default(['/home/' + item.key]) }}/.selected_editor"
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: 0644 
+  loop: "{{ users | dict2items }}"
+  when: item.value.editor is defined and item.value.editor != ""
+
 ## Ideally this would get the unique list of editors needed on this server...
 #- name: Editors installed
 #  apt:
