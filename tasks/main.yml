@@ -1,7 +1,7 @@
 ---
 # https://github.com/ansible/ansible/issues/10164#issuecomment-73470662
 - debug:
-    msg: "name: {{ item.key }} | groups: {{ item.value.groups | default([]) | join(',') or omit }} | home: {{ item.value.home | default(['/home/' + item.key]) }} | system: {{ item.value.system | default('no', false) }} | editor: {{ item.value.editor | default('vim', true) }}"
+    msg: "name: {{ item.key }} | groups: {{ item.value.groups | default([]) | join(',') or omit }} | home: {{ item.value.home | default('/home/' + item.key) }} | system: {{ item.value.system | default('no', false) }} | editor: {{ item.value.editor | default('vim', true) }}"
     verbosity: 1
   loop: "{{ users | dict2items }}"
 
