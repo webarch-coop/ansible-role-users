@@ -62,7 +62,7 @@ The other repo should also contain a `users.yml` file that contains:
         editor: vim
       chris:
         groups:
-          - sudoers
+          - sudo
         editor: vim
         ssh_public_keys: https://git.coop/chris.keys 
     
@@ -96,8 +96,4 @@ ansible-playbook users.yml
 
 ## TODO
 
-* Make these variables default to sensible values if not set:
-   * home: `/home/{{ item.name }}`
-   * shell: `/bin/bash`
-   * system: `no`
-   * groups: `""`
+* Add more options from the [Ansible user module](https://docs.ansible.com/ansible/latest/modules/user_module.html)
