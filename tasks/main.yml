@@ -14,6 +14,12 @@
     system: "{{ item.value.system | default('no', false) }}"
   loop: "{{ users | dict2items }}"
 
+- debug:
+    msg: "name: {{ item.key }} | ssh dir: {{ item.value.home | default(['/home/' + item.key]) }}/.ssh"
+    verbosity: 1
+  loop: "{{ users | dict2items }}"
+  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != "" 
+
 - name: SSH private directories present
   file:
     path: "{{ item.value.home | default(['/home/' + item.key]) }}/.ssh"
