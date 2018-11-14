@@ -4,17 +4,16 @@
     verbosity: 1
   loop: "{{ user_accounts }}"
 
-# item.groups woudl ideally be set to "" if not set
+# item.groups would ideally be set to "" if not set
 # item.home would ideally be populated with /home/item.name if not set
 # item.shell would ideally be set to /bin/bash if not set
 # item.system would ideally be set to "no" if not set
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#defaulting-undefined-variables
+# https://stackoverflow.com/a/41727473
 - name: Add user accounts
   user:
     name: "{{ item.name }}"
-    # https://stackoverflow.com/a/41727473
-    #groups: "{{ (item | default({})).groups | default(omit) }}"
-    groups: "{{ item.value.groups | default('') }}"
+    groups: "{{ item.groups }}"
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default('/bin/bash', true) }}"
     system: "{{ item.system | default(omit) }}"
