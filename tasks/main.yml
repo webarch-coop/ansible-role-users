@@ -16,7 +16,7 @@
 
 - name: SSH private directories present
   file:
-    path: "{{ item.value.home | default(['/home/' + item.key]) }}/.ssh"
+    path: "{{ [ item.value.home + '/.ssh' ] | default(['/home/' + item.key + '/.ssh']) }}"
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
