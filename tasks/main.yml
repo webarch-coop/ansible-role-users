@@ -38,7 +38,7 @@
     group: "{{ item.key }}"
     mode: 0600 
   loop: "{{ users | dict2items }}"
-  when: item.ssh_public_keys is defined and item.ssh_public_keys != ""
+  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
 
 #- name: Set default editor
 #  copy:
