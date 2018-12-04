@@ -11,7 +11,7 @@
     groups: "{{ item.value.groups | default([]) | join(',') or omit }}"
     home: "{{ item.value.home | default('/home/' + item.key) }}"
     shell: "{{ item.value.shell | default('/bin/bash', true) }}"
-    generate_ssh_key: "{{ item.value.generate_ssh_key | default(no) }}"
+    generate_ssh_key: "{{ item.value.generate_ssh_key | default('no') }}"
     system: "{{ item.value.system | default('no', false) }}"
   loop: "{{ users | dict2items }}"
 
