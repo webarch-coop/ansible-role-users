@@ -45,17 +45,19 @@ The other repo should also contain a `users.yml` file that contains:
   vars:
     users:
       foo:
-        home: /opt/foo
-        shell: /bin/false
-        system: yes
-      bar:
-        home: /var/www/bar
+        name: Foo Bar
+        email: foo@example.org
+        home: /var/www/foo
         system: yes
         shell: /usr/sbin/nologin
         generate_ssh_key: yes
         editor: vim
         groups:
           - ssl-cert
+      bar:
+        home: /opt/bar
+        shell: /bin/false
+        system: yes
       baz:
         groups:
           - staff
