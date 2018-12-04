@@ -52,6 +52,7 @@ The other repo should also contain a `users.yml` file that contains:
         home: /var/www/bar
         system: yes
         shell: /usr/sbin/nologin
+        generate_ssh_key: yes
         editor: vim
         groups:
           - ssl-cert
