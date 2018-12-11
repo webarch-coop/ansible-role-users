@@ -19,7 +19,7 @@
     msg: "name: {{ item.key }} | ssh dir: {{ item.value.home | default('/home/' + item.key) }}/.ssh"
     verbosity: 1
   loop: "{{ users | dict2items }}"
-  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != "" 
+  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
 
 - name: SSH private directories present
   file:
@@ -27,17 +27,17 @@
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
-    mode: 0700 
+    mode: 0700
   loop: "{{ users | dict2items }}"
-  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != "" 
+  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
 
 - name: SSH public keys present
   get_url:
-    url: "{{ item.value.ssh_public_keys }}"    
-    dest: "{{ item.value.home | default('/home/' + item.key) }}/.ssh/authorized_keys"    
+    url: "{{ item.value.ssh_public_keys }}"
+    dest: "{{ item.value.home | default('/home/' + item.key) }}/.ssh/authorized_keys"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
-    mode: 0600 
+    mode: 0600
   loop: "{{ users | dict2items }}"
   when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
 
@@ -47,14 +47,14 @@
     dest: "{{ item.value.home | default('/home/' + item.key) }}/.selected_editor"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
-    mode: 0644 
+    mode: 0644
   loop: "{{ users | dict2items }}"
   when: item.value.editor is defined and item.value.editor != ""
 
 # Ideally this would get the unique list of editors needed on this server...
 - name: Editors installed
   apt:
-    pkg: 
+    pkg:
       - vim
     state: present
     update_cache: yes
@@ -65,9 +65,9 @@
     dest: "{{ item.value.home | default('/home/' + item.key) }}/.vimrc"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
-    mode: 0644 
+    mode: 0644
   loop: "{{ users | dict2items }}"
-  when: item.value.editor is defined and item.value.editor == 'vim' 
+  when: item.value.editor is defined and item.value.editor == 'vim'
 
 - debug:
     msg: "bashrc: {{ item.value.home | default('/home/' + item.key) }}/.bashrc"
