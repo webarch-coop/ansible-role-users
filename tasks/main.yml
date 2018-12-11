@@ -83,12 +83,12 @@
   loop: "{{ users | dict2items }}"
   when: item.value.editor is defined and item.value.editor == 'vim'
 
-- name: .gitconfig in place 
+- name: .gitconfig in place
   template:
     src: templates/gitconfig.j2
     dest: "{{ item.value.home | default('/home/' + item.key) }}/.gitconfig"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
-    mode: 0644 
+    mode: 0644
   loop: "{{ users | dict2items }}"
   when: ( item.value.name is defined and item.value.name != "" ) and ( item.value.email is defined and item.value.email != "" )
