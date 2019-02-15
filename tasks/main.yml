@@ -5,6 +5,13 @@
     verbosity: 1
   loop: "{{ users | dict2items }}"
 
+#- name: Add group accounts
+#  group:
+#    name: 
+#    state:
+#    system:
+#  loop: "{{ users | dict2items }}"
+
 - name: Add user accounts
   user:
     name: "{{ item.key }}"
