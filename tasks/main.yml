@@ -23,7 +23,7 @@
   loop: "{{ users | dict2items }}"
 
 - debug:
-    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.users_key) }}/.ssh"
+    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
     verbosity: 1
   loop: "{{ users | dict2items }}"
   when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
