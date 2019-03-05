@@ -48,6 +48,9 @@ The other repo should also contain a `users.yml` file that contains:
         users_name: Foo Bar
         users_email: foo@example.org
         users_home: /var/www/foo
+        users_home_owner: root
+        users_home_group: www-data
+        users_home_mode: 0750
         users_system: yes
         users_shell: /usr/sbin/nologin
         users_generate_ssh_key: yes
