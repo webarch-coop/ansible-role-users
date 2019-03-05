@@ -45,29 +45,29 @@ The other repo should also contain a `users.yml` file that contains:
   vars:
     users:
       foo:
-        name: Foo Bar
-        email: foo@example.org
-        home: /var/www/foo
-        system: yes
-        shell: /usr/sbin/nologin
-        generate_ssh_key: yes
-        editor: vim
-        groups:
+        users_name: Foo Bar
+        users_email: foo@example.org
+        users_home: /var/www/foo
+        users_system: yes
+        users_shell: /usr/sbin/nologin
+        users_generate_ssh_key: yes
+        users_editor: vim
+        users_groups:
           - ssl-cert
       bar:
-        home: /opt/bar
-        shell: /bin/false
-        system: yes
+        users_home: /opt/bar
+        users_shell: /bin/false
+        users_system: yes
       baz:
-        groups:
+        users_groups:
           - staff
           - users
-        editor: vim
+        users_editor: vim
       chris:
-        groups:
+        users_groups:
           - sudo
-        editor: vim
-        ssh_public_keys: https://git.coop/chris.keys 
+        users_editor: vim
+        users_ssh_public_keys: https://git.coop/chris.keys 
     
   hosts:
     - users_servers

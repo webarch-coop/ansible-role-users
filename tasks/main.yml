@@ -1,7 +1,7 @@
 ---
 # https://github.com/ansible/ansible/issues/10164#issuecomment-73470662
 - debug:
-    msg: "name: {{ item.key }} | groups: {{ item.value.groups | default([]) | join(',') or omit }} | home: {{ item.value.home | default('/home/' + item.key) }} | system: {{ item.value.system | default('no', false) }} | editor: {{ item.value.editor | default('vim', true) }}"
+    msg: "name: {{ item.key }} | groups: {{ item.value.users_groups | default([]) | join(',') or omit }} | home: {{ item.value.users_home | default('/home/' + item.key) }} | system: {{ item.value.users_system | default('no', false) }} | editor: {{ item.value.users_editor | default('vim', true) }}"
     verbosity: 1
   loop: "{{ users | dict2items }}"
 
@@ -15,48 +15,48 @@
 - name: Add user accounts
   user:
     name: "{{ item.key }}"
-    groups: "{{ item.value.groups | default([]) | join(',') or omit }}"
-    home: "{{ item.value.home | default('/home/' + item.key) }}"
-    shell: "{{ item.value.shell | default('/bin/bash', true) }}"
-    generate_ssh_key: "{{ item.value.generate_ssh_key | default('no') }}"
-    system: "{{ item.value.system | default('no', false) }}"
+    groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
+    home: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
+    generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
+    system: "{{ item.value.users_system | default('no', false) }}"
   loop: "{{ users | dict2items }}"
 
 - debug:
-    msg: "name: {{ item.key }} | ssh dir: {{ item.value.home | default('/home/' + item.key) }}/.ssh"
+    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.users_key) }}/.ssh"
     verbosity: 1
   loop: "{{ users | dict2items }}"
-  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
+  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
 
 - name: SSH private directories present
   file:
-    path: "{{ item.value.home | default('/home/' + item.key) }}/.ssh"
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0700
   loop: "{{ users | dict2items }}"
-  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
+  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
 
 - name: SSH public keys present
   get_url:
-    url: "{{ item.value.ssh_public_keys }}"
-    dest: "{{ item.value.home | default('/home/' + item.key) }}/.ssh/authorized_keys"
+    url: "{{ item.value.users_ssh_public_keys }}"
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0600
   loop: "{{ users | dict2items }}"
-  when: item.value.ssh_public_keys is defined and item.value.ssh_public_keys != ""
+  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
 
 - name: Set default editor
   copy:
-    src: "files/{{ item.value.editor }}/selected_editor"
-    dest: "{{ item.value.home | default('/home/' + item.key) }}/.selected_editor"
+    src: "files/{{ item.value.users_editor }}/selected_editor"
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.selected_editor"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
-  when: item.value.editor is defined and item.value.editor != ""
+  when: item.value.users_editor is defined and item.value.users_editor != ""
 
 # Ideally this would get the unique list of editors needed on this server...
 - name: Editors installed
@@ -69,33 +69,33 @@
 - name: .vimrc in place
   copy:
     src: "files/vim/vimrc"
-    dest: "{{ item.value.home | default('/home/' + item.key) }}/.vimrc"
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.vimrc"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
-  when: item.value.editor is defined and item.value.editor == 'vim'
+  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
 
 - debug:
-    msg: "bashrc: {{ item.value.home | default('/home/' + item.key) }}/.bashrc"
+    msg: "bashrc: {{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
   loop: "{{ users | dict2items }}"
-  when: item.value.editor is defined and item.value.editor == 'vim'
+  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
 
 - name: vim set to be default editor
   lineinfile:
-    path: "{{ item.value.home | default('/home/' + item.key) }}/.bashrc"
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
     line: 'export EDITOR="vim"'
     state: present
     create: yes
   loop: "{{ users | dict2items }}"
-  when: item.value.editor is defined and item.value.editor == 'vim'
+  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
 
 - name: .gitconfig in place
   template:
     src: templates/gitconfig.j2
-    dest: "{{ item.value.home | default('/home/' + item.key) }}/.gitconfig"
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.gitconfig"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
-  when: ( item.value.name is defined and item.value.name != "" ) and ( item.value.email is defined and item.value.email != "" )
+  when: ( item.value.users_name is defined and item.value.users_name != "" ) and ( item.value.users_email is defined and item.value.users_email != "" )
