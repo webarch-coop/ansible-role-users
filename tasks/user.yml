@@ -1,7 +1,7 @@
 ---
 - name: Print debugging info
   debug:
-    msg: "name: {{ item.key }} | groups: {{ item.value.users_groups | default([]) | join(',') or omit }} | home: {{ item.value.users_home | default('/home/' + item.key) }} | system: {{ item.value.users_system | default('no', false) }} | editor: {{ item.value.users_editor | default('vim', true) }} | home owner: {{ item.value.users_home_owner }} | home group: {{ item.value.users_home_group }} | home mode: {{ item.value.users_home_mode }}"
+    msg: "name: {{ item.key }} | groups: {{ item.value.users_groups | default([]) | join(',') or omit }} | home: {{ item.value.users_home | default('/home/' + item.key) }} | system: {{ item.value.users_system | default('no', false) }} | editor: {{ item.value.users_editor | default('vim', true) }} | home owner: {{ item.value.users_home_owner | default(item.key) }} | home group: {{ item.value.users_home_group | default(item.key) }} | home mode: {{ item.value.users_home_mode | default(0700) }}"
     verbosity: 1
 
 - name: Add user accounts
