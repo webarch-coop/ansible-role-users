@@ -68,6 +68,8 @@ The other repo should also contain a `users.yml` file that contains:
           - sudo
         users_editor: vim
         users_ssh_public_keys: https://git.coop/chris.keys 
+      fred:
+        users_state: absent
     
   hosts:
     - users_servers

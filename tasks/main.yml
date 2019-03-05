@@ -7,10 +7,18 @@
 
 #- name: Add group accounts
 #  group:
-#    name: 
+#    name:
 #    state:
 #    system:
 #  loop: "{{ users | dict2items }}"
+
+- name: Remove user accounts
+  user:
+    name: "{{ item.key }}"
+    state: absent
+    remove: yes
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_state is defined and item.value.users_state == "absent"
 
 - name: Add user accounts
   user:
