@@ -12,7 +12,7 @@
 #    system:
 #  loop: "{{ users | dict2items }}"
 
-- name: Remove user accounts
+- name: User accounts absent
   user:
     name: "{{ item.key }}"
     state: absent
@@ -20,51 +20,10 @@
   loop: "{{ users | dict2items }}"
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
-- name: Add user accounts
-  user:
-    name: "{{ item.key }}"
-    groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
-    home: "{{ item.value.users_home | default('/home/' + item.key) }}"
-    shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
-    generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
-    system: "{{ item.value.users_system | default('no', false) }}"
+- name: User accounts present 
+  include_tasks: user.yml
   loop: "{{ users | dict2items }}"
-
-- debug:
-    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
-    verbosity: 1
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
-
-- name: SSH private directories present
-  file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
-    state: directory
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: 0700
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
-
-- name: SSH public keys present
-  get_url:
-    url: "{{ item.value.users_ssh_public_keys }}"
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: 0600
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
-
-- name: Set default editor
-  copy:
-    src: "files/{{ item.value.users_editor }}/selected_editor"
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.selected_editor"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: 0644
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_editor is defined and item.value.users_editor != ""
+  when: item.value.users_state is undefined or item.value.users_state == "present"
 
 # Ideally this would get the unique list of editors needed on this server...
 - name: Editors installed
@@ -74,36 +33,83 @@
     state: present
     update_cache: yes
 
-- name: .vimrc in place
-  copy:
-    src: "files/vim/vimrc"
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.vimrc"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: 0644
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
-
-- debug:
-    msg: "bashrc: {{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
-
-- name: vim set to be default editor
-  lineinfile:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
-    line: 'export EDITOR="vim"'
-    state: present
-    create: yes
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
-
-- name: .gitconfig in place
-  template:
-    src: templates/gitconfig.j2
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.gitconfig"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: 0644
-  loop: "{{ users | dict2items }}"
-  when: ( item.value.users_name is defined and item.value.users_name != "" ) and ( item.value.users_email is defined and item.value.users_email != "" )
+#- name: Add user accounts
+#  user:
+#    name: "{{ item.key }}"
+#    groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
+#    home: "{{ item.value.users_home | default('/home/' + item.key) }}"
+#    shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
+#    generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
+#    system: "{{ item.value.users_system | default('no', false) }}"
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_state is undefined or item.value.users_state == "present"
+#
+#- debug:
+#    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
+#    verbosity: 1
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
+#
+#- name: SSH private directories present
+#  file:
+#    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
+#    state: directory
+#    owner: "{{ item.key }}"
+#    group: "{{ item.key }}"
+#    mode: 0700
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
+#
+#- name: SSH public keys present
+#  get_url:
+#    url: "{{ item.value.users_ssh_public_keys }}"
+#    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
+#    owner: "{{ item.key }}"
+#    group: "{{ item.key }}"
+#    mode: 0600
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
+#
+#- name: Set default editor
+#  copy:
+#    src: "files/{{ item.value.users_editor }}/selected_editor"
+#    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.selected_editor"
+#    owner: "{{ item.key }}"
+#    group: "{{ item.key }}"
+#    mode: 0644
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_editor is defined and item.value.users_editor != ""
+#
+#- name: .vimrc in place
+#  copy:
+#    src: "files/vim/vimrc"
+#    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.vimrc"
+#    owner: "{{ item.key }}"
+#    group: "{{ item.key }}"
+#    mode: 0644
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
+#
+#- debug:
+#    msg: "bashrc: {{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
+#
+#- name: vim set to be default editor
+#  lineinfile:
+#    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
+#    line: 'export EDITOR="vim"'
+#    state: present
+#    create: yes
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
+#
+#- name: .gitconfig in place
+#  template:
+#    src: templates/gitconfig.j2
+#    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.gitconfig"
+#    owner: "{{ item.key }}"
+#    group: "{{ item.key }}"
+#    mode: 0644
+#  loop: "{{ users | dict2items }}"
+#  when: ( item.value.users_name is defined and item.value.users_name != "" ) and ( item.value.users_email is defined and item.value.users_email != "" )
