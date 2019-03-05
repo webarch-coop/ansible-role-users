@@ -50,7 +50,8 @@ The other repo should also contain a `users.yml` file that contains:
         users_home: /var/www/foo
         users_home_owner: root
         users_home_group: www-data
-        users_home_mode: 0750
+        # You must quote the mode or the leaving zero is stripped"
+        users_home_mode: "0750"
         users_system: yes
         users_shell: /usr/sbin/nologin
         users_generate_ssh_key: yes
