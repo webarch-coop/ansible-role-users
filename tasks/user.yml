@@ -11,22 +11,12 @@
     group: "{{ item.value.users_group | default('item.key) }}"
     groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
     home: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    create_home: True
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
+    skeleton: "{{ item.value.users_skel | default('/etc/skel') }}"
     generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
     system: "{{ item.value.users_system | default('no', false) }}"
   when: item.value.users_state is undefined or item.value.users_state == "present"
-
-- name: Skel files and directories in place 
-  synchronize: 
-    src: "files/skel.d/{{ item.value.users_skel }}" 
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}" 
-    owner: "{{ item.key }}" 
-    group: "{{ item.value.users_group | default('item.key) }}"
-    perms: yes 
-    recursive: yes 
-    times: no  
-  loop: "{{ users | dict2items }}" 
-  when: item.value.users_skel is defined 
 
 - name: Chown user home directory owner
   file:
