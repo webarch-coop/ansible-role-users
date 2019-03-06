@@ -30,4 +30,4 @@
 - name: Quotas set
   include_tasks: quota.yml
   loop: "{{ users | dict2items }}"
-  when: item.value.users_quota is defined
+  when: item.value.users_quota is defined and item.value.users_quota != ""
