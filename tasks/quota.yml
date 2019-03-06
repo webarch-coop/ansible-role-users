@@ -18,15 +18,15 @@
   set_fact:
     quota_block_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 / 100 * 90 }}"
     quota_block_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 }}"
-    quota_inode_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2024 / 100 * 90 }}"
-    quota_inode_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2024 }}"
+    quota_inode_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2048 / 100 * 90 }}"
+    quota_inode_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2048 }}"
 
 - debug:
     msg: 
     - "block-softlimit: {{ quota_block_softlimit }}"
     - "block-hardlimit: {{ quota_block_hardlimit }}"
     - "inode-softlimit: {{ quota_inode_softlimit }}"
-    - "inode-hardlimit: {{ quota_inode_softlimit }}"
+    - "inode-hardlimit: {{ quota_inode_hardlimit }}"
 
 #block-hardlimit
 #inode-softlimit
