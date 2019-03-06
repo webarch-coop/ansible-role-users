@@ -22,6 +22,14 @@
     group: root
     recurse: yes
 
+- name: Absent users home directories removed 
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}" 
+    state: absent
+    remove: yes
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_state is defined and item.value.users_state == "absent"
+
 - name: User accounts absent
   user:
     name: "{{ item.key }}"
