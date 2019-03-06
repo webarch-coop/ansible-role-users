@@ -2,18 +2,28 @@
 # https://github.com/ansible/ansible/issues/10164#issuecomment-73470662
 - name: Print debugging info
   debug:
-    msg: "name: {{ item.key }} | group: {{ item.value.users_group | default('item.key') }} | groups: {{ item.value.users_groups | default([]) | join(',') or omit }} | home: {{ item.value.users_home | default('/home/' + item.key) }} | system: {{ item.value.users_system | default('no', false) }} | editor: {{ item.value.users_editor | default('vim', true) }} | home owner: {{ item.value.users_home_owner | default(item.key) }} | home group: {{ item.value.users_home_group | default(item.key) }} | home mode: {{ item.value.users_home_mode | default(0700) }}"
+    msg: "name: {{ item.key }}"
+    msg: "group: {{ item.value.users_group | default(item.key) }}"
+    msg: "groups: {{ item.value.users_groups | default([]) | join(',') or omit }}"
+    msg: "home: {{ item.value.users_home | default('/home/' + item.key) }}"
+    msg: "shell: {{ item.value.users_shell | default('/bin/bash', true) }}"
+    msg: "skeleton: {{ ('/usr/local/etc/skel.d/' + item.value.users_skel) | default('/etc/skel') }}"
+    msg: "system: {{ item.value.users_system | default('no', false) }}"
+    msg: "editor: {{ item.value.users_editor | default('vim', true) }}"
+    msg: "home owner: {{ item.value.users_home_owner | default(item.key) }}"
+    msg: "home group: {{ item.value.users_home_group | default(item.key) }}"
+    msg: "home mode: {{ item.value.users_home_mode | default(0700) }}"
     verbosity: 1
 
 - name: Add user accounts
   user:
     name: "{{ item.key }}"
-    group: "{{ item.value.users_group | default('item.key') }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
     groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
     home: "{{ item.value.users_home | default('/home/' + item.key) }}"
     create_home: True
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
-    skeleton: "{{ ( '/usr/local/etc/skel.d/' + item.value.users_skel ) | default('/etc/skel') }}"
+    skeleton: "{{ ('/usr/local/etc/skel.d/' + item.value.users_skel) | default('/etc/skel') }}"
     generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
     system: "{{ item.value.users_system | default('no', false) }}"
   when: item.value.users_state is undefined or item.value.users_state == "present"
