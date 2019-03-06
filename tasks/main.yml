@@ -109,6 +109,8 @@
 - name: User groups present
   include_tasks: groups.yml
   loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: users_groups_user
   when: item.value.users_groups is defined and item.value.users_state is undefined or item.value.users_state == "present"
 
 - name: User accounts present
