@@ -1,4 +1,12 @@
 ---
+- name: Packages present 
+  apt:
+    pkg:
+      - bc
+      - vim
+    state: present
+    update_cache: yes
+
 #- name: Add group accounts
 #  group:
 #    name:
@@ -23,11 +31,3 @@
   include_tasks: quota.yml
   loop: "{{ users | dict2items }}"
   when: item.value.users_quota is defined
-
-# Ideally this would get the unique list of editors needed on this server...
-- name: Editors installed
-  apt:
-    pkg:
-      - vim
-    state: present
-    update_cache: yes
