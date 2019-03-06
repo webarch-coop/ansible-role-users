@@ -22,7 +22,12 @@
     group: root
     recurse: yes
 
-#- name: Add group accounts
+- name: Debug users_groups
+  debug:
+    msg: "groups: {{ item.value.users_groups }}" 
+  loop: "{{ users | dict2items }}"
+
+#- name: Add groups accounts
 #  group:
 #    name:
 #    state:
