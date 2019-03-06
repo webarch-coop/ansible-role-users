@@ -10,11 +10,17 @@
   synchronize:
     src: files/skel.d/
     dest: /usr/local/etc/skel.d/
-    owner: root
-    group: root
     perms: yes
     recursive: yes
     times: no 
+
+- name: Skel files chowned
+  file:
+    path: /usr/local/etc/skel.d
+    state: directory
+    owner: root
+    group: root
+    recurse: yes
 
 #- name: Add group accounts
 #  group:
