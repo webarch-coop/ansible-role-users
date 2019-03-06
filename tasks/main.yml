@@ -111,7 +111,8 @@
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: users_groups_user
-  when: item.value.users_groups is defined and item.value.users_state is undefined or item.value.users_state == "present"
+  #when: item.value.users_state is undefined or item.value.users_state == "present" and item.value.users_groups is defined
+  when: users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" and users_groups_user.value.users_groups is defined
 
 - name: User accounts present
   include_tasks: user.yml
