@@ -25,7 +25,8 @@
 
 - name: Round variables to whole numbers
   set_fact:
-    quota_block_softlimit: "{{ quota_block_softlimit | round(0, 'floor') | int }}"
+    #quota_block_softlimit: "{{ quota_block_softlimit | round(0, 'floor') | int }}"
+    quota_block_softlimit: "{{ quota_block_softlimit | round | int }}"
 
 - debug:
     msg: 
