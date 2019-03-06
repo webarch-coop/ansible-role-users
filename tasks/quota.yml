@@ -13,11 +13,16 @@
   shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 1024' | bc"
   register: quota_block_hardlimit
 
+# https://superuser.com/a/1156454
+- name: Set a variable for the inode-softlimit
+  set_fact:
+    quota_inode_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2 * 1024 }}"
 
 - debug:
     msg: 
-    - "block-softlimit: quota_block_softlimit.stdout"
-    - "block-hardlimit: quota_block_hardlimit.stdout"
+    - "block-softlimit: {{ quota_block_softlimit.stdout }}"
+    - "block-hardlimit: {{ quota_block_hardlimit.stdout }}"
+    - "inode-softlimit: {{ quota_inode_softlimit.stdout }}"
 
 #block-hardlimit
 #inode-softlimit
