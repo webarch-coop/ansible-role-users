@@ -109,7 +109,7 @@
 - name: User groups present
   include_tasks: groups.yml
   loop: "{{ users | dict2items }}"
-  when: item.value.users_groups is defined and item.value.users_state == "present"
+  when: item.value.users_groups is defined and item.value.users_state is undefined or item.value.users_state == "present"
 
 - name: User accounts present
   include_tasks: user.yml
