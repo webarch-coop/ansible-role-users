@@ -5,7 +5,7 @@
     msg: "quota: {{ item.value.users_quota }}"
 
 - name: set a variable for the block-softlimit
-  shell: "echo '{{ ( item.value.users_quota | int ) | human_to_bytes }} / 100 * 90' | bc "
+  shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 100 * 90' | bc "
   register: quota_block_softlimit
 
 - debug:
