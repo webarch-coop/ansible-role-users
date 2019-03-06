@@ -1,5 +1,5 @@
 ---
-- name: Packages present 
+- name: Packages present
   apt:
     pkg:
       - vim
@@ -12,7 +12,7 @@
     dest: /usr/local/etc/skel.d/
     perms: yes
     recursive: yes
-    times: no 
+    times: no
 
 - name: Skel files chowned
   file:
@@ -37,7 +37,7 @@
   loop: "{{ users | dict2items }}"
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
-- name: User accounts present 
+- name: User accounts present
   include_tasks: user.yml
   loop: "{{ users | dict2items }}"
   when: item.value.users_state is undefined or item.value.users_state == "present"
