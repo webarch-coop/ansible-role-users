@@ -33,6 +33,7 @@
     name: "{{ item.value.users_groups }}"
     state: present
   loop: "{{ users | dict2items }}"
+  when: item.value.users_groups is defined
 
 - name: User accounts absent
   user:
