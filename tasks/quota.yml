@@ -16,10 +16,10 @@
 # https://superuser.com/a/1156454
 - name: Set a variable for the inode-softlimit
   set_fact:
-    quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 1024 / 100 * 90 | round(0, 'down') | int }}"
-    quota_block_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 1024 | round(0, 'down') | int }}"
-    quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 2048 / 100 * 90 | round(0, 'down') | int }}"
-    quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 2048 | round(0, 'down') | int }}"
+    quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 1024 / 100 * 90 | round(0, 'floor') | int }}"
+    quota_block_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 1024 | round(0, 'floor') | int }}"
+    quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 2048 / 100 * 90 | round(0, 'floor') | int }}"
+    quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) / 2048 | round(0, 'floor') | int }}"
 
 - debug:
     msg: 
