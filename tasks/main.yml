@@ -26,6 +26,7 @@
   debug:
     msg: "groups: {{ item.value.users_groups }}" 
   loop: "{{ users | dict2items }}"
+  when: item.value.users_groups is defined
 
 #- name: Add groups accounts
 #  group:
