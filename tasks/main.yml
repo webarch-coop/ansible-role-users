@@ -22,74 +22,74 @@
     group: root
     recurse: yes
 
-- name: Debug users_group1
-  debug:
-    msg: "group1: {{ item.value.users_group1 }}" 
-    verbosity: 1
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_groups is defined and item.value.users_group1 is defined 
-
-- name: Debug users_group2
-  debug:
-    msg: "group2: {{ item.value.users_group2 }}" 
-    verbosity: 1
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_groups is defined and item.value.users_group2 is defined 
-
-- name: Debug users_group3
-  debug:
-    msg: "group3: {{ item.value.users_group3 }}" 
-    verbosity: 1
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_groups is defined and item.value.users_group3 is defined 
-
-- name: Debug users_group4
-  debug:
-    msg: "group4: {{ item.value.users_group4 }}" 
-    verbosity: 1
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_groups is defined and item.value.users_group4 is defined 
-
-- name: Debug users_group5
-  debug:
-    msg: "group5: {{ item.value.users_group5 }}" 
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_groups is defined and item.value.users_group5 is defined 
-
-- name: Add first groups accounts
-  group:
-    name: "{{ item.value.users_group1 }}"
-    state: present
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_group1 is defined and item.value.users_state == "present"
-
-- name: Add second groups accounts
-  group:
-    name: "{{ item.value.users_group2 }}"
-    state: present
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_group2 is defined and item.value.users_state == "present"
-
-- name: Add third groups accounts
-  group:
-    name: "{{ item.value.users_group3 }}"
-    state: present
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_group3 is defined and item.value.users_state == "present"
-
-- name: Add fourth groups accounts
-  group:
-    name: "{{ item.value.users_group4 }}"
-    state: present
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_group4 is defined and item.value.users_state == "present"
-
-- name: Add fifth groups accounts
-  group:
-    name: "{{ item.value.users_group5 }}"
-    state: present
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_group5 is defined and item.value.users_state == "present"
+#- name: Debug users_group1
+#  debug:
+#    msg: "group1: {{ item.value.users_group1 }}" 
+#    verbosity: 1
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_groups is defined and item.value.users_group1 is defined 
+#
+#- name: Debug users_group2
+#  debug:
+#    msg: "group2: {{ item.value.users_group2 }}" 
+#    verbosity: 1
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_groups is defined and item.value.users_group2 is defined 
+#
+#- name: Debug users_group3
+#  debug:
+#    msg: "group3: {{ item.value.users_group3 }}" 
+#    verbosity: 1
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_groups is defined and item.value.users_group3 is defined 
+#
+#- name: Debug users_group4
+#  debug:
+#    msg: "group4: {{ item.value.users_group4 }}" 
+#    verbosity: 1
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_groups is defined and item.value.users_group4 is defined 
+#
+#- name: Debug users_group5
+#  debug:
+#    msg: "group5: {{ item.value.users_group5 }}" 
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_groups is defined and item.value.users_group5 is defined 
+#
+#- name: Add first groups accounts
+#  group:
+#    name: "{{ item.value.users_group1 }}"
+#    state: present
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_group1 is defined and item.value.users_state == "present"
+#
+#- name: Add second groups accounts
+#  group:
+#    name: "{{ item.value.users_group2 }}"
+#    state: present
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_group2 is defined and item.value.users_state == "present"
+#
+#- name: Add third groups accounts
+#  group:
+#    name: "{{ item.value.users_group3 }}"
+#    state: present
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_group3 is defined and item.value.users_state == "present"
+#
+#- name: Add fourth groups accounts
+#  group:
+#    name: "{{ item.value.users_group4 }}"
+#    state: present
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_group4 is defined and item.value.users_state == "present"
+#
+#- name: Add fifth groups accounts
+#  group:
+#    name: "{{ item.value.users_group5 }}"
+#    state: present
+#  loop: "{{ users | dict2items }}"
+#  when: item.value.users_group5 is defined and item.value.users_state == "present"
 
 - name: User accounts absent
   user:
@@ -98,6 +98,18 @@
     remove: yes
   loop: "{{ users | dict2items }}"
   when: item.value.users_state is defined and item.value.users_state == "absent"
+
+- name: User groups absent
+  group:
+    name: "{{ item.key }}"
+    state: absent
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_state is defined and item.value.users_state == "absent"
+
+- name: User groups present
+  include_tasks: groups.yml
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_groups is defined and item.value.users_state == "present"
 
 - name: User accounts present
   include_tasks: user.yml

@@ -69,8 +69,8 @@ The other repo should also contain a `users.yml` file that contains:
         users_generate_ssh_key: yes
         users_editor: vim
         users_groups:
-          group1: users
-          group2: ssl-cert
+          - users
+          - ssl-cert
       bar:
         users_home: /opt/bar
         users_shell: /bin/false
@@ -78,8 +78,8 @@ The other repo should also contain a `users.yml` file that contains:
         users_quota: 1G
       baz:
         users_groups:
-          group1: staff
-          group2: users
+          - staff
+          - users
         users_editor: vim
         users_quota_block_softlimit: 1908874
         users_quota_block_hardlimit: 2097152
@@ -87,7 +87,8 @@ The other repo should also contain a `users.yml` file that contains:
         users_quota_inode_hardlimit: 10484
       chris:
         users_groups:
-          group1: sudo
+          - sudo
+          - operator
         users_editor: vim
         users_ssh_public_keys: https://git.coop/chris.keys 
       fred:
