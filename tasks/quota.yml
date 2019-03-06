@@ -18,9 +18,9 @@
   set_fact:
     #quota_block_softlimit: "{{ ((( item.value.users_quota | human_to_bytes ) / 1024 ) // 100 ) * 90 | round(0, 'floor') | int }}"
     # https://stackoverflow.com/a/35158145
-    quota_block_softlimit: "{{ 0.9 * (( item.value.users_quota | human_to_bytes ) // 1024 ) }}"
+    quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
     quota_block_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1024 }}"
-    quota_inode_softlimit: "{{ 0.9 * (( item.value.users_quota | human_to_bytes ) // 2048 ) }}"
+    quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 2248 }}"
     quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 2048 }}"
 
 - debug:
