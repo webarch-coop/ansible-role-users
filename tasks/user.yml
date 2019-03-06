@@ -8,7 +8,7 @@
 - name: Add user accounts
   user:
     name: "{{ item.key }}"
-    group: "{{ item.value.users_group | default('item.key) }}"
+    group: "{{ item.value.users_group | default('item.key') }}"
     groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
     home: "{{ item.value.users_home | default('/home/' + item.key) }}"
     create_home: True
