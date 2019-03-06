@@ -12,6 +12,16 @@ To use this role you need to use Ansible Galaxy to install it into another repos
   scm: git
 ```
 
+If you want to use any of the `quota_` variables then you also need to include the [quota role](https://git.coop/webarch/quota) and makse sure that `quota_dir` is set to a mount point for a partition, for example have a seperate `/home` partition.
+
+```yml
+---
+- name: quota
+  src: https://git.coop/webarch/quota.git
+  version: master
+  scm: git
+```
+
 And a `ansible.cfg` that contains:
 
 ```
@@ -62,11 +72,16 @@ The other repo should also contain a `users.yml` file that contains:
         users_home: /opt/bar
         users_shell: /bin/false
         users_system: yes
+        users_quota: 1G
       baz:
         users_groups:
           - staff
           - users
         users_editor: vim
+        users_quota_block_softlimit: 1908874
+        users_quota_block_hardlimit: 2097152
+        users_quota_inode_softlimit: 9532
+        users_quota_inode_hardlimit: 10484
       chris:
         users_groups:
           - sudo
