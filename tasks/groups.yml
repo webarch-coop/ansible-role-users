@@ -3,4 +3,4 @@
   group:
     name: "{{ item }}"
     state: present
-  loop: item.value.users_groups 
+  loop: "{{ item.value.users_groups }}"
