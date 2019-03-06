@@ -2,12 +2,13 @@
 # https://github.com/ansible/ansible/issues/10164#issuecomment-73470662
 - name: Print debugging info
   debug:
-    msg: "name: {{ item.key }} | groups: {{ item.value.users_groups | default([]) | join(',') or omit }} | home: {{ item.value.users_home | default('/home/' + item.key) }} | system: {{ item.value.users_system | default('no', false) }} | editor: {{ item.value.users_editor | default('vim', true) }} | home owner: {{ item.value.users_home_owner | default(item.key) }} | home group: {{ item.value.users_home_group | default(item.key) }} | home mode: {{ item.value.users_home_mode | default(0700) }}"
+    msg: "name: {{ item.key }} | group: {{ item.value.users_group | default('item.key) }} | groups: {{ item.value.users_groups | default([]) | join(',') or omit }} | home: {{ item.value.users_home | default('/home/' + item.key) }} | system: {{ item.value.users_system | default('no', false) }} | editor: {{ item.value.users_editor | default('vim', true) }} | home owner: {{ item.value.users_home_owner | default(item.key) }} | home group: {{ item.value.users_home_group | default(item.key) }} | home mode: {{ item.value.users_home_mode | default(0700) }}"
     verbosity: 1
 
 - name: Add user accounts
   user:
     name: "{{ item.key }}"
+    group: "{{ item.value.users_group | default('item.key) }}"
     groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
     home: "{{ item.value.users_home | default('/home/' + item.key) }}"
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
@@ -15,14 +16,26 @@
     system: "{{ item.value.users_system | default('no', false) }}"
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
-- name: Chown user home owner
+- name: Skel files and directories in place 
+  synchronize: 
+    src: "files/skel.d/{{ item.value.users_skel }}" 
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}" 
+    owner: "{{ item.key }}" 
+    group: "{{ item.value.users_group | default('item.key) }}"
+    perms: yes 
+    recursive: yes 
+    times: no  
+  loop: "{{ users | dict2items }}" 
+  when: item.value.users_skel is defined 
+
+- name: Chown user home directory owner
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     owner: "{{ item.value.users_home_owner }}"
   when: item.value.users_home_owner is defined
 
-- name: Chown user home group
+- name: Chown user home directory group
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory

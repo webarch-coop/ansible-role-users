@@ -58,8 +58,9 @@ The other repo should also contain a `users.yml` file that contains:
         users_name: Foo Bar
         users_email: foo@example.org
         users_home: /var/www/foo
+        users_group: users
         users_home_owner: root
-        users_home_group: www-data
+        users_home_group: users
         # You must quote the mode or the leaving zero is stripped"
         users_home_mode: "0750"
         users_system: yes
@@ -67,6 +68,7 @@ The other repo should also contain a `users.yml` file that contains:
         users_generate_ssh_key: yes
         users_editor: vim
         users_groups:
+          - users
           - ssl-cert
       bar:
         users_home: /opt/bar

@@ -31,3 +31,15 @@
   include_tasks: quota.yml
   loop: "{{ users | dict2items }}"
   when: quota_dir is defined and item.value.users_quota is defined and item.value.users_quota != ""
+
+- name: Skel files and directories in place
+  synchronize:
+    src: "files/skel.d/{{ item.value.users_skel }}"
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    perms: yes
+    recursive: yes
+    times: no 
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_skel is defined
