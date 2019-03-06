@@ -24,16 +24,48 @@
 
 - name: Debug users_groups
   debug:
-    msg: "groups: {{ item.value.users_groups }}" 
+    msg: "group1: {{ item.value.users_group1 }}" 
+    msg: "group2: {{ item.value.users_group2 }}" 
+    msg: "group3: {{ item.value.users_group3 }}" 
+    msg: "group4: {{ item.value.users_group4 }}" 
+    msg: "group5: {{ item.value.users_group5 }}" 
   loop: "{{ users | dict2items }}"
   when: item.value.users_groups is defined
 
-- name: Add groups accounts
+- name: Add first groups accounts
   group:
-    name: "{{ item.value.users_groups }}"
+    name: "{{ item.value.users_group1 }}"
     state: present
   loop: "{{ users | dict2items }}"
-  when: item.value.users_groups is defined
+  when: item.value.users_group1 is defined
+
+- name: Add second groups accounts
+  group:
+    name: "{{ item.value.users_group2 }}"
+    state: present
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_group2 is defined
+
+- name: Add third groups accounts
+  group:
+    name: "{{ item.value.users_group3 }}"
+    state: present
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_group3 is defined
+
+- name: Add fourth groups accounts
+  group:
+    name: "{{ item.value.users_group4 }}"
+    state: present
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_group4 is defined
+
+- name: Add fifth groups accounts
+  group:
+    name: "{{ item.value.users_group5 }}"
+    state: present
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_group5 is defined
 
 - name: User accounts absent
   user:
