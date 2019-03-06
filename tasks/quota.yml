@@ -37,7 +37,7 @@
 
 - name: Set quota_inode_hardlimit from users_quota_inode_hardlimit
   set_fact:
-    quota_inode_hardlimit: "{{ users_quota_inode_hardlimit }}"
+    quota_inode_hardlimit: "{{ item.value.users_quota_inode_hardlimit }}"
   when: item.value.users_quota_inode_hardlimit is defined
 
 - name: Set quota_inode_hardlimit from users_quota
