@@ -28,12 +28,11 @@
   loop: "{{ users | dict2items }}"
   when: item.value.users_groups is defined
 
-#- name: Add groups accounts
-#  group:
-#    name:
-#    state:
-#    system:
-#  loop: "{{ users | dict2items }}"
+- name: Add groups accounts
+  group:
+    name: "{{ item.value.users_groups }}"
+    state: present
+  loop: "{{ users | dict2items }}"
 
 - name: User accounts absent
   user:
