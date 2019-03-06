@@ -1,6 +1,9 @@
 ---
 # setquota ${USERNAME} ${SQUOTA} ${DQUOTA} 0 0 -a
 #
+- debug:
+    msg: "quote: {{ item.value.users_quota | int }}"
+
 - name: set a variable for the block-softlimit
   shell: "echo '{{ ( item.value.users_quota | int ) | human_to_bytes }} / 100 * 90' | bc "
   register: quota_block_softlimit
