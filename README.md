@@ -58,7 +58,7 @@ The other repo should also contain a `users.yml` file that contains:
         users_name: Foo Bar
         users_email: foo@example.org
         users_home: /var/www/foo
-        users_skel: www
+        users_skel: /usr/local/etc/skel.d/www
         users_group: users
         users_home_owner: root
         users_home_group: users
