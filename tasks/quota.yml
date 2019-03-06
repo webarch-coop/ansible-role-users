@@ -4,25 +4,29 @@
 - debug:
     msg: "quota: {{ item.value.users_quota }}"
 
-- name: set a variable for the block-softlimit as 90% of users_quota in kibibytes
-  #shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 1024 / 100 * 90' | bc"
-  shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes / 1024 / 100 * 90 }}'"
-  register: quota_block_softlimit
-
-- name: set a variable for the block-hardlimit as users_quota in kibibytes
-  shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 1024' | bc"
-  register: quota_block_hardlimit
+#- name: set a variable for the block-softlimit as 90% of users_quota in kibibytes
+#  #shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 1024 / 100 * 90' | bc"
+#  shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes / 1024 / 100 * 90 }}'"
+#  register: quota_block_softlimit
+#
+#- name: set a variable for the block-hardlimit as users_quota in kibibytes
+#  shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 1024' | bc"
+#  register: quota_block_hardlimit
 
 # https://superuser.com/a/1156454
 - name: Set a variable for the inode-softlimit
   set_fact:
-    quota_inode_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2 * 1024 }}"
+    quota_block_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 / 100 * 90 }}"
+    quota_block_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 }}"
+    quota_inode_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2024 / 100 * 90 }}"
+    quota_inode_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2024 }}"
 
 - debug:
     msg: 
     - "block-softlimit: {{ quota_block_softlimit.stdout }}"
     - "block-hardlimit: {{ quota_block_hardlimit.stdout }}"
     - "inode-softlimit: {{ quota_inode_softlimit.stdout }}"
+    - "inode-hardlimit: {{ quota_inode_softlimit.stdout }}"
 
 #block-hardlimit
 #inode-softlimit
