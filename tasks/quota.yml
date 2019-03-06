@@ -35,5 +35,5 @@
 #inode-hardlimit
 
 - name: setquota
-  command: "echo 'setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }}'" 
+  command: "echo 'setquota -b {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ item.value.users_home | dirname }}'" 
 #  command: "setquota {{ item.key }} {{ ( item.value.users_quota | int ) | human_to_bytes(default_unit=k) / 100 * 90 }}
