@@ -1,0 +1,16 @@
+---
+# setquota ${USERNAME} ${SQUOTA} ${DQUOTA} 0 0 -a
+#
+- name: set a variable for the block-softlimit
+  shell: "echo '{{ ( item.value.users_quota | int ) | human_to_bytes }} / 100 * 90' | bc "
+  register: quota_block_softlimit
+
+- debug:
+    msg: "block-softlimit: quota_block_softlimit.stdout"
+
+#block-hardlimit
+#inode-softlimit
+#inode-hardlimit
+
+#- name: setquota
+#  command: "setquota {{ item.key }} {{ ( item.value.users_quota | int ) | human_to_bytes(default_unit=k) / 100 * 90 }}
