@@ -12,7 +12,7 @@
 
 - name: Set quota_block_softlimit from users_quota
   set_fact:
-    quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
+    quota_block_softlimit: "{{ item.value.users_quota | human_to_bytes // 1125 }}"
   when: item.value.users_quota_block_softlimit not defined
 
 - name: Set quota_block_hardlimit from users_quota_block_hardlimit
