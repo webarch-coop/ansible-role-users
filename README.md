@@ -58,6 +58,7 @@ The other repo should also contain a `users.yml` file that contains:
         users_name: Foo Bar
         users_email: foo@example.org
         users_home: /var/www/foo
+        users_skel: www
         users_group: users
         users_home_owner: root
         users_home_group: users
@@ -124,4 +125,3 @@ ansible-playbook users.yml
 
 * Add the users dictionary to the `hosts.yml` file?
 * Add more options from the [Ansible user module](https://docs.ansible.com/ansible/latest/modules/user_module.html)
-* Emulate /etc/skel
