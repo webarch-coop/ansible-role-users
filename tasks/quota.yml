@@ -23,10 +23,10 @@
 
 - debug:
     msg: 
-    - "block-softlimit: {{ quota_block_softlimit.stdout }}"
-    - "block-hardlimit: {{ quota_block_hardlimit.stdout }}"
-    - "inode-softlimit: {{ quota_inode_softlimit.stdout }}"
-    - "inode-hardlimit: {{ quota_inode_softlimit.stdout }}"
+    - "block-softlimit: {{ quota_block_softlimit }}"
+    - "block-hardlimit: {{ quota_block_hardlimit }}"
+    - "inode-softlimit: {{ quota_inode_softlimit }}"
+    - "inode-hardlimit: {{ quota_inode_softlimit }}"
 
 #block-hardlimit
 #inode-softlimit
