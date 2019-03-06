@@ -16,10 +16,10 @@
 # https://superuser.com/a/1156454
 - name: Set a variable for the inode-softlimit
   set_fact:
-    quota_block_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 / 100 * 90 }}"
-    quota_block_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 }}"
-    quota_inode_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2048 / 100 * 90 }}"
-    quota_inode_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2048 }}"
+    quota_block_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 / 100 * 90 | round | int }}"
+    quota_block_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 1024 | round | int }}"
+    quota_inode_softlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2048 / 100 * 90 | round | int }}"
+    quota_inode_hardlimit: "{{ ( item.value.users_quota ) | human_to_bytes / 2048 | round | int }}"
 
 - debug:
     msg: 
@@ -32,5 +32,6 @@
 #inode-softlimit
 #inode-hardlimit
 
-#- name: setquota
+- name: setquota
+  command: "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }}" 
 #  command: "setquota {{ item.key }} {{ ( item.value.users_quota | int ) | human_to_bytes(default_unit=k) / 100 * 90 }}
