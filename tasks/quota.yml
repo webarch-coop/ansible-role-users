@@ -1,40 +1,24 @@
 ---
-# setquota ${USERNAME} ${SQUOTA} ${DQUOTA} 0 0 -a
-#
 - debug:
-    msg: "quota: {{ item.value.users_quota }}"
-
-#- name: set a variable for the block-softlimit as 90% of users_quota in kibibytes
-#  #shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 1024 / 100 * 90' | bc"
-#  shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes / 1024 / 100 * 90 }}'"
-#  register: quota_block_softlimit
-#
-#- name: set a variable for the block-hardlimit as users_quota in kibibytes
-#  shell: "echo '{{ ( item.value.users_quota ) | human_to_bytes }} / 1024' | bc"
-#  register: quota_block_hardlimit
+    msg: 
 
 # https://superuser.com/a/1156454
 - name: Set a variables for quota
   set_fact:
-    #quota_block_softlimit: "{{ ((( item.value.users_quota | human_to_bytes ) / 1024 ) // 100 ) * 90 | round(0, 'floor') | int }}"
     # https://stackoverflow.com/a/35158145
-    quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
-    quota_block_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1024 }}"
-    quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 225280 }}"
-    quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 204800 }}"
+    quota_block_softlimit: "{{ users_quota_block_softlimit | default('( item.value.users_quota | human_to_bytes ) // 1125 ') }}"
+    quota_block_hardlimit: "{{ users_quota_block_hardlimit | default('( item.value.users_quota | human_to_bytes ) // 1024 ') }}"
+    quota_inode_softlimit: "{{ users_quota_inode_softlimit | default('( item.value.users_quota | human_to_bytes ) // 225280 ') }}"
+    quota_inode_hardlimit: "{{ users_quota_inode_hardlimit | default('( item.value.users_quota | human_to_bytes ) // 204800 ') }}"
 
 - debug:
-    msg: 
+    msg:
+    - "quota: {{ item.value.users_quota }}"
     - "block-softlimit: {{ quota_block_softlimit }}"
     - "block-hardlimit: {{ quota_block_hardlimit }}"
     - "inode-softlimit: {{ quota_inode_softlimit }}"
     - "inode-hardlimit: {{ quota_inode_hardlimit }}"
-
-#block-hardlimit
-#inode-softlimit
-#inode-hardlimit
+    verbosity: 1
 
 - name: setquota
-  #command: "echo 'setquota -b {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}'" 
   command: "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}" 
-#  command: "setquota {{ item.key }} {{ ( item.value.users_quota | int ) | human_to_bytes(default_unit=k) / 100 * 90 }}
