@@ -10,7 +10,7 @@
   when: users_debian_version == "buster"
 
 - name: Fail if unsupported distro
-  fail: 
+  fail:
     msg: "Not runnng Debian stretch or buster so additonal PHP version check needed"
   when: '"stretch" not in users_phpfpm_version_check and "buster" not in users_phpfpm_version_check'
 
@@ -27,7 +27,7 @@
       loop: "{{ users | dict2items }}"
       when: item.value.users_state is undefined or item.value.users_state == "present" and \
             and "phpfpm" in item.value.users_groups
-    
+
     - name: Users PHP FPM pool.d file absent
       file:
         path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
