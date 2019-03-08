@@ -4,3 +4,4 @@ ansible-lint:
   script:
     - ansible-lint tasks/main.yml
     - ansible-lint meta/main.yml
+    - molecule lint
