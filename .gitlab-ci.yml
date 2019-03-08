@@ -1,3 +1,4 @@
+---
 image: registry.git.coop/webarch/containers/images/ansible:0.1
 
 ansible-lint:
