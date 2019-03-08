@@ -53,14 +53,14 @@
 
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
-- block:
+- name: User groups present
+  include_tasks: groups.yml
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: users_groups_user
+  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and users_groups_user.value.users_groups is defined
 
-    - name: User groups present
-      include_tasks: groups.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: users_groups_user
-      when: users_groups_user.value.users_groups is defined
+- block:
 
     - name: User group present
       group:
