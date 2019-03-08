@@ -30,85 +30,82 @@
     group: root
     recurse: true
 
-- name: Absent users home directories removed
-  file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}"
-    state: absent
-  loop: "{{ users | dict2items }}"
+- block:
+
+    - name: Absent users home directories removed
+      file:
+        path: "{{ item.value.users_home | default('/home/' + item.key) }}"
+        state: absent
+      loop: "{{ users | dict2items }}"
+
+    - name: User accounts absent
+      user:
+        name: "{{ item.key }}"
+        state: absent
+        remove: true
+      loop: "{{ users | dict2items }}"
+
+    - name: User groups absent
+      group:
+        name: "{{ item.key }}"
+        state: absent
+      loop: "{{ users | dict2items }}"
+
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
-- name: User accounts absent
-  user:
-    name: "{{ item.key }}"
-    state: absent
-    remove: true
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_state is defined and item.value.users_state == "absent"
+- block:
 
-- name: User groups absent
-  group:
-    name: "{{ item.key }}"
-    state: absent
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_state is defined and item.value.users_state == "absent"
+    - name: User groups present
+      include_tasks: groups.yml
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: users_groups_user
+      when: users_groups_user.value.users_groups is defined
+    
+    - name: User group present
+      group:
+        name: "{{ item.key }}"
+        state: present
+      loop: "{{ users | dict2items }}"
+    
+    - name: User accounts present
+      include_tasks: user.yml
+      loop: "{{ users | dict2items }}"
+    
+    - name: Quotas set
+      include_tasks: quota.yml
+      loop: "{{ users | dict2items }}"
+      when: quota_dir is defined and item.value.users_quota is defined and item.value.users_quota != ""
 
-- name: User groups present
-  include_tasks: groups.yml
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: users_groups_user
-  when: users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" and users_groups_user.value.users_groups is defined
-
-- name: User group present
-  group:
-    name: "{{ item.key }}"
-    state: present
-  loop: "{{ users | dict2items }}"
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
-- name: User accounts present
-  include_tasks: user.yml
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_state is undefined or item.value.users_state == "present"
-
-- name: Quotas set
-  include_tasks: quota.yml
-  loop: "{{ users | dict2items }}"
-  when: item.value.users_state is undefined or item.value.users_state == "present" and \
-        quota_dir is defined and item.value.users_quota is defined and item.value.users_quota != ""
-
-- name: Check if php7.0-fpm is installed on stretch
-  shell: dpkg -s php7.0-fpm | grep ^Status
+- name: Check if php-fpm is installed
+  shell: dpkg -s php-fpm | grep ^Status
   register: users_phpfpm_installed_check
-  when: users_debian_version eq "stretch"
 
-- name: Check if php7.3-fpm is installed on buster
-  shell: dpkg -s php7.3-fpm | grep ^Status
-  register: users_phpfpm_installed_check
-  when: users_debian_version eq "buster"
+- block:
 
-- name: Set the users_phpfpm_installed variable
-  set_fact:
-    users_phpfpm_installed: "true"
-  when: '"installed" in users_phpfpm.stdout'
+    - name: Set the users_phpfpm_installed variable
+      set_fact:
+        users_phpfpm_installed: "true"
 
-- name: Get the PHP version on stretch
-  shell: php-fpm7.0 -v | grep ^PHP | awk '{ print $2 }' | cut -d'.' -f1,2
-  register: users_phpfpm_version_check
-  when: users_debian_version eq "stretch" and users_phpfpm_installed eq "true"
+    - name: Check if php7.0-fpm is installed on stretch
+      shell: dpkg -s php7.0-fpm | grep ^Status
+      register: users_phpfpm_installed_check
+      when: users_debian_version == "stretch"
 
-- name: Get the PHP version on buster
-  shell: php-fpm7.3 -v | grep ^PHP | awk '{ print $2 }' | cut -d'.' -f1,2
-  register: users_phpfpm_version_check
-  when: users_debian_version eq "buster" and users_phpfpm_installed eq "true"
+    - name: Check if php7.3-fpm is installed on buster
+      shell: dpkg -s php7.3-fpm | grep ^Status
+      register: users_phpfpm_installed_check
+      when: users_debian_version == "buster"
 
-- name: Set the PHP version variable
-  set_fact:
-    users_phpfpm_version: "{{ users_phpfpm_version_check.stdout }}"
-  when: users_phpfpm_installed eq "true" and users_phpfpm_version_check is defined
+    - name: Fail if unsupported distro
+      fail:
+        msg: "Not runnng Debian stretch or buster so additonal PHP version check needed"
+      when: "stretch" not in users_phpfpm_version_check and "buster" not in users_phpfpm_version_check
 
-- name: PHP-FPM configured for users in the phpfpm group
-  include_tasks: phpfpm.yml
-  loop: "{{ users | dict2items }}"
-  when: users_phpfpm_installed eq "true" and users_phpfpm_version is defined and \
-        "phpfpm" in item.value.users_groups or item.value.users_group == "phpfpm"
+    - name: Include the PHP FPM tasks
+      include_tasks: phpfpm.yml
+      when: users_phpfpm_installed == "true" and users_phpfpm_version is defined
+
+  when: users_phpfpm_installed_check is defined and "installed" in users_phpfpm.stdout
