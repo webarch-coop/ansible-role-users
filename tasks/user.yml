@@ -22,7 +22,7 @@
     group: "{{ item.value.users_group | default(item.key) }}"
     groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
     home: "{{ item.value.users_home | default('/home/' + item.key) }}"
-    create_home: True
+    create_home: true
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
     skeleton: "{{ item.value.users_skel | default(omit) }}"
     generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
@@ -100,7 +100,7 @@
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
     line: 'export EDITOR="vim"'
     state: present
-    create: yes
+    create: true
   when: item.value.users_editor is defined and item.value.users_editor == 'vim'
 
 - name: .gitconfig in place

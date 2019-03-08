@@ -4,14 +4,14 @@
     pkg:
       - vim
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Skel files and directories in place
   synchronize:
     src: files/skel.d/
     dest: /usr/local/etc/skel.d/
-    perms: yes
-    recursive: yes
+    perms: true
+    recursive: true
     times: no
 
 - name: Skel files chowned
@@ -20,7 +20,7 @@
     state: directory
     owner: root
     group: root
-    recurse: yes
+    recurse: true
 
 - name: Absent users home directories removed
   file:
@@ -33,7 +33,7 @@
   user:
     name: "{{ item.key }}"
     state: absent
-    remove: yes
+    remove: true
   loop: "{{ users | dict2items }}"
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
@@ -49,7 +49,6 @@
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: users_groups_user
-  #when: item.value.users_state is undefined or item.value.users_state == "present" and item.value.users_groups is defined
   when: users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" and users_groups_user.value.users_groups is defined
 
 - name: User group present

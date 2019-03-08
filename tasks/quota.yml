@@ -44,11 +44,11 @@
 
 - debug:
     msg:
-    - "quota: {{ item.value.users_quota }}"
-    - "block-softlimit: {{ quota_block_softlimit }}"
-    - "block-hardlimit: {{ quota_block_hardlimit }}"
-    - "inode-softlimit: {{ quota_inode_softlimit }}"
-    - "inode-hardlimit: {{ quota_inode_hardlimit }}"
+      - "quota: {{ item.value.users_quota }}"
+      - "block-softlimit: {{ quota_block_softlimit }}"
+      - "block-hardlimit: {{ quota_block_hardlimit }}"
+      - "inode-softlimit: {{ quota_inode_softlimit }}"
+      - "inode-hardlimit: {{ quota_inode_hardlimit }}"
     verbosity: 1
 
 - name: setquota
