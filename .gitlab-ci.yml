@@ -2,6 +2,5 @@ image: registry.git.coop/webarch/containers/images/ansible:0.1
 
 ansible-lint:
   script:
-    - ansible-lint --nocolor tasks/main.yml
-    - ansible-lint --nocolor meta/main.yml
-    - ansible-lint --nocolor defaults/main.yml
+    - ansible-lint tasks/main.yml
+    - ansible-lint meta/main.yml

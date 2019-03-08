@@ -3,7 +3,7 @@
     msg: "user={{ users_groups_user }} group={{ item }}"
   loop: "{{ users_groups_user.value.users_groups }}"
 
-- name: Add group 
+- name: Add group
   group:
     name: "{{ item }}"
     state: present

@@ -8,7 +8,7 @@
       - "groups: {{ item.value.users_groups | default([]) | join(',') or omit }}"
       - "home: {{ item.value.users_home | default('/home/' + item.key) }}"
       - "shell: {{ item.value.users_shell | default('/bin/bash', true) }}"
-      - "skeleton: {{ item.value.users_skel | default(omit) }}" 
+      - "skeleton: {{ item.value.users_skel | default(omit) }}"
       - "system: {{ item.value.users_system | default('no', false) }}"
       - "editor: {{ item.value.users_editor | default('vim', true) }}"
       - "home owner: {{ item.value.users_home_owner | default(item.key) }}"
