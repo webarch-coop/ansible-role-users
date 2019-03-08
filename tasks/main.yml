@@ -12,7 +12,7 @@
     dest: /usr/local/etc/skel.d/
     perms: true
     recursive: true
-    times: no
+    times: false
 
 - name: Skel files chowned
   file:
