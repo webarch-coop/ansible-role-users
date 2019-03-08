@@ -61,17 +61,17 @@
       loop_control:
         loop_var: users_groups_user
       when: users_groups_user.value.users_groups is defined
-    
+
     - name: User group present
       group:
         name: "{{ item.key }}"
         state: present
       loop: "{{ users | dict2items }}"
-    
+
     - name: User accounts present
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
-    
+
     - name: Quotas set
       include_tasks: quota.yml
       loop: "{{ users | dict2items }}"
