@@ -1,1 +1,2 @@
 files/vim/vimrc gitlab-language=viml
+templates/phppfm_user.conf.j2 gitlab-language=conf

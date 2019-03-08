@@ -1,0 +1,39 @@
+---
+- name: Get the PHP version on stretch
+  shell: php-fpm7.0 -v | grep ^PHP | awk '{ print $2 }' | cut -d'.' -f1,2
+  register: users_phpfpm_version_check
+  when: users_debian_version == "stretch"
+
+- name: Get the PHP version on buster
+  shell: php-fpm7.3 -v | grep ^PHP | awk '{ print $2 }' | cut -d'.' -f1,2
+  register: users_phpfpm_version_check
+  when: users_debian_version == "buster"
+
+- name: Fail if unsupported distro
+  fail: 
+    msg: "Not runnng Debian stretch or buster so additonal PHP version check needed"
+  when: "stretch" not in users_phpfpm_version_check and "buster" not in users_phpfpm_version_check
+
+- block:
+
+    - name: Set the PHP version variable
+      set_fact:
+        users_phpfpm_version: "{{ users_phpfpm_version_check.stdout }}"
+
+    - name: Users PHP FPM pool.d file present
+      template:
+        src: templates/phppfm_user.conf.j2
+        dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
+      loop: "{{ users | dict2items }}"
+      when: item.value.users_state is undefined or item.value.users_state == "present" and \
+            and "phpfpm" in item.value.users_groups
+    
+    - name: Users PHP FPM pool.d file absent
+      file:
+        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
+        state: absent
+      loop: "{{ users | dict2items }}"
+      when: item.value.users_state is defined and item.value.users_state == "absent" or \
+            "phpfpm" not in item.value.users_groups
+
+  when: users_phpfpm_version is defined
