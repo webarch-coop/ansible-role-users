@@ -116,5 +116,5 @@
       include_tasks: phpfpm.yml
       when: '"installed" in users_phpfpm_installed_check'
 
-  when: users_phpfpm_installed == "true"
-  # when: users_phpfpm_installed_check is defined and "installed" in users_phpfpm_installed_check.stdout
+  # when: users_phpfpm_installed == "true"
+  when: users_phpfpm_installed_check is defined and "installed" in users_phpfpm_installed_check.stdout
