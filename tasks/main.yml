@@ -88,6 +88,11 @@
     users_phpfpm_installed: "true"
   when: users_phpfpm_installed_check is defined and "installed" in users_phpfpm_installed_check.stdout
 
+- name: Print the users_phpfpm_installed variable
+  debug:
+    var: users_phpfpm_installed
+    verbosity: 1
+
 - block:
 
     - name: Check if php7.0-fpm is installed on stretch
