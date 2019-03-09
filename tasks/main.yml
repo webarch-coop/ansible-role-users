@@ -110,11 +110,11 @@
     - name: Fail if unsupported distro
       fail:
         msg: Not running a supported version of PHP
-      when: '"installed" not in users_phpfpm70_installed_check and "installed" not in users_phpfpm73_installed_check' 
+      when: '"installed" not in users_phpfpm70_installed_check or "installed" not in users_phpfpm73_installed_check' 
 
     - name: Include the PHP FPM tasks
       include_tasks: phpfpm.yml
-      when: '"installed" in users_phpfpm_installed_check'
+      when: '"installed" in  users_phpfpm70_installed_check or "installed" in users_phpfpm73_installed_check'
 
   when: users_phpfpm_installed == "present"
   #when: users_phpfpm_installed_check is defined and "installed" in users_phpfpm_installed_check.stdout
