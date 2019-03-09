@@ -14,8 +14,10 @@
     state: present
     update_cache: true
 
-- name: Skel www profiles included
-  include_tasks: skel_www.conf
+- name: Skel profiles included
+  include_tasks: "skel_{{ item }}.yml"
+  with_items:
+    - www
 
 - block:
 
