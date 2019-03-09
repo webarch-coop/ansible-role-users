@@ -23,6 +23,9 @@
   file:
     path: "/usr/local/etc/skel.d/www/{{ item }}"
     state: directory
+    owner: root
+    group: root
+    mode: 0700
   with_items:
     - .cache
     - .composer
@@ -38,9 +41,6 @@
     - logs
     - private
     - tmp
-  owner: root
-  group: root
-  mode: 0700
 
 #- name: Skel files chowned
 #  file:
