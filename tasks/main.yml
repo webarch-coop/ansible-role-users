@@ -14,21 +14,10 @@
     state: present
     update_cache: true
 
-- name: Skel files and directories in place
-  synchronize:
-    src: files/skel.d/
-    dest: /usr/local/etc/skel.d/
-    perms: true
-    recursive: true
-    times: false
-
-- name: Skel files chowned
-  file:
-    path: /usr/local/etc/skel.d
-    state: directory
-    owner: root
-    group: root
-    recurse: true
+- name: Skel profiles included
+  include_tasks: "skel_{{ item }}.conf"
+  loop:
+    - www
 
 - block:
 
