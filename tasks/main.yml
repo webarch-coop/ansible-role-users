@@ -80,7 +80,7 @@
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
 - name: Check if php-fpm is installed
-  shell: dpkg -s php-fpm | grep ^Status | sed 's/Status: install ok //'
+  shell: dpkg -s php-fpm | grep ^Status | awk '{ print $4 }' 
   register: users_phpfpm_installed_check
 
 #- name: Set the users_phpfpm_installed variable
@@ -97,13 +97,13 @@
 - block:
 
     - name: Check if php7.0-fpm is installed on stretch
-      shell: dpkg -s php7.0-fpm | grep ^Status | sed 's/Status: install ok //'
+      shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
       register: users_phpfpm70_installed_check
       when: users_debian_version == "stretch"
       #when: '"stretch" in users_debian_version'
 
     - name: Check if php7.3-fpm is installed on buster
-      shell: dpkg -s php7.3-fpm | grep ^Status | sed 's/Status: install ok //'
+      shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
       register: users_phpfpm73_installed_check
       when: users_debian_version == "buster"
       # when: '"buster" in users_debian_version'
