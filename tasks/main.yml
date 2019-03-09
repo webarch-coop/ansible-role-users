@@ -15,7 +15,7 @@
     update_cache: true
 
 - name: Skel www profiles included
-  include_tasks: tasks/skel_www.conf
+  include_tasks: skel_www.conf
 
 - block:
 
