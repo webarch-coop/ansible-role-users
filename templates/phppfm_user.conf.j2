@@ -20,7 +20,7 @@ pm.max_requests = 1000
 
 access.log = $prefix/logs/php-fpm.access.log
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-slowlog = log/php-fpm.slow.log
+slowlog = $prefix/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
 
