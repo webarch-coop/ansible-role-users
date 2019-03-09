@@ -14,10 +14,8 @@
     state: present
     update_cache: true
 
-- name: Skel profiles included
-  include_tasks: "skel_{{ item }}.conf"
-  loop:
-    - www
+- name: Skel www profiles included
+  include_tasks: tasks/skel_www.conf
 
 - block:
 
