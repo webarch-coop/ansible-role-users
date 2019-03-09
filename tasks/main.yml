@@ -80,44 +80,10 @@
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
 - name: Check if php-fpm is installed
-  shell: dpkg -s php-fpm | grep ^Status | awk '{ print $4 }' 
-  register: users_phpfpm_installed_check
+  shell: dpkg -s php-fpm | grep ^Status | awk '{ print $4 }'
+  register: users_phpfpm_status
+  when: users_debian_version == "stretch" or users_debian_version == "buster"
 
-#- name: Set the users_phpfpm_installed variable
-#  set_fact:
-#    users_phpfpm_state: "present"
-#  when: users_phpfpm_installed_check.stdout == "installed"
-#  #when: users_phpfpm_installed_check is defined and "installed" in users_phpfpm_installed_check.stdout
-#
-#- name: Print the users_phpfpm_state variable
-#  debug:
-#    var: users_phpfpm_state
-#    verbosity: 1
-
-- block:
-
-    - name: Check if php7.0-fpm is installed on stretch
-      shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
-      register: users_phpfpm70_installed_check
-      when: users_debian_version == "stretch"
-      #when: '"stretch" in users_debian_version'
-
-    - name: Check if php7.3-fpm is installed on buster
-      shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
-      register: users_phpfpm73_installed_check
-      when: users_debian_version == "buster"
-      # when: '"buster" in users_debian_version'
-
-    - name: Fail if unsupported distro
-      fail:
-        msg: Not running a supported version of PHP
-      #when: '"installed" not in users_phpfpm70_installed_check or "installed" not in users_phpfpm73_installed_check'
-      when: users_phpfpm70_installed_check.stdout != "installed" and users_phpfpm73_installed_check.stdout != "installed"
-
-    - name: Include the PHP FPM tasks
-      include_tasks: phpfpm.yml
-      # when: '"installed" in  users_phpfpm70_installed_check or "installed" in users_phpfpm73_installed_check'
-      when: users_phpfpm70_installed_check.stdout == "installed" or users_phpfpm73_installed_check.stdout == "installed"
-
-  # when: users_phpfpm_state == "present"
-  when: users_phpfpm_installed_check.stdout == "installed"
+- name: Include the PHP FPM tasks
+  include_tasks: phpfpm.yml
+  when: users_phpfpm_status.stdout == "installed"
