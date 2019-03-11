@@ -71,6 +71,23 @@
 
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
+- name: Email address in .forward
+  template:
+    src: templates/forward
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
+    owner: root 
+    group: root
+    mode: 0644
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_email is defined and item.value.users_email != ""
+
+- name: Email address absent so no .forwad
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
+    state: absent
+  loop: "{{ users | dict2items }}"
+  when: item.value.users_email is not defined or item.value.users_email != ""
+
 - name: Check if php-fpm is installed
   shell: dpkg -s php-fpm | grep ^Status | awk '{ print $4 }'
   register: users_phpfpm_status
@@ -80,3 +97,4 @@
 - name: Include the PHP FPM tasks
   include_tasks: phpfpm.yml
   when: users_phpfpm_status.stdout == "installed"
+
