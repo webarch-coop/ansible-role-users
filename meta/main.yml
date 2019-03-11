@@ -2,7 +2,7 @@
 galaxy_info:
   role_name: users
   author: Chris Croome
-  description: Ansible role for adding uiser accounts to Debian servers
+  description: Ansible role for adding user accounts to Debian servers
   company: Webarchitects Co-operative
   license: license (GPLv3)
   # groups: Before version 2.3, the only input format allowed was a comma separated string.
