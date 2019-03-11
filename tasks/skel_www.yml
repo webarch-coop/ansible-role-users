@@ -1,7 +1,7 @@
 ---
 - name:  "Skel {{ users_skeleton }} directory present"
   file:
-    path: "files/skel.d/{{ users_skeleton }}"
+    path: "/usr/local/etc/skel.d/{{ users_skeleton }}"
     state: directory
 
 - name: "Skel {{ users_skeleton }} files in place"
