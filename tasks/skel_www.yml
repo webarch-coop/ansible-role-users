@@ -15,6 +15,7 @@
   file:
     path: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
     state: touch
+    modification_time: preserve
   with_items:
     - .bash_history
     - .yarnrc

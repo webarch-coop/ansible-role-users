@@ -2,42 +2,42 @@
 # https://superuser.com/a/1156454
 # https://stackoverflow.com/a/35158145
 
-- name: Set quota_block_softlimit from users_quota_block_softlimit
+- name: "Set quota_block_softlimit from users_quota_block_softlimit for {{ item.key }}"
   set_fact:
     quota_block_softlimit: "{{ item.value.users_quota_block_softlimit }}"
   when: item.value.users_quota_block_softlimit is defined
 
-- name: Set quota_block_softlimit from users_quota
+- name: "Set quota_block_softlimit from users_quota for {{ item.key }}"
   set_fact:
     quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
   when: item.value.users_quota_block_softlimit is not defined
 
-- name: Set quota_block_hardlimit from users_quota_block_hardlimit
+- name: "Set quota_block_hardlimit from users_quota_block_hardlimit for {{ item.key }}"
   set_fact:
     quota_block_hardlimit: "{{ item.value.users_quota_block_hardlimit }}"
   when: item.value.users_quota_block_hardlimit is defined
 
-- name: Set quota_block_hardlimit from users_quota
+- name: "Set quota_block_hardlimit from users_quota for {{ item.key }}"
   set_fact:
     quota_block_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1024 }}"
   when: item.value.users_quota_block_hardlimit is not defined
 
-- name: Set quota_inode_softlimit from users_quota_inode_softlimit
+- name: "Set quota_inode_softlimit from users_quota_inode_softlimit for {{ item.key }}"
   set_fact:
     quota_inode_softlimit: "{{ item.value.users_quota_inode_softlimit }}"
   when: item.value.users_quota_inode_softlimit is defined
 
-- name: Set quota_inode_softlimit from users_quota
+- name: "Set quota_inode_softlimit from users_quota for {{ item.key }}"
   set_fact:
     quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 225280 }}"
   when: item.value.users_quota_inode_softlimit is not defined
 
-- name: Set quota_inode_hardlimit from users_quota_inode_hardlimit
+- name: "Set quota_inode_hardlimit from users_quota_inode_hardlimit for {{ item.key }}"
   set_fact:
     quota_inode_hardlimit: "{{ item.value.users_quota_inode_hardlimit }}"
   when: item.value.users_quota_inode_hardlimit is defined
 
-- name: Set quota_inode_hardlimit from users_quota
+- name: "Set quota_inode_hardlimit from users_quota for {{ item.key }}"
   set_fact:
     quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 204800 }}"
   when: item.value.users_quota_inode_hardlimit is not defined
@@ -51,11 +51,11 @@
       - "inode-hardlimit: {{ quota_inode_hardlimit }}"
     verbosity: 1
 
-- name: the set quota command which is about to be run
+- name: "The set quota command which is about to be run for {{ item.key }}"
   debug:
     msg:
       - "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}"
     verbosity: 1
 
-- name: setquota
+- name: "Setquota for {{ item.key }}"
   command: "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}"

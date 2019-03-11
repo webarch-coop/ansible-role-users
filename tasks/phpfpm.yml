@@ -3,11 +3,13 @@
   shell: php-fpm7.0 -v | grep ^PHP | awk '{ print $2 }' | cut -d'.' -f1,2
   register: users_phpfpm_version_check
   when: users_debian_version == "stretch"
+  changed_when: false
 
 - name: Get the PHP version on buster
   shell: php-fpm7.3 -v | grep ^PHP | awk '{ print $2 }' | cut -d'.' -f1,2
   register: users_phpfpm_version_check
   when: users_debian_version == "buster"
+  changed_when: false
 
 - name: Set the PHP version variable
   set_fact:

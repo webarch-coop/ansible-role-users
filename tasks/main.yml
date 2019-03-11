@@ -75,6 +75,7 @@
   shell: dpkg -s php-fpm | grep ^Status | awk '{ print $4 }'
   register: users_phpfpm_status
   when: users_debian_version == "stretch" or users_debian_version == "buster"
+  changed_when: false
 
 - name: Include the PHP FPM tasks
   include_tasks: phpfpm.yml
