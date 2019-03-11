@@ -2,6 +2,7 @@
 - name: Check /etc/debian_version
   shell: "cat /etc/debian_version | awk -F/ '{ print $1 }'"
   register: users_debian_version_check
+  changed_when: false
 
 - name: Set a fact for the Debian version
   set_fact:
