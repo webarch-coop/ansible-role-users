@@ -81,7 +81,7 @@
   loop: "{{ users | dict2items }}"
   when: item.value.users_email is defined and item.value.users_email != ""
 
-- name: Email address absent so no .forwad
+- name: Email address absent so no .forward
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
     state: absent
