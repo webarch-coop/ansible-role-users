@@ -73,7 +73,7 @@
 
 - name: Email address in .forward
   template:
-    src: templates/forward
+    src: templates/forward.j2
     dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
     owner: root 
     group: root
