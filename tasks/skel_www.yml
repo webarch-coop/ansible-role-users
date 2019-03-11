@@ -1,27 +1,27 @@
 ---
-- name: Skel www files in place
+- name: "Skel {{ users_skeleton }} files in place"
   copy:
-    src: "files/skel.d/www/{{ item }}"
-    dest: "/usr/local/etc/skel.d/www/{{ item }}"
+    src: "files/skel.d/{{ users_skeleton }}/{{ item }}"
+    dest: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
     owner: root
     group: root
     mode: 0600
-  with_items:
+  loop:
     - .bash_logout
     - .bashrc
     - .profile
 
-- name: Skel www files touched
+- name: "Skel {{ users_skeleton }} files touched"
   file:
-    path: "/usr/local/etc/skel.d/www/{{ item }}"
+    path: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
     state: touch
   with_items:
     - .bash_history
     - .yarnrc
 
-- name: Skel www private directories present
+- name: "Skel {{ users_skeleton }} private directories present"
   file:
-    path: "/usr/local/etc/skel.d/www/{{ item }}"
+    path: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
     state: directory
     owner: root
     group: root

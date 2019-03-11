@@ -17,8 +17,10 @@
 
 - name: Skel profiles included
   include_tasks: "skel_{{ item }}.yml"
-  with_items:
+  loop:
     - www
+  loop_control:
+    loop_var: users_skeleton
 
 - block:
 
