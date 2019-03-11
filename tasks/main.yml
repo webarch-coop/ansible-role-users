@@ -86,7 +86,7 @@
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
     state: absent
   loop: "{{ users | dict2items }}"
-  when: item.value.users_email is not defined or item.value.users_email != ""
+  when: item.value.users_email is not defined or item.value.users_email == ""
 
 - name: Check if php-fpm is installed
   shell: dpkg -s php-fpm | grep ^Status | awk '{ print $4 }'
