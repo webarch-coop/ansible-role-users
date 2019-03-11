@@ -16,7 +16,7 @@
     update_cache: true
 
 - name: Skel profiles included
-  include_tasks: "skel_{{ item }}.yml"
+  include_tasks: "skel_{{ users_skeleton }}.yml"
   loop:
     - www
   loop_control:
