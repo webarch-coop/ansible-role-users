@@ -19,7 +19,7 @@
     - .bash_history
     - .yarnrc
 
-- name: Skel www private directories present 
+- name: Skel www private directories present
   file:
     path: "/usr/local/etc/skel.d/www/{{ item }}"
     state: directory
@@ -42,10 +42,10 @@
     - private
     - tmp
 
-#- name: Skel files chowned
-#  file:
-#    path: /usr/local/etc/skel.d
-#    state: directory
-#    owner: root
-#    group: root
-#    recurse: true
+# - name: Skel files chowned
+#   file:
+#     path: /usr/local/etc/skel.d
+#     state: directory
+#     owner: root
+#     group: root
+#     recurse: true

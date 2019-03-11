@@ -51,6 +51,11 @@
       - "inode-hardlimit: {{ quota_inode_hardlimit }}"
     verbosity: 1
 
+- name: the set quota command which is about to be run
+  debug:
+    msg: 
+      - "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}"
+    verbosity: 1  
+
 - name: setquota
-  command: "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} \
-           {{ quota_inode_hardlimit }} {{ quota_dir }}"
+  command: "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}"
