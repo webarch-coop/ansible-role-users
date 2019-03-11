@@ -88,13 +88,18 @@
   loop: "{{ users | dict2items }}"
   when: item.value.users_email is not defined or item.value.users_email == ""
 
-- name: Check if php-fpm is installed
-  shell: dpkg -s php-fpm | grep ^Status | awk '{ print $4 }'
+- name: Check if php-fpm is installed on stretch
+  shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
   register: users_phpfpm_status
-  when: users_debian_version == "stretch" or users_debian_version == "buster"
+  when: users_debian_version == "stretch"
+  changed_when: false
+
+- name: Check if php-fpm is installed on buster
+  shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
+  register: users_phpfpm_status
+  when: users_debian_version == "buster"
   changed_when: false
 
 - name: Include the PHP FPM tasks
   include_tasks: phpfpm.yml
   when: users_phpfpm_status.stdout == "installed"
-
