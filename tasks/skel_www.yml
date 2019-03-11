@@ -1,4 +1,9 @@
 ---
+- name:  "Skel {{ users_skeleton }} directory present"
+  file:
+    path: "files/skel.d/{{ users_skeleton }}"
+    state: directory
+
 - name: "Skel {{ users_skeleton }} files in place"
   copy:
     src: "files/skel.d/{{ users_skeleton }}/{{ item }}"

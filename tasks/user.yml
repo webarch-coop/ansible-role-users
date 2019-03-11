@@ -71,6 +71,7 @@
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0600
+    force: yes
   when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
 
 - name: Set default editor
