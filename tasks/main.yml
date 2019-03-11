@@ -75,7 +75,7 @@
   template:
     src: templates/forward.j2
     dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
-    owner: "{{ item.key }}" 
+    owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
