@@ -15,7 +15,7 @@
 #     register: etc_groups
 #
 #     when: item in ansible_facts.getent_group
-#  
+#
 #   # get all groups
 #   - getent:
 #       database: group
