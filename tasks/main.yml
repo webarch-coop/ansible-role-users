@@ -100,6 +100,8 @@
   when: users_debian_version == "buster"
   changed_when: false
 
+# check if a chroot exists
+
 - name: Include the PHP FPM tasks
   include_tasks: phpfpm.yml
   when: users_phpfpm_status.stdout == "installed"

@@ -9,6 +9,20 @@
     users_phpfpm_version: "7.3"
   when: users_debian_version == "buster"
 
+# check if users are in a chroot group
+#   - name: Check if user exists
+#     shell: /usr/bin/getent group | awk -F":" '{print $1}'
+#     register: etc_groups
+#
+#     when: item in ansible_facts.getent_group
+#  
+#   # get all groups
+#   - getent:
+#       database: group
+#       split: ':'
+#   - debug:
+#       var: getent_group
+
 - block:
 
     - name: Users PHP FPM pool.d file present
