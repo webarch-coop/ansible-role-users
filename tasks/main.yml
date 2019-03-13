@@ -105,6 +105,11 @@
     path: "{{ chroot_dir | default('/chroot') }}"
   register: users_chroot_dir
 
-- name: Include the PHP FPM tasks
+- name: Include the chroot user tasks
+  include_tasks: chroot_user.yml
+  loop: "{{ users | dict2items }}"
+  when: users_chroot_dir.stat.exists
+
+- name: Include the PHP FPM chroot tasks
   include_tasks: phpfpm_chroot.yml
   when: users_phpfpm_status.stdout == "installed" and users_chroot_dir.stat.exists
