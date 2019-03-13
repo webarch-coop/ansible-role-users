@@ -4,14 +4,14 @@
     - name: "Remove {{ item.key }} from {{ chroot_dir | default('/chroot') }}/etc/passwd"
       lineinfile:
         path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
-        regexp: "^{{ item.key }}:" 
+        regexp: "^{{ item.key }}:"
         state: absent
 
     - name: "Remove {{ item.key }} from {{ chroot_dir | default('/chroot') }}/etc/group"
       lineinfile:
         path: "{{ chroot_dir | default('/chroot') }}/etc/group"
         regexp: "^{{ item.key }}:"
-        state: absent 
+        state: absent
 
     # - name: "Remove {{ item.key }} mount points"
 
@@ -20,7 +20,7 @@
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
 
 - block:
-    
+
     - name: "Read {{ item.key }} entry from /etc/passwd"
       command: "grep ^{{ item.key }}: /etc/passwd"
       register: users_etc_passwd
