@@ -17,7 +17,7 @@
 
     # - name: "Remove {{ item.key }} mount points from /etc/fstab"
 
-  when: ( item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
 
 - block:
     
