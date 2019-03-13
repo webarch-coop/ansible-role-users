@@ -25,15 +25,13 @@
         src: templates/phpfpm_chroot_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and \
-            ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
 
     - name: Users PHP FPM pool.d file absent
       file:
         path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or \
-            ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
+      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
