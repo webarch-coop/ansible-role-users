@@ -1,0 +1,50 @@
+---
+- block:
+
+    - name: "Remove {{ item.key }} from {{ chroot_dir | default('/chroot') }}/etc/passwd"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
+        regexp: "^{{ item.key }}:" 
+        state: absent
+
+    - name: "Remove {{ item.key }} from {{ chroot_dir | default('/chroot') }}/etc/group"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/group"
+        regexp: "^{{ item.key }}:"
+        state: present
+
+    # - name: "Remove {{ item.key }} mount points"
+
+    # - name: "Remove {{ item.key }} mount points from /etc/fstab"
+
+  when: ( item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+
+- block:
+    
+    - name: "Read {{ item.key }} entry from /etc/passwd"
+      command: "grep ^{{ item.key }}: /etc/passwd"
+      register: users_etc_passwd
+      changed_when: false
+
+    - name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/passwd"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
+        line: users_etc_passwd.stdout
+        state: present
+
+    - name: "Read {{ item.key }} entry from /etc/group"
+      command: "grep ^{{ item.key }}: /etc/group"
+      register: users_etc_group
+      changed_when: false
+
+    - name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/group"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/group"
+        line: users_etc_group.stdout
+        state: present
+
+    # - name: Mount them in a chroot
+
+    # - name: Add their mount points to /etc/fstab
+
+  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
