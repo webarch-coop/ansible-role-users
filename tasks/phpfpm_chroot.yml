@@ -9,13 +9,6 @@
     users_phpfpm_version: "7.3"
   when: users_debian_version == "buster"
 
-# check if users are in a chroot group
-#   - name: Check if user exists
-#     shell: /usr/bin/getent group | awk -F":" '{print $1}'
-#     register: etc_groups
-#
-#     when: item in ansible_facts.getent_group
-
 - name: Get all groups
   getent:
     database: group
@@ -23,6 +16,7 @@
 
 - debug:
     var: getent_group
+    verbosity: 1
 
 - block:
 
@@ -32,7 +26,7 @@
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and \
-            "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups
+            ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
 
     - name: Users PHP FPM pool.d file absent
       file:
@@ -40,6 +34,6 @@
         state: absent
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or \
-            "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups
+            ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
 
-  when: users_phpfpm_version is defined and "phpfpm" in getent_group and "chroot" in getent_group
+  when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
