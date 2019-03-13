@@ -16,7 +16,7 @@
 
 - debug:
     var: getent_group
-    verbosity: 1
+    verbosity: 2
 
 - block:
 
