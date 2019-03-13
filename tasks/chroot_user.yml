@@ -11,7 +11,7 @@
       lineinfile:
         path: "{{ chroot_dir | default('/chroot') }}/etc/group"
         regexp: "^{{ item.key }}:"
-        state: present
+        state: absent 
 
     # - name: "Remove {{ item.key }} mount points"
 
