@@ -18,6 +18,12 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint_stat
 
+    - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
+      file:
+        path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
+        state: absent
+      when: users_chroot_home_mountpoint_stat.stat.exists
+
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} is mounted"
       shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint
