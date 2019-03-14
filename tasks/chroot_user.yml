@@ -18,21 +18,21 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
         src: "/home/{{ item.key }}"
         state: absent
-        backup: yes
+        backup: true
 
     - name: "Unmount /run/mysqld from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
         src: /run/mysqld
         state: absent
-        backup: yes
+        backup: true
 
     - name: "Unmount {{ chroot_dir | default('/chroot') }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
         src: "{{ chroot_dir | default('/chroot') }}"
         state: absent
-        backup: yes
+        backup: true
 
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
 
@@ -67,7 +67,7 @@
         fstype: ext4
         opts: ro,bind,nosuid
         state: mounted
-        backup: yes
+        backup: true
 
     - name: "Mount /home/{{ item.key }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       mount:
@@ -76,7 +76,7 @@
         fstype: ext4
         opts: rw,bind,nodev,nosuid
         state: mounted
-        backup: yes
+        backup: true
 
     - name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
@@ -85,6 +85,6 @@
         fstype: ext4
         opts: ro,bind,nodev,nosuid,noexec
         state: mounted
-        backup: yes
+        backup: true
 
   when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
