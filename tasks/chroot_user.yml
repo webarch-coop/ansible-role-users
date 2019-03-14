@@ -27,9 +27,9 @@
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint_umount
-      retries: 2
-      delay: 2
-      until: '"not mounted" in users_chroot_home_mountpoint_umount.stderr'
+      # retries: 2
+      # delay: 2
+      # until: '"not mounted" in users_chroot_home_mountpoint_umount.stderr'
       when: users_chroot_home_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_home_mountpoint.stdout
 
     - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
