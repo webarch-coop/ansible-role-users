@@ -19,6 +19,10 @@
         src: "/home/{{ item.key }}"
         state: absent
         backup: true
+        retries: 3
+        delay: 3
+        register: result
+        until: result.rc == 0
 
     - name: "Unmount /run/mysqld from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
@@ -26,6 +30,10 @@
         src: /run/mysqld
         state: absent
         backup: true
+        retries: 3
+        delay: 3
+        register: result
+        until: result.rc == 0
 
     - name: "Unmount {{ chroot_dir | default('/chroot') }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       mount:
@@ -33,6 +41,10 @@
         src: "{{ chroot_dir | default('/chroot') }}"
         state: absent
         backup: true
+        retries: 3
+        delay: 3
+        register: result
+        until: result.rc == 0
 
     - name: "Mount point {{ chroot_dir | default('/chroot') }}/home/{{ item.key }} absent"
       file:
