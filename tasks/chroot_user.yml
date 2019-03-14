@@ -13,31 +13,73 @@
         regexp: "^{{ item.key }}:"
         state: absent
 
+    - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} exists"
+      stat:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      register: users_chroot_home_mountpoint_stat
+
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} is mounted"
       command: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
-      register: users_chroot_mountpoint
+      register: users_chroot_home_mountpoint
+      when: users_chroot_home_mountpoint_stat.exists
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
-      register: users_chroot_mountpoint_umount
+      register: users_chroot_home_mountpoint_umount
       retries: 2
       delay: 2
-      when: '"is a mountpoint" in users_chroot_mountpoint.stdout'
-      until: '"not mounted" in users_chroot_mountpoint_umount'
+      when: '"is a mountpoint" in users_chroot_home_mountpoint.stdout'
+      until: '"not mounted" in users_chroot_home_mountpoint_umount.stdout'
 
-    - name: "Unmount /home/{{ item.key }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+    - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
         state: absent
         backup: true
 
-    - name: "Unmount /run/mysqld from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+    - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld exists"
+      stat:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      register: users_chroot_mysqld_mountpoint_stat
+
+    - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
+      command: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      register: users_chroot_mysqld_mountpoint
+      when: users_chroot_mysqld_mountpoint_stat.exists
+
+    - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      register: users_chroot_mysqld_mountpoint_umount
+      retries: 2
+      delay: 2
+      when: '"is a mountpoint" in users_chroot_mysqld_mountpoint.stdout'
+      until: '"not mounted" in users_chroot_mysqld_mountpoint_umount.stdout'
+
+    - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
         state: absent
         backup: true
 
-    - name: "Unmount {{ chroot_dir | default('/chroot') }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+    - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} exists"
+      stat:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      register: users_chroot_mountpoint_stat
+
+    - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
+      command: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      register: users_chroot_mountpoint
+      when: users_chroot_mountpoint_stat.exists
+
+    - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      register: users_chroot_mountpoint_umount
+      retries: 2
+      delay: 2
+      when: '"is a mountpoint" in users_chroot_mountpoint.stdout'
+      until: '"not mounted" in users_chroot_mountpoint_umount.stdout'
+
+    - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
         state: absent
