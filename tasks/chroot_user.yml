@@ -18,8 +18,9 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint_stat
 
+    # Command ends in `; true` because we always want mountpoint to exit with a 0 not fail with a 1
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
-      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld ; true"
       args:
         executable: /bin/bash
       register: users_chroot_mysqld_mountpoint
@@ -29,9 +30,9 @@
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint_umount
-      retries: 2
-      delay: 2
-      until: '"not mounted" in users_chroot_mysqld_mountpoint_umount.stderr'
+      # retries: 2
+      # delay: 2
+      # until: '"not mounted" in users_chroot_mysqld_mountpoint_umount.stderr'
       when: users_chroot_mysqld_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mysqld_mountpoint.stdout
 
 #    - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
