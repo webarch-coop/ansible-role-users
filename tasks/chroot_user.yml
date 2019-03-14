@@ -20,6 +20,8 @@
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} is mounted"
       shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} ; test ${PIPESTATUS[0]} -eq 1"
+      args:
+        executable: /bin/bash
       register: users_chroot_home_mountpoint
       when: users_chroot_home_mountpoint_stat.stat.exists
       changed_when: '"is a mountpoint" in users_chroot_home_mountpoint.stdout'
