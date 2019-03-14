@@ -19,9 +19,10 @@
       register: users_chroot_home_mountpoint_stat
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} is mounted"
-      shell: "! mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint
       when: users_chroot_home_mountpoint_stat.stat.exists
+      changed_when: '"is a mountpoint" in users_chroot_home_mountpoint.stdout'
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
@@ -43,9 +44,10 @@
       register: users_chroot_mysqld_mountpoint_stat
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
-      shell: "! mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint
       when: users_chroot_mysqld_mountpoint_stat.stat.exists
+      changed_when: '"is a mountpoint" in users_chroot_mysqld_mountpoint.stdout'
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
@@ -67,9 +69,10 @@
       register: users_chroot_mountpoint_stat
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
-      shell: "! mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       register: users_chroot_mountpoint
       when: users_chroot_mountpoint_stat.stat.exists
+      changed_when: '"is a mountpoint" in users_chroot_mountpoint.stdout'
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
