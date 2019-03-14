@@ -13,9 +13,26 @@
         regexp: "^{{ item.key }}:"
         state: absent
 
-    # - name: "Remove {{ item.key }} mount points"
+    - name: "Unmount /home/{{ item.key }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      mount:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+        src: "/home/{{ item.key }}"
+        state: absent
+        backup: yes
 
-    # - name: "Remove {{ item.key }} mount points from /etc/fstab"
+    - name: "Unmount /run/mysqld from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      mount:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+        src: /run/mysqld
+        state: absent
+        backup: yes
+
+    - name: "Unmount {{ chroot_dir | default('/chroot') }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      mount:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+        src: "{{ chroot_dir | default('/chroot') }}"
+        state: absent
+        backup: yes
 
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
 
@@ -43,8 +60,31 @@
         line: users_etc_group.stdout
         state: present
 
-    # - name: Mount them in a chroot
+    - name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      mount:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+        src: "{{ chroot_dir | default('/chroot') }}"
+        fstype: ext4
+        opts: ro,bind,nosuid
+        state: mounted
+        backup: yes
 
-    # - name: Add their mount points to /etc/fstab
+    - name: "Mount /home/{{ item.key }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      mount:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+        src: "/home/{{ item.key }}"
+        fstype: ext4
+        opts: rw,bind,nodev,nosuid
+        state: mounted
+        backup: yes
+
+    - name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      mount:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+        src: /run/mysqld
+        fstype: ext4
+        opts: ro,bind,nodev,nosuid,noexec
+        state: mounted
+        backup: yes
 
   when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
