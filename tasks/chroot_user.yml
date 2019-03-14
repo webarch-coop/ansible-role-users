@@ -29,7 +29,7 @@
       register: users_chroot_home_mountpoint_umount
       retries: 2
       delay: 2
-      until: '"not mounted" in users_chroot_home_mountpoint_umount.stdout'
+      until: '"not mounted" in users_chroot_home_mountpoint_umount.stderr'
       when: users_chroot_home_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_home_mountpoint.stdout
 
     - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
@@ -60,7 +60,7 @@
 #      register: users_chroot_mysqld_mountpoint_umount
 #      retries: 2
 #      delay: 2
-#      until: '"not mounted" in users_chroot_mysqld_mountpoint_umount.stdout'
+#      until: '"not mounted" in users_chroot_mysqld_mountpoint_umount.stderr'
 #      when: users_chroot_mysqld_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mysqld_mountpoint.stdout
 
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
@@ -85,7 +85,7 @@
 #      register: users_chroot_mountpoint_umount
 #      retries: 2
 #      delay: 2
-#      until: '"not mounted" in users_chroot_mountpoint_umount.stdout'
+#      until: '"not mounted" in users_chroot_mountpoint_umount.stderr'
 #      when: users_chroot_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mountpoint.stdout
 
     - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
