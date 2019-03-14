@@ -19,7 +19,7 @@
       register: users_chroot_mysqld_mountpoint_stat
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
-      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld ; test ${PIPESTATUS[0]} -eq 1"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       args:
         executable: /bin/bash
       register: users_chroot_mysqld_mountpoint
