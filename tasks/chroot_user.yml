@@ -13,38 +13,35 @@
         regexp: "^{{ item.key }}:"
         state: absent
 
+    - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} is mounted"
+      command: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      register: users_chroot_mountpoint
+
+    - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      register: users_chroot_mountpoint_umount
+      retries: 2
+      delay: 2
+      when: '"is a mountpoint" in users_chroot_mountpoint.stdout'
+      until: '"not mounted" in users_chroot_mountpoint_umount'
+
     - name: "Unmount /home/{{ item.key }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
-        src: "/home/{{ item.key }}"
         state: absent
         backup: true
-        retries: 3
-        delay: 3
-        register: result
-        until: result.rc == 0
 
     - name: "Unmount /run/mysqld from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-        src: /run/mysqld
         state: absent
         backup: true
-        retries: 3
-        delay: 3
-        register: result
-        until: result.rc == 0
 
     - name: "Unmount {{ chroot_dir | default('/chroot') }} from {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-        src: "{{ chroot_dir | default('/chroot') }}"
         state: absent
         backup: true
-        retries: 3
-        delay: 3
-        register: result
-        until: result.rc == 0
 
     - name: "Mount point {{ chroot_dir | default('/chroot') }}/home/{{ item.key }} absent"
       file:
