@@ -18,9 +18,6 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint_stat
 
-    - debug:
-        var: users_chroot_mysqld_mountpoint_stat
-
     # Command ends in `; true` because we always want mountpoint to exit with a 0 not fail with a 1
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
       shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld ; true"
@@ -60,11 +57,11 @@
       # until: '"not mounted" in users_chroot_home_mountpoint_umount.stderr'
       when: users_chroot_home_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_home_mountpoint.stdout
 
-#    - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
-#      file:
-#        path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
-#        state: absent
-#      when: users_chroot_home_mountpoint_stat.stat.exists
+    - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
+      file:
+        path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
+        state: absent
+      when: users_chroot_home_mountpoint_stat.stat.exists
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} exists"
       stat:
@@ -85,12 +82,12 @@
       # until: '"not mounted" in users_chroot_mountpoint_umount.stderr'
       when: users_chroot_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mountpoint.stdout
 
-#    - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
-#      file:
-#        path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
-#        state: absent
-#      when: users_chroot_home_mountpoint_stat.stat.exists
-#
+    - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
+      file:
+        path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
+        state: absent
+      when: users_chroot_home_mountpoint_stat.stat.exists
+
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
