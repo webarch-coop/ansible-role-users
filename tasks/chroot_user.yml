@@ -31,7 +31,7 @@
       changed_when: '"is a mountpoint" in users_chroot_mysqld_mountpoint.stdout'
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-      command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+      command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint_umount
       # retries: 2
       # delay: 2
@@ -53,7 +53,7 @@
       changed_when: '"is a mountpoint" in users_chroot_home_mountpoint.stdout'
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
-      command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
+      command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint_umount
       # retries: 2
       # delay: 2
@@ -78,11 +78,11 @@
       changed_when: '"is a mountpoint" in users_chroot_mountpoint.stdout'
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-      command: "umount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+      command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       register: users_chroot_mountpoint_umount
-      retries: 2
-      delay: 2
-      until: '"not mounted" in users_chroot_mountpoint_umount.stderr'
+      # retries: 2
+      # delay: 2
+      # until: '"not mounted" in users_chroot_mountpoint_umount.stderr'
       when: users_chroot_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mountpoint.stdout
 
 #    - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
