@@ -56,17 +56,8 @@
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint_umount
-      # retries: 2
-      # delay: 2
-      # until: '"not mounted" in users_chroot_home_mountpoint_umount.stderr'
       when: users_chroot_home_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_home_mountpoint.stdout
       failed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
-
-    # - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
-    #   file:
-    #     path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
-    #     state: absent
-    #   when: ( users_chroot_home_mountpoint_stat.stat.exists ) and ( "not mounted" in users_chroot_home_mountpoint_umount.stderr )
 
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       mount:
@@ -79,6 +70,7 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       register: users_chroot_mountpoint_stat
 
+    # Command ends in `; true` because we always want mountpoint to exit with a 0 not fail with a 1
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
       shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} ; true"
       args:
@@ -90,10 +82,12 @@
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       register: users_chroot_mountpoint_umount
-      # retries: 2
-      # delay: 2
-      # until: '"not mounted" in users_chroot_mountpoint_umount.stderr'
       when: users_chroot_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mountpoint.stdout
+
+    - name: "Directory {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} absent"
+      file:
+        path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+        state: absent
 
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       mount:
@@ -101,7 +95,7 @@
         state: absent
         backup: true
 
-    - name: "Mount point {{ chroot_dir | default('/chroot') }}/home/{{ item.key }} absent"
+    - name: "Directory {{ chroot_dir | default('/chroot') }}/home/{{ item.key }} absent"
       file:
         path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
         state: absent
@@ -118,7 +112,7 @@
     - name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/passwd"
       lineinfile:
         path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
-        line: users_etc_passwd.stdout
+        line: "{{ users_etc_passwd.stdout }}"
         state: present
 
     - name: "Read {{ item.key }} entry from /etc/group"
@@ -129,7 +123,7 @@
     - name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/group"
       lineinfile:
         path: "{{ chroot_dir | default('/chroot') }}/etc/group"
-        line: users_etc_group.stdout
+        line: "{{ users_etc_group.stdout }}"
         state: present
 
     - name: "Mount point {{ chroot_dir | default('/chroot') }}/home/{{ item.key }} present"
