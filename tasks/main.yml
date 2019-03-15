@@ -1,6 +1,6 @@
 ---
 - name: Check /etc/debian_version
-  shell: "cat /etc/debian_version | awk -F/ '{ print $1 }'"
+  shell: "lsb_release -c | awk '{ print $2 }'"
   register: users_debian_version_check
   changed_when: false
 
