@@ -49,7 +49,7 @@
       - "block-hardlimit: {{ users_quota_block_hardlimit }}"
       - "inode-softlimit: {{ users_quota_inode_softlimit }}"
       - "inode-hardlimit: {{ users_quota_inode_hardlimit }}"
-    verbosity: 1
+    verbosity: 2
 
 - name: Set facts for the existing limits 
   set_fact:
@@ -62,7 +62,7 @@
   debug:
     msg:
       - "setquota {{ item.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"
-    verbosity: 1
+    verbosity: 2
 
 - name: "Setquota for {{ item.key }}"
   command: "setquota {{ item.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"
