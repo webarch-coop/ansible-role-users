@@ -35,3 +35,8 @@
       when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
+
+- name: Restart php-fpm
+  service:
+    name: "php{{ users_phpfpm_version }}-fpm"
+    state: restarted
