@@ -88,6 +88,18 @@
 
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
+- name: "Updated users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+  shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+  register: users_repquota_md5sum_after
+  when: quota_dir is defined
+  changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+
+- name: Updated users quotas fetched
+  fetch:
+    src: "{{ quota_dir }}/quota_user.csv"
+    dest: /tmp/
+  when: quota_dir is defined
+
 - name: Email address in .forward
   template:
     src: templates/forward.j2
