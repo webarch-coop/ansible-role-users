@@ -12,7 +12,7 @@ To use this role you need to use Ansible Galaxy to install it into another repos
   scm: git
 ```
 
-If you want to use any of the `quota_` variables then you also need to include the [quota role](https://git.coop/webarch/quota) and makse sure that `quota_dir` is set to a mount point for a partition, for example have a seperate `/home` partition.
+If you want to use any of the `quota_` variables then you also need to include the [quota role](https://git.coop/webarch/quota) and make sure that `quota_dir` is set to a mount point for a partition, for example have a seperate `/home` partition.
 
 ```yml
 ---
