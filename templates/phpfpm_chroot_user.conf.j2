@@ -11,7 +11,7 @@ listen.mode = 0660
 ;listen.acl_groups =
 listen.allowed_clients = 127.0.0.1
 
-chdir = {{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}
+chdir = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}
 
 pm = ondemand
 pm.max_children = 5
