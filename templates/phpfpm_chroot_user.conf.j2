@@ -1,8 +1,8 @@
 [{{ item.key }}]
-prefix = {{ item.value.users_home | default('/home/' + item.key) }}
+prefix = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key) }}
 user = {{ item.key }} 
 group = {{ item.key }}
-
+chroot = $prefix
 listen = $prefix/php7.3-fpm.sock
 listen.owner = {{ item.key }} 
 listen.group = {{ item.key }}
@@ -23,8 +23,6 @@ access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
 slowlog = $prefix/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
-
-chroot = $prefix
 
 ; Chdir to this directory at the start.
 ; Note: relative path can be used.
