@@ -22,6 +22,10 @@
   loop_control:
     loop_var: users_skeleton
 
+- name: Users quotas written to CSV file
+  shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv"
+  when: quota_dir is defined
+
 - block:
 
     - name: Absent users home directories removed

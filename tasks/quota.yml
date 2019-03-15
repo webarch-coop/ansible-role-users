@@ -2,60 +2,68 @@
 # https://superuser.com/a/1156454
 # https://stackoverflow.com/a/35158145
 
-- name: "Set quota_block_softlimit from users_quota_block_softlimit for {{ item.key }}"
+- name: "Set users_quota_block_softlimit from users_quota_block_softlimit for {{ item.key }}"
   set_fact:
-    quota_block_softlimit: "{{ item.value.users_quota_block_softlimit }}"
+    users_quota_block_softlimit: "{{ item.value.users_quota_block_softlimit }}"
   when: item.value.users_quota_block_softlimit is defined
 
-- name: "Set quota_block_softlimit from users_quota for {{ item.key }}"
+- name: "Set users_quota_block_softlimit from users_quota for {{ item.key }}"
   set_fact:
-    quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
+    users_quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
   when: item.value.users_quota_block_softlimit is not defined
 
-- name: "Set quota_block_hardlimit from users_quota_block_hardlimit for {{ item.key }}"
+- name: "Set users_quota_block_hardlimit from users_quota_block_hardlimit for {{ item.key }}"
   set_fact:
-    quota_block_hardlimit: "{{ item.value.users_quota_block_hardlimit }}"
+    users_quota_block_hardlimit: "{{ item.value.users_quota_block_hardlimit }}"
   when: item.value.users_quota_block_hardlimit is defined
 
-- name: "Set quota_block_hardlimit from users_quota for {{ item.key }}"
+- name: "Set users_quota_block_hardlimit from users_quota for {{ item.key }}"
   set_fact:
-    quota_block_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1024 }}"
+    users_quota_block_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1024 }}"
   when: item.value.users_quota_block_hardlimit is not defined
 
-- name: "Set quota_inode_softlimit from users_quota_inode_softlimit for {{ item.key }}"
+- name: "Set users_quota_inode_softlimit from users_quota_inode_softlimit for {{ item.key }}"
   set_fact:
-    quota_inode_softlimit: "{{ item.value.users_quota_inode_softlimit }}"
+    users_quota_inode_softlimit: "{{ item.value.users_quota_inode_softlimit }}"
   when: item.value.users_quota_inode_softlimit is defined
 
-- name: "Set quota_inode_softlimit from users_quota for {{ item.key }}"
+- name: "Set users_quota_inode_softlimit from users_quota for {{ item.key }}"
   set_fact:
-    quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 225280 }}"
+    users_quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 225280 }}"
   when: item.value.users_quota_inode_softlimit is not defined
 
-- name: "Set quota_inode_hardlimit from users_quota_inode_hardlimit for {{ item.key }}"
+- name: "Set users_quota_inode_hardlimit from users_quota_inode_hardlimit for {{ item.key }}"
   set_fact:
-    quota_inode_hardlimit: "{{ item.value.users_quota_inode_hardlimit }}"
+    users_quota_inode_hardlimit: "{{ item.value.users_quota_inode_hardlimit }}"
   when: item.value.users_quota_inode_hardlimit is defined
 
-- name: "Set quota_inode_hardlimit from users_quota for {{ item.key }}"
+- name: "Set users_quota_inode_hardlimit from users_quota for {{ item.key }}"
   set_fact:
-    quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 204800 }}"
+    users_quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 204800 }}"
   when: item.value.users_quota_inode_hardlimit is not defined
 
 - debug:
     msg:
       - "quota: {{ item.value.users_quota }}"
-      - "block-softlimit: {{ quota_block_softlimit }}"
-      - "block-hardlimit: {{ quota_block_hardlimit }}"
-      - "inode-softlimit: {{ quota_inode_softlimit }}"
-      - "inode-hardlimit: {{ quota_inode_hardlimit }}"
+      - "block-softlimit: {{ users_quota_block_softlimit }}"
+      - "block-hardlimit: {{ users_quota_block_hardlimit }}"
+      - "inode-softlimit: {{ users_quota_inode_softlimit }}"
+      - "inode-hardlimit: {{ users_quota_inode_hardlimit }}"
     verbosity: 1
+
+- name: Set facts for the existing limits 
+  set_fact:
+    users_quota_existing_block_softlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=5') }}"
+    users_quota_existing_block_hardlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=6') }}"
+    users_quota_existing_inode_softlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=9') }}"
+    users_quota_existing_inode_hardlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=10') }}"
 
 - name: "The set quota command which is about to be run for {{ item.key }}"
   debug:
     msg:
-      - "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}"
+      - "setquota {{ item.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"
     verbosity: 1
 
 - name: "Setquota for {{ item.key }}"
-  command: "setquota {{ item.key }} {{ quota_block_softlimit }} {{ quota_block_hardlimit }} {{ quota_inode_softlimit }} {{ quota_inode_hardlimit }} {{ quota_dir }}"
+  command: "setquota {{ item.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"
+  changed_when: ( users_quota_existing_block_softlimit != users_quota_block_softlimit ) or ( users_quota_existing_block_hardlimit != users_quota_block_hardlimit ) or ( users_quota_existing_inode_softlimit != users_quota_inode_softlimit ) or ( users_quota_existing_inode_hardlimit != users_quota_inode_hardlimit )
