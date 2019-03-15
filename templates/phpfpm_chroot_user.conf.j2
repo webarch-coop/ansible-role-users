@@ -2,8 +2,8 @@
 prefix = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key) }}
 user = {{ item.key }} 
 group = {{ item.key }}
-chroot = $prefix
-listen = $prefix/php7.3-fpm.sock
+chroot = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key) }}
+listen = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key) }}/php7.3-fpm.sock
 listen.owner = {{ item.key }} 
 listen.group = {{ item.key }}
 listen.mode = 0660
@@ -18,9 +18,9 @@ pm.max_requests = 1000
 ;pm.status_path = /status
 ;ping.path = /ping
 
-access.log = $prefix/logs/php-fpm.access.log
+access.log = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key) }}/logs/php-fpm.access.log
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-slowlog = $prefix/logs/php-fpm.slow.log
+slowlog = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key) }}/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
 
