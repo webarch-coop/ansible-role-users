@@ -30,10 +30,8 @@
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint_umount
-      # retries: 2
-      # delay: 2
-      # until: '"not mounted" in users_chroot_mysqld_mountpoint_umount.stderr'
       when: users_chroot_mysqld_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mysqld_mountpoint.stdout
+      failed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
 
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
@@ -62,12 +60,13 @@
       # delay: 2
       # until: '"not mounted" in users_chroot_home_mountpoint_umount.stderr'
       when: users_chroot_home_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_home_mountpoint.stdout
+      failed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
 
     # - name: "Delete {{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
     #   file:
     #     path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
     #     state: absent
-    #   when: users_chroot_home_mountpoint_stat.stat.exists
+    #   when: ( users_chroot_home_mountpoint_stat.stat.exists ) and ( "not mounted" in users_chroot_home_mountpoint_umount.stderr )
 
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       mount:
@@ -102,9 +101,9 @@
         state: absent
         backup: true
 
-    - name: "Mount point {{ chroot_dir | default('/chroot') }}/{{ item.key }} absent"
+    - name: "Mount point {{ chroot_dir | default('/chroot') }}/home/{{ item.key }} absent"
       file:
-        path: "{{ chroot_dir | default('/chroot') }}/{{ item.key }}"
+        path: "{{ chroot_dir | default('/chroot') }}/home/{{ item.key }}"
         state: absent
 
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
