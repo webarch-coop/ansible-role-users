@@ -53,10 +53,10 @@
 
 - name: Set facts for the existing limits 
   set_fact:
-    users_quota_existing_block_softlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=5') }}"
-    users_quota_existing_block_hardlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=6') }}"
-    users_quota_existing_inode_softlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=9') }}"
-    users_quota_existing_inode_hardlimit: "{{ lookup('csvfile', '{{ item.key }} file={{ quota_dir }}/quota_user.csv delimiter=, col=10') }}"
+    users_quota_existing_block_softlimit: "{{ lookup('csvfile', '{{ item.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=5') }}"
+    users_quota_existing_block_hardlimit: "{{ lookup('csvfile', '{{ item.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=6') }}"
+    users_quota_existing_inode_softlimit: "{{ lookup('csvfile', '{{ item.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=9') }}"
+    users_quota_existing_inode_hardlimit: "{{ lookup('csvfile', '{{ item.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=10') }}"
 
 - name: "The set quota command which is about to be run for {{ item.key }}"
   debug:

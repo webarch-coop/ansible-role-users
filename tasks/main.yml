@@ -23,7 +23,13 @@
     loop_var: users_skeleton
 
 - name: Users quotas written to CSV file
-  shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv"
+  shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv"
+  when: quota_dir is defined
+
+- name: Users quotas fetched
+  fetch:
+    src: "{{ quota_dir }}/quota_user.csv"
+    dest: /tmp/
   when: quota_dir is defined
 
 - block:
