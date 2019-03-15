@@ -98,7 +98,7 @@
   fetch:
     src: "{{ quota_dir }}/quota_user.csv"
     dest: /tmp/
-  when: quota_dir is defined
+  when: quota_dir is defined and users_repquota_md5sum_after.changed
 
 - name: Email address in .forward
   template:
