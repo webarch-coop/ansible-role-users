@@ -1,9 +1,9 @@
 # {{ item.key }} {{ virtual_host }}
 <VirtualHost *:80>
-  ServerName {{ users_apache_server_name }}
-  ServerAlias {% for server_alias in users_apache_server_aliases %}{{ server_alias }}{% endfor %}
-  DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/{{ users_apache_virtual_host }}
-  <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_apache_virtual_host }}">
+  ServerName {{ item.value.users_apache_server_name }}
+  ServerAlias {% for server_alias in item.value.users_apache_server_aliases %}{{ server_alias }}{% endfor %}
+  DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ virtual_host }}
+  <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ virtual_host }}">
     Options +Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     DirectoryIndex index.html index.shtml index.htm index.xhtml wsh.shtml
     AllowOverride AuthConfig FileInfo Indexes Limit Options=IncludesNOEXEC,Indexes,MultiViews,SymLinksIfOwnerMatch Nonfatal=Override

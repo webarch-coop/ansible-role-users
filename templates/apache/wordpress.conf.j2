@@ -1,6 +1,6 @@
 # {{ item.key }} {{ virtual_host }}
 <VirtualHost *:80>
-  ServerName {{ users_apache_server_name }}
+  ServerName {{ item.value.users_apache_server_name }}
   ServerAlias {% for server_alias in users_apache_server_aliases %}{{ server_alias }}{% endfor %}
   DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/{{ users_apache_virtual_host }}
   <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_apache_virtual_host }}">
