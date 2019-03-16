@@ -18,8 +18,8 @@
   template:
     src: templates/apache_user.conf.j2
     dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
-  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and users_apache_virtual_hosts is defined
+  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and users_apache_virtual_hosts is defined
 
 - name: Apache sites-enabled symlink present
   command: "a2ensite {{ item.key }}"
-  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and users_apache_virtual_hosts is defined
+  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and users_apache_virtual_hosts is defined
