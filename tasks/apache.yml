@@ -6,7 +6,7 @@
 
 - name: Apache sites-enabled symlink removed
   command: "a2dissite {{ item.key }}"
-  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) and users_apache_site_enabled.stat.islnk
+  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) and ( users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk )
 
 - name: Apache sites-available file removed
   file:
