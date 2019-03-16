@@ -8,6 +8,10 @@
   set_fact:
     users_debian_version: "{{ users_debian_version_check.stdout }}"
 
+- name: Load package information as facts
+  package_facts:
+    manager: apt
+
 - name: Packages present
   apt:
     pkg:
@@ -142,3 +146,8 @@
 - name: Include the PHP FPM chroot tasks
   include_tasks: phpfpm_chroot.yml
   when: users_phpfpm_status.stdout == "installed" and users_chroot_dir.stat.exists
+
+- name: Include Apache config
+  include_tasks: apache.yml
+  loop: "{{ users | dict2items }}"
+  when: '"apache2" in ansible_facts.packages'

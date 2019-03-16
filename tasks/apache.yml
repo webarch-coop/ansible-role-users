@@ -1,0 +1,20 @@
+---
+- name: Apache sites-enabled symlink removed
+  command: "a2dissite {{ item.key }}"
+  when: item.value.users_state is defined and item.value.users_state == "absent"
+
+- name: Apache sites-available file removed
+  file:
+    path: "/etc/apache2/sites-available/{{ item.key }}.conf"
+    state: absent
+  when: item.value.users_state is defined and item.value.users_state == "absent"
+
+- name: Apache sites-available file generated
+  template:
+    src: templates/apache_user.conf.j2
+    dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and users_apache_virtual_hosts is defined
+
+- name: Apache sites-enabled symlink present
+  command: "a2ensite {{ item.key }}"
+  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and users_apache_virtual_hosts is defined

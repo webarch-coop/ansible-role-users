@@ -1,0 +1,27 @@
+# {{ item.key }} {{ virtual_host }}
+<VirtualHost *:80>
+  ServerName {{ users_apache_server_name }}
+  ServerAlias {% for server_alias in users_apache_server_aliases %}{{ server_alias }}{% endfor %}
+  DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/{{ users_apache_virtual_host }}
+  <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_apache_virtual_host }}">
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews -IncludesNOEXEC -ExecCGI
+    DirectoryIndex index.php wsh.shtml
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,IncludesNOEXEC,Indexes,MultiViews,SymLinksIfOwnerMatch Nonfatal=Override
+    <IfModule mod_version.c>
+      Require all granted
+    </IfModule>
+    <FilesMatch "\.php$">
+      <If "-f %{REQUEST_FILENAME}">
+        SetHandler "proxy:unix:{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/php7.3-fpm.sock|fcgi://localhost{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_apache_virtual_host }}"
+      </If>
+    </FilesMatch>
+  </Directory>
+  <Directory "/home/{{ item.key }}/sites/{{ virtual_host }}/wp-content/uploads/">
+    Options None +SymLinksifOwnerMatch
+    SetHandler None
+    AddType text/plain .php
+  </Directory>
+  ErrorLog  /home/{{ item.key }}/logs/error.log
+  CustomLog /home/{{ item.key }}/logs/access.log combinedio
+</VirtualHost>
+
