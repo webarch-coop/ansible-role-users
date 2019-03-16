@@ -1,5 +1,5 @@
 # Ansible provisioned
 
 {% for virtual_host in item.value.users_apache_virtual_hosts %}
-{% include 'templates/apache/' + item.value.users_apache_template %}
+{% include 'templates/apache/' + virtual_host.users_apache_template %}
 {% endfor %}
