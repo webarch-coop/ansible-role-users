@@ -14,7 +14,7 @@ listen.allowed_clients = 127.0.0.1
 chdir = {{ item.value.users_home | default('/home/' + item.key) }}
 
 pm = ondemand
-pm.max_children = 5
+pm.max_children = {{ users_phpfpm_max_children }} | default('2') }}
 pm.process_idle_timeout = 10s;
 pm.max_requests = 1000
 ;pm.status_path = /status
@@ -26,6 +26,9 @@ slowlog = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/{{ it
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
 
+env[TMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+env[TMPDIR] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+env[TEMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and
 ; stderr will be redirected to /dev/null according to FastCGI specs.
@@ -63,9 +66,6 @@ request_terminate_timeout = 60
 ; Default Value: clean env
 ;env[HOSTNAME] = $HOSTNAME
 ;env[PATH] = /usr/local/bin:/usr/bin:/bin
-;env[TMP] = /tmp
-;env[TMPDIR] = /tmp
-;env[TEMP] = /tmp
 
 ; Additional php.ini defines, specific to this pool of workers. These settings
 ; overwrite the values previously defined in the php.ini. The directives are the
