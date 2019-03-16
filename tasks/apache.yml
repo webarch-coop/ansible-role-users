@@ -1,7 +1,12 @@
 ---
+- name: "Check if the {{ item.key }} site is enabled"
+  stat:
+    path: "/etc/apache2/sites-enabled/{{ item.key }}.conf"
+  register: users_apache_site_enabled
+
 - name: Apache sites-enabled symlink removed
   command: "a2dissite {{ item.key }}"
-  when: item.value.users_state is defined and item.value.users_state == "absent"
+  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) and users_apache_site_enabled.stat.islnk
 
 - name: Apache sites-available file removed
   file:
