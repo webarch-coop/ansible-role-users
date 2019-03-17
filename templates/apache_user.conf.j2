@@ -2,7 +2,7 @@
 #
 # item.value.users_apache_virtual_hosts: {{ item.value.users_apache_virtual_hosts }}
 # {% for virtual_host in item.value.users_apache_virtual_hosts %}
-#   {{ hostvars[virtual_host].users_apache_template }}
+#   {{ hostvars[virtual_host] }}
 # {% endfor %}
 # 
 # ## for virtual_host in item.value.users_apache_virtual_hosts ##
