@@ -4,4 +4,5 @@
 
 {% for virtual_host in item.value.users_apache_virtual_hosts %}
 #   {{ virtual_host }}
+#   {{ virtual_host[item].users_apache_template }}
 {% endfor %}
