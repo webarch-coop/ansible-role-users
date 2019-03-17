@@ -4,4 +4,6 @@
 #
 # {% for vhost in item.value.users_apache_virtual_hosts %}
 #   {{ vhost }}
+#   {% include 'templates/apache' + vhost + '.j2' %}
+#
 # {% endfor %}
