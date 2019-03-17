@@ -8,7 +8,8 @@
 {% endfor %}
 
 {% for virtual_host in item.value.users_apache_virtual_hosts.values() %}
-#   {{ key }}
+#   {{ virtual_host.index }}
 #   {{ virtual_host.users_apache_server_name }}
 #   {{ virtual_host.users_apache_template }}
 {% endfor %}
+
