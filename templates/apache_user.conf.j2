@@ -1,10 +1,7 @@
 # Ansible provisioned
 #
 # item.value.users_apache_virtual_hosts: {{ item.value.users_apache_virtual_hosts }}
-#
-# {% for vhost in item.value.users_apache_virtual_hosts %}
-#   {{ vhost }}
-#   {% for template in vhost.users_apache_template %}
-#     {{ template }}
-#   {% endfor %} 
-# {% endfor %}
+
+{% for virtual_host in item.value.users_apache_virtual_hosts %}
+#   {{ virtual_host }}
+{% endfor %}
