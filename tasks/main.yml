@@ -11,6 +11,8 @@
 - name: Load package information as facts
   package_facts:
     manager: apt
+  tags:
+    - apache
 
 - name: Packages present
   apt:
