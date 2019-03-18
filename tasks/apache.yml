@@ -37,6 +37,8 @@
   loop: item.value.users_apache_virtual_hosts
   loop_control:
     loop_var: vhost
+  tags:
+    - apache
 
 - name: "Apache {{ item.key }} sites-enabled symlink present"
   command: "a2ensite {{ item.key }}"
