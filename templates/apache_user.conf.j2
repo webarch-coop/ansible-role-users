@@ -3,7 +3,10 @@
 
 # {{ vhost }}
 <VirtualHost *:80>
+{% if apache_suexec is defined and apache_suexec == "True" %}
   SuexecUserGroup {{ item.key }} {{ item.key }}
+{% endif %}
+
   ServerName {{ vhost_config.users_apache_server_name }}
 {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
