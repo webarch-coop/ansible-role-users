@@ -3,23 +3,33 @@
   stat:
     path: "/etc/apache2/sites-enabled/{{ item.key }}.conf"
   register: users_apache_site_enabled
+  tags:
+    - apache
 
 - name: "Apache {{ item.key }} sites-enabled symlink absent" 
   command: "a2dissite {{ item.key }}"
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) and ( users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk )
+  tags:
+    - apache
 
 - name: "Apache {{ item.key }} sites-available file absent" 
   file:
     path: "/etc/apache2/sites-available/{{ item.key }}.conf"
     state: absent
   when: item.value.users_state is defined and item.value.users_state == "absent"
+  tags:
+    - apache
 
 - name: "Apache {{ item.key }} sites-available file present" 
   template:
     src: templates/apache_user.conf.j2
     dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
   when: item.value.users_state is undefined or item.value.users_state == "present"
+  tags:
+    - apache
 
 - name: "Apache {{ item.key }} sites-enabled symlink present"
   command: "a2ensite {{ item.key }}"
   when: item.value.users_state is undefined or item.value.users_state == "present"
+  tags:
+    - apache
