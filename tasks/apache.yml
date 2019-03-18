@@ -34,7 +34,7 @@
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
-  loop: "{{ item.value.users_apache_virtual_hosts }}"
+  loop: "{{ item.value.users_apache_virtual_hosts.items() }}"
   loop_control:
     loop_var: vhost
   tags:
