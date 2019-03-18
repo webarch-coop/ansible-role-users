@@ -1,7 +1,4 @@
 # Ansible provisioned
-# user: {{ item.key }}
-
-# home: {{ item.value.users_home | default('/home/' + item.key) }}
 {% for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
 
 # {{ vhost }}

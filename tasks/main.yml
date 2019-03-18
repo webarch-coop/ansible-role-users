@@ -155,3 +155,9 @@
   when: ( "apache2" in ansible_facts.packages ) and item.value.users_apache_virtual_hosts is defined
   tags:
     - apache
+
+- name: Apache configtest
+  command: apachectl configtest
+  register: users_apachectl_configtest
+  tags:
+    - apache
