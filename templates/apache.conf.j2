@@ -26,7 +26,6 @@
     DirectoryIndex index.html index.php index.shtml index.xhtml index.cgi index.pl index.htm wsh.shtml
     AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
     <IfModule fcgid_module>
-      FcgidConnectTimeout 20
       <IfModule mime_module>
         <FilesMatch "[^.]+\.cgi$">
           SetHandler fcgid-script
