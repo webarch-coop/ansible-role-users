@@ -3,13 +3,13 @@
 # item.value.users_apache_virtual_hosts: {{ item.value.users_apache_virtual_hosts }}
 
 {% for vhost in item.value.users_apache_virtual_hosts.keys() %}
-  {{ vhost }}
+# {{ vhost }}
 {% endfor %}
 
-{% for vhost in item.value.users_apache_virtual_hosts %}
-# {{ item.value.users_apache_virtual_hosts[vhost].key }}
-# {{ item.value.users_apache_virtual_hosts[vhost].users_apache_template }}
-# {{ item.value.users_apache_virtual_hosts[vhost].users_apache_server_name }}
+{% for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
+# {{ vhost }}
+# {{ vhost_config.users_apache_template }}
+# {{ vhost_config.users_apache_server_name }}
 {% endfor %}
 
 
