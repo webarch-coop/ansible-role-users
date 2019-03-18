@@ -6,10 +6,11 @@
   ServerName {{ vhost_config.users_apache_server_name }}
   ServerAlias {{ vhost_config.users_apache_server_aliases }}
   ServerAlias {% for alias in vhost_config.users_apache_server_aliases.items() %}{{ alias }}{% endfor %}
-  # ServerAlias ## for alias in vhost_config.users_apache_server_aliases %}## alias }}## endfor %}
-  {% if item.value.users_email is defined and item.value.users_email != "" %}ServerAdmin {{ item.value.users_email }}{% endif %}
-  DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}
-
+  # ServerAlias ## for alias in vhost_config.users_apache_server_aliases #### alias #### endfor ##
+  ## if item.value.users_email is defined and item.value.users_email != "" ##ServerAdmin ## item.value.users_email #### endif ##
+  DocumentRoot ## item.value.users_home | default('/home/' + item.key) ##/sites/{{ vhost }}
+  <Directory ## item.value.users_home | default('/home/' + item.key) ##/sites/{{ vhost }}>
+  </Directory>
 # {{ vhost_config.users_apache_template }}
 </VirtualHost>
 {% endfor %}
