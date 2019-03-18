@@ -17,9 +17,25 @@
 
   DocumentRoot "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
   <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}">
-  
-  </Directory>
 
+{% if vhost_config.users_apache_type is "php" %}
+
+
+{% elif vhost_config.users_apache_type is "cgi" %}
+
+
+{% else %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+    DirectoryIndex index.html index.shtml index.htm index.xhtml wsh.shtml
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
+(% endif %}
+  
+    Require all granted
+  </Directory>
+  CustomLog /var/log/apache2/{{ item.key }}_access.log bandwidth
+  LogLevel error
+  ErrorLog  {{ item.value.users_home | default('/home/' + item.key) }}/logs/error.log
+  CustomLog {{ item.value.users_home | default('/home/' + item.key) }}/logs/access.log combinedio
 # {{ vhost_config.users_apache_template }}
 </VirtualHost>
 {% endfor %}
