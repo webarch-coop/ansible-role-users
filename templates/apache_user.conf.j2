@@ -4,8 +4,10 @@
 # {{ vhost }}
 <VirtualHost *:80>
   ServerName {{ vhost_config.users_apache_server_name }}
+  {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias {{ vhost_config.users_apache_server_aliases }}
-  # ServerAlias ## for alias in vhost_config.users_apache_server_aliases.items() #### alias #### endfor #
+  {% endif %}
+  ServerAlias {% for alias in vhost_config.users_apache_server_aliases.items() %}{{ alias }}{% endfor %}
   # ServerAlias ## for alias in vhost_config.users_apache_server_aliases #### alias #### endfor ##
 # {{ vhost_config.users_apache_template }}
 </VirtualHost>
