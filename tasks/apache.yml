@@ -42,6 +42,8 @@
 
 - name: "Apache {{ item.key }} sites-enabled symlink present"
   command: "a2ensite {{ item.key }}"
+  register: users_a2ensite
+  changed_when: '"already enabled" not in users_a2ensite.stdout'
   when: item.value.users_state is undefined or item.value.users_state == "present"
   tags:
     - apache

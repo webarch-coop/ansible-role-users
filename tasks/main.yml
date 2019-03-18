@@ -159,5 +159,6 @@
 - name: Apache configtest
   command: apachectl configtest
   register: users_apachectl_configtest
+  changed_when: '"Syntax OK" not in users_apachectl_configtest.stdout'
   tags:
     - apache
