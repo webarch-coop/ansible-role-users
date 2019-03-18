@@ -1,13 +1,13 @@
 # Ansible provisioned
-
 {% for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
+
 # {{ vhost }}
 <VirtualHost *:80>
   ServerName {{ vhost_config.users_apache_server_name }}
   {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias {{ vhost_config.users_apache_server_aliases }}
   {% endif %}
-  ServerAlias {% for alias in vhost_config.users_apache_server_aliases.items() %}{{ alias }}{% endfor %}
+  ServerAlias {% for alias in vhost_config.users_apache_server_aliases %}{{ alias }}{% endfor %}
   # ServerAlias ## for alias in vhost_config.users_apache_server_aliases #### alias #### endfor ##
 # {{ vhost_config.users_apache_template }}
 </VirtualHost>
