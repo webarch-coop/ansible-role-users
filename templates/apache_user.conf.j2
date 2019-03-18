@@ -3,7 +3,8 @@
 # item.value.users_apache_virtual_hosts: {{ item.value.users_apache_virtual_hosts }}
 
 {% for vhost_dict in item.value.users_apache_virtual_hosts %}
-  {% for vhost in vhost_dict.iteritems() -%}
+  {{ vhost_dict }}
+  {% for vhost in vhost_dict %}
 #   {{ vhost.users_apache_server_name }}
 #   {{ vhost.users_apache_template }}
   {% endfor %}
