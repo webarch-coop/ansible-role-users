@@ -4,6 +4,7 @@
 
 # {{ vhost }}
 <VirtualHost *:80>
+# apache_suexec: {{ apache_suexec }}
 {% if apache_suexec is defined and apache_suexec == "True" %}
   SuexecUserGroup {{ item.key }} {{ item.key }}
 {% endif %}
