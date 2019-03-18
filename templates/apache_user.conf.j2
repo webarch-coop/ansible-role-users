@@ -1,15 +1,14 @@
 # Ansible provisioned
-#
-# item.value.users_apache_virtual_hosts: {{ item.value.users_apache_virtual_hosts }}
-
-{% for vhost in item.value.users_apache_virtual_hosts.keys() %}
-# {{ vhost }}
-{% endfor %}
 
 {% for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
 # {{ vhost }}
+<VirtualHost *:80>
+  ServerName {{ vhost_config.users_apache_server_name }}
+  ServerAlias {% for alias in vhost_config.users_apache_server_aliases %}{{ alias }}{% endfor %}
+  DocumentRoot sites/{{ vhost }}
+
 # {{ vhost_config.users_apache_template }}
-# {{ vhost_config.users_apache_server_name }}
+</VirtualHost>
 {% endfor %}
 
 
