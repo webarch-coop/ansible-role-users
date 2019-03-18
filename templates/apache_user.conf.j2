@@ -6,6 +6,7 @@
 
 # {{ vhost }}
 <VirtualHost *:80>
+  SuexecUserGroup {{ item.key }} {{ item.key }}
   ServerName {{ vhost_config.users_apache_server_name }}
 {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
@@ -14,22 +15,18 @@
 {% if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"
 {% endif %}
-
   DocumentRoot "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
   <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}">
-
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
 
 
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-
 
 {% else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     DirectoryIndex index.html index.shtml index.htm index.xhtml wsh.shtml
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 {% endif %}
-  
     Require all granted
   </Directory>
   CustomLog /var/log/apache2/{{ item.key }}_access.log bandwidth
