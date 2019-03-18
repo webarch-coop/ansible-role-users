@@ -12,10 +12,14 @@
 {% endif %}
 
 {% if item.value.users_email is defined and item.value.users_email != "" %}
-  ServerAdmin {{ item.value.users_email }}
+  ServerAdmin "{{ item.value.users_email }}"
 {% endif %}
 
-  DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }} 
+  DocumentRoot "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
+  <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}">
+  
+  </Directory>
+
 # {{ vhost_config.users_apache_template }}
 </VirtualHost>
 {% endfor %}
