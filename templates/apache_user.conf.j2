@@ -4,15 +4,12 @@
 
 {% for vhost in item.value.users_apache_virtual_hosts.keys() %}
   {{ vhost }}
-  ## for vhost in vhost_dict %}
-#   '' vhost }}
-#   ## vhost.users_apache_server_name }}
-#   ## vhost.users_apache_template }}
-  ## endfor %}
 {% endfor %}
 
-## for virtual_host in item.value.users_apache_virtual_hosts.values() %}
-#   ## virtual_host.users_apache_server_name }}
-#   ## virtual_host.users_apache_template }}
-## endfor %}
+{% for vhost in item.value.users_apache_virtual_hosts %}
+# {{ item.value.users_apache_virtual_hosts[vhost] }}
+# {{ item.value.users_apache_virtual_hosts[vhost].users_apache_template }}
+# {{ item.value.users_apache_virtual_hosts[vhost].users_apache_server_name }}
+{% endfor %}
+
 
