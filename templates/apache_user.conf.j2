@@ -4,7 +4,6 @@
 
 {% for vhost_dict in item.value.users_apache_virtual_hosts %}
   {% for vhost in vhost_dict.iteritems() -%}
-#   {{ vhost.users_apache_site }}
 #   {{ vhost.users_apache_server_name }}
 #   {{ vhost.users_apache_template }}
   {% endfor %}
