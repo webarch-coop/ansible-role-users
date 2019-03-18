@@ -150,4 +150,4 @@
 - name: Include Apache config
   include_tasks: apache.yml
   loop: "{{ users | dict2items }}"
-  when: '"apache2" in ansible_facts.packages'
+  when: ( "apache2" in ansible_facts.packages ) and item.value.users_apache_virtual_hosts is defined
