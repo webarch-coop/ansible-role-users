@@ -6,13 +6,13 @@
   tags:
     - apache
 
-- name: "Apache {{ item.key }} sites-enabled symlink absent" 
+- name: "Apache {{ item.key }} sites-enabled symlink absent"
   command: "a2dissite {{ item.key }}"
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) and ( users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk )
   tags:
     - apache
 
-- name: "Apache {{ item.key }} sites-available file absent" 
+- name: "Apache {{ item.key }} sites-available file absent"
   file:
     path: "/etc/apache2/sites-available/{{ item.key }}.conf"
     state: absent
@@ -20,7 +20,7 @@
   tags:
     - apache
 
-- name: "Apache {{ item.key }} sites-available file present" 
+- name: "Apache {{ item.key }} sites-available file present"
   template:
     src: templates/apache.conf.j2
     dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
