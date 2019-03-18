@@ -4,7 +4,9 @@
 # {{ vhost }}
 <VirtualHost *:80>
 {% if apache_suexec %}
+<IfModule suexec_module>
   SuexecUserGroup {{ item.key }} {{ item.key }}
+</IfModule>
 {% endif %}
   ServerName {{ vhost_config.users_apache_server_name }}
 {% if vhost_config.users_apache_server_aliases is defined %}
@@ -20,7 +22,20 @@
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
 
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
+    DirectoryIndex index.html index.php index.shtml index.xhtml index.cgi index.pl index.htm wsh.shtml
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
+    <IfModule fcgid_module>
+      FcgidConnectTimeout 20
+      <IfModule mime_module>
+        <FilesMatch "[^.]+\.cgi$">
+          SetHandler fcgid-script
+        </FilesMatch>
+        <FilesMatch "[^.]+\.pl$">
+          SetHandler fcgid-script
+        </FilesMatch>
+      </IfModule>
+    </IfModule>
 {% else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     DirectoryIndex index.html index.shtml index.htm index.xhtml wsh.shtml
