@@ -1,4 +1,3 @@
 files/vim/vimrc gitlab-language=viml
 templates/phpfpm_chroot_user.conf.j2 gitlab-language=ini
-templates/apache_user.conf.j2 gitlab-language=apache
-templates/apache/*.conf.j2 gitlab-language=apache
+templates/apache.conf.j2 gitlab-language=apache

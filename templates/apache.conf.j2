@@ -1,14 +1,11 @@
 # Ansible provisioned
-# apache_suexec: {{ apache_suexec }}
 {% for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
 
 # {{ vhost }}
 <VirtualHost *:80>
-# apache_suexec: {{ apache_suexec }}
 {% if apache_suexec %}
   SuexecUserGroup {{ item.key }} {{ item.key }}
 {% endif %}
-
   ServerName {{ vhost_config.users_apache_server_name }}
 {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}

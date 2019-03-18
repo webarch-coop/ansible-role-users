@@ -22,11 +22,21 @@
 
 - name: "Apache {{ item.key }} sites-available file present" 
   template:
-    src: templates/apache_user.conf.j2
+    src: templates/apache.conf.j2
     dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
   when: item.value.users_state is undefined or item.value.users_state == "present"
   tags:
     - apache
+
+- name: Apache DocumentRoot present
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
+    state: directory
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+  loop: item.value.users_apache_virtual_hosts
+  loop_control:
+    loop_var: vhost
 
 - name: "Apache {{ item.key }} sites-enabled symlink present"
   command: "a2ensite {{ item.key }}"
