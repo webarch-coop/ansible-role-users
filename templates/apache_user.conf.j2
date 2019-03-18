@@ -18,10 +18,10 @@
   DocumentRoot "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
   <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}">
 
-{% if vhost_config.users_apache_type is "php" %}
+{% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
 
 
-{% elif vhost_config.users_apache_type is "cgi" %}
+{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
 
 
 {% else %}
