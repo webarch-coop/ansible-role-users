@@ -18,9 +18,8 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint_stat
 
-    # Command ends in `; true` because we always want mountpoint to exit with a 0 not fail with a 1
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
-      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld ; true"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       args:
         executable: /bin/bash
       register: users_chroot_mysqld_mountpoint
@@ -44,9 +43,8 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint_stat
 
-    # Command ends in `; true` because we always want mountpoint to exit with a 0 not fail with a 1
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} is mounted"
-      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} ; true"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       args:
         executable: /bin/bash
       register: users_chroot_home_mountpoint
@@ -70,9 +68,8 @@
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       register: users_chroot_mountpoint_stat
 
-    # Command ends in `; true` because we always want mountpoint to exit with a 0 not fail with a 1
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
-      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} ; true"
+      shell: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
       args:
         executable: /bin/bash
       register: users_chroot_mountpoint
