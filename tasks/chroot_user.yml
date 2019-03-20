@@ -28,7 +28,7 @@
       command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       register: users_chroot_mysqld_mountpoint_umount
       when: users_chroot_mysqld_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mysqld_mountpoint.stdout
-      failed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
+      changed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
 
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
@@ -51,7 +51,7 @@
       command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       register: users_chroot_home_mountpoint_umount
       when: users_chroot_home_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_home_mountpoint.stdout
-      failed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
+      changed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
 
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }}"
       mount:
