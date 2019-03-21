@@ -159,7 +159,7 @@
 - name: Include Apache config tasks present users
   include_tasks: apache_users_present.yml
   loop: "{{ users | dict2items }}"
-  when: ( "apache2" in ansible_facts.packages ) and ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or tem.value.users_state == "present" )
+  when: ( "apache2" in ansible_facts.packages ) and ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or item.value.users_state == "present" )
   tags:
     - apache
 
