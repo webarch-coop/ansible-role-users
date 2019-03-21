@@ -16,7 +16,7 @@
       - "home mode: {{ item.value.users_home_mode | default(0700) }}"
     verbosity: 2
 
-- name: Add user accounts
+- name: "Add user account for {{ item.key }}"
   user:
     name: "{{ item.key }}"
     group: "{{ item.value.users_group | default(item.key) }}"
@@ -29,21 +29,21 @@
     system: "{{ item.value.users_system | default('no', false) }}"
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
-- name: Chown user home directory owner
+- name: "Chown user home directory owner to {{ item.value.users_home_owner }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     owner: "{{ item.value.users_home_owner }}"
   when: item.value.users_home_owner is defined
 
-- name: Chown user home directory group
+- name: "Chown user home directory group to {{ item.value.users_home_group }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     group: "{{ item.value.users_home_group }}"
   when: item.value.users_home_group is defined
 
-- name: Chmod users home directory
+- name: "Chmod users home directory {{ item.value.users_home_mode }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
@@ -55,7 +55,7 @@
     verbosity: 1
   when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
 
-- name: SSH private directories present
+- name: "SSH private directories present for {{ item.key }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
     state: directory

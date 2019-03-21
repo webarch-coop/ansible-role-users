@@ -20,14 +20,14 @@
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
       command: "mountpoint {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-      ignore_errors: true
+      ignore_errors: yes
       register: users_chroot_mysqld_mountpoint
       when: users_chroot_mysqld_mountpoint_stat.stat.exists
       changed_when: '"is a mountpoint" in users_chroot_mysqld_mountpoint.stdout'
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-      ignore_errors: true
+      ignore_errors: yes
       register: users_chroot_mysqld_mountpoint_umount
       when: users_chroot_mysqld_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mysqld_mountpoint.stdout
       changed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
