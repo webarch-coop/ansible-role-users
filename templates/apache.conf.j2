@@ -11,7 +11,7 @@
 {% if apache_mods_enabled is defined and "mpm_itk" in apache_mods_enabled %}
 <IfModule mpm_itk_module>
   AssignUserID {{ item.key }}
-  MaxClientsVHost {{ apache_mpm_itk_max_clients_vhost | default'(50)' }}
+  MaxClientsVHost {{ apache_mpm_itk_max_clients_vhost | default('50') }}
 </IfModule>
 {% endif %}
 
