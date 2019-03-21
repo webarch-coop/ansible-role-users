@@ -143,7 +143,7 @@
 - name: Include the chroot absent users tasks
   include_tasks: chroot_users_absent.yml
   loop: "{{ users | dict2items }}"
-  when: users_chroot_dir.stat.exists ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+  when: users_chroot_dir.stat.exists and ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
 
 - name: Include the chroot present users tasks
   include_tasks: chroot_users_present.yml
