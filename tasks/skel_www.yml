@@ -10,7 +10,7 @@
     dest: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
     owner: root
     group: root
-    mode: 0600
+    mode: 0640
   loop:
     - .bash_logout
     - .bashrc
@@ -32,7 +32,7 @@
     state: directory
     owner: root
     group: root
-    mode: 0700
+    mode: 0750
   with_items:
     - .cache
     - .composer
@@ -47,6 +47,7 @@
     - .yarn
     - logs
     - private
+    - sites
     - tmp
 
 # - name: Skel files chowned

@@ -1,0 +1,37 @@
+---
+- name: "Apache {{ item.key }} sites-available file present"
+  template:
+    src: templates/apache.conf.j2
+    dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+  tags:
+    - apache
+
+- name: Apache DocumentRoot present
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
+    state: directory
+    owner: "{{ item.key }}"
+    group: "{{ apache_user }}"
+    mode: 0750
+  loop: "{{ item.value.users_apache_virtual_hosts.keys() }}"
+  loop_control:
+    loop_var: vhost
+  tags:
+    - apache
+
+- name: Apache log directory present
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs"
+    state: directory
+    owner: root
+    group: "{{ item.key }}"
+    mode: 0750
+  tags:
+    - apache
+
+- name: "Apache {{ item.key }} sites-enabled symlink present"
+  command: "a2ensite {{ item.key }}"
+  register: users_a2ensite
+  changed_when: '"already enabled" not in users_a2ensite.stdout'
+  tags:
+    - apache

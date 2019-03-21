@@ -149,10 +149,17 @@
   include_tasks: phpfpm_chroot.yml
   when: users_phpfpm_status.stdout == "installed" and users_chroot_dir.stat.exists
 
-- name: Include Apache config
-  include_tasks: apache.yml
+- name: Include Apache config tasks absent users
+  include_tasks: apache_users_absent.yml
   loop: "{{ users | dict2items }}"
-  when: ( "apache2" in ansible_facts.packages ) and item.value.users_apache_virtual_hosts is defined
+  when: ( "apache2" in ansible_facts.packages ) and ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is defined and item.value.users_state == "absent" )
+  tags:
+    - apache
+
+- name: Include Apache config tasks present users
+  include_tasks: apache_users_present.yml
+  loop: "{{ users | dict2items }}"
+  when: ( "apache2" in ansible_facts.packages ) and ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or tem.value.users_state == "present" )
   tags:
     - apache
 

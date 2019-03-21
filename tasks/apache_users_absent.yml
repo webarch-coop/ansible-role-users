@@ -1,0 +1,20 @@
+---
+- name: "Check if the {{ item.key }} site is enabled"
+  stat:
+    path: "/etc/apache2/sites-enabled/{{ item.key }}.conf"
+  register: users_apache_site_enabled
+  tags:
+    - apache
+
+- name: "Apache {{ item.key }} sites-enabled symlink absent"
+  command: "a2dissite {{ item.key }}"
+  when: users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk
+  tags:
+    - apache
+
+- name: "Apache {{ item.key }} sites-available file absent"
+  file:
+    path: "/etc/apache2/sites-available/{{ item.key }}.conf"
+    state: absent
+  tags:
+    - apache
