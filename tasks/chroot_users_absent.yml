@@ -1,0 +1,76 @@
+---
+- name: "Remove {{ item.key }} from {{ chroot_dir | default('/chroot') }}/etc/passwd"
+  lineinfile:
+    path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
+    regexp: "^{{ item.key }}:"
+    state: absent
+
+- name: "Remove {{ item.key }} from {{ chroot_dir | default('/chroot') }}/etc/group"
+  lineinfile:
+    path: "{{ chroot_dir | default('/chroot') }}/etc/group"
+    regexp: "^{{ item.key }}:"
+    state: absent
+
+- name: "Stat {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  stat:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  register: users_chroot_users_run_mysqld_mountpoint
+
+- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  ignore_errors: true
+  register: users_chroot_mysqld_mountpoint_umount
+  changed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
+  when: users_chroot_users_run_mysqld_mountpoint.stat.exists
+
+- name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld from /etc/fstab"
+  lineinfile:
+    path: /etc/fstab
+    line: "^/run/mysqld {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+    state: absent
+
+- name: "Stat {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+  stat:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+  register: users_chroot_users_home_mountpoint 
+
+- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+  ignore_errors: true
+  register: users_chroot_home_mountpoint_umount
+  changed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
+  when: users_chroot_users_home_mountpoint.stat.exists
+
+- name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} from /etc/fstab"
+  lineinfile:
+    path: /etc/fstab
+    line: "^{{ item.value.users_home | default('/home/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+    state: absent
+
+- name: "Stat {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+  stat:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+  register: users_chroot_mountpoint
+
+- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+  ignore_errors: true
+  register: users_chroot_mountpoint_umount
+  changed_when: '"not mounted" in users_chroot_mountpoint_umount.stdout'
+  when: users_chroot_mountpoint.stat.exists
+
+- name: "Directory {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} absent"
+  file:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+    state: absent
+
+- name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+  mount:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+    state: absent
+    backup: true
+
+- name: "Directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }} absent"
+  file:
+    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }}"
+    state: absent

@@ -1,0 +1,57 @@
+---
+- name: "Read {{ item.key }} entry from /etc/passwd"
+  command: "grep ^{{ item.key }}: /etc/passwd"
+  register: users_etc_passwd
+  changed_when: false
+
+- name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/passwd"
+  lineinfile:
+    path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
+    line: "{{ users_etc_passwd.stdout }}"
+    state: present
+
+- name: "Read {{ item.key }} entry from /etc/group"
+  command: "grep ^{{ item.key }}: /etc/group"
+  register: users_etc_group
+  changed_when: false
+
+- name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/group"
+  lineinfile:
+    path: "{{ chroot_dir | default('/chroot') }}/etc/group"
+    line: "{{ users_etc_group.stdout }}"
+    state: present
+
+- name: "Mount point {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }} present"
+  file:
+    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+  mount:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+    src: "{{ chroot_dir | default('/chroot') }}"
+    fstype: ext4
+    opts: ro,bind,nosuid
+    state: mounted
+    backup: true
+
+- name: "Mount {{ item.value.users_home | default('/home/' + item.key) }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+  mount:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+    src: "/home/{{ item.key }}"
+    fstype: ext4
+    opts: rw,bind,nodev,nosuid
+    state: mounted
+    backup: true
+
+- name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  mount:
+    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+    src: /run/mysqld
+    fstype: ext4
+    opts: ro,bind,nodev,nosuid,noexec
+    state: mounted
+    backup: true
