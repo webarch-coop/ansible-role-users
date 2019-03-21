@@ -30,12 +30,12 @@
       when: users_chroot_mysqld_mountpoint_stat.stat.exists and "is a mountpoint" in users_chroot_mysqld_mountpoint.stdout
       changed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
 
-    # mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} rw before runing this?
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
       mount:
         path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
         state: absent
         backup: true
+      ignore_errors: true
 
     - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/home/{{ item.key }} exists"
       stat:
