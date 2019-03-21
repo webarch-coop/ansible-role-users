@@ -24,7 +24,7 @@
         path: /etc/fstab
         line: "^/run/mysqld {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
         state: absent
-        
+
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
       command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
       ignore_errors: true
@@ -34,7 +34,7 @@
     - name: "Remove {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} from /etc/fstab"
       lineinfile:
         path: /etc/fstab
-        line: "^{{ item.value.users_home | default('/home/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}" 
+        line: "^{{ item.value.users_home | default('/home/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
         state: absent
 
     - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
