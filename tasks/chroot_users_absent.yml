@@ -32,7 +32,7 @@
 - name: "Stat {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
   stat:
     path: "{{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
-  register: users_chroot_users_home_mountpoint 
+  register: users_chroot_users_home_mountpoint
 
 - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
   command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
