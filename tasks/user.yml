@@ -19,7 +19,7 @@
 - name: "Set a fact for the {{ item.key }}'s groups adding the {{ item.key }} group to the list"
   set_fact:
     users_all_groups:
-      - "{{ item.value.users_groups | default([]) | join(',') or omit }}"
+      - "{{ item.value.users_groups | default(omit) }}"
       - "{{ item.key }}"
 
 - name: Print the users_all_groups variable
