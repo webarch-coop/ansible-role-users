@@ -6,7 +6,7 @@
   tags:
     - apache
 
-- name: Apache DocumentRoot present
+- name: "Apache DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }} present"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
     state: directory
@@ -19,7 +19,7 @@
   tags:
     - apache
 
-- name: Apache log directory present
+- name: "Apache log directory {{ item.value.users_home | default('/home/' + item.key) }}/logs present"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs"
     state: directory

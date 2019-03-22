@@ -26,8 +26,8 @@
     path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     owner: root
-    group: root
-    mode: 0755
+    group: "{{ apache_user | default('www-data') }}"
+    mode: 0750
 
 - name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
   mount:
