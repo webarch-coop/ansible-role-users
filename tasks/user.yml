@@ -16,6 +16,17 @@
       - "home mode: {{ item.value.users_home_mode | default(0700) }}"
     verbosity: 2
 
+- name: "Set a fact for the {{ item.key }}'s groups adding the {{ item.key }} group to the list"
+  set_fact:
+    users_all_groups:
+      - "{{ item.value.users_groups | default([]) | join(',') or omit }}"
+      - "{{ item.key }}"
+
+- name: Print the users_all_groups variable
+  debug:
+    var: users_all_groups
+    verbosity: 1
+
 - name: "User account for {{ item.key }} present"
   user:
     name: "{{ item.key }}"
