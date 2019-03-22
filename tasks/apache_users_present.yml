@@ -11,7 +11,7 @@
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
     state: directory
     owner: "{{ item.key }}"
-    group: "{{ apache_user }}"
+    group: "{{ apache_user | default('www-data') }}"
     mode: 0750
   loop: "{{ item.value.users_apache_virtual_hosts.keys() }}"
   loop_control:

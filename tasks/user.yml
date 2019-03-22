@@ -28,19 +28,19 @@
     generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
     system: "{{ item.value.users_system | default('no', false) }}"
 
-- name: "Chown user home directory owner to {{ item.value.users_home_owner }}"
+- name: "Chown user home directory owner to {{ item.value.users_home_owner | default('/home/' + item.key) }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     owner: "{{ item.value.users_home_owner | default('item.key') }}"
 
-- name: "Chown user home directory group to {{ item.value.users_home_group }}"
+- name: "Chown user home directory group to {{ item.value.users_home_group | default('/home/' + item.key) }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     group: "{{ item.value.users_home_group | default('item.key') }}"
 
-- name: "Chmod users home directory {{ item.value.users_home_mode }}"
+- name: "Chmod users home directory {{ item.value.users_home_mode | default('/home/' + item.key) }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
