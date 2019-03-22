@@ -15,7 +15,7 @@
       - "name: {{ item.key }}"
       - "group: {{ item.value.users_group | default(item.key) }}"
       - "groups: {{ item.value.users_groups | default([]) | join(',') or \ omit }}"
-      - "all groups: {{ users_all_groups}}"
+      - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit}}"
       - "home: {{ item.value.users_home | default('/home/' + item.key) }}"
       - "shell: {{ item.value.users_shell | default('/bin/bash', true) }}"
       - "skeleton: {{ item.value.users_skel | default(omit) }}"
