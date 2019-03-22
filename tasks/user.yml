@@ -30,8 +30,7 @@
   user:
     name: "{{ item.key }}"
     group: "{{ item.value.users_group | default(item.key) }}"
-    groups:
-      - "{{ users_all_groups }}"
+    groups: "{{ users_all_groups | default([]) | join(',') or \ omit }}"
     home: "{{ item.value.users_home | default('/home/' + item.key) }}"
     create_home: true
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
