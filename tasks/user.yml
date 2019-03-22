@@ -1,11 +1,21 @@
 ---
-# https://github.com/ansible/ansible/issues/10164#issuecomment-73470662
+- name: "Set a fact for the {{ item.key }} users own group as a list"
+  set_fact:
+    users_own_group:
+      - "{{ item.key }}"
+
+- name: "Set a fact for the {{ item.key }} users groups which includes the users own group, as a list"
+  set_fact:
+    users_all_groups:
+      - "{{ item.value.users_groups | default(omit) + users_own_group }}"
+
 - name: "Print debugging info for {{ item.key }}"
   debug:
     msg:
       - "name: {{ item.key }}"
       - "group: {{ item.value.users_group | default(item.key) }}"
       - "groups: {{ item.value.users_groups | default([]) | join(',') or \ omit }}"
+      - "all groups: {{ users_all_groups}}"
       - "home: {{ item.value.users_home | default('/home/' + item.key) }}"
       - "shell: {{ item.value.users_shell | default('/bin/bash', true) }}"
       - "skeleton: {{ item.value.users_skel | default(omit) }}"
@@ -16,27 +26,11 @@
       - "home mode: {{ item.value.users_home_mode | default(0700) }}"
     verbosity: 2
 
-- name: "Set a fact for the {{ item.key }} users own group as a list"
-  set_fact:
-    users_own_group:
-      - "{{ item.key }}"
-
-- name: "Set a fact for the {{ item.key }} users groups which includes the users own group, as a list"
-  set_fact:
-    users_all_groups:
-      # - "{{ users_own_group }}"
-      - "{{ item.value.users_groups | default(omit) + users_own_group }}"
-
-- name: "Print the {{ item.key }} users users_all_groups variable"
-  debug:
-    var: users_all_groups
-    verbosity: 1
-
 - name: "User account for {{ item.key }} present"
   user:
     name: "{{ item.key }}"
     group: "{{ item.value.users_group | default(item.key) }}"
-    groups: "{{ item.value.users_groups | default([]) | join(',') or omit }}"
+    groups: "{{ users_all_groups }}"
     home: "{{ item.value.users_home | default('/home/' + item.key) }}"
     create_home: true
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
