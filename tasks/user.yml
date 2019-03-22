@@ -16,16 +16,16 @@
       - "home mode: {{ item.value.users_home_mode | default(0700) }}"
     verbosity: 2
 
-- name: "Set a fact for the {{ item.key }} users own group as a list"
-  set_fact:
-    users_own_group:
-      - "{{ item.key }}"
+#- name: "Set a fact for the {{ item.key }} users own group as a list"
+#  set_fact:
+#    users_own_group:
+#      - "{{ item.key }}"
 
 - name: "Set a fact for the {{ item.key }} users groups which includes the users own group, as a list"
   set_fact:
     users_all_groups:
-      - "{{ users_own_group }}"
-      - "{{ item.value.users_groups | default(omit) }}"
+      # - "{{ users_own_group }}"
+      - "{{ item.value.users_groups | default(omit) + item.key }}"
 
 - name: "Print the {{ item.key }} users users_all_groups variable"
   debug:
