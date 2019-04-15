@@ -14,6 +14,23 @@
   tags:
     - apache
 
+- name: Check if php-fpm is installed on stretch
+  shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
+  register: users_phpfpm_status
+  when: users_debian_version == "stretch"
+  changed_when: false
+
+- name: Check if php-fpm is installed on buster
+  shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
+  register: users_phpfpm_status
+  when: users_debian_version == "buster"
+  changed_when: false
+
+- name: Check if a chroot exists
+  stat:
+    path: "{{ chroot_dir | default('/chroot') }}"
+  register: users_chroot_dir
+
 - name: Packages present
   apt:
     pkg:
@@ -28,28 +45,34 @@
   loop_control:
     loop_var: users_skeleton
 
-- name: "Touch {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-  file:
-    path: "{{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-    state: touch
+# Quota tasks
+- block:
 
-- name: "Get the md5sum of {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-  command: "md5sum {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-  register: users_repquota_md5sum_before
-  changed_when: false
+    - name: "Touch {{ quota_dir }}/quota_user.csv"
+      file:
+        path: "{{ quota_dir }}/quota_user.csv"
+        state: touch
+        access_time: preserve
 
-- name: "Users quotas written to {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv and md5sum printed"
-  shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv ; chmod 600 {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv ; md5sum {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-  register: users_repquota_md5sum_after
+    - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
+      command: "md5sum {{ quota_dir }}/quota_user.csv"
+      register: users_repquota_md5sum_before
+      changed_when: false
+      when: quota_dir is defined
+
+    - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+      register: users_repquota_md5sum_after
+      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+
+    - name: Users quotas fetched
+      fetch:
+        src: "{{ quota_dir }}/quota_user.csv"
+        dest: /tmp/
+
   when: quota_dir is defined
-  changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
 
-- name: Users quotas fetched
-  fetch:
-    src: "{{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-    dest: /tmp/
-  when: quota_dir is defined
-
+# Delete users
 - block:
 
     - name: Absent users home directories removed
@@ -73,6 +96,7 @@
 
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
+# Add users
 - name: User groups present
   include_tasks: groups.yml
   loop: "{{ users | dict2items }}"
@@ -104,17 +128,21 @@
 
   when: item.value.users_state is undefined or item.value.users_state == "present"
 
-- name: "Updated users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
-  shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
-  register: users_repquota_md5sum_after
-  when: quota_dir is defined
-  changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+# Users quota CSV file updated
+- block:
 
-- name: Updated users quotas fetched
-  fetch:
-    src: "{{ quota_dir }}/quota_user.csv"
-    dest: /tmp/
-  when: quota_dir is defined and users_repquota_md5sum_after.changed
+    - name: "Updated users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+      register: users_repquota_md5sum_after
+      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+
+    - name: Updated users quotas fetched
+      fetch:
+        src: "{{ quota_dir }}/quota_user.csv"
+        dest: /tmp/
+      when: users_repquota_md5sum_after.changed
+
+  when: quota_dir is defined
 
 - name: Email address in .forward
   template:
@@ -133,61 +161,56 @@
   loop: "{{ users | dict2items }}"
   when: item.value.users_email is not defined or item.value.users_email == ""
 
-- name: Check if php-fpm is installed on stretch
-  shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
-  register: users_phpfpm_status
-  when: users_debian_version == "stretch"
-  changed_when: false
+# Chroot users
+- block:
 
-- name: Check if php-fpm is installed on buster
-  shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
-  register: users_phpfpm_status
-  when: users_debian_version == "buster"
-  changed_when: false
+    - name: Include the chroot absent users tasks
+      include_tasks: chroot_users_absent.yml
+      loop: "{{ users | dict2items }}"
+      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
 
-- name: Check if a chroot exists
-  stat:
-    path: "{{ chroot_dir | default('/chroot') }}"
-  register: users_chroot_dir
+    - name: Include the chroot present users tasks
+      include_tasks: chroot_users_present.yml
+      loop: "{{ users | dict2items }}"
+      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
 
-- name: Include the chroot absent users tasks
-  include_tasks: chroot_users_absent.yml
-  loop: "{{ users | dict2items }}"
-  when: users_chroot_dir.stat.exists and ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+    - name: Include the PHP FPM chroot tasks
+      include_tasks: phpfpm_chroot.yml
+      when: users_phpfpm_status.stdout == "installed"
 
-- name: Include the chroot present users tasks
-  include_tasks: chroot_users_present.yml
-  loop: "{{ users | dict2items }}"
-  when: users_chroot_dir.stat.exists and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
+  when: users_chroot_dir.stat.exists
 
-- name: Include the PHP FPM chroot tasks
-  include_tasks: phpfpm_chroot.yml
-  when: users_phpfpm_status.stdout == "installed" and users_chroot_dir.stat.exists
+# Apache config for users
+- block:
 
-- name: Include Apache config tasks absent users
-  include_tasks: apache_users_absent.yml
-  loop: "{{ users | dict2items }}"
-  when: ( "apache2" in ansible_facts.packages ) and ( item.value.users_state is defined and item.value.users_state == "absent" )
-  tags:
-    - apache
+    - name: Include Apache config tasks absent users
+      include_tasks: apache_users_absent.yml
+      loop: "{{ users | dict2items }}"
+      when: item.value.users_state is defined and item.value.users_state == "absent"
+      tags:
+        - apache
 
-- name: Include Apache config tasks present users
-  include_tasks: apache_users_present.yml
-  loop: "{{ users | dict2items }}"
-  when: ( "apache2" in ansible_facts.packages ) and ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or item.value.users_state == "present" )
-  tags:
-    - apache
+    - name: Include Apache config tasks present users
+      include_tasks: apache_users_present.yml
+      loop: "{{ users | dict2items }}"
+      when: ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or item.value.users_state == "present" )
+      tags:
+        - apache
 
-- name: Apache configtest
-  command: apachectl configtest
-  register: users_apachectl_configtest
-  changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
+    - name: Apache configtest
+      command: apachectl configtest
+      register: users_apachectl_configtest
+      changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
+      when: '"apache2" in ansible_facts.packages'
+      tags:
+        - apache
+
+    - name: Apache restart
+      service:
+        name: apache2
+        state: restarted
+      when: "Syntax OK" in users_apachectl_configtest.stderr
+      tags:
+        - apache
+
   when: '"apache2" in ansible_facts.packages'
-  tags:
-    - apache
-
-- name: Apache restart
-  service:
-    name: apache2
-    state: restarted
-  when: ( "apache2" in ansible_facts.packages ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
