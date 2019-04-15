@@ -11,7 +11,8 @@
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites"
     state: directory
     owner: "{{ item.key }}"
-    group: "{{ apache_user | default('www-data') }}"
+    # group: "{{ apache_user | default('www-data') }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0750
   tags:
     - apache
@@ -21,7 +22,8 @@
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
     state: directory
     owner: "{{ item.key }}"
-    group: "{{ apache_user | default('www-data') }}"
+    # group: "{{ apache_user | default('www-data') }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0750
   loop: "{{ item.value.users_apache_virtual_hosts.keys() }}"
   loop_control:
