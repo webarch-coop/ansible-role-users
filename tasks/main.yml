@@ -177,6 +177,12 @@
   command: apachectl configtest
   register: users_apachectl_configtest
   changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
-  when: ( "apache2" in ansible_facts.packages ) and ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or item.value.users_state == "present" )
+  when: '"apache2" in ansible_facts.packages'
   tags:
     - apache
+
+- name: Apache restart
+  service:
+    name: apache2
+    state: restarted
+  when: ( "apache2" in ansible_facts.packages ) and ( "Syntax OK" in users_apachectl_configtest.stderr ) 
