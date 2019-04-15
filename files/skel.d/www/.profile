@@ -25,3 +25,11 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
+
+# set TMPDIR, TMP and TEMP if ~/tmp exists
+if [ -d "$HOME/tmp" ] ; then
+    TMPDIR="$HOME/tmp"
+    TMP="$HOME/tmp"
+    TEMP="$HOME/tmp"
+fi
+

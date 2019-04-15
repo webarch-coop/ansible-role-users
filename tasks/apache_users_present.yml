@@ -6,6 +6,16 @@
   tags:
     - apache
 
+- name: "Apache {{ item.key }}/sites directory present"
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites"
+    state: directory
+    owner: "{{ item.key }}" 
+    group: "{{ apache_user | default('www-data') }}"
+    mode: 0750
+  tags:
+    - apache
+
 - name: "Apache DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }} present"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"

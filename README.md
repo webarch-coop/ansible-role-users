@@ -64,7 +64,7 @@ The other repo should also contain a `users.yml` file that contains:
         users_home_group: users
         # You must quote the mode or the leaving zero is stripped"
         users_home_mode: "0750"
-        users_system: yes
+        users_system: true
         users_shell: /usr/sbin/nologin
         users_generate_ssh_key: yes
         users_editor: vim
@@ -76,7 +76,7 @@ The other repo should also contain a `users.yml` file that contains:
       bar:
         users_home: /opt/bar
         users_shell: /bin/false
-        users_system: yes
+        users_system: true
         users_quota: 1G
       baz:
         users_groups:
