@@ -1,6 +1,6 @@
 ---
-- name: "{{ users_group_member }} is a member of {{ item.value.users_group | default(item.key) }}" 
-  command: "usermod -a -G {{ item.value.users_group | default(item.key) }} {{ users_group_member }}" 
+- name: "{{ users_group_member }} is a member of {{ item.value.users_group | default(item.key) }}"
+  command: "usermod -a -G {{ item.value.users_group | default(item.key) }} {{ users_group_member }}"
   loop: "{{ item.value.users_group_members }}"
   loop_control:
     loop_var: users_group_member
