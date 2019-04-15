@@ -209,7 +209,7 @@
       service:
         name: apache2
         state: restarted
-      when: "Syntax OK" in users_apachectl_configtest.stderr
+      when: '"Syntax OK" in users_apachectl_configtest.stderr'
       tags:
         - apache
 
