@@ -71,6 +71,8 @@ The other repo should also contain a `users.yml` file that contains:
         users_groups:
           - users
           - ssl-cert
+        users_group_members:
+          - www-data
       bar:
         users_home: /opt/bar
         users_shell: /bin/false
