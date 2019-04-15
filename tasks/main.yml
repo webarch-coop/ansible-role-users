@@ -28,22 +28,21 @@
   loop_control:
     loop_var: users_skeleton
 
-- name: "Stat {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-  stat:
+- name: "Touch {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
+  file:
     path: "{{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
-  register: users_repquota_stat
+    state: touch
 
 - name: "Get the md5sum of {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
   command: "md5sum {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
   register: users_repquota_md5sum_before
-  when: users_repquota_stat.stat.exists
   changed_when: false
 
 - name: "Users quotas written to {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv and md5sum printed"
   shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv ; chmod 600 {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv ; md5sum {{ quota_dir }}/{{ inventory_hostname }}_quota_user.csv"
   register: users_repquota_md5sum_after
   when: quota_dir is defined
-  changed_when: users_repquota_md5sum_before is not defined or ( users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout )
+  changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
 
 - name: Users quotas fetched
   fetch:
@@ -191,4 +190,4 @@
   service:
     name: apache2
     state: restarted
-  when: ( "apache2" in ansible_facts.packages ) and ( "Syntax OK" in users_apachectl_configtest.stderr ) 
+  when: ( "apache2" in ansible_facts.packages ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
