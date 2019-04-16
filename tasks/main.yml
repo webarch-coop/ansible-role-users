@@ -92,6 +92,8 @@
         remove: true
       loop: "{{ users | dict2items }}"
 
+    # - name: Users MariaDB databases absent
+
     - name: Users MariaDB account absent
       include_tasks: galaxy/roles/mariadb/tasks/user_absent.yml
       vars:
@@ -131,6 +133,8 @@
     - name: User accounts present
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
+
+    # - name: Users MariaDB databases present
 
     - name: Users MariaDB account created and password set
       include_tasks: galaxy/roles/mariadb/tasks/user_present.yml
