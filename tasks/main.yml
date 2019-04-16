@@ -47,7 +47,7 @@
 
 - name: pam-mysql tasks included
   include_tasks: pam_mysql.yml
-  when: ( users_pam_mysql is defined ) and ( users_pam_mysql is "True" )
+  when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
 
 # Quota tasks
 - block:
