@@ -3,7 +3,7 @@
   apt:
     pkg:
       - pam-mysql
-  state: present
+    state: present
   update_cache: false
 
 - name: /etc/pam-mysql.conf in place
