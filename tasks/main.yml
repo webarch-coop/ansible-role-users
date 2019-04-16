@@ -97,7 +97,7 @@
       vars:
         mariadb_user: "{{ item.key }}"
       loop: "{{ users | dict2items }}"
-      when: ( users_pam_mysql is defined ) and ( users_pam_mysql is "True" )
+      when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
 
     - name: User groups absent
       group:
@@ -137,7 +137,7 @@
       vars:
         mariadb_user: "{{ item.key }}"
       loop: "{{ users | dict2items }}"
-      when: ( users_pam_mysql is defined ) and ( users_pam_mysql is "True" )
+      when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
 
     - name: Quotas set
       include_tasks: quota.yml
