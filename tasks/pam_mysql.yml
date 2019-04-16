@@ -21,6 +21,6 @@
     mode: 0644
     owner: root
     group: root
-    loop:
-      - common-account
-      - common-auth
+  loop:
+    - common-account
+    - common-auth
