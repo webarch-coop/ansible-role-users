@@ -45,6 +45,10 @@
   loop_control:
     loop_var: users_skeleton
 
+- name: pam-mysql tasks included
+  include_tasks: pam_mysql.yml
+  when: ( users_pam_mysql is defined ) and ( users_pam_mysql is "True" )
+
 # Quota tasks
 - block:
 
