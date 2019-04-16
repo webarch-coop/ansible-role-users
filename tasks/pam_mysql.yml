@@ -4,7 +4,7 @@
     pkg:
       - pam-mysql
     state: present
-  update_cache: false
+    update_cache: false
 
 - name: /etc/pam-mysql.conf in place
   copy:
