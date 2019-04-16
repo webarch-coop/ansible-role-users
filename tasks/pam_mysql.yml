@@ -10,17 +10,17 @@
   copy:
     src: files/pam-mysql/pam-mysql.conf
     dest: /etc/pam-mysql.conf
-  mode: 0640
-  owner: root
-  group: root
+    mode: 0640
+    owner: root
+    group: root
 
 - name: /etc/pam.d/ files in place
   copy:
     src: "files/pam-mysql/{{ item }}"
     dest: "/etc/pam.d/{{ item }}"
-  mode: 0644
-  owner: root
-  group: root
-  loop:
-    - common-account
-    - common-auth
+    mode: 0644
+    owner: root
+    group: root
+    loop:
+      - common-account
+      - common-auth
