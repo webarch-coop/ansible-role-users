@@ -2,7 +2,7 @@
 - name: pam-mysql present
   apt:
     pkg:
-      - pam-mysql
+      - libpam-mysql
     state: present
     update_cache: false
 
