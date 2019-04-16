@@ -92,6 +92,13 @@
         remove: true
       loop: "{{ users | dict2items }}"
 
+    - name: Users MariaDB account absent
+      include_tasks: galaxy/roles/mariadb/tasks/user_absent.yml
+      vars:
+        mariadb_user: "{{ item.key }}"
+      loop: "{{ users | dict2items }}"
+      when: ( users_pam_mysql is defined ) and ( users_pam_mysql is "True" )
+
     - name: User groups absent
       group:
         name: "{{ item.key }}"
@@ -124,6 +131,13 @@
     - name: User accounts present
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
+
+    - name: Users MariaDB account created and password set
+      include_tasks: galaxy/roles/mariadb/tasks/user_present.yml
+      vars:
+        mariadb_user: "{{ item.key }}"
+      loop: "{{ users | dict2items }}"
+      when: ( users_pam_mysql is defined ) and ( users_pam_mysql is "True" )
 
     - name: Quotas set
       include_tasks: quota.yml

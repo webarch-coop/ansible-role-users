@@ -4,7 +4,7 @@
     pkg:
       - pam-mysql
   state: present
-  update_cache: no
+  update_cache: false
 
 - name: /etc/pam-mysql.conf in place
   copy:
@@ -24,5 +24,3 @@
   loop:
     - common-account
     - common-auth
-
-
