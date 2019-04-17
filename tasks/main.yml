@@ -144,8 +144,10 @@
         # mariadb_databases: "{{ query('dict', 'item.value.users_mariadb_databases') }}"
         # mariadb_databases: 
         #   - "[ {{ item.value.users_mariadb_databases }} ]"
-        mariadb_databases: "{{ list.users_mariadb_databases }}"
+        # mariadb_databases: "{{ list.value.users_mariadb_databases }}"
+        mariadb_databases: "{{ lookup('list', item.value.users_mariadb_databases) }}"
       loop: "{{ users | dict2items }}"
+      # loop: "{{ lookup('dict', users) }}"
       when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
 
     - name: Quotas set
