@@ -140,7 +140,7 @@
       include_tasks: galaxy/roles/mariadb/tasks/user_present.yml
       vars:
         mariadb_user: "{{ item.key }}"
-        mariadb_databases: "{{ item.value.users_mariadb_databases | default([]) }}"
+        mariadb_databases: "{{ item.value.users_mariadb_databases }}"
       loop: "{{ users | dict2items }}"
       when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
 
