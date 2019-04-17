@@ -142,8 +142,9 @@
         mariadb_user: "{{ item.key }}"
         # mariadb_databases: "{% for db in item.value.users_mariadb_databases %}{{ db }}{% endfor %}"
         # mariadb_databases: "{{ query('dict', 'item.value.users_mariadb_databases') }}"
-        mariadb_databases: 
-          - "[ {{ item.value.users_mariadb_databases }} ]"
+        # mariadb_databases: 
+        #   - "[ {{ item.value.users_mariadb_databases }} ]"
+        mariadb_databases: "{{ list.users_mariadb_databases }}"
       loop: "{{ users | dict2items }}"
       when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
 
