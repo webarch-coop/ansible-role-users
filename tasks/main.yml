@@ -145,7 +145,7 @@
         # mariadb_databases: 
         #   - "[ {{ item.value.users_mariadb_databases }} ]"
         # mariadb_databases: "{{ list.value.users_mariadb_databases }}"
-        mariadb_databases: "{{ query('list', item.value.users_mariadb_databases) | default(omit) }}"
+        mariadb_databases: "{{ query('list', item.value.users_mariadb_databases) | default([]) }}"
       loop: "{{ users | dict2items }}"
       # loop: "{{ lookup('dict', users) }}"
       when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
