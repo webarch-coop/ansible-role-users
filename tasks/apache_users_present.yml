@@ -17,7 +17,7 @@
   tags:
     - apache
 
-- name: "Apache DocumentRoot {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }} present"
+- name: "Apache DocumentRoot present"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
     state: directory
@@ -25,7 +25,7 @@
     # group: "{{ apache_user | default('www-data') }}"
     group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0750
-  loop: "{{ item.value.users_apache_virtual_hosts.keys() }}"
+  loop: "{{ item.value.users_apache_virtual_hosts.keys() | list }}"
   loop_control:
     loop_var: vhost
   tags:

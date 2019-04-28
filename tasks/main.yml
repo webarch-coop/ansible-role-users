@@ -135,20 +135,17 @@
       loop: "{{ users | dict2items }}"
 
     # - name: Users MariaDB databases present
+    #   include_tasks: mariadb_databases_present.yml
+    #   loop: "{{ users | dict2items }}"
+    #   when: item.value.users_mariadb_databases is defined
 
-    - name: Users MariaDB account created and password set
-      include_tasks: galaxy/roles/mariadb/tasks/user_present.yml
+    - name: Users MariaDB accounts created and passwords set for users other than root and sudoers
+      include_tasks: mariadb_user_present.yml
       vars:
         mariadb_user: "{{ item.key }}"
-        # mariadb_databases: "{% for db in item.value.users_mariadb_databases %}{{ db }}{% endfor %}"
-        # mariadb_databases: "{{ query('dict', 'item.value.users_mariadb_databases') }}"
-        # mariadb_databases: 
-        #   - "[ {{ item.value.users_mariadb_databases }} ]"
-        # mariadb_databases: "{{ list.value.users_mariadb_databases }}"
         mariadb_databases: "{{ lookup('list', item.value.users_mariadb_databases) | default([]) }}"
       loop: "{{ users | dict2items }}"
-      # loop: "{{ lookup('dict', users) }}"
-      when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
+      when: ( "chroot" not in item.value.users_groups ) and ( "root" not in item.value.users_groups ) 
 
     - name: Quotas set
       include_tasks: quota.yml

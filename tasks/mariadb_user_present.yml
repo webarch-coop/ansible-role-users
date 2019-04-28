@@ -1,0 +1,115 @@
+---
+- name: "Register the HOME directory path if a user account for {{ mariadb_user }} exists"
+  shell: "grep '^{{ mariadb_user }}:' /etc/passwd | awk -F : '{ print $6 }'"
+  register: mariadb_user_home
+
+- name: "Check if the HOME directory exists for {{ mariadb_user }}"
+  stat:
+    path: "{{ mariadb_user_home.stdout }}"
+  register: mariadb_user_home_check
+  when: ( mariadb_mycnf is not defined ) and ( mariadb_user_home.stdout != "" )
+
+- name: Check if a user group matching the MariaDB user exists
+  command: "grep '^{{ mariadb_user }}:' /etc/group"
+  register: mariadb_user_group_check
+
+- name: "Set mariadb_mycnf_group to {{ mariadb_user }} as the group exists"
+  set_fact:
+    mariadb_mycnf_group: "{{ mariadb_user }}"
+  when: mariadb_user_group_check.stdout != ""
+
+- name: "Set mariadb_mycnf_group to users as the {{ mariadb_user }} group doesn't exists"
+  set_fact:
+    mariadb_mycnf_group: users
+  when: mariadb_user_group_check.stdout == ""
+
+- name: "Set mariadb_mycnf to /root/.{{ mariadb_user }}.my.cnf"
+  set_fact:
+    mariadb_mycnf: "/root/.{{ mariadb_user }}.my.cnf"
+    mariadb_mycnf_owner: root
+  when: ( mariadb_mycnf is not defined ) and ( mariadb_user_home.stdout == "" )
+
+- name: "Set mariadb_mycnf to {{ mariadb_user_home_check.stdout | quote }}/.my.cnf"
+  set_fact:
+    mariadb_mycnf: "{{ mariadb_user_home.stdout | quote }}/.my.cnf"
+    mariadb_mycnf_owner: "{{ mariadb_user }}"
+    mariadb_mycnf_group: "{{ mariadb_mycnf_group }}"
+  when: ( mariadb_mycnf is not defined ) and ( mariadb_user_home_check.stat.exists )
+
+- name: "Stat {{ mariadb_mycnf }}"
+  stat:
+    path: "{{ mariadb_mycnf }}"
+  register: mariadb_user_mycnf_stat
+
+# Generate a password
+- block:
+
+    - name: "Generate a random password for {{ mariadb_user }} as it is not defined or empty"
+      command: pwgen -n 20 1
+      register: mariadb_password_gen
+
+    - name: Set a fact for the mariadb_password
+      set_fact:
+        mariadb_password: "{{ mariadb_password_gen.stdout | trim | quote }}"
+
+  when: ( mariadb_user_mycnf_stat.stat.exists == False ) and ( mariadb_password is not defined or mariadb_password == "" )
+
+# Read a password
+- block:
+
+    - name: "mariadb_password loaded from {{ mariadb_mycnf }} since the file exists and the password was not set"
+      # shell: "grep ^password {{ mariadb_mycnf }} | sed -e 's/[[:space:]]//' | sed -e 's/password=//' | tr -d '\"'"
+      shell: "my_print_defaults --defaults-file='{{ mariadb_mycnf }}' client | grep '^--password' | sed -e 's/--password=//'"
+      register: mariadb_password_read
+
+    - name: Set a fact for the mariadb_password
+      set_fact:
+        mariadb_password: "{{ mariadb_password_read.stdout | trim | quote }}"
+
+  when: ( mariadb_user_mycnf_stat.stat.exists == True ) and ( mariadb_password is not defined or mariadb_password == "" )
+
+- debug:
+    msg: "mariadb_password: {{ mariadb_password }}"
+    verbosity: 3
+  when: mariadb_password is defined and mariadb_password != ""
+
+- fail:
+    msg: "The mariadb_password appears not to be set"
+  when: mariadb_password is not defined or mariadb_password == ""
+
+- name: "mariadb_password written to {{ mariadb_mycnf }}"
+  template:
+    src: templates/my.cnf.j2
+    dest: "{{ mariadb_mycnf }}"
+    owner: "{{ mariadb_mycnf_owner }}"
+    group: "{{ mariadb_mycnf_group }}"
+    mode: 0400
+    force: true
+
+- name: "Databases that {{ mariadb_user }} should have access to"
+  debug:
+    msg: "{{ db }}"
+    verbosity: 1
+  loop: "{{ mariadb_databases }}"
+  loop_control:
+    loop_var: db
+  when: ( mariadb_databases is defined ) and ( mariadb_databases != "" )
+
+- name: "Set a variable for mysql_user priv for {{ mariadb_user }}"
+  set_fact:
+    mariadb_priv: "{% if mariadb_databases[0] is defined %}{% for db in mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
+
+- name: "Print priv for {{ mariadb_user }}"
+  debug:
+    var: mariadb_priv
+    verbosity: 1
+
+- name: MariaDB user present
+  mysql_user:
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ mariadb_user }}"
+    password: "{{ mariadb_password }}"
+    priv: "{{ mariadb_priv }}"
+    state: present
+    update_password: always
