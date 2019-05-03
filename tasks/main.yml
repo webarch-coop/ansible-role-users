@@ -85,19 +85,17 @@
         state: absent
       loop: "{{ users | dict2items }}"
 
-    - name: User accounts absent
+    - name: Users accounts absent
       user:
         name: "{{ item.key }}"
         state: absent
         remove: true
       loop: "{{ users | dict2items }}"
 
-#    - name: Users MariaDB account absent
-#      include_tasks: mariadb_user_absent.yml
-#      vars:
-#        mariadb_user: "{{ item.key }}"
-#      loop: "{{ users | dict2items }}"
-#      when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
+    - name: Users MariaDB account and databases absent
+      include_tasks: mariadb_user_absent.yml
+      loop: "{{ users | dict2items }}"
+      when: ( users_pam_mysql is defined ) and ( users_pam_mysql == True )
 
     - name: User groups absent
       group:
@@ -140,8 +138,6 @@
     - name: Users MariaDB accounts and databases created and passwords read or set
       include_tasks: mariadb_user_present.yml
       vars:
-        mariadb_user: "{{ item.key }}"
-        mariadb_databases: "{{ lookup('list', item.value.users_mariadb_databases) | default([]) }}"
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
 

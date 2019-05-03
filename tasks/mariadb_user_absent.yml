@@ -1,7 +1,15 @@
 ---
-- name: "MariaDB user {{ mariadb_user }} absent"
-  mysql_user:
-    login_user: root
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-    name: "{{ mariadb_user }}"
-    state: absent
+- name: "Get the databases that {{ item.key }} has access to"
+  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='test1';" mysql
+  register: users_mariadb_list
+
+- debug:
+    msg: "Databases to be deleted: {{ users_mariadb_list.stdout_list }}"
+    verbosity: 1
+
+#- name: "MariaDB user {{ mariadb_user }} absent"
+#  mysql_user:
+#    login_user: root
+#    login_unix_socket: /var/run/mysqld/mysqld.sock
+#    name: "{{ mariadb_user }}"
+#    state: absent
