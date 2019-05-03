@@ -51,23 +51,23 @@
   debug:
     msg: "{{ db }}"
     verbosity: 1
-  loop: "{{ users_mariadb_databases }}"
+  loop: "{{ item.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
-  when: ( users_mariadb_databases != "" ) or ( users_mariadb_databases != [] ) and ( users_mariadb_databases is defined )
+  when: ( item.value.users_mariadb_databases != [] ) and ( users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
 
 - name: "Databases present for {{ item.key }}"
   mysql_db:
     name: "{{ db }}"
     state: present
-  loop: "{{ users_mariadb_databases }}"
+  loop: "{{ item.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
-  when: ( users_mariadb_databases != "" ) or ( users_mariadb_databases != [] ) and ( users_mariadb_databases is defined )
+  when: ( item.value.users_mariadb_databases != [] ) and ( users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
 
 - name: "Set a variable for mysql_user priv for {{ item.key }}"
   set_fact:
-    users_mariadb_priv: "{% if users_mariadb_databases[0] is defined %}{% for db in users_mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
+    users_mariadb_priv: "{% if item.value.users_mariadb_databases[0] is defined %}{% for db in item.value.users_mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
 
 - name: "Print priv for {{ item.key }}"
   debug:
