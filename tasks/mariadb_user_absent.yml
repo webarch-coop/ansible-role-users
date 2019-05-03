@@ -10,7 +10,7 @@
 - name: "Databases absent for {{ item.key }}"
   mysql_db:
     name: "{{ db }}"
-    state: present
+    state: absent
   loop: "{{ users_mariadb_list.stdout_lines }}"
   loop_control:
     loop_var: db
