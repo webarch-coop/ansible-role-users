@@ -11,13 +11,15 @@
   mysql_db:
     name: "{{ db }}"
     state: absent
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   loop: "{{ users_mariadb_list.stdout_lines }}"
   loop_control:
     loop_var: db
 
-#- name: "MariaDB user {{ mariadb_user }} absent"
-#  mysql_user:
-#    login_user: root
-#    login_unix_socket: /var/run/mysqld/mysqld.sock
-#    name: "{{ mariadb_user }}"
-#    state: absent
+- name: "MariaDB user {{ item.key }} absent"
+  mysql_user:
+    name: "{{ item.key }}"
+    state: absent
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
