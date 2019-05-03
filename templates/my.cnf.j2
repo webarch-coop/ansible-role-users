@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
 
 [client]
-user="{{ mariadb_user }}"
-password="{{ mariadb_password }}"
+user="{{ item.key }}"
+password="{{ users_mariadb_password }}"

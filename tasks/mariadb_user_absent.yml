@@ -1,0 +1,7 @@
+---
+- name: "MariaDB user {{ mariadb_user }} absent"
+  mysql_user:
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ mariadb_user }}"
+    state: absent
