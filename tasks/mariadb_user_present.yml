@@ -59,6 +59,8 @@
   mysql_db:
     name: "{{ db }}"
     state: present
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   loop: "{{ item.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
@@ -74,10 +76,10 @@
 
 - name: "MariaDB {{ item.key }} user present"
   mysql_user:
-    login_user: root
-    login_unix_socket: /var/run/mysqld/mysqld.sock
     name: "{{ item.key }}"
     password: "{{ users_mariadb_password }}"
     priv: "{{ users_mariadb_priv }}"
     state: present
     update_password: always
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
