@@ -132,12 +132,12 @@
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
 
-    - name: Users MariaDB databases present
-      include_tasks: mariadb_databases_present.yml
-      loop: "{{ users | dict2items }}"
-      when: item.value.users_mariadb_databases is defined
+#    - name: Users MariaDB databases present
+#      include_tasks: mariadb_databases_present.yml
+#      loop: "{{ users | dict2items }}"
+#      when: item.value.users_mariadb_databases is defined
 
-    - name: Users MariaDB accounts created and passwords set for users other than root and sudoers
+    - name: Users MariaDB accounts and databases created and passwords read or set
       include_tasks: mariadb_user_present.yml
       vars:
         mariadb_user: "{{ item.key }}"
