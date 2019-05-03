@@ -143,7 +143,7 @@
         mariadb_user: "{{ item.key }}"
         mariadb_databases: "{{ lookup('list', item.value.users_mariadb_databases) | default([]) }}"
       loop: "{{ users | dict2items }}"
-      when: ( "chroot" not in item.value.users_groups ) and ( "root" not in item.value.users_groups ) 
+      when: ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
 
     - name: Quotas set
       include_tasks: quota.yml
