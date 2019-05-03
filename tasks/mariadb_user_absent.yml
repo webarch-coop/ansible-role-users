@@ -4,7 +4,7 @@
   register: users_mariadb_list
 
 - debug:
-    msg: "Databases to be deleted: {{ users_mariadb_list.stdout_list }}"
+    msg: "Databases to be deleted: {{ users_mariadb_list.stdout_lines }}"
     verbosity: 1
 
 #- name: "MariaDB user {{ mariadb_user }} absent"
