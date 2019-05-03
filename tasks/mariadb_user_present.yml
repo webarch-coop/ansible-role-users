@@ -54,7 +54,7 @@
   loop: "{{ item.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
-  when: ( item.value.users_mariadb_databases != [] ) and ( users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
+  # when: ( item.value.users_mariadb_databases != [] ) and ( users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
 
 - name: "Databases present for {{ item.key }}"
   mysql_db:
@@ -63,7 +63,7 @@
   loop: "{{ item.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
-  when: ( item.value.users_mariadb_databases != [] ) and ( users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
+  # when: ( item.value.users_mariadb_databases != [] ) and ( users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
 
 - name: "Set a variable for mysql_user priv for {{ item.key }}"
   set_fact:
