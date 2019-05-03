@@ -7,6 +7,14 @@
     msg: "Databases to be deleted: {{ users_mariadb_list.stdout_lines }}"
     verbosity: 1
 
+- name: "Databases absent for {{ item.key }}"
+  mysql_db:
+    name: "{{ db }}"
+    state: present
+  loop: "{{ users_mariadb_list.stdout_lines }}"
+  loop_control:
+    loop_var: db
+
 #- name: "MariaDB user {{ mariadb_user }} absent"
 #  mysql_user:
 #    login_user: root
