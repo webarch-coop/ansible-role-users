@@ -47,15 +47,8 @@
 
 - name: "The databases that {{ item.key }} has access to"
   command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
+  changed_when: false
   register: users_mariadb_list
-
-- name: "Databases that {{ item.key }} should have access to"
-  debug:
-    msg: "{{ db }}"
-    verbosity: 1
-  loop: "{{ item.value.users_mariadb_databases }}"
-  loop_control:
-    loop_var: db
 
 - debug: 
     msg: "Databases that {{ item.key }} should have access to: {{ item.value.users_mariadb_databases }}"
@@ -69,6 +62,20 @@
     msg: "Databases to delete: {{ users_mariadb_list.stdout_lines | difference(item.value.users_mariadb_databases) }}"
     verbosity: 1
   when: ( users_mariadb_list is defined ) and ( users_mariadb_list != "" )
+
+- set_fact:
+    users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(item.value.users_mariadb_databases) }}"
+
+- name: "Databases absent for {{ item.key }}"
+  mysql_db:
+    name: "{{ db }}"
+    state: absent
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  loop: "{{ users_mariadb_delete_list }}"
+  when: ( users_mariadb_delete_list is defined ) and ( users_mariadb_delete_list != [] )
+  loop_control:
+    loop_var: db
 
 - name: "Databases present for {{ item.key }}"
   mysql_db:
