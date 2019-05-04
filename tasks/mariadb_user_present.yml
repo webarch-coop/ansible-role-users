@@ -4,7 +4,6 @@
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   register: users_mycnf
 
-# Generate a password
 - block:
 
     - name: "Generate a random password for {{ item.key }} MaridaDB account as ~/.my.cnf doesn't exist"
@@ -17,10 +16,9 @@
 
   when: users_mycnf.stat.exists == False
 
-# Read a password
 - block:
 
-    - name: "MariaDB password loaded from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
+    - name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
       shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
       register: users_mariadb_password_read
 
@@ -31,7 +29,7 @@
   when: users_mycnf.stat.exists == True
 
 - debug:
-    msg: "users_mariadb_password: {{ users_mariadb_password }}"
+    msg: "MariaDB passwd for {{ item.key }}: {{ users_mariadb_password }}"
     verbosity: 3
 
 - fail:
@@ -47,6 +45,10 @@
     mode: 0400
     force: true
 
+- name: "The databases that {{ item.key }} has access to"
+  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='test1';" mysql
+  register: users_mariadb_list
+
 - name: "Databases that {{ item.key }} should have access to"
   debug:
     msg: "{{ db }}"
@@ -54,6 +56,10 @@
   loop: "{{ item.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
+
+- debug:
+    msg: "Databases to delete: {{ users_mariadb_list | difference(item.value.users_mariadb_databases) }}"
+    verbosity: 1
 
 - name: "Databases present for {{ item.key }}"
   mysql_db:

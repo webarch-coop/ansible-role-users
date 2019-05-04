@@ -1,10 +1,10 @@
 ---
-- name: "Get the databases that {{ item.key }} has access to"
+- name: "The databases that {{ item.key }} has access to"
   command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='test1';" mysql
   register: users_mariadb_list
 
 - debug:
-    msg: "Databases to be deleted: {{ users_mariadb_list.stdout_lines }}"
+    msg: "Databases to be deleted for {{ item.key }}: {{ users_mariadb_list.stdout_lines }}"
     verbosity: 1
 
 - name: "Databases absent for {{ item.key }}"
