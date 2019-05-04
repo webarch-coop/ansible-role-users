@@ -46,7 +46,7 @@
     force: true
 
 - name: "The databases that {{ item.key }} has access to"
-  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='test1';" mysql
+  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
   register: users_mariadb_list
 
 - name: "Databases that {{ item.key }} should have access to"
