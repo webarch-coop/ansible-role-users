@@ -36,7 +36,7 @@
     msg: "The mariadb_password appears not to be set"
   when: ( users_mariadb_password is not defined ) or ( users_mariadb_password == "" )
 
-- name: "mariadb_password written to {{ users_mycnf }}"
+- name: "mariadb_password written to {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   template:
     src: templates/my.cnf.j2
     dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
@@ -50,20 +50,8 @@
   changed_when: false
   register: users_mariadb_list
 
-- debug: 
-    msg: "Databases that {{ item.key }} should have access to: {{ item.value.users_mariadb_databases }}"
-    verbosity: 1
-
-- debug:
-    msg: "Databases that {{ item.key }} does have access to: {{ users_mariadb_list.stdout_lines }}"
-    verbosity: 1
-
-- debug:
-    msg: "Databases to delete: {{ users_mariadb_list.stdout_lines | difference(item.value.users_mariadb_databases) }}"
-    verbosity: 1
-  when: ( users_mariadb_list is defined ) and ( users_mariadb_list != "" )
-
-- set_fact:
+- name: "Set a fact for the databases to delete for {{ item.key }}"
+  set_fact:
     users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(item.value.users_mariadb_databases) }}"
 
 - name: "Databases absent for {{ item.key }}"
