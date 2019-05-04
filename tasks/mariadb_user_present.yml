@@ -58,8 +58,9 @@
     loop_var: db
 
 - debug:
-    msg: "Databases to delete: {{ users_mariadb_list.stdout_list | difference(item.value.users_mariadb_databases) }}"
+    msg: "Databases to delete: {{ users_mariadb_list.stdout | difference(item.value.users_mariadb_databases) }}"
     verbosity: 1
+  when: ( users_mariadb_list is defined ) and ( users_mariadb_list != "" )
 
 - name: "Databases present for {{ item.key }}"
   mysql_db:
