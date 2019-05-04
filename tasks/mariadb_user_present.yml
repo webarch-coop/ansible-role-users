@@ -57,6 +57,14 @@
   loop_control:
     loop_var: db
 
+- debug: 
+    msg: "Databases that {{ item.key }} should have access to: {{ item.value.users_mariadb_databases }}"
+    verbosity: 1
+
+- debug:
+    msg: "Databases that {{ item.key }} does have access to: {{ users_mariadb_list.stdout }}"
+    verbosity: 1
+
 - debug:
     msg: "Databases to delete: {{ users_mariadb_list.stdout | difference(item.value.users_mariadb_databases) }}"
     verbosity: 1
