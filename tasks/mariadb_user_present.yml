@@ -58,7 +58,7 @@
     loop_var: db
 
 - debug:
-    msg: "Databases to delete: {{ users_mariadb_list | difference(item.value.users_mariadb_databases) }}"
+    msg: "Databases to delete: {{ users_mariadb_list.stdout_list | difference(item.value.users_mariadb_databases) }}"
     verbosity: 1
 
 - name: "Databases present for {{ item.key }}"
