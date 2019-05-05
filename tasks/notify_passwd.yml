@@ -2,16 +2,17 @@
 - name: "Stat {{ item.key }}/.notify_passwd file"
   register: users_notify_passwd_file
 
-- name: "Random passwd for {{ item.key }} generated"
-  command: pwgen -n 20 1 
-  register: users_passwd
-  when: users_notify_passwd_file.stat.exists == False 
+- block:
 
-# https://www.systutorials.com/39549/changing-linux-users-password-in-one-command-line/
-- name: "Password set for {{ item.key }}"
-  shell: echo -e "{{ users_passwd }}\n{{ users_passwd }}" | passwd {{ item.key }}
+    - name: "Random passwd for {{ item.key }} generated"
+      command: pwgen -n 20 1
+      register: users_passwd
 
-- name: "Password notification email sent to {{ item.value.users_email }}" 
-  when: item.value.users_email is defined and item.value.users_email != ""
+    # https://www.systutorials.com/39549/changing-linux-users-password-in-one-command-line/
+    - name: "Password set for {{ item.key }}"
+      shell: echo -e "{{ users_passwd }}\n{{ users_passwd }}" | passwd {{ item.key }}
 
-- name: "
+    - name: "Password notification email sent to {{ item.value.users_email }}"
+      when: item.value.users_email is defined and item.value.users_email != ""
+
+  when: users_notify_passwd_file.stat.exists == False

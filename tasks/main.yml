@@ -136,6 +136,10 @@
       loop: "{{ users | dict2items }}"
       when: ( quota_dir is defined ) and ( item.value.users_quota is defined ) and ( item.value.users_quota != "" )
 
+    - name: Set passwds and notify users
+      include_tasks: notify_passwd.yml
+      loop: "{{ users | dict2items }}"
+
   when: ( item.value.users_state is undefined ) or ( item.value.users_state == "present" )
 
 # Users quota CSV file updated
