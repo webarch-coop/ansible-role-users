@@ -121,4 +121,4 @@
         group: root
         mode: 0640
 
-  when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True ) and ( users_notify_passwd_file.stat.exists == False )
+  when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True ) and ( users_notify_mariadb_passwd_file.stat.exists == False )
