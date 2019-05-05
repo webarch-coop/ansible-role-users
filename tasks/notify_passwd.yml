@@ -10,6 +10,9 @@
       command: pwgen -n 20 1
       register: users_passwd
 
+    - debug:
+        msg: "Passwd command: echo -e '{{ users_passwd }}\n{{ users_passwd }}' | passwd {{ item.key }}"
+
     # https://www.systutorials.com/39549/changing-linux-users-password-in-one-command-line/
     - name: "Password set for {{ item.key }}"
       shell: "echo -e '{{ users_passwd }}\n{{ users_passwd }}' | passwd {{ item.key }}"
