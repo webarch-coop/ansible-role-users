@@ -1,10 +1,10 @@
 Hi {{ item.value.users_name | default(item.key) }}
 
-Your SFTP / SSH account details for {{ hostname }}:
+Your SFTP / SSH account details for {{ ansible_fqdn }}:
 
   Username:	{{ item.key }}
   Password:	{{ users_passwd.stdout }}
-  Server:	{{ hostname }}
+  Server:	{{ ansible_fqdn }}
   Port:		22
 
 All the best

@@ -21,14 +21,14 @@
 
     - name:
       set_fact:
-        users_passwd_notify_from: "Webarchitects <root@{{ hostname }}>"
+        users_passwd_notify_from: "Webarchitects <root@{{ ansible_fqdn }}>"
       when: ( users_passwd_notify_from is not defined ) or ( users_passwd_notify_from == "" )
 
     - name: "Password notification email sent to {{ item.value.users_email }}"
       mail:
         from: "{{ users_passwd_notify_from }}"
         to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
-        subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ hostname }}"
+        subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ ansible_fqdn }}"
         body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
         host: localhost
         port: 25
