@@ -3,7 +3,7 @@ Hi {{ item.value.users_name }}
 Your SFTP / SSH account details for {{ ansible_hostname }}:
 
   Username:	{{ item.key }}
-  Password:	{{ users_passwd }}
+  Password:	{{ users_passwd.stdout }}
   Server:	{{ ansible_hostname }}
   Port:		22
 

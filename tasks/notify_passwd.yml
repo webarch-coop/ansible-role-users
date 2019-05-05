@@ -11,11 +11,11 @@
       register: users_passwd
 
     - debug:
-        msg: "Passwd command: echo -e '{{ users_passwd }}\n{{ users_passwd }}' | passwd {{ item.key }}"
+        msg: "Passwd command: echo -e '{{ users_passwd.stdout }}\n{{ users_passwd.stdout }}' | passwd {{ item.key }}"
 
     # https://www.systutorials.com/39549/changing-linux-users-password-in-one-command-line/
     - name: "Password set for {{ item.key }}"
-      shell: "echo -e '{{ users_passwd }}\n{{ users_passwd }}' | passwd {{ item.key }}"
+      shell: "echo -e '{{ users_passwd.stdout }}\n{{ users_passwd.stdout }}' | passwd {{ item.key }}"
 
     - name: "Password notification email sent to {{ item.value.users_email }}"
       mail:
