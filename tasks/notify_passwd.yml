@@ -17,7 +17,7 @@
     - name: "Password set for {{ item.key }}"
       shell: |
              echo -e '{{ users_passwd.stdout }}
-             {{ users_passwd.stdout }}' | passwd {{ item.key }}"
+             {{ users_passwd.stdout }}' | passwd {{ item.key }}
       register: users_passwd_change
 
     - debug:
