@@ -1,4 +1,5 @@
 ---
+# Ideally this would check if the command needs to be run before running it
 - name: "Users that have membership of {{ item.value.users_group | default(item.key) }} group"
   command: "usermod -a -G {{ item.value.users_group | default(item.key) }} {{ users_group_member }}"
   loop: "{{ item.value.users_group_members }}"

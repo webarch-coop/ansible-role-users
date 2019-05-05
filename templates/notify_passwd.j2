@@ -1,0 +1,15 @@
+Hi {{ item.value.users_name }}
+
+Your SFTP / SSH account details for {{ ansible_hostname }}:
+
+  Username:	{{ item.key }}
+  Password:	{{ users_passwd }}
+  Server:	{{ ansible_hostname }}
+  Port:		22
+
+All the best
+
+{{ users_notify_passwd_from | default('Webarchitects') }}
+
+-- 
+{{ users_notify_passwd_signature | default('Webarch Co-operative Limited| https://www.webarchitects.coop/| Contact: https://webarch.net/contact| Help:    https://docs.webarch.net/| Status:  https://webarch.info/|') }}

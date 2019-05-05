@@ -1,5 +1,7 @@
 ---
 - name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/.notify_passwd file"
+  stat:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.notify_passwd"
   register: users_notify_passwd_file
 
 - block:
