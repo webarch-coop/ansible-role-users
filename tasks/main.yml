@@ -139,7 +139,7 @@
     - name: Set passwds and notify users
       include_tasks: notify_passwd.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_notify_passwd is defined ) ( item.value.users_notify_passwd == True ) and ( item.value.users_email is defined ) and ( item.value.users_email != "" )
+      when: ( item.value.users_notify_passwd is defined ) and ( item.value.users_notify_passwd == True ) and ( item.value.users_email is defined ) and ( item.value.users_email != "" )
 
   when: ( item.value.users_state is undefined ) or ( item.value.users_state == "present" )
 
