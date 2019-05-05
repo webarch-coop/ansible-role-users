@@ -3,10 +3,6 @@
   command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
   register: users_mariadb_list
 
-- debug:
-    msg: "Databases to be deleted for {{ item.key }}: {{ users_mariadb_list.stdout_lines }}"
-    verbosity: 1
-
 - name: "Databases absent for {{ item.key }}"
   mysql_db:
     name: "{{ db }}"

@@ -75,6 +75,10 @@
 # Delete users
 - block:
 
+    - name: Absent users MariaDB account and databases absent
+      include_tasks: mariadb_user_absent.yml
+      loop: "{{ users | dict2items }}"
+
     - name: Absent users home directories removed
       file:
         path: "{{ item.value.users_home | default('/home/' + item.key) }}"
@@ -86,10 +90,6 @@
         name: "{{ item.key }}"
         state: absent
         remove: true
-      loop: "{{ users | dict2items }}"
-
-    - name: Users MariaDB account and databases absent
-      include_tasks: mariadb_user_absent.yml
       loop: "{{ users | dict2items }}"
 
     - name: User groups absent
@@ -106,7 +106,7 @@
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: users_groups_user
-  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and users_groups_user.value.users_groups is defined
+  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and ( users_groups_user.value.users_groups is defined )
 
 - block:
 
@@ -119,16 +119,11 @@
     - name: Users group members present
       include: group_members.yml
       loop: "{{ users | dict2items }}"
-      when: item.value.users_group_members is defined and item.value.users_group_members != ""
+      when: ( item.value.users_group_members is defined ) and ( item.value.users_group_members != [] )
 
     - name: User accounts present
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
-
-#    - name: Users MariaDB databases present
-#      include_tasks: mariadb_databases_present.yml
-#      loop: "{{ users | dict2items }}"
-#      when: item.value.users_mariadb_databases is defined
 
     - name: Users MariaDB accounts and databases created and passwords read or set
       include_tasks: mariadb_user_present.yml
@@ -139,9 +134,9 @@
     - name: Quotas set
       include_tasks: quota.yml
       loop: "{{ users | dict2items }}"
-      when: quota_dir is defined and item.value.users_quota is defined and item.value.users_quota != ""
+      when: ( quota_dir is defined ) and ( item.value.users_quota is defined ) and ( item.value.users_quota != "" )
 
-  when: item.value.users_state is undefined or item.value.users_state == "present"
+  when: ( item.value.users_state is undefined ) or ( item.value.users_state == "present" )
 
 # Users quota CSV file updated
 - block:
