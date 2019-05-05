@@ -35,7 +35,7 @@
         from: "{{ users_passwd_notify_from | default('Webarchitects <root@{{ ansible_hostname }}') }}"
         to: "{{ users_name }} <{{ item.value.users_email }}>" 
         subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ ansible_hostname }}"
-        body: "{{ lookup('template', 'templates/passwd_notify.j2') }}"
+        body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
         host: localhost
         port: 25
       when: item.value.users_email is defined and item.value.users_email != ""
