@@ -90,3 +90,35 @@
     update_password: always
     login_user: root
     login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
+  stat:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd"
+  register: users_notify_mariadb_passwd_file
+  when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True )
+
+- block:
+
+    - name: "Password notification email sent to {{ item.value.users_email }}"
+      mail:
+        from: "{{ users_notify_passwd_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
+        to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
+        subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ item.key }} on {{ ansible_fqdn }}"
+        body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
+        host: localhost
+        port: 25
+        secure: never
+      when: item.value.users_email is defined and item.value.users_email != ""
+
+    - name: "Notification date recorded in {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
+      lineinfile:
+        path: "{{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd"
+        line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
+        create: true
+        state: present
+        insertafter: EOF
+        owner: root
+        group: root
+        mode: 0640
+
+  when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True ) and ( users_notify_passwd_file.stat.exists == False )
