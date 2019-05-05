@@ -14,21 +14,10 @@
       command: "mkpasswd --method=sha-512 {{ users_passwd.stdout }}"
       register: users_passwd_hash
 
-    # https://www.systutorials.com/39549/changing-linux-users-password-in-one-command-line/
-    #- name: "Password set for {{ item.key }}"
-    #  shell: |
-    #         echo -e "{{ users_passwd.stdout }}
-    #         {{ users_passwd.stdout }}" | sed 's/^ //' | passwd {{ item.key }}
-    #  register: users_passwd_change
-
     - name: "Password set for {{ item.key }}"
       user:
         name: "{{ item.key }}"
         password: "{{ users_passwd_hash.stdout }}"
-
-    #- debug:
-    #    msg: "{{ users_passwd_change.stdout }]"
-    #    verbosity: 1
 
     - name:
       set_fact:
@@ -37,8 +26,8 @@
 
     - name: "Password notification email sent to {{ item.value.users_email }}"
       mail:
-        from: "{{ users_passwd_notify_from }}" 
-        to: "{{ item.value.users_name | default('item.key') }} <{{ item.value.users_email }}>" 
+        from: "{{ users_passwd_notify_from }}"
+        to: "{{ item.value.users_name | default('item.key') }} <{{ item.value.users_email }}>"
         subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ ansible_hostname }}"
         body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
         host: localhost
@@ -50,7 +39,7 @@
       lineinfile:
         path: "{{ item.value.users_home | default('/home/' + item.key) }}/.notify_passwd"
         line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ item.value.users_name | default('item.key') }} <{{ item.value.users_email }}>"
-        create: yes
+        create: true
         state: present
         insertafter: EOF
         owner: root
