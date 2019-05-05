@@ -16,8 +16,8 @@
     # https://www.systutorials.com/39549/changing-linux-users-password-in-one-command-line/
     - name: "Password set for {{ item.key }}"
       shell: |
-             echo -e '{{ users_passwd.stdout }}
-             {{ users_passwd.stdout }}' | passwd {{ item.key }}
+             echo -e {{ users_passwd.stdout }}
+             {{ users_passwd.stdout }} | passwd {{ item.key }}
       register: users_passwd_change
 
     - debug:
