@@ -3,8 +3,8 @@
 user = {{ item.key }} 
 group = {{ item.key }}
 chroot = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}
-;listen = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock
-listen = /{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock
+listen = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock
+;listen = /{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock
 listen.owner = root
 listen.group = {{ item.key }}
 listen.mode = 0640
