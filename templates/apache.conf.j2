@@ -30,11 +30,22 @@
     DirectoryIndex index.php index.html index.shtml index.htm index.xhtml wsh.shtml
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
-    <FilesMatch "\.php$">
-      <If "-f %{REQUEST_FILENAME}">
-        SetHandler "proxy:unix:{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
-      </If>
-    </FilesMatch>
+    <IfModule proxy_fcgi_module>
+      <IfModule setenvif_module>
+        SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+      </IfModule>
+      <FilesMatch "\.php$">
+        <If "-f %{REQUEST_FILENAME}">
+          SetHandler "proxy:unix:{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
+        </If>
+      </FilesMatch>
+      <FilesMatch ".+\.phps$">
+        Require all denied
+      </FilesMatch>
+      <FilesMatch "^\.ph(ar|p|ps|tml)$">
+        Require all denied
+      </FilesMatch>
+    </IfModule>
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
     DirectoryIndex index.html index.php index.shtml index.xhtml index.cgi index.pl index.htm wsh.shtml
