@@ -1,4 +1,4 @@
-Hi {{ item.value.users_name }}
+Hi {{ item.value.users_name | default('item.key') }}
 
 Your SFTP / SSH account details for {{ ansible_hostname }}:
 
