@@ -32,7 +32,7 @@
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
     <FilesMatch "\.php$">
       <If "-f %{REQUEST_FILENAME}">
-        SetHandler "proxy:unix:/{{ item.value.users_home | default('/home/' + item.key) }}//php-fpm.sock|fcgi://localhost/"
+        SetHandler "proxy:unix:{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
       </If>
     </FilesMatch>
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
