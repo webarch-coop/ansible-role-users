@@ -26,8 +26,15 @@
   DocumentRoot "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
   <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}">
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+    DirectoryIndex index.php index.html index.shtml index.htm index.xhtml wsh.shtml
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
-
+    <FilesMatch "\.php$">
+      <If "-f %{REQUEST_FILENAME}">
+        SetHandler "proxy:unix:/{{ item.value.users_home | default('/home/' + item.key) }}//php-fpm.sock|fcgi://localhost/"
+      </If>
+    </FilesMatch>
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
     DirectoryIndex index.html index.php index.shtml index.xhtml index.cgi index.pl index.htm wsh.shtml
