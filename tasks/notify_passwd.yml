@@ -38,6 +38,7 @@
         body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
         host: localhost
         port: 25
+        secure: never
       when: item.value.users_email is defined and item.value.users_email != ""
 
     - name: "Notification date recorded in {{ item.value.users_home | default('/home/' + item.key) }} file"
