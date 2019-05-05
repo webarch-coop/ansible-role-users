@@ -25,7 +25,7 @@
         to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
         subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ ansible_fqdn }}"
         headers:
-          - "{{ users_notify_passwd_headers | default['Reply-To=Webarchitects <support@webarchitects.coop>'] }}"
+          - "{{ users_notify_passwd_headers | default('Reply-To=Webarchitects <support@webarchitects.coop>') }}"
         body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
         host: localhost
         port: 25
