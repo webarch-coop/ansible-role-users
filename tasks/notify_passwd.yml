@@ -10,19 +10,25 @@
       command: pwgen -n 20 1
       register: users_passwd
 
-    - debug:
-        msg: "Passwd command: echo -e '{{ users_passwd.stdout }}\n{{ users_passwd.stdout }}' | passwd {{ item.key }}"
+    - name: "SHA 512 hash of passwd generated"
+      command: "mkpasswd --method=sha-512 {{ users_passwd.stdout }}"
+      register: users_passwd_hash
 
     # https://www.systutorials.com/39549/changing-linux-users-password-in-one-command-line/
-    - name: "Password set for {{ item.key }}"
-      shell: |
-             echo -e "{{ users_passwd.stdout }}
-             {{ users_passwd.stdout }}" | sed 's/^ //' | passwd {{ item.key }}
-      register: users_passwd_change
+    #- name: "Password set for {{ item.key }}"
+    #  shell: |
+    #         echo -e "{{ users_passwd.stdout }}
+    #         {{ users_passwd.stdout }}" | sed 's/^ //' | passwd {{ item.key }}
+    #  register: users_passwd_change
 
-    - debug:
-        msg: "{{ users_passwd_change.stdout }]"
-        verbosity: 1
+    - name: "Password set for {{ item.key }}"
+      user:
+        name: "{{ item.key }}"
+        password: "{{ users_passwd_hash.stdout }}"
+
+    #- debug:
+    #    msg: "{{ users_passwd_change.stdout }]"
+    #    verbosity: 1
 
     - name: "Password notification email sent to {{ item.value.users_email }}"
       mail:
