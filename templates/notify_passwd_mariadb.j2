@@ -1,0 +1,18 @@
+Hi {{ item.value.users_name | default(item.key) }}
+
+Your MariaDB account and database details for {{ ansible_fqdn }}:
+
+  Username:	{{ item.key }}
+  Password:	{{ users_passwd.stdout }}
+  Databases:	{% for d in item.value.users_mariadb_databases %}{{ d }} {% endfor %}
+  Server:	localhost
+  Port:		3306
+
+Note that there is no direct external access to the database.
+
+All the best
+
+{{ users_notify_passwd_from | default('Webarchitects') }}
+
+-- 
+{{ users_notify_passwd_signature | default('Webarch Co-operative Limited\nhttps://www.webarch.coop/') }}

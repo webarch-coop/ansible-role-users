@@ -104,7 +104,7 @@
         from: "{{ users_notify_passwd_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
         to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
         subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ item.key }} on {{ ansible_fqdn }}"
-        body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
+        body: "{{ lookup('template', 'templates/notify_passwd_mariadb.j2') }}"
         host: localhost
         port: 25
         secure: never
