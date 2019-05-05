@@ -1,5 +1,5 @@
 ---
-- name: "Stat {{ item.key }}/.notify_passwd file"
+- name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/.notify_passwd file"
   register: users_notify_passwd_file
 
 - block:
@@ -13,6 +13,24 @@
       shell: echo -e "{{ users_passwd }}\n{{ users_passwd }}" | passwd {{ item.key }}
 
     - name: "Password notification email sent to {{ item.value.users_email }}"
+      mail:
+        from: "{{ users_passwd_notify_from | default('Webarchitects <root@{{ ansible_hostname }}') }}"
+        to: "{{ users_name }} <{{ item.value.users_email }}>" 
+        subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ ansible_hostname }}"
+        body: "{{ lookup('template', 'templates/passwd_notify.j2') }}"
+        host: localhost
+        port: 25
       when: item.value.users_email is defined and item.value.users_email != ""
+
+    - name: "Notification date recorded in {{ item.value.users_home | default('/home/' + item.key) }} file"
+      lineinfile:
+        path: "{{ item.value.users_home | default('/home/' + item.key) }}"
+        line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ users_name }} <{{ item.value.users_email }}>"
+        create: yes
+        state: present
+        insertafter: EOF
+        owner: root
+        group: root
+        mode: 0644
 
   when: users_notify_passwd_file.stat.exists == False
