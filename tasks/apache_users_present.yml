@@ -50,9 +50,9 @@
 
 - name: Debug WP install
   debug:
-    msg: "vhost.users_cms: {{ vhost.users_cms }}" 
+    msg: "vhost.value.users_cms: {{ vhost.value.users_cms }}" 
   loop: "{{ item.value.users_apache_virtual_hosts.keys() | list }}"
-  # when: ( vhost.users_cms is defined ) and ( vhost.users_cms == "wordpress" )
+  # when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
   loop_control:
     loop_var: vhost
 
