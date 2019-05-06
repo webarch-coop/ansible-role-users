@@ -49,7 +49,7 @@
     - apache
 
 - name: WP install
-  include_task: wordpress.yml
+  include_tasks: wordpress.yml
   loop: "{{ item.value.users_apache_virtual_hosts.keys() | list }}"
   when: ( vhost.users_cms is defined ) and ( users_cms == "wordpress" )
   loop_control:
