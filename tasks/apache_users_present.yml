@@ -47,3 +47,11 @@
   changed_when: '"already enabled" not in users_a2ensite.stdout'
   tags:
     - apache
+
+- name: CMS install
+  include_task: "{{ vhost.users_cms }}.yml"
+  loop: "{{ item.value.users_apache_virtual_hosts.keys() | list }}"
+  when: ( vhost.users_cms is defined ) and ( users_cms != "" )
+  loop_control:
+    loop_var: vhost
+
