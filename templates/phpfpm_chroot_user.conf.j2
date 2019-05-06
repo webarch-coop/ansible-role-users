@@ -15,9 +15,15 @@ listen.mode = 0660
 ;listen.acl_groups =
 listen.allowed_clients = 127.0.0.1
 
+env[TMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+env[TMPDIR] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+env[TEMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+
 chdir = {{ item.value.users_home | default('/home/' + item.key) }}
 ; https://www.php.net/install.fpm.configuration
 php_admin_value[session.save_path] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+php_admin_value[upload_tmp_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+php_admin_value[sys_temp_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 
 pm = ondemand
 pm.max_children = {{ users_phpfpm_max_children | default('2') }}
@@ -31,10 +37,6 @@ access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
 slowlog = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
-
-env[TMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
-env[TMPDIR] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
-env[TEMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and
 ; stderr will be redirected to /dev/null according to FastCGI specs.
