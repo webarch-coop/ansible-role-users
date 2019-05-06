@@ -16,6 +16,8 @@ listen.mode = 0660
 listen.allowed_clients = 127.0.0.1
 
 chdir = {{ item.value.users_home | default('/home/' + item.key) }}
+; https://www.php.net/install.fpm.configuration
+php_admin_value[session.save_path] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 
 pm = ondemand
 pm.max_children = {{ users_phpfpm_max_children | default('2') }}
@@ -56,6 +58,7 @@ env[TEMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 ; via getenv(), $_ENV and $_SERVER.
 ; Default Value: yes
 ;clear_env = no
+clear_env = yes
 
 ; Limits the extensions of the main script FPM will allow to parse. This can
 ; prevent configuration mistakes on the web server side. You should only limit
@@ -64,6 +67,7 @@ env[TEMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 ; Note: set an empty value to allow all extensions.
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5 .php7
+security.limit_extensions = .php
 
 ; Pass environment variables like LD_LIBRARY_PATH. All $VARIABLEs are taken from
 ; the current environment.

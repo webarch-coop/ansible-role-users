@@ -40,12 +40,6 @@
           SetHandler "proxy:unix:{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
         </If>
       </FilesMatch>
-      <FilesMatch ".+\.phps$">
-        Require all denied
-      </FilesMatch>
-      <FilesMatch "^\.ph(ar|p|ps|tml)$">
-        Require all denied
-      </FilesMatch>
     </IfModule>
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
