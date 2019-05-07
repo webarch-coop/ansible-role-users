@@ -1,3 +1,4 @@
 ---
 - debug:
-    msg: "WordPress install dir: {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
+    msg: "WordPress install dir: {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+
