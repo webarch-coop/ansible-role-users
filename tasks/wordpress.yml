@@ -33,7 +33,7 @@
         users_wp_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
 
     - name: "Configure WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-      command: "wp core config --dbname='{{ users_wp_dbname }}' --dbuser='{{ item.key }} --dbpass='{{ users_wp_dbpass }}'"
+      command: "wp core config --dbname='{{ users_wp_dbname }}' --dbuser='{{ item.key }}' --dbpass='{{ users_wp_dbpass }}'"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
