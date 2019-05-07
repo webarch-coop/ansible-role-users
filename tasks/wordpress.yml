@@ -2,3 +2,8 @@
 - debug:
     msg: "WordPress install dir: {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
 
+- name: Check is WordPress ins installed
+  command: wp core is-installed
+  args:
+    chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+  become_user: "{{ item.key }}"
