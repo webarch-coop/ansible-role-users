@@ -41,13 +41,13 @@
 
     - name: Set fact for the database name
       set_fact:
-        users_wp_dbname: "{{ item.value.users_mariadb_databases[0] }}"
-      when: ( vhost.value.users_wp_dbname is not defined ) or ( vhost.value.users_wp_dbname == "" )
+        users_wp_dbname: "{{ vhost.value.users_wp_dbname }}"
+      when: ( vhost.value.users_wp_dbname is defined ) and ( vhost.value.users_wp_dbname == "" )
 
     - name: Set fact for the database name
       set_fact:
-        users_wp_dbname: "{{ vhost.value.users_wp_dbname }}"
-      when: ( vhost.value.users_wp_dbname is defined ) and ( vhost.value.users_wp_dbname == "" )
+        users_wp_dbname: "{{ item.value.users_mariadb_databases[0] }}"
+      when: ( vhost.value.users_wp_dbname is not defined ) or ( vhost.value.users_wp_dbname == "" )
 
     - name: Set facts
       set_fact:
@@ -61,46 +61,46 @@
       become_user: "{{ item.key }}"
       when: users_wp_config.stat.exists == False
 
+    - name: Set fact for WordPress URL
+      set_fact:
+        users_wp_url: "{{ vhost.value.users_wp_url }}"
+      when: ( vhost.value.users_wp_url is defined ) and ( vhost.value.users_wp_url != "" )
+
     # This will need updating for HTTPS when that is implemented
     - name: Set fact for WordPress URL
       set_fact:
         users_wp_url: "http://{{ item.value.users_apache_server_name }}"
       when: ( vhost.value.users_wp_url is not defined ) or ( vhost.value.users_wp_url == "" )
 
-    - name: Set fact for WordPress URL
+    - name: Set fact for WordPress title
       set_fact:
-        users_wp_url: "{{ vhost.value.users_wp_url }}"
-      when: ( vhost.value.users_wp_url is defined ) and ( vhost.value.users_wp_url is != "" )
+        users_wp_title: "{{ vhost.value.users_wp_title }}"
+      when: ( vhost.value.users_wp_title is defined ) and ( vhost.value.users_wp_title != "" )
 
     - name: Set fact for WordPress title
       set_fact:
         users_wp_title: "{{ item.value.users_apache_server_name }}"
       when: ( vhost.value.users_wp_title is not defined ) or ( vhost.value.users_wp_title == "" )
 
-    - name: Set fact for WordPress title
-      set_fact:
-        users_wp_title: "{{ vhost.value.users_wp_title }}"
-      when: ( vhost.value.users_wp_title is defined ) and ( vhost.value.users_wp_title != "" )
-
-    - name: Set fact for WordPress admin username
-      set_fact:
-        user_wp_admin_user: "{{ item.key }}"
-      when: ( vhost.value.user_wp_admin_user is not defined ) or ( vhost.value.user_wp_admin_user == "" )
- 
     - name: Set fact for WordPress admin username
       set_fact:
         user_wp_admin_user: "{{ vhost.value.user_wp_admin_user }}"
       when: ( vhost.value.user_wp_admin_user is defined ) and ( vhost.value.user_wp_admin_user != "" )
 
-    - name: Set fact for WordPress admin email
+    - name: Set fact for WordPress admin username
       set_fact:
-        user_wp_admin_email: "{{ item.value.users_email }}"
-      when: ( vhost.value.user_wp_admin_email is not defined ) or ( vhost.value.user_wp_admin_email == "" )
+        user_wp_admin_user: "{{ item.key }}"
+      when: ( vhost.value.user_wp_admin_user is not defined ) or ( vhost.value.user_wp_admin_user == "" )
 
     - name: Set fact for WordPress admin email
       set_fact:
         user_wp_admin_email: "{{ vhost.value.user_wp_admin_email }}"
       when: ( vhost.value.user_wp_admin_email is defined ) and ( ( vhost.value.user_wp_admin_email != "" )
+ 
+    - name: Set fact for WordPress admin email
+      set_fact:
+        user_wp_admin_email: "{{ item.value.users_email }}"
+      when: ( vhost.value.user_wp_admin_email is not defined ) or ( vhost.value.user_wp_admin_email == "" )
 
     - name: "Install WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       command: "wp core install --url='{{ users_wp_url }}' --title='' --admin_name='${USERNAME}' --admin_email='${EMAIL}' --admin_password='${PASSWD_WP}'"
