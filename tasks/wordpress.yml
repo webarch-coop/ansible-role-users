@@ -8,6 +8,11 @@
 #     chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
 #   become_user: "{{ item.key }}"
 
+- name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/index.php"
+  stat:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/index.php"
+  register: users_wp_index
+
 - name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-config.php"
   stat:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-config.php"
@@ -20,7 +25,7 @@
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
-      when: users_wp_config.stat.exists == False
+      when: users_wp_index.stat.exists == False
 
     - name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
       shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
@@ -37,6 +42,7 @@
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
+      when: users_wp_config.stat.exists == False
 
     # - name: "Install WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
     #   command: wp core install --url='https://${SITENAME}' --title='${SITENAME}' --admin_name='${USERNAME}' --admin_email='${EMAIL}' --admin_password='${PASSWD_WP}'
