@@ -51,8 +51,9 @@
 - name: Debug WP install
   debug:
     msg: "vhost.value.users_cms: {{ vhost.value.users_cms }}"
+  loop: "{{ lookup('dict', item.value.users_apache_virtual_hosts) }}"
   # loop: "{{ item.value.users_apache_virtual_hosts | subelements('users_cms', 'skip_missing=True') }}"
-  loop: "{{ lookup('subelements', item.value.users_apache_virtual_hosts, 'users_cms', {'skip_missing': True})}}"  
+  # loop: "{{ lookup('subelements', item.value.users_apache_virtual_hosts, 'users_cms', {'skip_missing': True})}}"  
   # when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
   loop_control:
     loop_var: vhost
