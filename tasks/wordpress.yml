@@ -32,6 +32,10 @@
       changed_when: false
       register: users_mariadb_password_read
 
+    - name: Debig DB name
+      debug:
+        msg: "First DB name: {{ item.value.users_mariadb_databases[0] }}"
+
     - name: Set facts for the database
       set_fact:
         users_wp_dbname: "{% if vhost.item.users_wp_dbname is not defined %}{{ item.value.users_mariadb_databases[0] }}{% else %}{{ vhost.item.users_wp_dbname }}{% endif %}"
