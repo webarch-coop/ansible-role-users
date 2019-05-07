@@ -109,19 +109,19 @@
       become_user: "{{ item.key }}"
       when: users_wp_config.stat.exists == False
 
-    # wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
-    # wp core language install en_GB
-    # wp core language activate en_GB
-    # wp plugin install wp-fail2ban
-    # wp plugin activate wp-fail2ban
-    # wp plugin install wp-piwik
-    # wp plugin activate wp-piwik
-    # wp option update wp-piwik_global-piwik_url "$PIWIK_URL"
-    # wp option update wp-piwik-site_id "$PIWIK_SITE_ID"
-    # wp option update wp-piwik_global-piwik_user "$PIWIK_USER"
-    # wp option update wp-piwik_global-piwik_token "$PIWIK_USER_TA"
-    # wp option update wp-piwik_global-track_mode default
-    # wp option update wp-piwik_global-force_protocol https
-    # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
+      # wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
+      # wp core language install en_GB
+      # wp core language activate en_GB
+      # wp plugin install wp-fail2ban
+      # wp plugin activate wp-fail2ban
+      # wp plugin install wp-piwik
+      # wp plugin activate wp-piwik
+      # wp option update wp-piwik_global-piwik_url "$PIWIK_URL"
+      # wp option update wp-piwik-site_id "$PIWIK_SITE_ID"
+      # wp option update wp-piwik_global-piwik_user "$PIWIK_USER"
+      # wp option update wp-piwik_global-piwik_token "$PIWIK_USER_TA"
+      # wp option update wp-piwik_global-track_mode default
+      # wp option update wp-piwik_global-force_protocol https
+      # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
 
   when: ( users_wp_index.stat.exists == False ) or ( users_wp_config.stat.exists == False )
