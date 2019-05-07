@@ -27,9 +27,9 @@
       changed_when: false
       register: users_mariadb_password_read
 
-    - name: Set a fact for the database
+    - name: Set facts for the database
       set_fact:
-        users_wp_dbname: "{% if vhost.item.users_wp_dbname is not defined %}{{ vhost.item.users_mariadb_databases[0]}}{% else %}{{ vhost.item.users_wp_dbname }}"
+        users_wp_dbname: "{% if vhost.item.users_wp_dbname is not defined %}{{ vhost.item.users_mariadb_databases[0]}}{% else %}{{ vhost.item.users_wp_dbname }}{% endif %}"
         users_wp_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
 
     - name: "Configure WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
@@ -39,6 +39,22 @@
       become_user: "{{ item.key }}"
 
     # - name: "Install WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-    #   command: wp --allow-root core install --url='https://${SITENAME}' --title='${SITENAME}' --admin_name='${USERNAME}' --admin_email='${EMAIL}' --admin_password='${PASSWD_WP}'
+    #   command: wp core install --url='https://${SITENAME}' --title='${SITENAME}' --admin_name='${USERNAME}' --admin_email='${EMAIL}' --admin_password='${PASSWD_WP}'
+    #
+    # wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
+    # wp core language install en_GB
+    # wp core language activate en_GB
+    # wp plugin install wp-fail2ban
+    # wp plugin activate wp-fail2ban
+    # wp plugin install wp-piwik
+    # wp plugin activate wp-piwik
+    # wp option update wp-piwik_global-piwik_url "$PIWIK_URL"
+    # wp option update wp-piwik-site_id "$PIWIK_SITE_ID"
+    # wp option update wp-piwik_global-piwik_user "$PIWIK_USER"
+    # wp option update wp-piwik_global-piwik_token "$PIWIK_USER_TA"
+    # wp option update wp-piwik_global-track_mode default
+    # wp option update wp-piwik_global-force_protocol https
+    # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
+    #                                                                                              
 
   when: users_wp_config.stat.exists == False
