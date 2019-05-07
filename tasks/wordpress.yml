@@ -2,8 +2,45 @@
 - debug:
     msg: "WordPress install dir: {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
 
-- name: Check is WordPress ins installed
+- name: "Check if WordPress in installed in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
   command: wp core is-installed
   args:
     chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
   become_user: "{{ item.key }}"
+
+- name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-config.php"  
+  stat:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-config.php"
+  register: users_wp_config
+
+- block:
+
+    - name: "Download WordPress to {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      command: wp core download
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+      when: users_wp_config.stat.exists == False
+
+    - name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
+      shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
+      changed_when: false
+      register: users_mariadb_password_read
+
+    - name: Set a fact for the database 
+      set_fact:
+        users_wp_dbname: "{% if vhost.item.users_wp_dbname is not defined %}{{ vhost.item.users_mariadb_databases[0]}}{% else %}{{ vhost.item.users_wp_dbname }}"
+        users_wp_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+
+    - name: "Configure WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      command: "wp core config --dbname='{{ users_wp_dbname }}' --dbuser='{{ item.key }} --dbpass='{{ users_wp_dbpass }}'"
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    #- name: "Install WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+    #  command: wp --allow-root core install --url='https://${SITENAME}' --title='${SITENAME}' --admin_name='${USERNAME}' --admin_email='${EMAIL}' --admin_password='${PASSWD_WP}'
+
+  when: users_wp_config.stat.exists == False
+
+
