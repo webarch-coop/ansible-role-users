@@ -2,6 +2,9 @@
 - debug:
     msg: "WordPress install dir: {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
 
+- debug:
+    msg: "First DB name: {{ item.value.users_mariadb_databases[0] }}"
+
 # - name: "Check if WordPress in installed in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
 #   command: wp core is-installed
 #   args:
@@ -31,10 +34,6 @@
       shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
       changed_when: false
       register: users_mariadb_password_read
-
-    - name: Debig DB name
-      debug:
-        msg: "First DB name: {{ item.value.users_mariadb_databases[0] }}"
 
     - name: Set facts for the database
       set_fact:
