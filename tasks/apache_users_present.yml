@@ -52,7 +52,7 @@
   debug:
     msg: "vhost.value.users_cms: {{ vhost.value.users_cms }}"
   # {% for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
-  loop: "{{ item.value.users_apache_virtual_hosts.keys() }}"
+  loop: "{{ item.value.users_apache_virtual_hosts | dict2items  }}"
   # loop: "{{ lookup('dict', item.value.users_apache_virtual_hosts) }}"
   # loop: "{{ item.value.users_apache_virtual_hosts | subelements('users_cms', 'skip_missing=True') }}"
   # loop: "{{ lookup('subelements', item.value.users_apache_virtual_hosts, 'users_cms', {'skip_missing': True})}}"  
