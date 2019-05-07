@@ -103,15 +103,30 @@
       when: ( vhost.value.user_wp_admin_email is not defined ) or ( vhost.value.user_wp_admin_email == "" )
 
     - name: "Install WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-      command: "wp core install --url='{{ users_wp_url }}' --title='' --admin_name='{{ user_wp_admin_user }}' --admin_email='{{ user_wp_admin_email }}'"
+      command: "wp core install --url='{{ users_wp_url }}' --title='' --admin_name='{{ user_wp_admin_user }}' --admin_email='{{ user_wp_admin_email }}' --skip-email"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
       when: users_wp_config.stat.exists == False
 
-      # wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
-      # wp core language install en_GB
-      # wp core language activate en_GB
+    - name: Nice URLs for WordPress
+      command: wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: GB english installed
+      command: wp core language install en_GB
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: GB english activated
+      command: wp core language activate en_GB
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
       # wp plugin install wp-fail2ban
       # wp plugin activate wp-fail2ban
       # wp plugin install wp-piwik
@@ -123,5 +138,7 @@
       # wp option update wp-piwik_global-track_mode default
       # wp option update wp-piwik_global-force_protocol https
       # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
+      #
+      # Send admin account details bu email
 
   when: ( users_wp_index.stat.exists == False ) or ( users_wp_config.stat.exists == False )
