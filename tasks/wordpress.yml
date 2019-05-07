@@ -95,8 +95,8 @@
     - name: Set fact for WordPress admin email
       set_fact:
         user_wp_admin_email: "{{ vhost.value.user_wp_admin_email }}"
-      when: ( vhost.value.user_wp_admin_email is defined ) and ( ( vhost.value.user_wp_admin_email != "" )
- 
+      when: ( vhost.value.user_wp_admin_email is defined ) and ( vhost.value.user_wp_admin_email != "" )
+
     - name: Set fact for WordPress admin email
       set_fact:
         user_wp_admin_email: "{{ item.value.users_email }}"
@@ -123,6 +123,5 @@
     # wp option update wp-piwik_global-track_mode default
     # wp option update wp-piwik_global-force_protocol https
     # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
-    #                                                                                              
 
   when: ( users_wp_index.stat.exists == False ) or ( users_wp_config.stat.exists == False )
