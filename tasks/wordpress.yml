@@ -79,7 +79,7 @@
 
     - name: Set fact for WordPress title
       set_fact:
-        users_wp_title: "{{ item.value.users_apache_server_name }}"
+        users_wp_title: "{{ vhost.value.users_apache_server_name }}"
       when: ( vhost.value.users_wp_title is not defined ) or ( vhost.value.users_wp_title == "" )
 
     - name: Set fact for WordPress admin username
