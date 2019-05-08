@@ -69,7 +69,7 @@
     # This will need updating for HTTPS when that is implemented
     - name: Set fact for WordPress URL
       set_fact:
-        users_wp_url: "http://{{ item.value.users_apache_server_name }}"
+        users_wp_url: "http://{{ vhost.value.users_apache_server_name }}"
       when: ( vhost.value.users_wp_url is not defined ) or ( vhost.value.users_wp_url == "" )
 
     - name: Set fact for WordPress title
