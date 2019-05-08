@@ -51,3 +51,11 @@
     - .yarn
     - private
     - tmp
+
+- name: "Skel {{ users_skeleton }} WP-CLI config in place"
+  copy:
+    src: "files/skel.d/{{ users_skeleton }}/.wp-cli/config.yml"
+    dest: "/usr/local/etc/skel.d/{{ users_skeleton }}/.wp-cli/config.yml"
+    owner: root
+    group: root
+    mode: 0600
