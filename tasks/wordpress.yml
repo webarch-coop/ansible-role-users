@@ -8,7 +8,7 @@
 - name: Fail if we don't have an email address for the first WordPress users
   fail:
     msg: "A email address is needed for the WordPress install, please set either users_email or users_wp_admin_email"
-  when: ( item.value.users_wp_admin_email is not defined ) or ( vhost.value.users_wp_admin_email is not defined )
+  when: ( vhost.value.users_wp_admin_email is not defined ) and ( item.value.users_email is not defined )
 
 - name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/index.php"
   stat:
