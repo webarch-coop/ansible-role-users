@@ -5,11 +5,10 @@
 - debug:
     msg: "First DB name: {{ item.value.users_mariadb_databases[0] }}"
 
-# - name: "Check if WordPress in installed in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-#   command: wp core is-installed
-#   args:
-#     chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-#   become_user: "{{ item.key }}"
+- name: Fail if we don't have an email address for the first WordPress users
+  fail:
+    msg: "A email address is needed for the WordPress install, please set either users_email or users_wp_admin_email"
+  when: ( item.value.users_wp_admin_email is not defined ) or ( vhost.value.users_wp_admin_email is not defined )
 
 - name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/index.php"
   stat:
@@ -126,12 +125,12 @@
       become_user: "{{ item.key }}"
       when: users_wp_config.stat.exists == False
 
-    - name: "Password notification email sent to {{ users_wp_admin_email }}" 
+    - name: "Password notification email sent to {{ users_wp_admin_email }}"
       mail:
         from: "{{ users_notify_passwd_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
         to: "{{ users_wp_admin_email }}"
         subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] WordPress admin login for {{ users_wp_url }}"
-        body: "{{ lookup('template', 'templates/notify_passwd_wordpress.j2') }}" 
+        body: "{{ lookup('template', 'templates/notify_passwd_wordpress.j2') }}"
         host: localhost
         port: 25
         secure: never
@@ -150,7 +149,7 @@
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
 
-    - name: WP-CLI config file absent 
+    - name: WP-CLI config file absent
       file:
         path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-cli.local.yml"
         state: absent
@@ -163,6 +162,19 @@
 
     - name: GB english activated
       command: wp core language activate en_GB
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: Webarchitects sidebar added
+      command: wp widget add text sidebar-1 7 --title="{{ vhost.value.users_wp_sidebar_title | default('Hosting') }}" --text="{{ vhost.value.users_wp_sidebar_html | default('This site is hosted by <a href=&quot;https://www.webarchitects.coop/&quot;>Webarchitects Co-operative</a>') }}" 
+      #" this comment is a fix for a fault in vim yaml syntax highlighting
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: Blog description added
+      command: wp option update blogdescription "{{ vhost.value.users_wp_blogdescription | default('Another WordPress site hosted by the ethical and co-operative folk at Webarchitects') }}"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
@@ -198,7 +210,23 @@
       # wp option update wp-piwik_global-track_mode default
       # wp option update wp-piwik_global-force_protocol https
       # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
-      #
-      # Send admin account details by email
+
+    - name: Plugins updated
+      command: wp plugin update --all
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: Themes updated
+      command: wp theme update --all
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: Lauguages updated
+      command: wp core language update
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
 
   when: ( users_wp_index.stat.exists == False ) or ( users_wp_config.stat.exists == False )
