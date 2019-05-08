@@ -129,7 +129,7 @@
     - name: "Password notification email sent to {{ users_wp_admin_email }}" 
       mail:
         from: "{{ users_notify_passwd_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
-        to: "{{ {{ users_wp_admin_email }}"
+        to: "{{ users_wp_admin_email }}"
         subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] WordPress admin login for {{ users_wp_url }}"
         body: "{{ lookup('template', 'templates/notify_passwd_wordpress.j2') }}" 
         host: localhost
