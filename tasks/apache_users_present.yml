@@ -1,4 +1,8 @@
 ---
+# The way this currently works there is one cert per VirtualHost
+# this needs to be changed so it is one cert per user with a commonName
+# user.inventory_hostname with all the ServerName and ServerAlises for 
+# all the VirtualHosts. Perhaps both approaches should be options?
 - name: Let's Encrypt cert role included
   include_role:
     name: acmesh
