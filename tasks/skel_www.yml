@@ -27,6 +27,7 @@
     access_time: preserve
   with_items:
     - .bash_history
+    - .mysql_history
     - .yarnrc
 
 - name: "Skel {{ users_skeleton }} private directories present"
@@ -44,6 +45,7 @@
     - .drush
     - .git
     - .gnupg
+    - .local
     - .npm
     - .ssh
     - .vim
