@@ -120,7 +120,7 @@
       when: ( vhost.value.user_wp_admin_password is not defined ) or ( vhost.value.user_wp_admin_password == "" )
 
     - name: "Install WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-      command: "wp core install --url='{{ users_wp_url }}' --title='{{ users_wp_title }}' --admin_name='{{ user_wp_admin_user }}' --admin_email='{{ user_wp_admin_email }}' --admin_password='{{ wp_admin_password }}' --skip-email"
+      command: "wp core install --url='{{ users_wp_url }}' --title='{{ users_wp_title }}' --admin_name='{{ user_wp_admin_user }}' --admin_email='{{ user_wp_admin_email }}' --admin_password='{{ users_wp_admin_password }}' --skip-email"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
