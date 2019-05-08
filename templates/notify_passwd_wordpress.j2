@@ -1,0 +1,14 @@
+Hi {{ item.value.users_name | default(item.key) }}
+
+Your WordPress admin account details for {{ users_wp_url }}:
+
+  Username:	{{ user_wp_admin_user }}
+  Password:	{{ user_wp_admin_password }}
+  URL:		{{ users_wp_url }}/wp-login.php
+
+All the best
+
+{{ users_notify_passwd_from | default('Webarchitects') }}
+
+-- 
+{{ users_notify_passwd_signature | default('Webarch Co-operative Limited\nhttps://www.webarch.coop/') }}

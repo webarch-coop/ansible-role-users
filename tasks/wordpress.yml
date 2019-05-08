@@ -102,18 +102,58 @@
         user_wp_admin_email: "{{ item.value.users_email }}"
       when: ( vhost.value.user_wp_admin_email is not defined ) or ( vhost.value.user_wp_admin_email == "" )
 
+    - name: Set a fact for the admin password
+      set_fact:
+        user_wp_admin_password: "{{ vhost.value.user_wp_admin_password }}"
+      when: ( vhost.value.user_wp_admin_password is defined ) and ( vhost.value.user_wp_admin_password != "" )
+
+    - block:
+
+        - name: Generate a random string for WordPress admin password if one is not set
+          command: pwgen -n 20 1
+          register: user_wp_admin_password_gen
+
+        - name: Set a variable with the random password
+          set_fact:
+            user_wp_admin_password: "{{ user_wp_admin_password_gen.stdout }}"
+
+      when: ( vhost.value.user_wp_admin_password is not defined ) or ( vhost.value.user_wp_admin_password == "" )
+
     - name: "Install WordPress in {{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-      command: "wp core install --url='{{ users_wp_url }}' --title='' --admin_name='{{ user_wp_admin_user }}' --admin_email='{{ user_wp_admin_email }}' --skip-email"
+      command: "wp core install --url='{{ users_wp_url }}' --title='{{ users_wp_title }}' --admin_name='{{ user_wp_admin_user }}' --admin_email='{{ user_wp_admin_email }}' --admin_password='{{ wp_admin_password }}' --skip-email"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
       when: users_wp_config.stat.exists == False
+
+    - name: "Password notification email sent to {{ user_wp_admin_email }}" 
+      mail:
+        from: "{{ users_notify_passwd_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
+        to: "{{ {{ user_wp_admin_email }}"
+        subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] WordPress admin login for {{ users_wp_url }}"
+        body: "{{ lookup('template', 'templates/notify_passwd_wordpress.j2') }}" 
+        host: localhost
+        port: 25
+        secure: never
+
+    - name: WP-CLI config file in place for .htaccess generation
+      copy:
+        src: files/wp-cli.local.yml
+        dest: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-cli.local.yml"
+        owner: "{{ item.key }}"
+        group: "{{ item.key }}"
+        mode: 0640
 
     - name: Nice URLs for WordPress
       command: wp rewrite structure '/%year%/%monthnum%/%postname%' --hard
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
+
+    - name: WP-CLI config file absent 
+      file:
+        path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-cli.local.yml"
+        state: absent
 
     - name: GB english installed
       command: wp core language install en_GB
@@ -127,10 +167,30 @@
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
 
-      # wp plugin install wp-fail2ban
-      # wp plugin activate wp-fail2ban
-      # wp plugin install wp-piwik
-      # wp plugin activate wp-piwik
+    - name: Plugin wp-fail2ban installed
+      command: wp plugin install wp-fail2ban
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: Plugin wp-fail2ban activated
+      command: wp plugin activate wp-fail2ban
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: Plugin wp-piwik installed
+      command: wp plugin install wp-piwik
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
+    - name: Plugin wp-piwik activated
+      command: wp plugin activate wp-piwik
+      args:
+        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      become_user: "{{ item.key }}"
+
       # wp option update wp-piwik_global-piwik_url "$PIWIK_URL"
       # wp option update wp-piwik-site_id "$PIWIK_SITE_ID"
       # wp option update wp-piwik_global-piwik_user "$PIWIK_USER"
@@ -139,6 +199,6 @@
       # wp option update wp-piwik_global-force_protocol https
       # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
       #
-      # Send admin account details bu email
+      # Send admin account details by email
 
   when: ( users_wp_index.stat.exists == False ) or ( users_wp_config.stat.exists == False )
