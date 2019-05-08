@@ -172,8 +172,8 @@
       when: ( vhost.value.users_wp_sidebar_html is not defined ) or ( vhost.value.users_wp_sidebar_html == "" )
 
     - name: Webarchitects sidebar added
-      command: wp widget add text sidebar-1 7 --title="{{ vhost.value.users_wp_sidebar_title | default('Hosting') }}" --text="{{ users_wp_sidebar_html }}" 
-      #" this comment is a fix for a fault in vim yaml syntax highlighting
+      command: wp widget add text sidebar-1 7 --title="{{ vhost.value.users_wp_sidebar_title | default('Hosting') }}" --text="{{ users_wp_sidebar_html }}"
+      # " this comment is a work around for a bug in vim yaml syntax highlighting
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
