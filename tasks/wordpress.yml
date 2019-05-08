@@ -154,14 +154,14 @@
         path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}/wp-cli.local.yml"
         state: absent
 
-    - name: GB english installed
-      command: wp core language install en_GB
+    - name: "Language {{ users_wp_locale }} installed"
+      command: "wp language core install {{ users_wp_locale }}"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
 
-    - name: GB english activated
-      command: wp core language activate en_GB
+    - name: "Language {{ users_wp_locale }} activated"
+      command: "wp core language activate {{ users_wp_locale }}"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
       become_user: "{{ item.key }}"
@@ -216,22 +216,18 @@
       # wp option update wp-piwik_global-force_protocol https
       # wp option update wp-piwik_global-proxy_url "$PIWIK_URL"
 
-    - name: Plugins updated
-      command: wp plugin update --all
+    - name: Plugins, themes and languages updated
+      command: "{{ update }}"
       args:
         chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-      become_user: "{{ item.key }}"
-
-    - name: Themes updated
-      command: wp theme update --all
-      args:
-        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
-      become_user: "{{ item.key }}"
-
-    - name: Lauguages updated
-      command: wp core language update
-      args:
-        chdir: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+      loop:
+        - "wp plugin update --all"
+        - "wp theme update --all"
+        - "wp language core update"
+        - "wp language plugin update --all"
+        - "wp language theme update --all"
+      loop_control:
+        loop_var: update
       become_user: "{{ item.key }}"
 
   when: ( users_wp_index.stat.exists == False ) or ( users_wp_config.stat.exists == False )

@@ -198,6 +198,8 @@
 # Apache config for users
 - block:
 
+    # - name: Let's Encrypt tasks for absent users
+
     - name: Include Apache config tasks absent users
       include_tasks: apache_users_absent.yml
       loop: "{{ users | dict2items }}"

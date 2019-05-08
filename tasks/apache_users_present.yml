@@ -1,4 +1,16 @@
 ---
+- name: Let's Encrypt cert role included
+  include_role:
+    name: acmesh
+  vars:
+    common_name: "{{ vhost.value.users_apache_server_name }}"
+    subject_alt_names: "{{ vhost.value.users_apache_server_aliases }}" 
+  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+  tags:
+    - apache
+
 - name: "Apache {{ item.key }} sites-available file present"
   template:
     src: templates/apache.conf.j2
