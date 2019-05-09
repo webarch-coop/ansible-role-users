@@ -17,9 +17,16 @@
 # One cert per user
 - block:
 
-    - name: Set fact for commonName
+    - name: "Set {{ item.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
       set_fact:
         common_name: "{{ item.key }}.{{ inventory_hostname }}"
+        subject_alt_names: []
+
+    - debug:
+        msg: "users_apache_server_name: {{ item.value.users_apache_server_name }}"
+
+    - debug:
+        msg: "users_apache_server_aliases: {{ item.value.users_apache_server_aliases }}"
 
     - name: Populate list of ServerName's for the user
       set_fact:
