@@ -23,8 +23,9 @@
 
     - name: Populate list of ServerName's for the user
       set_fact:
-        server_names: "{{ vhost.value.users_apache_server_name }}"
+        loop_server_names: "{{ vhost.value.users_apache_server_name }}"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+      register: server_names
       loop_control:
         loop_var: vhost
       tags:
@@ -32,8 +33,9 @@
 
     - name: Populate list ServerAliases' for the user
       set_fact:
-        server_aliases: "{{ vhost.value.users_apache_server_aliases|default([]) }}"
+        loop_server_aliases: "{{ vhost.value.users_apache_server_aliases|default([]) }}"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+      register: server_aliases
       loop_control:
         loop_var: vhost
       tags:
@@ -47,7 +49,7 @@
 
     - name: Set a fact for all the ServerName's and ServerAliases
       set_fact:
-        subject_alt_name: "{{ server_names }} + {{ server_aliases }}"
+        subject_alt_names: "{{ server_names }} + {{ server_aliases }}"
 
 #    - name: Set facts for subjectAltNames
 #      set_fact:
