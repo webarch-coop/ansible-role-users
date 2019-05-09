@@ -7,6 +7,14 @@
 {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
 {% endif %}
+
+  Alias "/.well-known/acme-challenge" "{{ document_root }}/.well-known/acme-challenge"
+  <Directory "{{ document_root }}/.well-known/acme-challenge">
+    Options None
+    AllowOverride None
+    ForceType text/plain
+    Allow from All
+  </Directory>
   Redirect / https://{{ vhost_config.users_apache_server_name }}/
 </VirtualHost>
 
