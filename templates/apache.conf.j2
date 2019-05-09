@@ -90,3 +90,5 @@
   CustomLog {{ item.value.users_home | default('/home/' + item.key) }}/logs/access.log combinedio
 </VirtualHost>
 {% endfor %}
+
+# vim: set ft=apache:
