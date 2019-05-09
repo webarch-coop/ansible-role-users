@@ -23,9 +23,9 @@
 
     - name: Populate list of ServerName's for the user
       set_fact:
-        loop_server_names: "{{ vhost.value.users_apache_server_name }}"
+        server_names: "{{ vhost.value.users_apache_server_name }}"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-      register: server_names
+      register: server_names_loop
       loop_control:
         loop_var: vhost
       tags:
@@ -33,9 +33,9 @@
 
     - name: Populate list ServerAliases' for the user
       set_fact:
-        loop_server_aliases: "{{ vhost.value.users_apache_server_aliases|default([]) }}"
+        server_aliases: "{{ vhost.value.users_apache_server_aliases|default([]) }}"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-      register: server_aliases
+      register: server_aliases_loop
       loop_control:
         loop_var: vhost
       tags:
@@ -45,11 +45,29 @@
         msg: "server_names: {{ server_names }}"
 
     - debug:
+        var: server_names
+
+    - debug:
+        msg: "server_names_loop: {{ server_names_loop }}"
+
+    - debug:
+        var: server_names_loop
+
+    - debug:
         msg: "server_aliases: {{ server_aliases }}"
+
+    - debug:
+        var: server_aliases
+
+    - debug:
+        msg: "server_aliases_loop: {{ server_aliases_loop }}"
+
+    - debug:
+        var: server_aliases_loop
 
     - name: Set a fact for all the ServerName's and ServerAliases
       set_fact:
-        subject_alt_names: "{{ server_names }} + {{ server_aliases }}"
+        subject_alt_names: "{{ server_names_loop.results | map(attribute='ansible_facts.server_names') }} + {{ server_aliases_loop.results | map(attribute='ansible_facts.server_aliases') }}"
 
 #    - name: Set facts for subjectAltNames
 #      set_fact:
