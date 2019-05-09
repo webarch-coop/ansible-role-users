@@ -36,7 +36,7 @@
 
     - name: Set fact for the database name, password, prefix and locale
       set_fact:
-        users_wp_dbname: "{% if vhost.value.users_wp_dbname %}{{ vhost.value.users_wp_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
+        users_wp_dbname: "{% if vhost.value.users_wp_dbname is defined %}{{ vhost.value.users_wp_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
         users_wp_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
         users_wp_dbprefix: "{{ vhost.value.users_wp_prefix | default('wp_') }}"
         users_wp_locale: "{{ vhost.value.users_wp_locale | default('en_GB') }}"
