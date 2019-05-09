@@ -1,8 +1,5 @@
 ---
-# The way this currently works there is one cert per VirtualHost
-# this needs to be changed so it is one cert per user with a commonName
-# user.inventory_hostname with all the ServerName and ServerAlises for
-# all the VirtualHosts. Perhaps both approaches should be options?
+# One cert per VirtualHost
 - name: Let's Encrypt cert role included
   include_role:
     name: acmesh
@@ -12,8 +9,36 @@
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+  when: users_cert == "vhost"
   tags:
     - apache
+
+# One cert per user
+- block:
+
+    - name: Set fact for commonName
+      set_fact:
+        common_name: "{{ item.key }}.{{ inventory_hostname }}"
+
+    - name: Set fact subjectAltNames
+      set_fact:
+        subject_alt_names:
+          - "{{ subject_alt_names }}"
+          - "{{ vhost.value.users_apache_server_name }}"
+          - "{{ vhost.value.users_apache_server_aliases }}" 
+      loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+      tags:
+        - apache
+
+    - name: Let's Encrypt cert role included
+      include_role:
+        name: acmesh
+      tags:
+        - apache
+
+ when: users_cert == "user"
 
 - name: "Apache {{ item.key }} sites-available file present"
   template:

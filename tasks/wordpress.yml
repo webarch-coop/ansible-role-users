@@ -34,22 +34,10 @@
       changed_when: false
       register: users_mariadb_password_read
 
-    - name: Set fact for the database password
+    - name: Set fact for the database name, password, prefix and locale
       set_fact:
+        users_wp_dbname: "{% if vhost.value.users_wp_dbname %}{{ vhost.value.users_wp_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
         users_wp_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
-
-    - name: Set fact for the database name
-      set_fact:
-        users_wp_dbname: "{{ vhost.value.users_wp_dbname }}"
-      when: ( vhost.value.users_wp_dbname is defined ) and ( vhost.value.users_wp_dbname == "" )
-
-    - name: Set fact for the database name
-      set_fact:
-        users_wp_dbname: "{{ item.value.users_mariadb_databases[0] }}"
-      when: ( vhost.value.users_wp_dbname is not defined ) or ( vhost.value.users_wp_dbname == "" )
-
-    - name: Set facts
-      set_fact:
         users_wp_dbprefix: "{{ vhost.value.users_wp_prefix | default('wp_') }}"
         users_wp_locale: "{{ vhost.value.users_wp_locale | default('en_GB') }}"
 
