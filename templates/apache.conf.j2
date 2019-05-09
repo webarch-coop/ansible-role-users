@@ -3,6 +3,14 @@
 
 # {{ vhost }}
 <VirtualHost *:80>
+  ServerName {{ vhost_config.users_apache_server_name }}
+{% if vhost_config.users_apache_server_aliases is defined %}
+  ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
+{% endif %}
+  Redirect / https://{{ vhost_config.users_apache_server_name }}/
+</VirtualHost>
+
+<VirtualHost *:443>
 {% if apache_mods_enabled is defined and "suexec" in apache_mods_enabled %}
 <IfModule suexec_module>
   SuexecUserGroup {{ item.key }} {{ item.key }}
@@ -19,6 +27,11 @@
 {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
 {% endif %}
+
+  SSLEngine on
+  SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
+  SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
+  SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
 
 {% if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"

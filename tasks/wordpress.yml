@@ -53,10 +53,9 @@
         users_wp_url: "{{ vhost.value.users_wp_url }}"
       when: ( vhost.value.users_wp_url is defined ) and ( vhost.value.users_wp_url != "" )
 
-    # This will need updating for HTTPS when that is implemented
     - name: Set fact for WordPress URL
       set_fact:
-        users_wp_url: "http://{{ vhost.value.users_apache_server_name }}"
+        users_wp_url: "https://{{ vhost.value.users_apache_server_name }}"
       when: ( vhost.value.users_wp_url is not defined ) or ( vhost.value.users_wp_url == "" )
 
     - name: Set fact for WordPress title
