@@ -43,6 +43,9 @@
         msg: "common_name is set to: {{ common_name }}"
         verbosity: 1
 
+    - fail:
+        msg: stop
+
     - name: Let's Encrypt cert role included
       include_role:
         name: acmesh
