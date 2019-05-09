@@ -20,6 +20,8 @@
     - name: Set fact for commonName
       set_fact:
         common_name: "{{ item.key }}.{{ inventory_hostname }}"
+        san: []
+        sans: []
         subject_alt_names: []
 
     - name: Set facts for subjectAltNames
