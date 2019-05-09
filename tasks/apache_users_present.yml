@@ -3,6 +3,7 @@
 - name: Let's Encrypt cert role included
   include_role:
     name: acmesh
+    tasks_from: letsencrypt
   vars:
     common_name: "{{ vhost.value.users_apache_server_name }}"
     subject_alt_names: "{{ vhost.value.users_apache_server_aliases }}"
@@ -35,10 +36,11 @@
     - name: Let's Encrypt cert role included
       include_role:
         name: acmesh
+        tasks_from: letsencrypt
       tags:
         - apache
 
- when: users_cert == "user"
+  when: users_cert == 'user'
 
 - name: "Apache {{ item.key }} sites-available file present"
   template:
