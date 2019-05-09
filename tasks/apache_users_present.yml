@@ -24,14 +24,23 @@
     - name: Set fact subjectAltNames
       set_fact:
         subject_alt_names:
-          - "{{ subject_alt_names }}"
           - "{{ vhost.value.users_apache_server_name }}"
           - "{{ vhost.value.users_apache_server_aliases }}" 
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+      register: sans
       loop_control:
         loop_var: vhost
       tags:
         - apache
+
+    - debug:
+        msg: "sans is set to: {{ sans }}"
+
+    - debug:
+        msg: "subject_alt_names is set to: {{ subject_alt_names }}"
+
+    - fail:
+        msg: debug stop
 
     - name: Let's Encrypt cert role included
       include_role:
