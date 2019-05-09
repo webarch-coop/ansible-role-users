@@ -25,8 +25,6 @@
     - name: Set facts for subjectAltNames
       set_fact:
         subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
-        # san: "{{ vhost.value.users_apache_server_name }} + {{ vhost.value.users_apache_server_aliases|default([]) }}"
-        # san: "{{ vhost.value.users_apache_server_aliases|default([]) + [ vhost.value.users_apache_server_name ] }}"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -35,18 +33,11 @@
 
     - debug:
         msg: "subject_alt_names is set to: {{ subject_alt_names }}"
-
-    - debug:
-        var: "{{ subject_alt_names }}"
+        verbosity: 1
 
     - debug:
         msg: "common_name is set to: {{ common_name }}"
-
-    - debug:
-        var: "{{ common_name }}"
-
-    - fail:
-        msg: debug stop
+        verbosity: 1
 
     - name: Let's Encrypt cert role included
       include_role:
