@@ -24,7 +24,7 @@
 
     - name: Set facts for subjectAltNames
       set_fact:
-        subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + [ vhost.value.users_apache_server_aliases|default([]) ]%}{{ subject_alt_names | list }}"
+        subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
         # san: "{{ vhost.value.users_apache_server_name }} + {{ vhost.value.users_apache_server_aliases|default([]) }}"
         # san: "{{ vhost.value.users_apache_server_aliases|default([]) + [ vhost.value.users_apache_server_name ] }}"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
