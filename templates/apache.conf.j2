@@ -38,9 +38,9 @@
 {% endif %}
 
   SSLEngine on
-  SSLCertificateFile            {{ le_dir }}/{{ item.key }}{{ inventory_hostname }}.cert.pem
-  SSLCertificateKeyFile         {{ le_dir }}/{{ item.key }}{{ inventory_hostname }}.key.pem
-  SSLCertificateChainFile       {{ le_dir }}/{{ item.key }}{{ inventory_hostname }}.ca.pem
+  SSLCertificateFile            {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.cert.pem
+  SSLCertificateKeyFile         {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.key.pem
+  SSLCertificateChainFile       {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.ca.pem
 
 {% if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"
