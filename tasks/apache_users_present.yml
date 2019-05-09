@@ -24,7 +24,7 @@
 
     - name: Set fact subjectAltNames
       set_fact:
-        san: "{{ vhost.value.users_apache_server_name }} + {{ vhost.value.users_apache_server_aliases }}"
+        san: "{{ vhost.value.users_apache_server_name }} + [ {{ vhost.value.users_apache_server_aliases }} ]"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
       register: sans
       loop_control:
