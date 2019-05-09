@@ -23,9 +23,9 @@
 
     - name: Set fact subjectAltNames
       set_fact:
-        subject_alt_names: "{{ vhost.value.users_apache_server_name }} + {{ vhost.value.users_apache_server_aliases }}" 
+        sans: "{{ vhost.value.users_apache_server_name }} + [ '{{ vhost.value.users_apache_server_aliases }}' ]"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-      register: sans_list
+      register: subject_alt_names
       loop_control:
         loop_var: vhost
       tags:
@@ -35,10 +35,10 @@
         msg: "subject_alt_names is set to: {{ subject_alt_names }}"
 
     - debug:
-        msg: "sans_list is set to: {{ sans_list }}"
+        msg: "sans is set to: {{ sans }}"
 
     - debug:
-        msg: "{{ sans_list.results | map(attribute='ansible_facts.subject_alt_names') | list }}"
+        msg: "{{ subject_alt_names.results | map(attribute='ansible_facts.sans') | list }}"
 
     - fail:
         msg: debug stop
