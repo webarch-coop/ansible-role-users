@@ -20,11 +20,11 @@
     - name: Set fact for commonName
       set_fact:
         common_name: "{{ item.key }}.{{ inventory_hostname }}"
-        sans: []
+        subject_alt_names: []
 
-    - name: Set fact subjectAltNames
+    - name: Set facts for subjectAltNames
       set_fact:
-        san: "{{ vhost.value.users_apache_server_name }} + {{ vhost.value.users_apache_server_aliases }}"
+        san: "{{ vhost.value.users_apache_server_aliases|default([]) }} + [ {{ vhost.value.users_apache_server_name }} ]"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
       register: sans
       loop_control:
