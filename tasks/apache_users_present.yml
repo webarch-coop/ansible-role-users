@@ -33,6 +33,9 @@
         - apache
 
     - debug:
+        msg: "san is set to: {{ san }}"
+
+    - debug:
         msg: "sans is set to: {{ sans }}"
 
     - debug:
