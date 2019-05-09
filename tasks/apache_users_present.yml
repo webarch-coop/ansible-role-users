@@ -39,7 +39,10 @@
         msg: "sans is set to: {{ sans }}"
 
     - debug:
-        msg: "{{ sans.results | map(attribute='ansible_facts.san') | list }}"
+        msg: "flattened sans.results: {{ sans.results | map(attribute='ansible_facts.sans') | list }}"
+
+    - debug:
+        msg: "flattened sans.results: {{ sans.results | map(attribute='ansible_facts.san') | list }}"
 
     - name: Set a variable for all the subjectAltNames
       set_fact:
