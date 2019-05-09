@@ -39,10 +39,13 @@
         msg: "san is set to: {{ san }}"
 
     - debug:
+        var: san
+
+    - debug:
         msg: "sans is set to: {{ sans }}"
 
     - debug:
-        msg: "flattened sans.results: {{ sans.results | map(attribute='ansible_facts.sans') | list }}"
+        var: sans
 
     - debug:
         msg: "flattened sans.results: {{ sans.results | map(attribute='ansible_facts.san') | list }}"
