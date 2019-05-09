@@ -20,39 +20,64 @@
     - name: Set fact for commonName
       set_fact:
         common_name: "{{ item.key }}.{{ inventory_hostname }}"
-        san: []
-        sans: []
-        subject_alt_names: []
 
-    - name: Set facts for subjectAltNames
+    - name: Populate list of ServerName's for the user
       set_fact:
-        san: "{{ vhost.value.users_apache_server_name }} + {{ vhost.value.users_apache_server_aliases|default([]) }}"
-        # san: "{{ vhost.value.users_apache_server_aliases|default([]) + [ vhost.value.users_apache_server_name ] }}"
+        server_names: "{{ vhost.value.users_apache_server_name }}"
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-      register: sans
+      loop_control:
+        loop_var: vhost
+      tags:
+        - apache
+
+    - name: Populate list ServerAliases' for the user
+      set_fact:
+        server_aliases: "{{ vhost.value.users_apache_server_aliases|default([]) }}"
+      loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
       tags:
         - apache
 
     - debug:
-        msg: "san is set to: {{ san }}"
+        msg: "server_names: {{ server_names }}"
 
     - debug:
-        var: san
+        msg: "server_aliases: {{ server_aliases }}"
 
-    - debug:
-        msg: "sans is set to: {{ sans }}"
-
-    - debug:
-        var: sans
-
-    - debug:
-        msg: "flattened sans.results: {{ sans.results | map(attribute='ansible_facts.san') | list }}"
-
-    - name: Set a variable for all the subjectAltNames
+    - name: Set a fact for all the ServerName's and ServerAliases
       set_fact:
-        subject_alt_names: "{{ sans.results | map(attribute='ansible_facts.san') | list }}"
+        subject_alt_name: "{{ server_names }} + {{ server_aliases }}"
+
+#    - name: Set facts for subjectAltNames
+#      set_fact:
+#        san: "{{ vhost.value.users_apache_server_name }} + {{ vhost.value.users_apache_server_aliases|default([]) }}"
+#        # san: "{{ vhost.value.users_apache_server_aliases|default([]) + [ vhost.value.users_apache_server_name ] }}"
+#      loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+#      register: sans
+#      loop_control:
+#        loop_var: vhost
+#      tags:
+#        - apache
+#
+#    - debug:
+#        msg: "san is set to: {{ san }}"
+#
+#    - debug:
+#        var: san
+#
+#    - debug:
+#        msg: "sans is set to: {{ sans }}"
+#
+#    - debug:
+#        var: sans
+#
+#    - debug:
+#        msg: "flattened sans.results: {{ sans.results | map(attribute='ansible_facts.san') | list }}"
+#
+#    - name: Set a variable for all the subjectAltNames
+#      set_fact:
+#        subject_alt_names: "{{ sans.results | map(attribute='ansible_facts.san') | list }}"
 
     - debug:
         msg: "subject_alt_names is set to: {{ subject_alt_names }}"
