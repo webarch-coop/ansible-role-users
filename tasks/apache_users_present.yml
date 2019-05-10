@@ -118,7 +118,8 @@
   register: users_mariadb_password_read
 
 - name: Include WordPress role
-  include_role: wordpress
+  include_role:
+    name: wordpress
   vars:
     wordpress_user: "{{ item.key }}"
     wordpress_group: "{{ item.key }}"
