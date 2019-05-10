@@ -131,7 +131,7 @@
     wordpress_dbprefix: "{{ vhost.value.wordpress_dbprefix | default('wp_') }}"
     wordpress_locale: "{{ vhost.value.wordpress_dbprefix | default('en_GB') }}"
     wordpress_url: "{{ vhost.value.wordpress_url | default(vhost.value.users_apache_server_name) }}"
-    wordpress_title: "{{ vhost.value.wordpress_title }}"
+    wordpress_title: "{{ vhost.value.wordpress_title | default(vhost.value.users_apache_server_name) }}"
     wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(vhost.key) }}"
     wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(item.value.users_email) }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
