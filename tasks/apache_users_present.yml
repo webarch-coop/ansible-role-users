@@ -125,7 +125,7 @@
     wordpress_group: "{{ item.key }}"
     wordpress_docroot: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
     wordpress_docroot_mode: "0750"
-    wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.users_wp_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
+    wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
     wordpress_dbuser: "{{ item.key }}"
     wordpress_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     wordpress_dbprefix: "{{ vhost.value.wordpress_dbprefix | default('wp_') }}"
