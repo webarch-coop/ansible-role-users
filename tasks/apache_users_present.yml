@@ -132,7 +132,7 @@
 
 - name: Include Matomo role
   include_role:
-    name: wordpress
+    name: matomo 
   vars:
     matomo_user: "{{ item.key }}"
     matomo_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
