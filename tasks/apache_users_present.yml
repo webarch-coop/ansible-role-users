@@ -43,9 +43,6 @@
         msg: "common_name is set to: {{ common_name }}"
         verbosity: 1
 
-    # - fail:
-    #     msg: stop
-
     - name: Let's Encrypt cert role included
       include_role:
         name: acmesh
@@ -104,15 +101,6 @@
   tags:
     - apache
 
-
-# - name: WP install
-#   include_tasks: wordpress.yml
-#   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-#   loop_control:
-#     loop_var: vhost
-#   tags:
-#     - apache
-
 - name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
   register: users_mariadb_password_read
@@ -138,3 +126,25 @@
   loop_control:
     loop_var: vhost
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
+
+- name: Include Matomo role
+  include_role:
+    name: wordpress
+  vars:
+    matomo_user: "{{ item.key }}"
+    matomo_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    matomo_html: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
+    matomo_private: "{{ item.value.users_home | default('/home/' + item.key) }}/private"
+    matomo_db_username: "{{ item.key }}"
+    matomo_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    matomo_db_host: localhost
+    matomo_db_name: "{% if vhost.value.matomo_dbname is defined %}{{ vhost.value.matomo_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
+    matomo_first_site_name: "{{ vhost.value.matomo_first_site_name | default('inventory_hostname') }}"
+    matomo_first_site_url: "{{ vhost.value.matomo_first_site_url | default('https://' + inventory_hostname + '/') }}"
+    matomo_first_user: "{{ vhost.value.matomo_first_user | default('item.key') }}"
+    matomo_first_user_email: "{{ item.value.users_email | default('root@' + inventory_hostname) }}"
+    matomo_first_user_pass: ""
+  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
