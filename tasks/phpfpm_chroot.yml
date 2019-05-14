@@ -27,6 +27,16 @@
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
 
+    - name: "php-fpm log directory {{ item.value.users_home | default('/home/' + item.key) }}/logs present"
+      file:
+        path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs"
+        state: directory
+        owner: root
+        group: "{{ item.key }}"
+        mode: 0750
+      loop: "{{ users | dict2items }}"
+      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+
     - name: Users PHP FPM pool.d file present
       template:
         src: templates/phpfpm_chroot_user.conf.j2

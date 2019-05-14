@@ -122,6 +122,9 @@
     wordpress_title: "{{ vhost.value.wordpress_title | default(vhost.value.users_apache_server_name) }}"
     wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(vhost.key) }}"
     wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(item.value.users_email) }}"
+    wordpress_email_from: "{{ users_notify_passwd_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
+    wordpress_email_subject_tag: "{{ users_passwd_notify_subject_tag | default('webarchitects') }}"
+    wordpress_email_signature: "{{ users_email_signature }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
@@ -144,6 +147,7 @@
     matomo_first_user: "{{ vhost.value.matomo_first_user | default('item.key') }}"
     matomo_first_user_email: "{{ item.value.users_email | default('root@' + inventory_hostname) }}"
     matomo_first_user_pass: ""
+    matomo_email_signature: "{{ users_notify_passwd_signature }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
