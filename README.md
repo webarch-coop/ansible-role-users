@@ -36,7 +36,7 @@ roles_path = galaxy/roles
 And a `.gitignore` containing:
 
 ```
-roles/galaxy
+galaxy/roles
 ```
 
 To pull this repo in run:
