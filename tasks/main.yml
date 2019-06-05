@@ -29,6 +29,14 @@
     users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
   when: users_phpfpm_status.stdout == "istalled"
 
+- name: Print the users_phpfpm_status
+  debug:
+    msg: "users_phpfpm_version: {{ users_phpfpm_version }}"
+    verbosity: 1
+
+- fail:
+    msg: stop
+
 - name: Check if a chroot exists
   stat:
     path: "{{ chroot_dir | default('/chroot') }}"

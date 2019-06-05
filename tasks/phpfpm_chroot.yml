@@ -1,19 +1,4 @@
 ---
-- name: Set the PHP version variable on stretch
-  set_fact:
-    users_phpfpm_version: "7.0"
-  when: users_debian_version == "stretch"
-
-- name: Set the PHP version variable on buster
-  set_fact:
-    users_phpfpm_version: "7.3"
-  when: users_debian_version == "buster"
-
-- name: Set the PHP version variable on bionic
-  set_fact:
-    users_phpfpm_version: "7.2"
-  when: users_debian_version == "buster"
-
 - name: Get all groups
   getent:
     database: group
