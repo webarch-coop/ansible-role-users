@@ -29,7 +29,8 @@
 
   when: users_mycnf.stat.exists == True
 
-- fail:
+- name: Fail when MariaDB password not set
+  fail:
     msg: "The mariadb_password appears not to be set"
   when: ( users_mariadb_password is not defined ) or ( users_mariadb_password == "" )
 

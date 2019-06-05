@@ -26,10 +26,18 @@
   when: users_debian_version == "buster"
   changed_when: false
 
+<<<<<<< HEAD
 - name: Print the users_phpfpm_status
   debug:
     msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
     verbosity: 1
+=======
+- name: Check if php-fpm is installed on bionic
+  shell: dpkg -s php7.2-fpm | grep ^Status | awk '{ print $4 }'
+  register: users_phpfpm_status
+  when: users_debian_version == "bionic"
+  changed_when: false
+>>>>>>> 17bdb902a636279dc5209b35515cbd9d05beddb7
 
 - name: Check if a chroot exists
   stat:
