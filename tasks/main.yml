@@ -14,23 +14,28 @@
   tags:
     - apache
 
-- name: Check if php-fpm is installed on stretch
-  shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
+- name: Check if php-fpm is installed
+  shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
   register: users_phpfpm_status
-  when: users_debian_version == "stretch"
   changed_when: false
 
-- name: Check if php-fpm is installed on buster
-  shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
-  register: users_phpfpm_status
-  when: users_debian_version == "buster"
-  changed_when: false
-
-- name: Check if php-fpm is installed on bionic
-  shell: dpkg -s php7.2-fpm | grep ^Status | awk '{ print $4 }'
-  register: users_phpfpm_status
-  when: users_debian_version == "bionic"
-  changed_when: false
+# - name: Check if php-fpm is installed on stretch
+#   shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
+#   register: users_phpfpm_status
+#   when: users_debian_version == "stretch"
+#   changed_when: false
+# 
+# - name: Check if php-fpm is installed on buster
+#   shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
+#   register: users_phpfpm_status
+#   when: users_debian_version == "buster"
+#   changed_when: false
+# 
+# - name: Check if php-fpm is installed on bionic
+#   shell: dpkg -s php7.2-fpm | grep ^Status | awk '{ print $4 }'
+#   register: users_phpfpm_status
+#   when: users_debian_version == "bionic"
+#   changed_when: false
 
 - name: Print the users_phpfpm_status
   debug:
