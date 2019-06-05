@@ -36,9 +36,6 @@
     verbosity: 1
   when: users_phpfpm_status is defined
 
-- fail:
-    msg: stop
-
 - name: Check if a chroot exists
   stat:
     path: "{{ chroot_dir | default('/chroot') }}"
