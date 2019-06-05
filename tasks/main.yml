@@ -26,6 +26,11 @@
   when: users_debian_version == "buster"
   changed_when: false
 
+- name: Print the users_phpfpm_status
+  debug:
+    msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
+    verbosity: 1
+
 - name: Check if a chroot exists
   stat:
     path: "{{ chroot_dir | default('/chroot') }}"
@@ -191,7 +196,7 @@
 
     - name: Include the PHP FPM chroot tasks
       include_tasks: phpfpm_chroot.yml
-      when: users_phpfpm_status.stdout == "installed"
+      when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
 
   when: users_chroot_dir.stat.exists
 
