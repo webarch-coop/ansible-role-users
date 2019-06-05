@@ -23,16 +23,18 @@
   debug:
     msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
     verbosity: 1
+  when: users_phpfpm_status is defined
 
 - name: Set a fact for the PHP-FPM version
   set_fact:
     users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
-  when: users_phpfpm_status.stdout == "istalled"
+  when: users_phpfpm_status.stdout == "installed"
 
 - name: Print the users_phpfpm_status
   debug:
     msg: "users_phpfpm_version: {{ users_phpfpm_version }}"
     verbosity: 1
+  when: users_phpfpm_status is defined
 
 - fail:
     msg: stop
