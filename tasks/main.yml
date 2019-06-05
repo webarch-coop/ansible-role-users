@@ -19,28 +19,15 @@
   register: users_phpfpm_status
   changed_when: false
 
-# - name: Check if php-fpm is installed on stretch
-#   shell: dpkg -s php7.0-fpm | grep ^Status | awk '{ print $4 }'
-#   register: users_phpfpm_status
-#   when: users_debian_version == "stretch"
-#   changed_when: false
-# 
-# - name: Check if php-fpm is installed on buster
-#   shell: dpkg -s php7.3-fpm | grep ^Status | awk '{ print $4 }'
-#   register: users_phpfpm_status
-#   when: users_debian_version == "buster"
-#   changed_when: false
-# 
-# - name: Check if php-fpm is installed on bionic
-#   shell: dpkg -s php7.2-fpm | grep ^Status | awk '{ print $4 }'
-#   register: users_phpfpm_status
-#   when: users_debian_version == "bionic"
-#   changed_when: false
-
 - name: Print the users_phpfpm_status
   debug:
     msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
     verbosity: 1
+
+- name: Set a fact for the PHP-FPM version
+  set_fact:
+    users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
+  when: users_phpfpm_status.stdout == "istalled"
 
 - name: Check if a chroot exists
   stat:
