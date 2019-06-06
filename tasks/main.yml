@@ -2,7 +2,7 @@
 - name: Check /etc/debian_version
   shell: "lsb_release -c | awk '{ print $2 }'"
   register: users_debian_version_check
-  check_mode: no
+  check_mode: false
   changed_when: false
 
 - name: Set a fact for the Debian version
