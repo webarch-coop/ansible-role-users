@@ -22,6 +22,7 @@ chdir = {{ item.value.users_home | default('/home/' + item.key) }}
 php_admin_value[session.save_path] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 php_admin_value[upload_tmp_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 php_admin_value[sys_temp_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+php_admin_value[soap.wsdl_cache_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 ;php_admin_value[mail.log] = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/logs/mail.log
 php_admin_value[mail.log] = {{ item.value.users_home | default('/home/' + item.key) }}/logs/mail.log
 
