@@ -12,6 +12,8 @@
 - name: Load package information as facts
   package_facts:
     manager: apt
+  tags:
+    - apache
 
 - name: Check if php-fpm is installed
   shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
