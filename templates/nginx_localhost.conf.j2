@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+location /phpfpm-{{ item.key }}-status {
+  include fastcgi.conf;
+  fastcgi_pass unix:/chroot-users/{{ item.key }}/home/stats/php-fpm.sock;
+  allow 127.0.0.1;
+  deny all;
+}
+# vim: syntax=nginx

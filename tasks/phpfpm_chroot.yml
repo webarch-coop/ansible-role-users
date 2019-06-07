@@ -8,14 +8,54 @@
     var: getent_group
     verbosity: 2
 
-- block:
+- name: Stat /usr/sbin/apache2
+  stat:
+    path: /usr/sbin/apache2
+  register: users_apache2
+
+- name: /etc/apache2/localhost.d present
+  file:
+    path: /etc/apache2/localhost.d
+    state: directory
+  when: users_apache2.stat.exists
+
+- name: Stat /usr/sbin/nginx
+  stat:
+    path: /usr/sbin/nginx
+  register: users_nginx
+
+- name: /etc/nginx/localhost.d present
+  file:
+    path: /etc/nginx/localhost.d
+    state: directory
+  when: users_nginx.stat.exists
+
+- name: PHP FPM users absent
 
     - name: Users PHP FPM pool.d file absent
       file:
         path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
+
+    - name: Users Apache PHP FPM localhost.d file absent 
+      file:
+        path: "/etc/apache2/localhost.d/{{ item }}.conf"
+        state: absent
+      loop: "{{ users | dict2items }}"
+      when: users_apache2.stat.exists
+
+    - name: Users Nginx PHP FPM localhost.d file present
+      file:
+        path: "/etc/nginx/localhost.d/{{ item }}.conf"
+        state: absent
+      loop: "{{ users | dict2items }}"
+      when: users_nginx.stat.exists
+
+  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
+
+- name: PHP FPM users present
+  block:
 
     - name: "php-fpm log directory {{ item.value.users_home | default('/home/' + item.key) }}/logs present"
       file:
@@ -33,6 +73,20 @@
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+
+    - name: Users Apache PHP FPM localhost.d file present
+      template:
+        src: apache_localhost.conf.j2
+        dest: "/etc/apache2/localhost.d/{{ item }}.conf"
+      loop: "{{ users | dict2items }}"
+      when: ( users_apache2.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+
+    - name: Users Nginx PHP FPM localhost.d file present
+      template:
+        src: nginx_localhost.conf.j2
+        dest: "/etc/nginx/localhost.d/{{ item }}.conf"
+      loop: "{{ users | dict2items }}"
+      when: ( users_nginx.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
 
