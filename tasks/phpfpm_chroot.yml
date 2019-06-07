@@ -41,14 +41,14 @@
 
     - name: Users Apache PHP FPM localhost.d file absent
       file:
-        path: "/etc/apache2/localhost.d/{{ item }}.conf"
+        path: "/etc/apache2/localhost.d/{{ item.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
       when: users_apache2.stat.exists
 
     - name: Users Nginx PHP FPM localhost.d file present
       file:
-        path: "/etc/nginx/localhost.d/{{ item }}.conf"
+        path: "/etc/nginx/localhost.d/{{ item.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
       when: users_nginx.stat.exists
@@ -78,7 +78,7 @@
     - name: Users Apache PHP FPM localhost.d file present
       template:
         src: apache_localhost.conf.j2
-        dest: "/etc/apache2/localhost.d/{{ item }}.conf"
+        dest: "/etc/apache2/localhost.d/{{ item.key }}.conf"
       loop: "{{ users | dict2items }}"
       when: ( users_apache2.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
 
