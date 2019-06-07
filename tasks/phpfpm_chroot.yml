@@ -39,7 +39,7 @@
         state: absent
       loop: "{{ users | dict2items }}"
 
-    - name: Users Apache PHP FPM localhost.d file absent 
+    - name: Users Apache PHP FPM localhost.d file absent
       file:
         path: "/etc/apache2/localhost.d/{{ item }}.conf"
         state: absent
