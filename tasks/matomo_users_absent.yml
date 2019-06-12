@@ -1,0 +1,8 @@
+---
+# https://github.com/digitalist-se/userconsole#userdelete
+- name: Include deleteuser tasks from Matomo role
+  include_role:
+    name: matomo
+  tasks_from: deleteuser.yml
+  vars:
+    matomo_login: "{{ item.key }}"

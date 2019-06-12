@@ -206,6 +206,18 @@
 
   when: users_chroot_dir.stat.exists
 
+- name: Matomo accounts for users absent
+  include_tasks: matomo_users_absent.yml
+  loop: "{{ users | dict2items }}"
+  when: ( item.value.users_state is defined ) and ( item.value.users_state == "absent" )
+  when: matomo_user is defined
+
+- name: Matomo accounts for users present
+  include_tasks: matomo_users_present.yml
+  loop: "{{ users | dict2items }}"
+  when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
+  when: matomo_user is defined
+
 # Apache config for users
 - block:
 
