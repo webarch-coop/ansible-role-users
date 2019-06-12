@@ -102,9 +102,9 @@
 
     - name: "Password notification email sent to {{ item.value.users_email }}"
       mail:
-        from: "{{ users_notify_passwd_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
+        from: "{{ users_notify_from | default('Webarchitects') }} <root@{{ ansible_fqdn }}>"
         to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
-        subject: "[{{ users_passwd_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ item.key }} on {{ ansible_fqdn }}"
+        subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ item.key }} on {{ ansible_fqdn }}"
         body: "{{ lookup('template', 'templates/notify_passwd_mariadb.j2') }}"
         host: localhost
         port: 25

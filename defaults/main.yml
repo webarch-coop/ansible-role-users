@@ -1,0 +1,4 @@
+---
+users_notify_from: "Webarchitects <root@{{ ansible_fqdn }}>"
+users_notify_subject_tag: webarchitects
+users_notify_subject_tag: webarchitects

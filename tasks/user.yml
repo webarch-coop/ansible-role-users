@@ -24,6 +24,7 @@
       - "home owner: {{ item.value.users_home_owner | default(item.key) }}"
       - "home group: {{ item.value.users_home_group | default(item.key) }}"
       - "home mode: {{ item.value.users_home_mode | default(0700) }}"
+      - "email: {{ item.value.users_email }}"
     verbosity: 1
 
 - name: "User account for {{ item.key }} present"

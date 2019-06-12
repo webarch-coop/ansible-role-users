@@ -1,10 +1,14 @@
 ---
 # https://github.com/digitalist-se/userconsole#usercreate
-- name: Include deleteuser tasks from Matomo role
+
+
+
+
+- name: Include adduser tasks from Matomo role
   include_role:
     name: matomo
   tasks_from: deleteuser.yml
   vars:
     matomo_login: "{{ item.key }}"
-    matomo_login_email:
-    matomo_login_password: 
+    matomo_login_email: "{{ item.value.users_email }}"
+    matomo_login_password:
