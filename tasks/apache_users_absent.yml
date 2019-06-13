@@ -18,3 +18,6 @@
     state: absent
   tags:
     - apache
+
+# There is no Matomo site:delete command yet, when this is this should be added here
+# https://github.com/digitalist-se/extratools/issues/7
