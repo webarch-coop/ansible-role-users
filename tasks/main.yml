@@ -240,6 +240,13 @@
   tags:
     - users-update
 
+- name: Check if a chroot exists
+  stat:
+    path: "{{ chroot_dir | default('/chroot') }}"
+  register: users_chroot_dir
+  tags:
+    - update-users
+
 # Chroot users
 - block:
 
