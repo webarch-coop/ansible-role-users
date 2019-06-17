@@ -9,28 +9,38 @@
 - debug:
     var: getent_group
     verbosity: 2
+  tags:
+    - users-update
 
 - name: Stat /usr/sbin/apache2
   stat:
     path: /usr/sbin/apache2
   register: users_apache2
+  tags:
+    - users-update
 
 - name: /etc/apache2/localhost.d present
   file:
     path: /etc/apache2/localhost.d
     state: directory
   when: users_apache2.stat.exists
+  tags:
+    - users-update
 
 - name: Stat /usr/sbin/nginx
   stat:
     path: /usr/sbin/nginx
   register: users_nginx
+  tags:
+    - users-update
 
 - name: /etc/nginx/localhost.d present
   file:
     path: /etc/nginx/localhost.d
     state: directory
   when: users_nginx.stat.exists
+  tags:
+    - users-update
 
 - name: PHP FPM users absent
   block:
