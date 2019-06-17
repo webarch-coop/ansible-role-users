@@ -109,6 +109,14 @@
 # Delete users
 - block:
 
+    - name: Include Apache config tasks absent users
+      include_tasks: apache_users_absent.yml
+      loop: "{{ users | dict2items }}"
+      when: ( "apache2" in ansible_facts.packages
+      tags:
+        - users-update
+        - apache
+
     - name: Absent users MariaDB account and databases absent
       include_tasks: mariadb_user_absent.yml
       loop: "{{ users | dict2items }}"
@@ -285,18 +293,8 @@
 
   when: matomo_user is defined
 
-# Apache config for users
+# Apache config for users present
 - block:
-
-    # - name: Let's Encrypt tasks for absent users
-
-    - name: Include Apache config tasks absent users
-      include_tasks: apache_users_absent.yml
-      loop: "{{ users | dict2items }}"
-      when: item.value.users_state is defined and item.value.users_state == "absent"
-      tags:
-        - users-update
-        - apache
 
     - name: Include Apache config tasks present users
       include_tasks: apache_users_present.yml
