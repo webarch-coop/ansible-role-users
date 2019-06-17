@@ -80,7 +80,7 @@
         state: touch
         access_time: preserve
       tags:
-      - update-users
+        - update-users
 
     - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
       command: "md5sum {{ quota_dir }}/quota_user.csv"

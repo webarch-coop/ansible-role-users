@@ -6,6 +6,6 @@
     tasks_from: adduser.yml
   vars:
     matomo_login: "{{ item.key }}"
-     matomo_login_email: "{{ item.value.users_email }}"
+    matomo_login_email: "{{ item.value.users_email }}"
   tags:
     - users-update
