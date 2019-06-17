@@ -235,16 +235,16 @@
     group: "{{ item.key }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
-  when: item.value.users_email is defined and item.value.users_email != ""
+  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( item.value.users_email is defined and item.value.users_email != "" )
   tags:
     - users-update
 
-- name: Email address absent so no .forward
+- name: Email address or user absent so no .forward
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
     state: absent
   loop: "{{ users | dict2items }}"
-  when: item.value.users_email is not defined or item.value.users_email == ""
+  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( item.value.users_email is not defined or item.value.users_email == "" )
   tags:
     - users-update
 
