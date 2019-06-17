@@ -103,6 +103,7 @@
 
 - name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
+  no_log: true
   register: users_mariadb_password_read
   changed_when: false
 
