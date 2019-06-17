@@ -89,8 +89,6 @@
       when: quota_dir is defined
       tags:
         - users-update
-      - update-users
-
 
     - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
       shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
