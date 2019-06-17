@@ -4,12 +4,14 @@
     path: "/etc/apache2/sites-enabled/{{ item.key }}.conf"
   register: users_apache_site_enabled
   tags:
+    - users-update
     - apache
 
 - name: "Apache {{ item.key }} sites-enabled symlink absent"
   command: "a2dissite {{ item.key }}"
   when: users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk
   tags:
+    - users-update
     - apache
 
 - name: "Apache {{ item.key }} sites-available file absent"
@@ -17,6 +19,7 @@
     path: "/etc/apache2/sites-available/{{ item.key }}.conf"
     state: absent
   tags:
+    - users-update
     - apache
 
 # There is no Matomo site:delete command yet, when this is this should be added here

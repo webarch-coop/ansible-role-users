@@ -5,3 +5,5 @@
   loop: "{{ item.value.users_group_members }}"
   loop_control:
     loop_var: users_group_member
+  tags:
+    - users-update

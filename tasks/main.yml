@@ -4,43 +4,58 @@
   register: users_debian_version_check
   check_mode: false
   changed_when: false
+  tags:
+    - update-users
 
 - name: Set a fact for the Debian version
   set_fact:
     users_debian_version: "{{ users_debian_version_check.stdout }}"
+  tags:
+    - update-users
 
 - name: Load package information as facts
   package_facts:
     manager: apt
   tags:
     - apache
+    - update-users
 
 - name: Check if php-fpm is installed
   shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
   register: users_phpfpm_status
   changed_when: false
+  tags:
+    - update-users
 
 - name: Print the users_phpfpm_status
   debug:
     msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
     verbosity: 1
   when: users_phpfpm_status is defined
+  tags:
+    - update-users
 
 - name: Set a fact for the PHP-FPM version
   set_fact:
     users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
   when: users_phpfpm_status.stdout == "installed"
+  tags:
+    - update-users
 
 - name: Print the users_phpfpm_status
   debug:
     msg: "users_phpfpm_version: {{ users_phpfpm_version }}"
     verbosity: 1
   when: users_phpfpm_status is defined
+  tags:
+    - update-users
 
 - name: Check if a chroot exists
   stat:
     path: "{{ chroot_dir | default('/chroot') }}"
   register: users_chroot_dir
+  tags:
+    - update-users
 
 - name: Packages present
   apt:
@@ -64,22 +79,32 @@
         path: "{{ quota_dir }}/quota_user.csv"
         state: touch
         access_time: preserve
+      tags:
+      - update-users
 
     - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
       command: "md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_before
       changed_when: false
       when: quota_dir is defined
+      tags:
+        - users-update
+      - update-users
+
 
     - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
       shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_after
       changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+      tags:
+        - users-update
 
     - name: Users quotas fetched
       fetch:
         src: "{{ quota_dir }}/quota_user.csv"
         dest: /tmp/
+      tags:
+        - users-update
 
   when: quota_dir is defined
 
@@ -89,12 +114,16 @@
     - name: Absent users MariaDB account and databases absent
       include_tasks: mariadb_user_absent.yml
       loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
 
     - name: Absent users home directories removed
       file:
         path: "{{ item.value.users_home | default('/home/' + item.key) }}"
         state: absent
       loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
 
     - name: Users accounts absent
       user:
@@ -102,12 +131,16 @@
         state: absent
         remove: true
       loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
 
     - name: User groups absent
       group:
         name: "{{ item.key }}"
         state: absent
       loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
 
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
@@ -118,6 +151,8 @@
   loop_control:
     loop_var: users_groups_user
   when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and ( users_groups_user.value.users_groups is defined )
+  tags:
+    - users-update
 
 - block:
 
@@ -126,31 +161,43 @@
         name: "{{ item.key }}"
         state: present
       loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
 
     - name: Users group members present
       include: group_members.yml
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_group_members is defined ) and ( item.value.users_group_members != [] )
+      tags:
+        - users-update
 
     - name: User accounts present
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
 
     - name: Users MariaDB accounts and databases created and passwords read or set
       include_tasks: mariadb_user_present.yml
       vars:
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
+      tags:
+        - users-update
 
     - name: Quotas set
       include_tasks: quota.yml
       loop: "{{ users | dict2items }}"
       when: ( quota_dir is defined ) and ( item.value.users_quota is defined ) and ( item.value.users_quota != "" )
+      tags:
+        - users-update
 
     - name: Set passwds and notify users
       include_tasks: notify_passwd.yml
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_notify_passwd is defined ) and ( item.value.users_notify_passwd == True ) and ( item.value.users_email is defined ) and ( item.value.users_email != "" )
+      tags:
+        - users-update
 
   when: ( item.value.users_state is undefined ) or ( item.value.users_state == "present" )
 
@@ -161,12 +208,16 @@
       shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_after
       changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+      tags:
+        - users-update
 
     - name: Updated users quotas fetched
       fetch:
         src: "{{ quota_dir }}/quota_user.csv"
         dest: /tmp/
       when: users_repquota_md5sum_after.changed
+      tags:
+        - users-update
 
   when: quota_dir is defined
 
@@ -179,6 +230,8 @@
     mode: 0644
   loop: "{{ users | dict2items }}"
   when: item.value.users_email is defined and item.value.users_email != ""
+  tags:
+    - users-update
 
 - name: Email address absent so no .forward
   file:
@@ -186,6 +239,8 @@
     state: absent
   loop: "{{ users | dict2items }}"
   when: item.value.users_email is not defined or item.value.users_email == ""
+  tags:
+    - users-update
 
 # Chroot users
 - block:
@@ -194,15 +249,21 @@
       include_tasks: chroot_users_absent.yml
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+      tags:
+        - users-update
 
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
+      tags:
+        - users-update
 
     - name: Include the PHP FPM chroot tasks
       include_tasks: phpfpm_chroot.yml
       when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
+      tags:
+        - users-update
 
   when: users_chroot_dir.stat.exists
 
@@ -214,11 +275,15 @@
       include_tasks: matomo_users_absent.yml
       loop: "{{ users | dict2items }}"
       when: ( matomo_user is defined ) and ( item.value.users_state is defined ) and ( item.value.users_state == "absent" )
+      tags:
+        - users-update
 
     - name: Matomo accounts for users present
       include_tasks: matomo_users_present.yml
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
+      tags:
+        - users-update
 
   when: matomo_user is defined
 
@@ -232,6 +297,7 @@
       loop: "{{ users | dict2items }}"
       when: item.value.users_state is defined and item.value.users_state == "absent"
       tags:
+        - users-update
         - apache
 
     - name: Include Apache config tasks present users
@@ -239,6 +305,7 @@
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or item.value.users_state == "present" )
       tags:
+        - users-update
         - apache
 
     - name: Apache configtest
@@ -247,6 +314,7 @@
       changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
       when: '"apache2" in ansible_facts.packages'
       tags:
+        - users-update
         - apache
 
     - name: Apache restart
@@ -255,6 +323,7 @@
         state: restarted
       when: '"Syntax OK" in users_apachectl_configtest.stderr'
       tags:
+        - users-update
         - apache
 
   when: '"apache2" in ansible_facts.packages'

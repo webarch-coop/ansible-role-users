@@ -3,6 +3,8 @@
   getent:
     database: group
     split: ':'
+  tags:
+    - users-update
 
 - debug:
     var: getent_group
@@ -38,6 +40,8 @@
         path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
 
     - name: Users Apache PHP FPM localhost.d file absent
       file:
@@ -45,6 +49,8 @@
         state: absent
       loop: "{{ users | dict2items }}"
       when: users_apache2.stat.exists
+      tags:
+        - users-update
 
     - name: Users Nginx PHP FPM localhost.d file present
       file:
@@ -52,6 +58,8 @@
         state: absent
       loop: "{{ users | dict2items }}"
       when: users_nginx.stat.exists
+      tags:
+        - users-update
 
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
 
@@ -67,6 +75,8 @@
         mode: 0750
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+      tags:
+        - users-update
 
     - name: Users PHP FPM pool.d file present
       template:
@@ -74,6 +84,8 @@
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+      tags:
+        - users-update
 
     - name: Users Apache PHP FPM localhost.d file present
       template:
@@ -81,6 +93,8 @@
         dest: "/etc/apache2/localhost.d/{{ item.key }}.conf"
       loop: "{{ users | dict2items }}"
       when: ( users_apache2.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+      tags:
+        - users-update
 
     - name: Users Nginx PHP FPM localhost.d file present
       template:
@@ -88,6 +102,8 @@
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
       loop: "{{ users | dict2items }}"
       when: ( users_nginx.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+      tags:
+        - users-update
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
 
@@ -95,3 +111,5 @@
   service:
     name: "php{{ users_phpfpm_version }}-fpm"
     state: restarted
+  tags:
+    - users-update

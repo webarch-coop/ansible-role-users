@@ -14,6 +14,7 @@
   when: users_cert == "vhost"
   tags:
     - apache
+    - users-update
 
 # One cert per user
 - block:
@@ -25,6 +26,7 @@
         reloadcmd: "service apache2 reload"
       tags:
         - apache
+        - users-update
 
     - name: Set fact for subjectAltNames
       set_fact:
@@ -34,6 +36,7 @@
         loop_var: vhost
       tags:
         - apache
+        - users-update
 
     - debug:
         msg: "subject_alt_names is set to: {{ subject_alt_names }}"
@@ -49,6 +52,7 @@
         tasks_from: letsencrypt
       tags:
         - apache
+        - users-update
 
   when: users_cert == 'user'
 
@@ -58,6 +62,7 @@
     dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
   tags:
     - apache
+    - users-update
 
 - name: "Apache {{ item.key }}/sites directory present"
   file:
@@ -69,6 +74,7 @@
     mode: 0750
   tags:
     - apache
+    - users-update
 
 - name: "Apache DocumentRoot present"
   file:
@@ -83,6 +89,7 @@
     loop_var: vhost
   tags:
     - apache
+    - users-update
 
 - name: "Apache log directory {{ item.value.users_home | default('/home/' + item.key) }}/logs present"
   file:
@@ -93,6 +100,7 @@
     mode: 0750
   tags:
     - apache
+    - users-update
 
 - name: "Apache {{ item.key }} sites-enabled symlink present"
   command: "a2ensite {{ item.key }}"
@@ -100,12 +108,15 @@
   changed_when: '"already enabled" not in users_a2ensite.stdout'
   tags:
     - apache
+    - users-update
 
 - name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
   no_log: true
   register: users_mariadb_password_read
   changed_when: false
+  tags:
+    - users-update
 
 # Add sites to matomo, this dosn't check that a site hasn't already been added
 # - name: addsite.yml tasks from Matomo role included for each vhost
@@ -145,6 +156,8 @@
   loop_control:
     loop_var: vhost
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
+  tags:
+    - users-update
 
 - name: Include Matomo role
   include_role:
@@ -167,3 +180,5 @@
   loop_control:
     loop_var: vhost
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
+  tags:
+    - users-update

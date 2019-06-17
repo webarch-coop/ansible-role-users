@@ -3,6 +3,8 @@
   stat:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   register: users_mycnf
+  tags:
+    - users-update
 
 - block:
 
@@ -10,11 +12,15 @@
       command: pwgen -n 20 1
       no_log: true
       register: users_mariadb_password_gen
+      tags:
+        - users-update
 
     - name: Set a fact for the mariadb_password
       set_fact:
         users_mariadb_password: "{{ users_mariadb_password_gen.stdout | trim | quote }}"
       no_log: true
+      tags:
+        - users-update
 
   when: users_mycnf.stat.exists == False
 
@@ -25,11 +31,15 @@
       no_log: true
       changed_when: false
       register: users_mariadb_password_read
+      tags:
+        - users-update
 
     - name: Set a fact for the mariadb_password
       set_fact:
         users_mariadb_password: "{{ users_mariadb_password_read.stdout | trim | quote }}"
       no_log: true
+      tags:
+        - users-update
 
   when: users_mycnf.stat.exists == True
 
@@ -37,6 +47,8 @@
   fail:
     msg: "The mariadb_password appears not to be set"
   when: ( users_mariadb_password is not defined ) or ( users_mariadb_password == "" )
+  tags:
+    - users-update
 
 - name: "mariadb_password written to {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   template:
@@ -47,15 +59,21 @@
     mode: 0400
     force: true
   no_log: true
+  tags:
+    - users-update
 
 - name: "The databases that {{ item.key }} has access to"
   command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
   changed_when: false
   register: users_mariadb_list
+  tags:
+    - users-update
 
 - name: "Set a fact for the databases to delete for {{ item.key }}"
   set_fact:
     users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(item.value.users_mariadb_databases) }}"
+  tags:
+    - users-update
 
 - name: "Databases absent for {{ item.key }}"
   mysql_db:
@@ -67,6 +85,8 @@
   when: ( users_mariadb_delete_list is defined ) and ( users_mariadb_delete_list != [] )
   loop_control:
     loop_var: db
+  tags:
+    - users-update
 
 - name: "Databases present for {{ item.key }}"
   mysql_db:
@@ -77,15 +97,21 @@
   loop: "{{ item.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
+  tags:
+    - users-update
 
 - name: "Set a variable for mysql_user priv for {{ item.key }}"
   set_fact:
     users_mariadb_priv: "{% if item.value.users_mariadb_databases[0] is defined %}{% for db in item.value.users_mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
+  tags:
+    - users-update
 
 - name: "Print priv for {{ item.key }}"
   debug:
     var: users_mariadb_priv
     verbosity: 1
+  tags:
+    - users-update
 
 - name: "MariaDB {{ item.key }} user present"
   mysql_user:
@@ -97,12 +123,16 @@
     login_user: root
     login_unix_socket: /var/run/mysqld/mysqld.sock
   no_log: true
+  tags:
+    - users-update
 
 - name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
   stat:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd"
   register: users_notify_mariadb_passwd_file
   when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True )
+  tags:
+    - users-update
 
 - block:
 
@@ -116,6 +146,8 @@
         port: 25
         secure: never
       when: item.value.users_email is defined and item.value.users_email != ""
+      tags:
+        - users-update
 
     - name: "Notification date recorded in {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
       lineinfile:
@@ -127,5 +159,7 @@
         owner: root
         group: root
         mode: 0640
+      tags:
+        - users-update
 
   when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True ) and ( users_notify_mariadb_passwd_file.stat.exists == False )

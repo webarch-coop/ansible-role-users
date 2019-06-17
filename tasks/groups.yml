@@ -2,9 +2,13 @@
 - debug:
     msg: "user={{ users_groups_user }} group={{ item }}"
   loop: "{{ users_groups_user.value.users_groups }}"
+  tags:
+    - users-update
 
 - name: Add group
   group:
     name: "{{ item }}"
     state: present
   loop: "{{ users_groups_user.value.users_groups }}"
+  tags:
+    - users-update

@@ -3,11 +3,15 @@
   set_fact:
     users_own_group:
       - "{{ item.key }}"
+  tags:
+    - update-users
 
 - name: "Set a fact for the {{ item.key }} users groups which includes the users own group, as a list"
   set_fact:
     users_all_groups:
       - "{{ item.value.users_groups | default(omit) + users_own_group }}"
+  tags:
+    - update-users
 
 - name: "Print debugging info for {{ item.key }}"
   debug:
@@ -38,24 +42,32 @@
     skeleton: "{{ item.value.users_skel | default(omit) }}"
     generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
     system: "{{ item.value.users_system | default('no', false) }}"
+  tags:
+    - update-users
 
 - name: "Chown user home directory owner to {{ item.value.users_home_owner | default(item.key) }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     owner: "{{ item.value.users_home_owner | default(item.key) }}"
+  tags:
+    - update-users
 
 - name: "Chown user home directory group to {{ item.value.users_home_group | default(item.key) }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     group: "{{ item.value.users_home_group | default(item.key) }}"
+  tags:
+    - update-users
 
 - name: "Chmod users home directory {{ item.value.users_home_mode | default('0750') }}"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}"
     state: directory
     mode: "{{ item.value.users_home_mode | default('0750') }}"
+  tags:
+    - update-users
 
 - debug:
     msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
@@ -70,6 +82,8 @@
     group: "{{ item.key }}"
     mode: 0700
   when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
+  tags:
+    - update-users
 
 - name: SSH public keys present
   get_url:
@@ -80,6 +94,8 @@
     mode: 0600
     force: true
   when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
+  tags:
+    - update-users
 
 - name: Set default editor
   copy:
@@ -89,6 +105,8 @@
     group: "{{ item.key }}"
     mode: 0644
   when: item.value.users_editor is defined and item.value.users_editor != ""
+  tags:
+    - update-users
 
 - name: .vimrc in place
   copy:
@@ -98,6 +116,8 @@
     group: "{{ item.key }}"
     mode: 0644
   when: item.value.users_editor is defined and item.value.users_editor == 'vim'
+  tags:
+    - update-users
 
 - debug:
     msg: "bashrc: {{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
@@ -110,6 +130,8 @@
     state: present
     create: true
   when: item.value.users_editor is defined and item.value.users_editor == 'vim'
+  tags:
+    - update-users
 
 - name: .gitconfig in place
   template:
@@ -119,3 +141,5 @@
     group: "{{ item.key }}"
     mode: 0644
   when: ( item.value.users_name is defined and item.value.users_name != "" ) and ( item.value.users_email is defined and item.value.users_email != "" )
+  tags:
+    - update-users

@@ -2,6 +2,8 @@
 - name: "The databases that {{ item.key }} has access to"
   command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
   register: users_mariadb_list
+  tags:
+    - users-update
 
 - name: "Databases absent for {{ item.key }}"
   mysql_db:
@@ -13,6 +15,8 @@
   when: ( users_mariadb_list.stdout_lines is defined ) and ( users_mariadb_list.stdout_lines != [] )
   loop_control:
     loop_var: db
+  tags:
+    - users-update
 
 - name: "MariaDB user {{ item.key }} absent"
   mysql_user:
@@ -20,3 +24,5 @@
     state: absent
     login_user: root
     login_unix_socket: /var/run/mysqld/mysqld.sock
+  tags:
+    - users-update
