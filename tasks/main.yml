@@ -112,7 +112,7 @@
     - name: Include Apache config tasks absent users
       include_tasks: apache_users_absent.yml
       loop: "{{ users | dict2items }}"
-      when: ( "apache2" in ansible_facts.packages
+      when: '"apache2" in ansible_facts.packages'
       tags:
         - users-update
         - apache
@@ -308,7 +308,6 @@
       command: apachectl configtest
       register: users_apachectl_configtest
       changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
-      when: '"apache2" in ansible_facts.packages'
       tags:
         - users-update
         - apache
