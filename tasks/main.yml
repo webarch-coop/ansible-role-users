@@ -5,27 +5,27 @@
   check_mode: false
   changed_when: false
   tags:
-    - update-users
+    - users-update
 
 - name: Set a fact for the Debian version
   set_fact:
     users_debian_version: "{{ users_debian_version_check.stdout }}"
   tags:
-    - update-users
+    - users-update
 
 - name: Load package information as facts
   package_facts:
     manager: apt
   tags:
     - apache
-    - update-users
+    - users-update
 
 - name: Check if php-fpm is installed
   shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
   register: users_phpfpm_status
   changed_when: false
   tags:
-    - update-users
+    - users-update
 
 - name: Print the users_phpfpm_status
   debug:
@@ -33,14 +33,14 @@
     verbosity: 1
   when: users_phpfpm_status is defined
   tags:
-    - update-users
+    - users-update
 
 - name: Set a fact for the PHP-FPM version
   set_fact:
     users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
   when: users_phpfpm_status.stdout == "installed"
   tags:
-    - update-users
+    - users-update
 
 - name: Print the users_phpfpm_status
   debug:
@@ -48,14 +48,14 @@
     verbosity: 1
   when: users_phpfpm_status is defined
   tags:
-    - update-users
+    - users-update
 
 - name: Check if a chroot exists
   stat:
     path: "{{ chroot_dir | default('/chroot') }}"
   register: users_chroot_dir
   tags:
-    - update-users
+    - users-update
 
 - name: Packages present
   apt:
@@ -80,7 +80,7 @@
         state: touch
         access_time: preserve
       tags:
-        - update-users
+        - users-update
 
     - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
       command: "md5sum {{ quota_dir }}/quota_user.csv"
@@ -239,13 +239,6 @@
   when: item.value.users_email is not defined or item.value.users_email == ""
   tags:
     - users-update
-
-- name: Check if a chroot exists
-  stat:
-    path: "{{ chroot_dir | default('/chroot') }}"
-  register: users_chroot_dir
-  tags:
-    - update-users
 
 # Chroot users
 - block:
