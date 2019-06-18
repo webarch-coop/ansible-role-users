@@ -164,6 +164,7 @@
     name: matomo
   vars:
     matomo_user: "{{ item.key }}"
+    matomo_url: "https://{{ vhost.value.users_apache_server_name }}/"
     matomo_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
     matomo_html: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
     matomo_private: "{{ item.value.users_home | default('/home/' + item.key) }}/private"
