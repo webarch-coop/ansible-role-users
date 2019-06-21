@@ -1,4 +1,9 @@
 ---
+- name: Slay installed
+  apt:
+    pgk: slay
+    state: persent
+
 - name: Check /etc/debian_version
   shell: "lsb_release -c | awk '{ print $2 }'"
   register: users_debian_version_check
@@ -108,6 +113,19 @@
 
 # Delete users
 - block:
+
+    - name: Slay any processes running as the user
+      command: "slay {{ item.key }}"
+      loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
+
+    - name: Include the chroot absent users tasks
+      include_tasks: chroot_users_absent.yml
+      loop: "{{ users | dict2items }}"
+      when: ( users_chroot_dir.stat.exists ) and ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+      tags:
+        - users-update
 
     - name: Include Apache config tasks absent users
       include_tasks: apache_users_absent.yml
@@ -250,13 +268,6 @@
 
 # Chroot users
 - block:
-
-    - name: Include the chroot absent users tasks
-      include_tasks: chroot_users_absent.yml
-      loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
-      tags:
-        - users-update
 
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
