@@ -298,6 +298,7 @@
         - users-update
 
     - name: If Matomo user exists and Matomo is installed
+      block:
 
         - name: Matomo accounts for users absent
           include_tasks: matomo_users_absent.yml
