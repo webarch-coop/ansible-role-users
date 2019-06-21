@@ -2,7 +2,7 @@
 - name: Slay installed
   apt:
     pkg: slay
-    state: persent
+    state: present
 
 - name: Check /etc/debian_version
   shell: "lsb_release -c | awk '{ print $2 }'"
