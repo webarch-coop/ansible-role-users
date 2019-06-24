@@ -118,13 +118,17 @@
   tags:
     - users-update
 
+# Ideally matomo_site_urls would be an array...
 - name: addsite.yml tasks from Matomo role included for each vhost
   include_role:
     name: matomo
     tasks_from: addsite.yml
   vars:
     matomo_site_name: "{{ vhost.key }}"
-    matomo_site_urls: "https://{{ vhost.value.users_apache_server_name }}/{% if vhost.value.users_apache_server_aliases is defined %}{% for a in vhost.value.users_apache_server_aliases %},https://{{ a}}/{% endfor %}{% endif %}"
+    matomo_site_main_url: "https://{{ vhost.value.users_apache_server_name }}"
+    # matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{% for a in vhost.value.users_apache_server_aliases }}https://{{ a }} {% endfor %}{% endif %}"
+    # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
+    matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{% vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','https://\\1') | list %}{% endif %}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
