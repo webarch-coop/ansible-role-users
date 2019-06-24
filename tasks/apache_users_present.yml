@@ -124,7 +124,7 @@
     tasks_from: addsite.yml
   vars:
     matomo_site_name: "{{ vhost.key }}"
-    matomo_site_urls: "https://{{ vhost.value.users_apache_server_name }}/{% for a in vhost.value.users_apache_server_aliases %},https://{{ a}}/{% endfor %}"
+    matomo_site_urls: "https://{{ vhost.value.users_apache_server_name }}/{% if vhost.value.users_apache_server_aliases is defined %}{% for a in vhost.value.users_apache_server_aliases %},https://{{ a}}/{% endfor %}{% endif %}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
