@@ -76,7 +76,7 @@
 - name: PHP FPM users present
   block:
 
-    - name: "php-fpm log directory {{ item.value.users_home | default('/home/' + item.key) }}/logs present"
+    - name: Users PHP FPM log directory present
       file:
         path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs"
         state: directory

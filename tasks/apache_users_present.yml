@@ -128,7 +128,6 @@
     # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
     matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% endif %}"
     matomo_site_admin: "{{ item.key }}"
-    matomo_notify_passwd: true
   when:
     - '"no such user" not in user_matomo_user_check.stderr'
     - user_matomo_config.stat.exists == True

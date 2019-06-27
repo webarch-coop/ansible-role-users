@@ -7,5 +7,6 @@
   vars:
     matomo_login: "{{ item.key }}"
     matomo_login_email: "{{ item.value.users_email }}"
+    users_matomo_notify_passwd: "{{ item.value.users_matomo_notify_passwd | default(true) }}"
   tags:
     - users-update
