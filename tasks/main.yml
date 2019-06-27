@@ -285,50 +285,55 @@
   when: users_chroot_dir.stat.exists
 
 # Matomo user accounts
-- name: "Check if the Matomo {{ matomo_user }} exists"
-  command: "id {{ matomo_user }}"
-  ignore_errors: true
-  check_mode: false
-  register: user_matomo_user_check
-  changed_when: '"no such user" in user_matomo_user_check.stderr'
-  tags:
-    - matomo
-    - users-update
-
-- name: Matomo user tasks
+- name: Matomo login account tasks
   block:
 
-    - name: "Check if {{ matomo_html }}/config/config.ini.php exists"
-      stat:
-        path: "{{ matomo_html }}/config/config.ini.php"
+    - name: "Check if the Matomo {{ matomo_user }} system user account exists"
+      command: "id {{ matomo_user }}"
+      ignore_errors: true
       check_mode: false
-      register: user_matomo_config
+      register: user_matomo_user_check
+      changed_when: '"no such user" in user_matomo_user_check.stderr'
       tags:
         - matomo
         - users-update
 
-    - name: If Matomo is installed
+    - name: Matomo user login account tasks
       block:
 
-        - name: Matomo accounts for users absent
-          include_tasks: matomo_users_absent.yml
-          loop: "{{ users | dict2items }}"
-          when: ( matomo_user is defined ) and ( item.value.users_state is defined ) and ( item.value.users_state == "absent" )
+        - name: Check if Matomo config file exists
+          stat:
+            path: "{{ matomo_html }}/config/config.ini.php"
+          check_mode: false
+          register: user_matomo_config
           tags:
             - matomo
             - users-update
 
-        - name: Matomo accounts for users present
-          include_tasks: matomo_users_present.yml
-          loop: "{{ users | dict2items }}"
-          when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
-          tags:
-            - matomo
-            - users-update
+        - name: If Matomo is installed
+          block:
 
-      when: user_matomo_config.stat.exists
+            - name: Matomo accounts for users absent
+              include_tasks: matomo_users_absent.yml
+              loop: "{{ users | dict2items }}"
+              when: ( matomo_user is defined ) and ( item.value.users_state is defined ) and ( item.value.users_state == "absent" )
+              tags:
+                - matomo
+                - users-update
 
-  when: '"no such user" not in user_matomo_user_check.stderr'
+            - name: Matomo accounts for users present
+              include_tasks: matomo_users_present.yml
+              loop: "{{ users | dict2items }}"
+              when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
+              tags:
+                - matomo
+                - users-update
+
+          when: user_matomo_config.stat.exists
+
+      when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
+
+  when: ( matomo_user is defined ) and ( matomo_user != "" )
 
 # Apache config for users present
 - block:

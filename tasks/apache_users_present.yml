@@ -118,25 +118,56 @@
   tags:
     - users-update
 
-- name: addsite.yml tasks from Matomo role included for each vhost
-  include_role:
-    name: matomo
-    tasks_from: addsite.yml
-  vars:
-    matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
-    matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
-    # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
-    matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% endif %}"
-    matomo_site_admin: "{{ item.key }}"
-  when:
-    - '"no such user" not in user_matomo_user_check.stderr'
-    - user_matomo_config.stat.exists == True
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-  tags:
-    - matomo
-    - users-update
+- name: Matomo site tasks
+  block:
+
+    - name: "Check if the Matomo {{ matomo_user }} system user account exists"
+      command: "id {{ matomo_user }}"
+      ignore_errors: true
+      check_mode: false
+      register: user_matomo_user_check
+      changed_when: '"no such user" in user_matomo_user_check.stderr'
+      tags:
+        - matomo
+        - users-update
+
+    - name: Matomo site tasks
+      block:
+
+        - name: Check if Matomo config file exists
+          stat:
+            path: "{{ matomo_html }}/config/config.ini.php"
+          check_mode: false
+          register: user_matomo_config
+          tags:
+            - matomo
+            - users-update
+
+        - name: If Matomo is installed
+          block:
+
+            - name: addsite.yml tasks from Matomo role included for each vhost
+              include_role:
+                name: matomo
+                tasks_from: addsite.yml
+              vars:
+                matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+                matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
+                # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
+                matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% endif %}"
+                matomo_site_admin: "{{ item.key }}"
+              loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+              loop_control:
+                loop_var: vhost
+              tags:
+                - matomo
+                - users-update
+
+          when: user_matomo_config.stat.exists
+
+      when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
+
+  when: ( matomo_user is defined ) and ( matomo_user != "" )
 
 - name: Include WordPress role
   include_role:
