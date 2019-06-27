@@ -285,19 +285,18 @@
   when: users_chroot_dir.stat.exists
 
 # Matomo user accounts
+- name: "Check if the Matomo {{ matomo_user }} exists"
+  command: "id {{ matomo_user }}"
+  ignore_errors: true
+  check_mode: false
+  register: user_matomo_user_check
+  changed_when: '"no such user" in user_matomo_user_check.stderr'
+  tags:
+    - matomo
+    - users-update
 
-- name: Matomo tasks
+- name: Matomo user tasks
   block:
-
-    - name: "Check if the Matomo {{ matomo_user }} exists"
-      command: "id {{ matomo_user }}"
-      ignore_errors: true
-      check_mode: false
-      register: user_matomo_user_check
-      changed_when: '"no such user" in user_matomo_user_check.stderr'
-      tags:
-        - matomo
-        - users-update
 
     - name: "Check if {{ matomo_html }}/config/config.ini.php exists"
       stat:
@@ -308,7 +307,7 @@
         - matomo
         - users-update
 
-    - name: If Matomo user exists and Matomo is installed
+    - name: If Matomo is installed
       block:
 
         - name: Matomo accounts for users absent
@@ -327,9 +326,9 @@
             - matomo
             - users-update
 
-      when: ( "no such user" not in user_matomo_user_check.stderr ) and ( user_matomo_config.stat.exists )
+      when: user_matomo_config.stat.exists
 
-  when: matomo_user is defined
+  when: '"no such user" not in user_matomo_user_check.stderr'
 
 # Apache config for users present
 - block:

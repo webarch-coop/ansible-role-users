@@ -129,7 +129,9 @@
     matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% endif %}"
     matomo_site_admin: "{{ item.key }}"
     matomo_notify_passwd: true
-  when: ( "no such user" not in user_matomo_user_check.stderr ) and ( user_matomo_config.stat.exists )
+  when:
+    - '"no such user" not in user_matomo_user_check.stderr'
+    - user_matomo_config.stat.exists == True
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
