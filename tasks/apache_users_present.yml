@@ -187,6 +187,7 @@
     wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(vhost.key) }}"
     wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(item.value.users_email) }}"
     wordpress_notify_from: "{{ users_notify_from | default('Webarchitects') }} <root@{{ inventory_hostname }}>"
+    wordpress_notify_reply_to: "{{ users_notify_from | default('Webarchitects') }} <root@{{ inventory_hostname }}>"
     wordpress_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     wordpress_notify_signature: "{{ users_notify_signature }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
