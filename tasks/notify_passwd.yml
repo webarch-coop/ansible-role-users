@@ -35,6 +35,7 @@
         subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ inventory_hostname }}"
         headers:
           - "Reply-To = {{ users_notify_reply_to | quote }}"
+        charset: us-ascii
         body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
         host: localhost
         port: 25
