@@ -1,6 +1,6 @@
 Hi {{ item.value.users_name | default(item.key) }}
 
-Your MariaDB account and database details for {{ ansible_fqdn }}:
+Your MariaDB account and database details for {{ inventory_hostname }}:
 
   Username:	{{ item.key }}
   Password:	{{ users_mariadb_password }}
@@ -13,7 +13,7 @@ Note that there is no direct external access to the database.
 
 All the best
 
-{{ users_notify_from | default('Webarchitects') }}
+{{ users_notify_reply_to }}
 
 -- 
 {{ users_notify_signature | default('Webarch Co-operative Limited\nhttps://www.webarch.coop/') }}

@@ -9,5 +9,10 @@
     matomo_login_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
     matomo_login_email: "{{ item.value.users_email }}"
     matomo_notify_passwd: "{{ item.value.users_matomo_notify_passwd | default(true) }}"
+    matomo_notify_from: "{{ users_notify_from }}"
+    matomo_notify_reply_to: "{{ users_notify_reply_to }}"
+    matomo_notify_subject_tag: "{{ users_notify_subject_tag }}"
+    matomo_notify_signature: "{{ users_notify_signature }}"
   tags:
+    - matomo
     - users-update

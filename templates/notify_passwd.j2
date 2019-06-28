@@ -1,15 +1,15 @@
 Hi {{ item.value.users_name | default(item.key) }}
 
-Your SFTP / SSH account details for {{ ansible_fqdn }}:
+Your SFTP / SSH account details for {{ inventory_hostname }}:
 
   Username:	{{ item.key }}
   Password:	{{ users_passwd.stdout }}
-  Server:	{{ ansible_fqdn }}
+  Server:	{{ inventory_hostname }}
   Port:		22
 
 All the best
 
-{{ users_notify_from | default('Webarchitects') }}
+{{ users_notify_reply_to }}
 
 -- 
 {{ users_notify_signature | default('Webarch Co-operative Limited\nhttps://www.webarch.coop/') }}
