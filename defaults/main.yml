@@ -1,5 +1,5 @@
 ---
-users_notify_from: "Webarchitects <root@{{ ansible_fqdn }}>"
+users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_subject_tag: webarchitects
 users_notify_signature: |
