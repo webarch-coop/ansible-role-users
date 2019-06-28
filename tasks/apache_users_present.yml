@@ -213,6 +213,7 @@
     matomo_first_site_url: "{{ vhost.value.matomo_first_site_url | default('http://' + inventory_hostname + '/') }}"
     matomo_first_user: "{{ vhost.value.matomo_first_user | default(item.key) }}"
     matomo_first_user_email: "{{ item.value.users_email | default('root@' + inventory_hostname) }}"
+    matomo_notify_passwd: "{{ vhost.value.matomo_notify_passwd | default(true) }}"
     matomo_email_signature: "{{ users_notify_passwd_signature }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
