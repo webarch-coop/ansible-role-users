@@ -142,7 +142,7 @@
         to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
         subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ item.key }} on {{ inventory_hostname }}"
         headers: "{{ users_notify_headers }}"
-        charset: utf-8
+        charset: us-ascii
         body: "{{ lookup('template', 'templates/notify_passwd_mariadb.j2') }}"
         host: localhost
         port: 25
