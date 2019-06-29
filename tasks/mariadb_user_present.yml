@@ -159,7 +159,7 @@
         state: present
         insertafter: EOF
         owner: root
-        group: "{{ item.value.users_group }}"
+        group: "{{ item.key }}"
         mode: 0640
       tags:
         - users-update
