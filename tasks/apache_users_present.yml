@@ -189,6 +189,7 @@
     wordpress_notify_from: "{{ users_notify_from | default('Webarchitects') }} <root@{{ inventory_hostname }}>"
     wordpress_notify_reply_to: "{{ users_notify_from | default('Webarchitects') }} <root@{{ inventory_hostname }}>"
     wordpress_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    wordpress_notify_headers: "{{ users_notify_headers }}"
     wordpress_notify_signature: "{{ users_notify_signature }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
@@ -216,6 +217,8 @@
     matomo_first_user_email: "{{ item.value.users_email | default('root@' + inventory_hostname) }}"
     matomo_notify_from: "{{ users_notify_from }}"
     matomo_notify_reply_to: "{{ users_notify_reply_to }}"
+    matomo_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    matomo_notify_headers: "{{ users_notify_headers }}"
     matomo_notify_passwd: "{{ vhost.value.matomo_notify_passwd | default(true) }}"
     matomo_email_signature: "{{ users_notify_signature }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"

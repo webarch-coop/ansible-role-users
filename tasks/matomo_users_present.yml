@@ -12,6 +12,7 @@
     matomo_notify_from: "{{ users_notify_from }}"
     matomo_notify_reply_to: "{{ users_notify_reply_to }}"
     matomo_notify_subject_tag: "{{ users_notify_subject_tag }}"
+    matomo_notify_headers: "{{ users_notify_headers }}"
     matomo_notify_signature: "{{ users_notify_signature }}"
   tags:
     - matomo
