@@ -8,15 +8,7 @@
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
 {% endif %}
 
-  # This shouldn't be needed due to server wide alias
-  # Alias "/.well-known/acme-challenge" "{{ document_root }}/.well-known/acme-challenge"
-  # <Directory "{{ document_root }}/.well-known/acme-challenge">
-  #   Options None
-  #   AllowOverride None
-  #   ForceType text/plain
-  #   Allow from All
-  # </Directory>
-  Redirect / https://{{ vhost_config.users_apache_server_name }}/
+  RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
 </VirtualHost>
 
 <VirtualHost *:443>
