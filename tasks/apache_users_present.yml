@@ -155,6 +155,7 @@
                 # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
                 matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% endif %}"
                 matomo_site_admin: "{{ item.key }}"
+              when: item.value.users_cms != "matomo"
               loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
               loop_control:
                 loop_var: vhost
