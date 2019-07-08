@@ -170,7 +170,7 @@
   when: ( matomo_user is defined ) and ( matomo_user != "" )
 
 - name: Include WordPress role
-  import_role:
+  include_role:
     name: wordpress
   vars:
     wordpress_user: "{{ item.key }}"
@@ -193,6 +193,10 @@
     wordpress_notify_signature: "{{ users_notify_signature }}"
     matomo_login: "{{ item.key }}"
     matomo_site_name: "{{ vhost.value.wordpress_url | default(vhost.value.users_apache_server_name) }}"
+    matomo_user: "{{ matomo_user }}"
+    matomo_url: "https://stats.{{ inventory_hostname }}/"
+    matomo_home: "/home/{{ matomo_user }}"
+    matomo_html: "{{ matomo_home }}/sites/default"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
