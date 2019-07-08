@@ -170,7 +170,7 @@
   when: ( matomo_user is defined ) and ( matomo_user != "" )
 
 - name: Include WordPress role
-  include_role:
+  import_role:
     name: wordpress
   vars:
     wordpress_user: "{{ item.key }}"
