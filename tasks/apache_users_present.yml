@@ -216,7 +216,7 @@
     matomo_db_username: "{{ item.key }}"
     matomo_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     matomo_db_host: localhost
-    matomo_db_name: "{% if vhost.value.matomo_dbname is defined %}{{ vhost.value.matomo_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
+    matomo_dbname: "{% if vhost.value.matomo_dbname is defined %}{{ vhost.value.matomo_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
     matomo_first_site_name: "{{ vhost.value.matomo_first_site_name | default(inventory_hostname) }}"
     matomo_first_site_url: "{{ vhost.value.matomo_first_site_url | default('http://' + inventory_hostname + '/') }}"
     matomo_first_user: "{{ vhost.value.matomo_first_user | default(item.key) }}"
