@@ -1,3 +1,4 @@
 set tmpdir="~/tmp"
 set folder="~/.mutt"
 set record="+sent"
+set sendmail="/usr/sbin/sendmail"
