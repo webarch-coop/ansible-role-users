@@ -18,18 +18,18 @@ fi
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
+    export PATH="$HOME/bin:$PATH"
 fi
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # set TMPDIR, TMP and TEMP if ~/tmp exists
 if [ -d "$HOME/tmp" ] ; then
-    TMPDIR="$HOME/tmp"
-    TMP="$HOME/tmp"
-    TEMP="$HOME/tmp"
+    export TMPDIR="$HOME/tmp"
+    export TMP="$HOME/tmp"
+    export TEMP="$HOME/tmp"
 fi
 
