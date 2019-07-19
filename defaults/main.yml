@@ -10,3 +10,5 @@ users_notify_signature: |
   Contact: https://webarch.net/contact
   Help:    https://docs.webarch.net/
   Status:  https://webarch.info/
+users_forward: true
+users_muttrc: true

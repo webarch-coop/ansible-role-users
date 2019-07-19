@@ -72,8 +72,8 @@
   loop_control:
     loop_var: users_skeleton
 
-# Quota tasks
-- block:
+- name: Quota tasks
+  block:
 
     - name: "Touch {{ quota_dir }}/quota_user.csv"
       file:
@@ -107,8 +107,8 @@
 
   when: quota_dir is defined
 
-# Delete users
-- block:
+- name: Users absent
+  block:
 
     - name: Slay any processes running as the user
       command: "slay {{ item.key }}"
@@ -164,7 +164,6 @@
 
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
-# Add users
 - name: User groups present
   include_tasks: groups.yml
   loop: "{{ users | dict2items }}"
@@ -174,7 +173,8 @@
   tags:
     - users-update
 
-- block:
+- name: Users present
+  block:
 
     - name: User group present
       group:
@@ -221,8 +221,8 @@
 
   when: ( item.value.users_state is undefined ) or ( item.value.users_state == "present" )
 
-# Users quota CSV file updated
-- block:
+- name: Users quota CSV file updated
+  block:
 
     - name: "Updated users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
       shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
@@ -241,29 +241,51 @@
 
   when: quota_dir is defined
 
-- name: Email address in .forward
-  template:
-    src: templates/forward.j2
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: 0644
-  loop: "{{ users | dict2items }}"
-  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( item.value.users_email is defined and item.value.users_email != "" )
-  tags:
-    - users-update
+- name: Create or remove a .forward file for each user
+  block:
 
-- name: Email address or user absent so no .forward
-  file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
-    state: absent
-  loop: "{{ users | dict2items }}"
-  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( item.value.users_email is not defined or item.value.users_email == "" )
-  tags:
-    - users-update
+    - name: Email address for user absent so no .forward
+      file:
+        path: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
+        state: absent
+      loop: "{{ users | dict2items }}"
+      when: ( users_forward == False ) or ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( item.value.users_email is not defined or item.value.users_email == "" )
+      tags:
+        - users-update
 
-# Chroot users
-- block:
+    - name: Email address in .forward
+      template:
+        src: templates/forward.j2
+        dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
+        owner: "{{ item.key }}"
+        group: "{{ item.key }}"
+        mode: 0644
+      loop: "{{ users | dict2items }}"
+      when: ( users_forward == True ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( item.value.users_email is defined and item.value.users_email != "" )
+      tags:
+        - users-update
+
+  when: users_forward is defined
+
+- name: Create a .muttrc for each user if it doesn't exist
+
+    - name: Users .muttrc present
+      template:
+        src: templates/muttrc.j2
+        dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.muttrc"
+        force: false
+        owner: "{{ item.key }}"
+        group: "{{ item.key }}"
+        mode: 0644
+      loop: "{{ users | dict2items }}"
+      when: users_muttrc == True
+      tags:
+        - users-update
+
+  when: users_muttrc is defined
+
+- name: Chroot users
+  block:
 
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
@@ -280,7 +302,6 @@
 
   when: users_chroot_dir.stat.exists
 
-# Matomo user accounts
 - name: Matomo login account tasks
   block:
 
@@ -330,8 +351,8 @@
 
   when: ( matomo_user is defined ) and ( matomo_user != "" )
 
-# Apache config for users present
-- block:
+- name: Apache config for users present
+  block:
 
     - name: Include Apache config tasks present users
       include_tasks: apache_users_present.yml

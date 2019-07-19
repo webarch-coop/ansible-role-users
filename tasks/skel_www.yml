@@ -14,7 +14,6 @@
   loop:
     - .bash_logout
     - .bashrc
-    - .muttrc
     - .profile
     - .vimrc
 
