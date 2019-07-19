@@ -15,6 +15,7 @@
     - .bash_logout
     - .bashrc
     - .profile
+    - .vimrc
 
 - name: "Skel {{ users_skeleton }} files touched"
   file:
