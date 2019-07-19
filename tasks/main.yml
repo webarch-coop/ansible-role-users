@@ -268,21 +268,17 @@
   when: users_forward is defined
 
 - name: Create a .muttrc for each user if it doesn't exist
-
-    - name: Users .muttrc present
-      template:
-        src: templates/muttrc.j2
-        dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.muttrc"
-        force: false
-        owner: "{{ item.key }}"
-        group: "{{ item.key }}"
-        mode: 0644
-      loop: "{{ users | dict2items }}"
-      when: users_muttrc == True
-      tags:
-        - users-update
-
-  when: users_muttrc is defined
+  template:
+    src: templates/muttrc.j2
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.muttrc"
+    force: false
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: 0644
+  loop: "{{ users | dict2items }}"
+  when: ( users_muttrc is defined ) and ( users_muttrc == True )
+  tags:
+    - users-update
 
 - name: Chroot users
   block:
