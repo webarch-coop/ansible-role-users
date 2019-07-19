@@ -1,1 +1,3 @@
 set tmpdir="~/tmp"
+set folder="~/.mutt"
+set record="+sent"
