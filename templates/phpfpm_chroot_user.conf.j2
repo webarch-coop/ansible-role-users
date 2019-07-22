@@ -24,7 +24,7 @@ php_admin_value[upload_tmp_dir] = {{ item.value.users_home | default('/home/' + 
 php_admin_value[sys_temp_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 php_admin_value[soap.wsdl_cache_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
 php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ item.key }}@{{ inventory_hostname }}
-php_admin_value[mail.log] = {{ item.value.users_home | default('/home/' + item.key) }}/logs/mail.log
+php_admin_value[mail.log] = {{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.mail.log
 
 pm = ondemand
 pm.max_children = {{ users_phpfpm_max_children | default('2') }}
