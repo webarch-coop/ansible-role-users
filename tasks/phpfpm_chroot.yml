@@ -92,7 +92,7 @@
       file:
         path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.mail.log"
         state: touch
-        owner: "{{ item.key }}" 
+        owner: "{{ item.key }}"
         group: "{{ item.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
