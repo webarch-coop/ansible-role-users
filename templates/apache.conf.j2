@@ -78,8 +78,8 @@
   </Directory>
   CustomLog /var/log/apache2/{{ item.key }}_access.log bandwidth
   LogLevel error
-  ErrorLog  {{ item.value.users_home | default('/home/' + item.key) }}/logs/error.log
-  CustomLog {{ item.value.users_home | default('/home/' + item.key) }}/logs/access.log combinedio
+  ErrorLog  {{ item.value.users_home | default('/home/' + item.key) }}/logs/apache.error.log
+  CustomLog {{ item.value.users_home | default('/home/' + item.key) }}/logs/apache.access.log combinedio
 </VirtualHost>
 {% endfor %}
 
