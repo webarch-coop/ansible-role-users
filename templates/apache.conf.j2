@@ -59,8 +59,13 @@
       </IfModule>
       <FilesMatch "\.php$">
         <If "-f %{REQUEST_FILENAME}">
+{% if "chroot" not in item.value.users_groups %}
+          SetHandler "proxy:unix:/run/php/php7.3-fpm.sock|fcgi://localhost/"
+
+{% else %}
           # SetHandler "proxy:unix:{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
           SetHandler "proxy:unix:{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
+{% endif %}
         </If>
       </FilesMatch>
     </IfModule>
