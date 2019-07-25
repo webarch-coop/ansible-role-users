@@ -28,6 +28,7 @@
       - "home owner: {{ item.value.users_home_owner | default(item.key) }}"
       - "home group: {{ item.value.users_home_group | default(item.key) }}"
       - "home mode: {{ item.value.users_home_mode | default(0700) }}"
+      - "generate ssh key: {{ item.value.users_generate_ssh_key | default('false') }}"
       # - "email: {{ item.value.users_email }}"
     verbosity: 1
 
@@ -40,7 +41,7 @@
     create_home: true
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
     skeleton: "{{ item.value.users_skel | default(omit) }}"
-    generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('no') }}"
+    generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('false') }}"
     system: "{{ item.value.users_system | default('no', false) }}"
   tags:
     - users-update
