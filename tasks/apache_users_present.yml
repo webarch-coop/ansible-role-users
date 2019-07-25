@@ -11,7 +11,7 @@
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-  when: users_cert == "vhost"
+  when: ( users_cert is defined ) and ( users_cert == "vhost" )
   tags:
     - apache
     - users-update
@@ -54,7 +54,7 @@
         - apache
         - users-update
 
-  when: users_cert == 'user'
+  when: ( users_cert is defined ) and ( users_cert == 'user' )
 
 - name: "Apache {{ item.key }} sites-available file present"
   template:
