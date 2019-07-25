@@ -36,7 +36,7 @@
   SSLCertificateKeyFile         {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.ca.pem
 {% endif %}
-{% if users_cert == "vhost" %
+{% if users_cert == "vhost" %}
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
