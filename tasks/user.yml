@@ -87,13 +87,16 @@
 
 - name: SSH public keys present
   get_url:
-    url: "{{ item.value.users_ssh_public_keys }}"
+    url: "{{ key_url }}"
     dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0600
     force: true
-  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
+  when: ( item.value.users_ssh_public_keys is defined ) and ( item.value.users_ssh_public_keys != [] )
+  loop: "{{ item.value.users_ssh_public_keys }}"
+  loop_control:
+    loop_var: key_url 
   tags:
     - users-update
 
