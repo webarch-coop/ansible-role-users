@@ -1,0 +1,29 @@
+---
+- name: SSH public keys downloaded
+  get_url:
+    url: "{{ key_url }}"
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_{{ key_idex }}"
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: 0600
+    force: true
+  loop: "{{ item.value.users_ssh_public_keys }}"
+  loop_control:
+    loop_var: key_url
+    index_var: key_idex
+  tags:
+    - users-update
+
+- name: Set a variable containing all the public keys
+  shell: "cat {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*"
+  register: users_ssh_public_keys_content
+  tags:
+    - users-update
+
+- name: SSH public keys present
+  authorized_key:
+    user: "{{ item.key }}"
+    state: present
+    key: "{{ users_ssh_public_keys_content.stdout }}"
+  tags:
+    - users-update
