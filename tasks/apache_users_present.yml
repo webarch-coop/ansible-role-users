@@ -1,6 +1,6 @@
 ---
 # One cert per VirtualHost
-- name: Let's Encrypt cert role included
+- name: Let's Encrypt cert per vhost role included
   include_role:
     name: acmesh
     tasks_from: letsencrypt
@@ -16,8 +16,8 @@
     - apache
     - users-update
 
-# One cert per user
-- block:
+- name: Let's Encrypt one cert per user tasks
+  block:
 
     - name: "Set {{ item.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
       set_fact:
