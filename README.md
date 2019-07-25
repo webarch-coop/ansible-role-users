@@ -92,7 +92,8 @@ The other repo should also contain a `users.yml` file that contains:
           - sudo
           - operator
         users_editor: vim
-        users_ssh_public_keys: https://git.coop/chris.keys 
+        users_ssh_public_keys:
+          - https://git.coop/chris.keys 
       fred:
         users_state: absent
     
@@ -124,7 +125,20 @@ Then it can be run as follows:
 ansible-playbook users.yml 
 ```
 
+## SSH Public Keys
+
+The `users_ssh_public_keys` array should be set to a list of one or more URL's for public keys (eg from GitHub).
+
+All the files at the URL's will be downloaded to files named:
+
+* `~/.ssh/authorized_keys_0`
+* `~/.ssh/authorized_keys_1`
+* `~/.ssh/authorized_keys_2`
+
+Then the concaternation of `~/.ssh/authorized_keys_*` will be added to `~/.ssh/authorized_keys`, this means if you want to add additional keys then you can simply add them to this directory, with a suitable filename, eg `~/.ssh/authorized_keys_extra`. 
+
+The `exclusive` option for the [authorized_key module](https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html) is not set to `True` so keys will have to be removed manually.
+
 ## TODO
 
-* Add the users dictionary to the `hosts.yml` file?
 * Add more options from the [Ansible user module](https://docs.ansible.com/ansible/latest/modules/user_module.html)

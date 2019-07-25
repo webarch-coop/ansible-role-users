@@ -24,6 +24,7 @@
   authorized_key:
     user: "{{ item.key }}"
     state: present
+    exclusive: false
     key: "{{ users_ssh_public_keys_content.stdout }}"
   tags:
     - users-update
