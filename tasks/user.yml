@@ -99,7 +99,7 @@
         force: true
       loop: "{{ item.value.users_ssh_public_keys }}"
       loop_control:
-        loop_var: key_url 
+        loop_var: key_url
         index_var: key_idex
       tags:
         - users-update
@@ -115,7 +115,7 @@
         user: "{{ item.key }}"
         state: present
         key: "{{ key_file }}"
-      with_file: "{{ users_ssh_public_key_files }}"
+      with_file: "{{ users_ssh_public_key_files.stdout_lines }}"
       tags:
         - users-update
 
