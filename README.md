@@ -139,6 +139,8 @@ Then the concaternation of `~/.ssh/authorized_keys_*` will be added to `~/.ssh/a
 
 The `exclusive` option for the [authorized_key module](https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html) is not set to `True` so keys will have to be removed manually.
 
+One drawback with this is that you can't prepend a key with `key_options`, for example, `from="127.0.0.1" ssh-rsa AAA...`, this behavious might be change in the future if we don't use the Ansible authorized_key module for adding the keys.
+
 ## TODO
 
 * Add more options from the [Ansible user module](https://docs.ansible.com/ansible/latest/modules/user_module.html)
