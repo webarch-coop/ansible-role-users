@@ -17,6 +17,7 @@
 - name: Set a variable containing all the public keys
   shell: "cat {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*"
   register: users_ssh_public_keys_content
+  changed_when: false
   tags:
     - users-update
 
