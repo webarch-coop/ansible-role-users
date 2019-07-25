@@ -12,3 +12,4 @@ users_notify_signature: |
   Status:  https://webarch.info/
 users_forward: true
 users_muttrc: true
+users_sites_dir: sites

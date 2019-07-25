@@ -64,9 +64,9 @@
     - apache
     - users-update
 
-- name: "Apache {{ item.key }}/sites directory present"
+- name: "Apache {{ item.key }}/{{ users_sites_dir }} directory present"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites"
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}"
     state: directory
     owner: "{{ item.key }}"
     # group: "{{ apache_user | default('www-data') }}"
@@ -78,7 +78,7 @@
 
 - name: "Apache DocumentRoot present"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost }}"
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
     state: directory
     owner: "{{ item.key }}"
     # group: "{{ apache_user | default('www-data') }}"
@@ -175,7 +175,7 @@
   vars:
     wordpress_user: "{{ item.key }}"
     wordpress_group: "{{ item.key }}"
-    wordpress_docroot: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+    wordpress_docroot: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     wordpress_docroot_mode: "0750"
     wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
     wordpress_dbuser: "{{ item.key }}"
@@ -212,7 +212,7 @@
     matomo_user: "{{ item.key }}"
     matomo_url: "https://{{ vhost.value.users_apache_server_name }}/"
     matomo_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
-    matomo_html: "{{ item.value.users_home | default('/home/' + item.key) }}/sites/{{ vhost.key }}"
+    matomo_html: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     matomo_private: "{{ item.value.users_home | default('/home/' + item.key) }}/private"
     matomo_db_username: "{{ item.key }}"
     matomo_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
