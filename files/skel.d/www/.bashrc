@@ -113,4 +113,4 @@ if ! shopt -oq posix; then
 fi
 
 # Add ~/bin to $PATH
-export PATH="${PATH}:${HOME}/bin"
+export PATH="${HOME}/bin:${PATH}"
