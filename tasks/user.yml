@@ -115,7 +115,9 @@
         user: "{{ item.key }}"
         state: present
         key: "{{ key_file }}"
-      with_file: "{{ users_ssh_public_key_files.stdout_lines }}"
+      loop: "{{ users_ssh_public_key_files.stdout_lines }}"
+      loop_control:
+        loop_var: key_file
       tags:
         - users-update
 
