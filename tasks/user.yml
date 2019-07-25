@@ -72,7 +72,6 @@
 - debug:
     msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
     verbosity: 1
-  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
 
 - name: "SSH private directories present for {{ item.key }}"
   file:
@@ -81,46 +80,11 @@
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0700
-  when: item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != ""
   tags:
     - users-update
 
-# TODO remove unwanted SSH public keys from users
 - name: Users SSH public keys present
-  block:
-
-    - name: SSH public keys downloaded
-      get_url:
-        url: "{{ key_url }}"
-        dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_{{ key_idex }}"
-        owner: "{{ item.key }}"
-        group: "{{ item.key }}"
-        mode: 0600
-        force: true
-      loop: "{{ item.value.users_ssh_public_keys }}"
-      loop_control:
-        loop_var: key_url
-        index_var: key_idex
-      tags:
-        - users-update
-
-    - name: Get a list of the public keys
-      shell: "ls {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_* || ( exit 0 )"
-      register: users_ssh_public_key_files
-      tags:
-        - users-update
-
-    - name: SSH public keys present
-      authorized_key:
-        user: "{{ item.key }}"
-        state: present
-        key: "{{ key_file }}"
-      loop: "{{ users_ssh_public_key_files.stdout_lines }}"
-      loop_control:
-        loop_var: key_file
-      tags:
-        - users-update
-
+  include_tasks: ssh.yml
   when: ( item.value.users_ssh_public_keys is defined ) and ( item.value.users_ssh_public_keys != [] )
 
 - name: Set default editor
