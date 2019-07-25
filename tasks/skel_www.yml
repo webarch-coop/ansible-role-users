@@ -53,6 +53,7 @@
     - .vim
     - .wp-cli
     - .yarn
+    - bin
     - private
     - tmp
 
