@@ -26,6 +26,6 @@
     user: "{{ item.key }}"
     state: present
     exclusive: false
-    key: "{{ users_ssh_public_keys_content.stdout }}"
+    key: "{{ users_ssh_public_keys_content.stdout_lines }}"
   tags:
     - users-update
