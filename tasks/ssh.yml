@@ -16,7 +16,7 @@
     - users-update
 
 - name: cat all the authorized_keys_* public keys to authorized_keys
-  shell: "cat {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_* > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && chmod 600 {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
+  shell: "rm {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && for a in $(ls {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*); do cat ${a} >> {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys; done && chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && chmod 600 {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
   register: users_ssh_public_keys_content
   tags:
     - users-ssh
