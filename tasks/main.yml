@@ -195,6 +195,7 @@
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
       tags:
+        - users-ssh
         - users-update
 
     - name: Users MariaDB accounts and databases created and passwords read or set

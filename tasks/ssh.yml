@@ -12,12 +12,14 @@
     loop_var: key_url
     index_var: key_idex
   tags:
+    - ssh
     - users-update
 
 - name: cat all the authorized_keys_* public keys to authorized_keys
   shell: "cat {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_* > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && chmod 600 {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
   register: users_ssh_public_keys_content
   tags:
+    - ssh
     - users-update
 
 # More work would be needed above before the Ansible authorized_key module could be used

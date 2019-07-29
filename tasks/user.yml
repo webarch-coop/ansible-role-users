@@ -82,11 +82,15 @@
     group: "{{ item.key }}"
     mode: 0700
   tags:
+    - users-ssh
     - users-update
 
 - name: Users SSH public keys present
   include_tasks: ssh.yml
   when: ( item.value.users_ssh_public_keys is defined ) and ( item.value.users_ssh_public_keys != [] )
+  tags:
+    - users-ssh
+    - users-update
 
 - name: Set default editor
   copy:
