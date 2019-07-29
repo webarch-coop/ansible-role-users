@@ -16,7 +16,7 @@
     - users-update
 
 - name: cat all the authorized_keys_* public keys to authorized_keys
-  shell: "for f in {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*; do cat '${f}'; echo; done > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
+  shell: "for f in {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
   register: users_ssh_public_keys_content
   tags:
     - users-ssh
