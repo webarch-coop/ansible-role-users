@@ -14,18 +14,18 @@
   tags:
     - users-update
 
-- name: Set a variable containing all the public keys
-  shell: "cat {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*"
+- name: cat all the authorized_keys_* public keys to authorized_keys
+  shell: "cat {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_* > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys && chmod 600 {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
   register: users_ssh_public_keys_content
-  changed_when: false
   tags:
     - users-update
 
-- name: SSH public keys present
-  authorized_key:
-    user: "{{ item.key }}"
-    state: present
-    exclusive: false
-    key: "{{ users_ssh_public_keys_content.stdout_lines }}"
-  tags:
-    - users-update
+# More work would be needed above before the Ansible authorized_key module could be used
+# - name: SSH public keys present
+#   authorized_key:
+#     user: "{{ item.key }}"
+#     state: present
+#     exclusive: false
+#     key: "{{ users_ssh_public_keys_content.stdout_lines }}"
+#   tags:
+#     - users-update
