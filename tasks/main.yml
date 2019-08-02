@@ -283,7 +283,7 @@
     group: "{{ item.key }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
-  when: ( users_muttrc is defined ) and ( users_muttrc == True )
+  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( users_muttrc is defined ) and ( users_muttrc == True )
   tags:
     - users-update
 
