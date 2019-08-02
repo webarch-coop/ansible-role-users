@@ -9,7 +9,8 @@
 - name: "Set a fact for the {{ item.key }} users groups which includes the users own group, as a list"
   set_fact:
     users_all_groups:
-      - "{{ item.value.users_groups | default(omit) }} + [ '{{ users_own_group }}' ]"
+      - "{{ item.value.users_groups | default(omit) + users_own_group }}"
+  when: ( item.value.users_groups is defined ) and ( item.value.users_groups != [] )
   tags:
     - users-update
 
