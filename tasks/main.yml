@@ -117,12 +117,17 @@
       tags:
         - users-update
 
-    - name: Include the chroot absent users tasks
-      include_tasks: chroot_users_absent.yml
-      loop: "{{ users | dict2items }}"
-      when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists ) and ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
-      tags:
-        - users-update
+    - name: Chroot users absent
+      block:
+
+        - name: Include the chroot absent users tasks
+          include_tasks: chroot_users_absent.yml
+          loop: "{{ users | dict2items }}"
+          when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+          tags:
+            - users-update
+
+      when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 
     - name: Include Apache config tasks absent users
       include_tasks: apache_users_absent.yml
@@ -298,7 +303,7 @@
       tags:
         - users-update
 
-  when: users_chroot_dir.stat.exists
+  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 
 - name: Matomo login account tasks
   block:
