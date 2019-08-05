@@ -290,6 +290,16 @@
 - name: Chroot users
   block:
 
+    - name: Debug chroot variables
+      debug:
+        msg: "{{ item.value.key }} has state {{ item.value.users_state }} and is in the following groups: {{ item.value.users_groups }}"
+        verbosity: 1
+      loop: "{{ users | dict2items }}"
+      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
+      tags:
+        - users-update
+      
+
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
       loop: "{{ users | dict2items }}"
