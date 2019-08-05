@@ -297,7 +297,7 @@
           debug:
             msg: "{{ item.value.key }} has state {{ item.value.users_state }} and is in the following groups: {{ item.value.users_groups }}"
             verbosity: 1
-          when: '"chroot" in item.value.users_groups'
+          when: ( item.value.users_groups is defined ) and ( "chroot" in item.value.users_groups )
           loop: "{{ users | dict2items }}"
           tags:
             - users-update
