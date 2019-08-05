@@ -302,7 +302,7 @@
           tags:
             - users-update
 
-      when: ( item.value.users_state is undefined or item.value.users_state == "present"
+      when: ( item.value.users_state is undefined ) or ( item.value.users_state == "present" )
 
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
