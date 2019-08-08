@@ -18,5 +18,4 @@
                         run-parts /etc/logrotate.d/httpd-prerotate; \
                 fi; \
         endscript
-        endscript
 }
