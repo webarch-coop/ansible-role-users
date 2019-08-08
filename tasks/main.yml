@@ -45,6 +45,7 @@
         msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
         verbosity: 1
       tags:
+        - logrotate
         - users-update
 
     - name: Set a fact for the PHP-FPM version
@@ -52,6 +53,7 @@
         users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
       when: users_phpfpm_status.stdout == "installed"
       tags:
+        - logrotate
         - users-update
 
   when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
