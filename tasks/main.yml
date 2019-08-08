@@ -304,7 +304,7 @@
     - name: PHP-FPM chroot tasks
       block:
 
-        - name: Logrotation config in place
+        - name: PHP-FPM chroot logrotation config in place
           copy:
             src: files/phpfpm_users_logrotate
             dest: /etc/logrotate.d/phpfpm_users_logrotate
