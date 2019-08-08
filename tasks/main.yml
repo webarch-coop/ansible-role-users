@@ -301,11 +301,25 @@
       tags:
         - users-update
 
-    - name: Include the PHP FPM chroot tasks
-      include_tasks: phpfpm_chroot.yml
+    - name: PHP-FPM chroot tasks
+      block:
+
+        - name: Logrotation config in place
+          copy:
+            src: files/phpfpm_users_logrotate
+            dest: /etc/logrotate.d/phpfpm_users_logrotate
+            owner: root
+            group: root
+            mode: 0644
+            tags:
+              - logrotate
+
+        - name: Include the PHP FPM chroot tasks
+          include_tasks: phpfpm_chroot.yml
+          tags:
+            - users-update
+
       when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
-      tags:
-        - users-update
 
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 

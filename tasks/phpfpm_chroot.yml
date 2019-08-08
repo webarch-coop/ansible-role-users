@@ -165,16 +165,6 @@
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
 
-- name: Logrotation config in place
-  copy:
-    src: files/phpfpm_users_logrotate
-    dest: /etc/logrotate.d/phpfpm_users_logrotate
-    owner: root
-    group: root
-    mode: 0644
-    tags:
-      - logrotate
-
 - name: Restart php-fpm
   service:
     name: "php{{ users_phpfpm_version }}-fpm"
