@@ -314,8 +314,8 @@
             owner: root
             group: root
             mode: 0644
-            tags:
-              - logrotate
+          tags:
+            - logrotate
 
         - name: Include the PHP FPM chroot tasks
           include_tasks: phpfpm_chroot.yml
