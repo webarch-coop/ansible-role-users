@@ -365,6 +365,14 @@
         - users-update
         - apache
 
+    - name: Users Apache logrotation config in place
+      copy:
+        src: files/apache_users_logrotate
+        dest: /etc/logrotate.d/apache_users_logrotate
+        owner: root
+        group: root
+        mode: 0644
+
     - name: Apache configtest
       command: apachectl configtest
       register: users_apachectl_configtest

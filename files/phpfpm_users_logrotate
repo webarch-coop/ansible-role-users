@@ -1,0 +1,14 @@
+/home/*/logs/php-fpm*log {
+        daily
+        rotate 28
+        missingok
+        notifempty
+        compress
+        delaycompress
+        create 644 root root
+        dateext
+        postrotate
+                /usr/lib/php/php7.3-fpm-reopenlogs
+        endscript
+}
+
