@@ -372,6 +372,8 @@
         owner: root
         group: root
         mode: 0644
+      tags:
+        - logrotate 
 
     - name: Apache configtest
       command: apachectl configtest
