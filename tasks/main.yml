@@ -10,12 +10,14 @@
   check_mode: false
   changed_when: false
   tags:
+    - logrotate
     - users-update
 
 - name: Set a fact for the Debian version
   set_fact:
     users_debian_version: "{{ users_debian_version_check.stdout }}"
   tags:
+    - logrotate
     - users-update
 
 - name: Load package information as facts
@@ -23,6 +25,7 @@
     manager: apt
   tags:
     - apache
+    - logrotate
     - users-update
 
 - name: Check if php-fpm is installed
@@ -31,6 +34,7 @@
   check_mode: false
   changed_when: false
   tags:
+    - logrotate
     - users-update
 
 - name: php-fpm variable set
