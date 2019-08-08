@@ -373,7 +373,7 @@
         group: root
         mode: 0644
       tags:
-        - logrotate 
+        - logrotate
 
     - name: Apache configtest
       command: apachectl configtest
