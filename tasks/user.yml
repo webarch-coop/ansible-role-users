@@ -91,6 +91,9 @@
   check_mode: false
   changed_when: false
   register: users_additional_authorized_keys
+  tags:
+    - users-ssh
+    - users-update
 
 - name: Users SSH public keys present
   include_tasks: ssh.yml
