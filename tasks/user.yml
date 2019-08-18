@@ -87,7 +87,7 @@
     - users-update
 
 - name: Check if additional ~/.ssh/authorized_keys_ files are present
-  command: "ls {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*"
+  command: "ls {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_* || echo ''"
   check_mode: false
   changed_when: false
   register: users_additional_authorized_keys
