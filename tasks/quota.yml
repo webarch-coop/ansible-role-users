@@ -11,7 +11,10 @@
 
 - name: "Set users_quota_block_softlimit from users_quota for {{ item.key }}"
   set_fact:
-    users_quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
+    # softlimit 10% under hardlimit:
+    # users_quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
+    # softlimit 10 time the hardlimit:
+    users_quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 102 }}"
   when: item.value.users_quota_block_softlimit is not defined
   tags:
     - users-update
