@@ -30,7 +30,7 @@
     src: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
     dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
     remote_src: true
-    force: no
+    force: false
     validate: ssh-keygen -lf %s
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
