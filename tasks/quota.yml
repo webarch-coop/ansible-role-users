@@ -42,7 +42,7 @@
 
 - name: "Set users_quota_inode_softlimit from users_quota for {{ item.key }}"
   set_fact:
-    users_quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 225280 }}"
+    users_quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 2252 }}"
   when: item.value.users_quota_inode_softlimit is not defined
   tags:
     - users-update
@@ -56,7 +56,7 @@
 
 - name: "Set users_quota_inode_hardlimit from users_quota for {{ item.key }}"
   set_fact:
-    users_quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 204800 }}"
+    users_quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 2048 }}"
   when: item.value.users_quota_inode_hardlimit is not defined
   tags:
     - users-update
