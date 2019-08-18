@@ -15,11 +15,27 @@
     - users-ssh
     - users-update
 
-- name: cat all the authorized_keys_* public keys to authorized_keys
-  shell: "for f in {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
+- name: cat all the authorized_keys_* public keys to ~/.ssh/.authorized_keys
+  shell: "for f in {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
   become: true
   become_user: "{{ item.key }}"
   register: users_ssh_public_keys_content
+  changed_when: false
+  tags:
+    - users-ssh
+    - users-update
+
+- name: Copy ~/.ssh/.authorized_keys to ~/ssh/authorized_keys if changed
+  synchronize:
+    src: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
+    checksum: true
+    archive: true
+    compress: false
+    group: true
+    mode: pull
+    rsync_opts:
+      - "-I"
   tags:
     - users-ssh
     - users-update
