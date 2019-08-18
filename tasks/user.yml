@@ -86,9 +86,15 @@
     - users-ssh
     - users-update
 
+- name: Check if additional ~/.ssh/authorized_keys_ files are present
+  command: "ls {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*"
+  check_mode: false
+  changed_when: false
+  register: users_additional_authorized_keys
+
 - name: Users SSH public keys present
   include_tasks: ssh.yml
-  when: ( item.value.users_ssh_public_keys is defined ) and ( item.value.users_ssh_public_keys != [] )
+  when: ( item.value.users_ssh_public_keys is defined and item.value.users_ssh_public_keys != [] ) or ( users_additional_authorized_keys is defined and users_additional_authorized_keys.stdout_lines != [] ) 
   tags:
     - users-ssh
     - users-update
