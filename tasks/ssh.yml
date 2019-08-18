@@ -26,16 +26,15 @@
     - users-update
 
 - name: Copy ~/.ssh/.authorized_keys to ~/ssh/authorized_keys if changed
-  synchronize:
+  copy:
     src: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
     dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
-    checksum: true
-    archive: true
-    compress: false
-    group: true
-    mode: pull
-    rsync_opts:
-      - "-I"
+    remote_src: true
+    force: no
+    validate: ssh-keygen -lf %s
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: 0600
   tags:
     - users-ssh
     - users-update
