@@ -414,3 +414,10 @@
         - apache
 
   when: '"apache2" in ansible_facts.packages'
+
+- name: Crontab present for users
+  include_tasks: crontab.yml
+  loop: "{{ users | dict2items }}"
+  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( users_crontab is not defined or users_crontab == True )
+  tags:
+    - users-update
