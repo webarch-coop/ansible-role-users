@@ -173,5 +173,5 @@
     owner: "{{ item.key }}"
     group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0700
-      tags:
-        - users-update
+  tags:
+    - users-update
