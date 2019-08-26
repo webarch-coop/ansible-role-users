@@ -19,7 +19,7 @@
   tags:
     - update-users
 
-- name: Set a variable for the users crontab minute 
+- name: Set a variable for the users crontab minute
   set_fact:
     users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
   tags:
