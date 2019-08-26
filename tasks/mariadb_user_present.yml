@@ -165,3 +165,13 @@
         - users-update
 
   when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True ) and ( users_notify_mariadb_passwd_file.stat.exists == False )
+
+- name: Directory present for database backups
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/private/mysql-backups"
+    state: directory
+    owner: "{{ item.key }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
+    mode: 0700
+      tags:
+        - users-update
