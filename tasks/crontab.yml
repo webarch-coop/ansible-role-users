@@ -2,7 +2,7 @@
 - name: "Check if {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min exists"
   stat:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
-    register: users_cron_min_file
+  register: users_cron_min_file
   tags:
     - update-users
 
