@@ -48,7 +48,7 @@
     - name: "PATH set for daily cron jobs for {{ item.key }}"
       cron:
         cron_file: "chroot_cron_daily_{{ item.key }}"
-        env: yes
+        env: true
         name: PATH
         job: "/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin"
       tags:
@@ -68,7 +68,7 @@
     - name: "PATH set for hourly cron jobs for {{ item.key }}"
       cron:
         cron_file: "chroot_cron_hourly_{{ item.key }}"
-        env: yes
+        env: true
         name: PATH
         job: "/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin"
       tags:
