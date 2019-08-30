@@ -29,7 +29,7 @@
   cron:
     name: "Daily cron jobs"
     user: "{{ item.key }}"
-    job: "if [[ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
+    job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
     minute: "{{ users_cron_min }}"
     hour: "05"
   tags:
@@ -39,7 +39,7 @@
   cron:
     name: "Hourly cron jobs"
     user: "{{ item.key }}"
-    job: "if [[ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh; fi"
+    job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh; fi"
     minute: "{{ users_cron_min }}"
     hour: "*"
   tags:
