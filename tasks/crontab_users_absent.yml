@@ -12,7 +12,7 @@
     - name: "Daily cron jobs for {{ item.key }}"
       cron:
         name: "Daily cron jobs"
-        user: "{{ item.key }}"
+        user: root
         cron_file: "chroot_cron_daily_{{ item.key }}"
         state: absent
       tags:
@@ -21,7 +21,7 @@
     - name: "Hourly cron jobs for {{ item.key }}"
       cron:
         name: "Hourly cron jobs"
-        user: "{{ item.key }}"
+        user: root
         cron_file: "chroot_cron_hourly_{{ item.key }}"
         state: absent
         hour: "*"
