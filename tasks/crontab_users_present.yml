@@ -1,4 +1,11 @@
 ---
+- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md in place"
+  copy:
+    src: files/CRON_README.md
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
+  tags:
+    - update-users
+
 - name: "Check if {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min exists"
   stat:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"

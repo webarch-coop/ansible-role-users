@@ -1,4 +1,11 @@
 ---
+- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md absent"
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
+    state: absent
+  tags:
+    - update-users
+
 - name: For chrooted users
   block:
 
