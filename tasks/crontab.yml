@@ -25,13 +25,23 @@
   tags:
     - update-users
 
-- name: "Crontab present for {{ item.key }}"
+- name: "Daily crontab present for {{ item.key }}"
   cron:
-    name: Daily cron jobs
+    name: "Daily cron jobs for {{ item.key }}"
     user: "{{ item.key }}"
-    job: "if [[ -f ${HOME}/bin/cron_daily.sh ]]; then bash ${HOME}/bin/cron_daily.sh; fi"
+    job: "if [[ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
     minute: "{{ users_cron_min }}"
     hour: "05"
+  tags:
+    - update-users
+
+- name: "Hourly crontab present for {{ item.key }}"
+  cron:
+    name: "Daily cron jobs for {{ item.key }}"
+    user: "{{ item.key }}"
+    job: "if [[ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh; fi"
+    minute: "{{ users_cron_min }}"
+    hour: "*"
   tags:
     - update-users
 
