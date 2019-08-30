@@ -1,0 +1,54 @@
+---
+- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md absent"
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
+    state: absent
+  tags:
+    - update-users
+
+- name: For chrooted users
+  block:
+
+    - name: "Daily cron jobs for {{ item.key }}"
+      cron:
+        name: "Daily cron jobs"
+        user: root
+        cron_file: "chroot_cron_daily_{{ item.key }}"
+        state: absent
+      tags:
+        - update-users
+
+    - name: "Hourly cron jobs for {{ item.key }}"
+      cron:
+        name: "Hourly cron jobs"
+        user: root
+        cron_file: "chroot_cron_hourly_{{ item.key }}"
+        state: absent
+        hour: "*"
+      tags:
+        - update-users
+
+  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists ) and ( "chroot" in item.value.users_groups )
+
+- name: For non-chrooted users
+  block:
+
+    - name: "Daily cron jobs for {{ item.key }}"
+      cron:
+        name: "Daily cron jobs"
+        user: "{{ item.key }}"
+        state: absent
+      tags:
+        - update-users
+
+    - name: "Hourly cron jobs for {{ item.key }}"
+      cron:
+        name: "Hourly cron jobs"
+        user: "{{ item.key }}"
+        state: absent
+      tags:
+        - update-users
+
+  when: '"chroot" not in item.value.users_groups'
+
+...

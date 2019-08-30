@@ -1,0 +1,97 @@
+---
+- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin present"
+  file:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin"
+    state: directory
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
+    mode: 0750
+  tags:
+    - update-users
+
+- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md in place"
+  copy:
+    src: files/CRON_README.md
+    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
+  tags:
+    - update-users
+
+- name: "Check if {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min exists"
+  stat:
+    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+  register: users_cron_min_file
+  tags:
+    - update-users
+
+- name: "Generate {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+  shell: "echo {{ 59 | random }} > {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+  when: ( users_cron_min_file.stat is not defined ) or ( users_cron_min_file.stat.exists == False )
+  tags:
+    - update-users
+
+- name: "Read the minute from {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+  slurp:
+    src: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+  register: users_cron_min_b64encoded
+  tags:
+    - update-users
+
+- name: Set a variable for the users crontab minute
+  set_fact:
+    users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
+  tags:
+    - update-users
+
+- name: Generate files to be run by root in /etc/cron.d for chrooted users
+  block:
+
+    - name: "Daily cron jobs for {{ item.key }}"
+      cron:
+        name: "Daily cron jobs"
+        cron_file: "chroot_cron_daily_{{ item.key }}"
+        user: root
+        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }} sudo -u {{ item.key }} PATH=/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ item.value.users_home | default('/home/' + item.key) }}/tmp /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ item.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ item.value.users_email }}; fi"
+        minute: "{{ users_cron_min }}"
+        hour: "05"
+      tags:
+        - update-users
+
+    - name: "Hourly cron jobs for {{ item.key }}"
+      cron:
+        name: "Hourly cron jobs"
+        cron_file: "chroot_cron_hourly_{{ item.key }}"
+        user: root
+        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }} sudo -u {{ item.key }} PATH=/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ item.value.users_home | default('/home/' + item.key) }}/tmp /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ item.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ item.value.users_email }}; fi"
+        minute: "{{ users_cron_min }}"
+        hour: "*"
+      tags:
+        - update-users
+
+  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists ) and ( "chroot" in item.value.users_groups )
+
+- name: Crontabs present for non-chrooted users
+  block:
+
+    - name: "Daily cron jobs for {{ item.key }}"
+      cron:
+        name: "Daily cron jobs"
+        user: "{{ item.key }}"
+        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
+        minute: "{{ users_cron_min }}"
+        hour: "05"
+      tags:
+        - update-users
+
+    - name: "Hourly cron jobs for {{ item.key }}"
+      cron:
+        name: "Hourly cron jobs"
+        user: "{{ item.key }}"
+        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]; then /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh; fi"
+        minute: "{{ users_cron_min }}"
+        hour: "*"
+      tags:
+        - update-users
+
+  when: '"chroot" not in item.value.users_groups'
+
+...
