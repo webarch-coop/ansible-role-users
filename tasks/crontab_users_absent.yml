@@ -1,14 +1,4 @@
 ---
-- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin present"
-  file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin"
-    state: directory
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-    mode: 0750
-  tags:
-    - update-users
-
 - name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md absent"
   file:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
