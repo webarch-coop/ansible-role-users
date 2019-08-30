@@ -25,9 +25,9 @@
   tags:
     - update-users
 
-- name: "Daily crontab present for {{ item.key }}"
+- name: "Daily cron jobs for {{ item.key }}"
   cron:
-    name: "Daily cron jobs for {{ item.key }}"
+    name: "Daily cron jobs"
     user: "{{ item.key }}"
     job: "if [[ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
     minute: "{{ users_cron_min }}"
@@ -35,9 +35,9 @@
   tags:
     - update-users
 
-- name: "Hourly crontab present for {{ item.key }}"
+- name: "Hourly cron jobs for {{ item.key }}"
   cron:
-    name: "Daily cron jobs for {{ item.key }}"
+    name: "Hourly cron jobs"
     user: "{{ item.key }}"
     job: "if [[ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]]; then bash {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh; fi"
     minute: "{{ users_cron_min }}"
