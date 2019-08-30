@@ -45,6 +45,15 @@
 - name: Generate files to be run by root in /etc/cron.d for chrooted users
   block:
 
+    - name: "PATH set for daily cron jobs for {{ item.key }}"
+      cron:
+        cron_file: "chroot_cron_daily_{{ item.key }}"
+        env: yes
+        name: PATH
+        job: "/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin"
+      tags:
+        - update-users
+
     - name: "Daily cron jobs for {{ item.key }}"
       cron:
         name: "Daily cron jobs"
@@ -53,6 +62,15 @@
         job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }}/ sudo -u {{ item.key }} /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
         minute: "{{ users_cron_min }}"
         hour: "05"
+      tags:
+        - update-users
+
+    - name: "PATH set for hourly cron jobs for {{ item.key }}"
+      cron:
+        cron_file: "chroot_cron_hourly_{{ item.key }}"
+        env: yes
+        name: PATH
+        job: "/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin"
       tags:
         - update-users
 
