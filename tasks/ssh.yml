@@ -16,11 +16,7 @@
     - users-update
 
 - name: cat all the authorized_keys_* public keys to ~/.ssh/.authorized_keys
-  shell: "for f in {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
-  become: true
-  become_method: su
-  become_flags: '-s /bin/bash'
-  become_user: "{{ item.key }}"
+  shell: "for f in {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys ; chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys ; chmod 600 {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
   register: users_ssh_public_keys_content
   changed_when: false
   tags:
