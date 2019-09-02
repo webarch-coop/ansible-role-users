@@ -12,9 +12,7 @@
 - name: "Set users_quota_block_softlimit from users_quota for {{ item.key }}"
   set_fact:
     # softlimit 10% under hardlimit:
-    # users_quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
-    # softlimit two times the hardlimit:
-    users_quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 512 }}"
+    users_quota_block_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 1125 }}"
   when: item.value.users_quota_block_softlimit is not defined
   tags:
     - users-update
@@ -42,7 +40,8 @@
 
 - name: "Set users_quota_inode_softlimit from users_quota for {{ item.key }}"
   set_fact:
-    users_quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 10240 }}"
+    # softlimit 10% under hardlimit:
+    users_quota_inode_softlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 11250 }}"
   when: item.value.users_quota_inode_softlimit is not defined
   tags:
     - users-update
@@ -56,7 +55,7 @@
 
 - name: "Set users_quota_inode_hardlimit from users_quota for {{ item.key }}"
   set_fact:
-    users_quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 20480 }}"
+    users_quota_inode_hardlimit: "{{ ( item.value.users_quota | human_to_bytes ) // 10240 }}"
   when: item.value.users_quota_inode_hardlimit is not defined
   tags:
     - users-update
