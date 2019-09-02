@@ -234,3 +234,26 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
   tags:
     - users-update
+
+- name: Include phpMyAdmin role
+  include_role:
+    name: phpmyadmin
+  vars:
+    phpmyadmin_user: "{{ item.key }}"
+    phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
+    phpmyadmin_db_user: "{{ item.key }}"
+    phpmyadmin_db_socket: /var/run/mysqld/mysqld.sock
+    phpmyadmin_db_host: localhost
+    phpmyadmin_db_port: 3306
+    phpmyadmin_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    phpmyadmin_private: "{{ item.value.users_home | default('/home/' + item.key) }}/private"
+    phpmyadmin_html: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    phpmyadmin_html_upload_dir: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
+    phpmyadmin_html_save_dir: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
+  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
+  tags:
+    - users-update
+...
