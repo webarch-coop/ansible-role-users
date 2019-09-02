@@ -242,6 +242,7 @@
     phpmyadmin_user: "{{ item.key }}"
     phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
     phpmyadmin_db_user: "{{ item.key }}"
+    phpmyadmin_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     phpmyadmin_db_socket: /var/run/mysqld/mysqld.sock
     phpmyadmin_db_host: localhost
     phpmyadmin_db_port: 3306
