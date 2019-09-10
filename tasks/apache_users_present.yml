@@ -15,6 +15,7 @@
   tags:
     - apache
     - users-update
+    - letsencrypt
 
 - name: Let's Encrypt one cert per user tasks
   block:
@@ -27,6 +28,7 @@
       tags:
         - apache
         - users-update
+        - letsencrypt
 
     - name: Set fact for subjectAltNames
       set_fact:
@@ -37,14 +39,23 @@
       tags:
         - apache
         - users-update
+        - letsencrypt
 
     - debug:
         msg: "subject_alt_names is set to: {{ subject_alt_names }}"
         verbosity: 1
+      tags:
+        - apache
+        - users-update
+        - letsencrypt
 
     - debug:
         msg: "common_name is set to: {{ common_name }}"
         verbosity: 1
+      tags:
+        - apache
+        - users-update
+        - letsencrypt
 
     - name: Let's Encrypt cert role included
       include_role:
@@ -53,6 +64,7 @@
       tags:
         - apache
         - users-update
+        - letsencrypt
 
   when: ( users_cert is defined ) and ( users_cert == 'user' )
 

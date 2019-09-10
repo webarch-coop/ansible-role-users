@@ -385,6 +385,7 @@
       tags:
         - users-update
         - apache
+        - letsencrypt
 
     - name: Users Apache logrotation config in place
       copy:
@@ -403,6 +404,7 @@
       tags:
         - users-update
         - apache
+        - letsencrypt
 
     - name: Apache restart
       service:
@@ -412,6 +414,7 @@
       tags:
         - users-update
         - apache
+        - letsencrypt
 
   when: '"apache2" in ansible_facts.packages'
 
