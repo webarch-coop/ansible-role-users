@@ -25,6 +25,7 @@
     manager: apt
   tags:
     - apache
+    - letsencrypt
     - logrotate
     - users-update
 
