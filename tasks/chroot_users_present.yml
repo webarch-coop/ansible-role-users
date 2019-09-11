@@ -74,14 +74,14 @@
     - users-update
 
 - name: "Check if /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
-  shell: "findmnt /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
+  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
   register: users_chroot_mysqld_mount
   changed_when: '"PRESENT" not in users_chroot_mysqld_mount.stdout'
   tags:
     - users-update
 
 - name: "Mount /run/mysqld at /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-  command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/mysqld /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/mysqld {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
   when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
   tags:
     - users-update
