@@ -1,0 +1,10 @@
+# Ansible managed file
+
+[Unit]
+Description=Create chroot users bind mounts
+
+[Service]
+ExecStart=/usr/local/bin/chroot-users-mounts
+
+[Install]
+WantedBy=multi-user.target

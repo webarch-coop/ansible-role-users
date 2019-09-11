@@ -298,6 +298,17 @@
 - name: Chroot users
   block:
 
+    - name: Systemd mount unit file in place
+      copy:
+        src: files/chroot_users_mounts.service
+        dest: /lib/systemd/system/chroot_users_mounts.service
+
+    - name: Chroot mount script in place
+      copy:
+        src: files/chroot-users-mounts.sh
+        dest: /usr/local/bin/chroot-users-mounts
+        mode: "0750"
+
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
       loop: "{{ users | dict2items }}"
