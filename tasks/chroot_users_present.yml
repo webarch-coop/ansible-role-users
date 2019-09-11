@@ -41,7 +41,7 @@
 
 - name: "Mount script for {{ item.key }} written to /etc/fstab.d/{{ item.key }}"
   template:
-    name: templates/fstab.j2
+    src: templates/fstab.j2
     dest: "/etc/fstab.d/{{ item.key }}"
     mode: 0750
   tags:
