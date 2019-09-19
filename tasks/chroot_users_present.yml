@@ -39,35 +39,50 @@
   tags:
     - users-update
 
+- name: "Mount script for {{ item.key }} written to /etc/fstab.d/{{ item.key }}"
+  template:
+    src: templates/fstab.j2
+    dest: "/etc/fstab.d/{{ item.key }}"
+    mode: 0750
+  tags:
+    - users-update
+
+- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_mount
+  changed_when: '"PRESENT" not in users_chroot_mount.stdout'
+  tags:
+    - users-update
+
 - name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-  mount:
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-    src: "{{ chroot_dir | default('/chroot') }}"
-    fstype: ext4
-    opts: ro,bind,nosuid
-    state: mounted
-    backup: true
+  command: "mount --make-private -t ext4 -o ro,bind,nosuid {{ chroot_dir | default('/chroot') }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+  when: '"ABSENT" in users_chroot_mount.stdout'
   tags:
     - users-update
 
-- name: "Mount {{ item.value.users_home | default('/home/' + item.key) }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
-  mount:
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
-    src: "/home/{{ item.key }}"
-    fstype: ext4
-    opts: rw,bind,nodev,nosuid
-    state: mounted
-    backup: true
+- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_home_mount
+  changed_when: '"PRESENT" not in users_chroot_home_mount.stdout'
   tags:
     - users-update
 
-- name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-  mount:
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-    src: /run/mysqld
-    fstype: ext4
-    opts: ro,bind,nodev,nosuid,noexec
-    state: mounted
-    backup: true
+- name: "Mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+  command: "mount --make-private -t ext4 -o rw,bind,nodev,nosuid {{ item.value.users_home | default('/home/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+  when: '"ABSENT" in users_chroot_home_mount.stdout'
   tags:
     - users-update
+
+- name: "Check if /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_mysqld_mount
+  changed_when: '"PRESENT" not in users_chroot_mysqld_mount.stdout'
+  tags:
+    - users-update
+
+- name: "Mount /run/mysqld at /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/mysqld {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+  when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
+  tags:
+    - users-update
+...

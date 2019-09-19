@@ -33,6 +33,7 @@
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0600
+  ignore_errors: "{{ ansible_check_mode }}"
   tags:
     - users-ssh
     - users-update
@@ -57,3 +58,4 @@
 #     key: "{{ users_ssh_public_keys_content.stdout_lines }}"
 #   tags:
 #     - users-update
+...
