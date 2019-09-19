@@ -22,3 +22,5 @@ users_sites_dir: sites
 # users_skell: false
 # Define users_phpfpm to false to skip PHP FPM tasks
 # users_phpfpm: false
+# Define users_cron to false to skip cron tasks
+# users_cron: false
