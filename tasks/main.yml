@@ -418,6 +418,7 @@
       command: apachectl configtest
       register: users_apachectl_configtest
       changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
+      check_mode: false
       tags:
         - users-update
         - apache
