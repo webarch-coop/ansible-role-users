@@ -225,7 +225,7 @@
       include_tasks: mariadb_user_present.yml
       vars:
       loop: "{{ users | dict2items }}"
-      when: 
+      when:
         - ( users_mariadb is not defined ) or ( users_mariadb == True )
         - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
       tags:
@@ -445,7 +445,7 @@
         - apache
         - letsencrypt
 
-  when: 
+  when:
     - '"apache2" in ansible_facts.packages'
     - ( users_apache is not defined ) or ( users_apache == True )
 
