@@ -14,3 +14,11 @@ users_notify_cron_append: "Reply-To: {{ users_notify_from }}"
 users_forward: true
 users_muttrc: true
 users_sites_dir: sites
+# Define users_apache to false to skip Apache tasks even if it is installed
+# users_apache: false
+# Define users_mariadb to false to skip MariaDB tasks even if it is installed
+# users_mariadb: false
+# Define users_skell to false to skip skell.d tasks
+# users_skell: false
+# Define users_phpfpm to false to skip PHP FPM tasks
+# users_phpfpm: false

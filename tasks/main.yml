@@ -29,35 +29,40 @@
     - logrotate
     - users-update
 
-- name: Check if php-fpm is installed
-  shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
-  register: users_phpfpm_status
-  check_mode: false
-  changed_when: false
-  tags:
-    - logrotate
-    - users-update
-
-- name: php-fpm variable set
+- name: PHP FPM tasks
   block:
 
-    - name: Print the users_phpfpm_status
-      debug:
-        msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
-        verbosity: 1
+    - name: Check if php-fpm is installed
+      shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
+      register: users_phpfpm_status
+      check_mode: false
+      changed_when: false
       tags:
         - logrotate
         - users-update
 
-    - name: Set a fact for the PHP-FPM version
-      set_fact:
-        users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
-      when: users_phpfpm_status.stdout == "installed"
-      tags:
-        - logrotate
-        - users-update
+    - name: php-fpm variable set
+      block:
 
-  when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
+        - name: Print the users_phpfpm_status
+          debug:
+            msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
+            verbosity: 1
+          tags:
+            - logrotate
+            - users-update
+
+        - name: Set a fact for the PHP-FPM version
+          set_fact:
+            users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
+          when: users_phpfpm_status.stdout == "installed"
+          tags:
+            - logrotate
+            - users-update
+
+      when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
+
+  when: ( users_phpfpm is not defined ) or ( users_phpfpm == True )
 
 - name: Check if a chroot exists
   stat:
@@ -80,6 +85,7 @@
     - www
   loop_control:
     loop_var: users_skeleton
+  when: ( users_skell is not defined ) or ( users_skell == True )
 
 - name: Quota tasks
   block:
@@ -140,7 +146,9 @@
     - name: Include Apache config tasks absent users
       include_tasks: apache_users_absent.yml
       loop: "{{ users | dict2items }}"
-      when: '"apache2" in ansible_facts.packages'
+      when:
+        - '"apache2" in ansible_facts.packages'
+        - ( users_apache is not defined ) or ( users_apache == True )
       tags:
         - users-update
         - apache
@@ -148,6 +156,7 @@
     - name: Absent users MariaDB account and databases absent
       include_tasks: mariadb_user_absent.yml
       loop: "{{ users | dict2items }}"
+      when: ( users_mariadb is not defined ) or ( users_mariadb == True )
       tags:
         - users-update
 
@@ -216,7 +225,9 @@
       include_tasks: mariadb_user_present.yml
       vars:
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
+      when: 
+        - ( users_mariadb is not defined ) or ( users_mariadb == True )
+        - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
       tags:
         - users-update
 
@@ -434,7 +445,9 @@
         - apache
         - letsencrypt
 
-  when: '"apache2" in ansible_facts.packages'
+  when: 
+    - '"apache2" in ansible_facts.packages'
+    - ( users_apache is not defined ) or ( users_apache == True )
 
 - name: Crontab absent for users
   include_tasks: crontab_users_absent.yml
