@@ -2,6 +2,8 @@
 
 This repository contains an Ansible role for adding user accounts to Debian servers.
 
+**NOTE: This role doesn't properly work with Ansible 2.8 due to [this bug](https://github.com/ansible/ansible/issues/56921).**
+
 To use this role you need to use Ansible Galaxy to install it into another repository under `galaxy/roles/users` by adding a `requirements.yml` file in that repo that contains:
 
 ```yml
