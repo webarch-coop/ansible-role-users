@@ -10,6 +10,8 @@
   check_mode: false
   changed_when: false
   tags:
+    - apache
+    - letsencrypt
     - logrotate
     - users-update
 
@@ -17,6 +19,8 @@
   set_fact:
     users_debian_version: "{{ users_debian_version_check.stdout }}"
   tags:
+    - apache
+    - letsencrypt
     - logrotate
     - users-update
 
