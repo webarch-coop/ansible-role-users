@@ -451,7 +451,7 @@
 
   when:
     - '"apache2" in ansible_facts.packages'
-    - ( users_apache is not defined ) or ( users_apache == True )
+    # - ( users_apache is not defined ) or ( users_apache == True )
 
 - name: Cron for user accounts
   block:
