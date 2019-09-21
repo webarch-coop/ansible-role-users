@@ -25,6 +25,7 @@
 - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
   command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
   ignore_errors: true
+  warn: false
   register: users_chroot_run_chroot_mountpoint_umount
   changed_when: '"not mounted" not in users_chroot_run_chroot_mountpoint_umount.stderr'
   when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
@@ -41,6 +42,7 @@
 - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
   command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
   ignore_errors: true
+  warn: false
   register: users_chroot_mysqld_mountpoint_umount
   changed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
   when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
@@ -57,6 +59,7 @@
 - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
   command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
   ignore_errors: true
+  warn: false
   register: users_chroot_home_mountpoint_umount
   changed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
   when: '"PRESENT" in users_chroot_users_home_mount.stdout'
@@ -73,6 +76,7 @@
 - name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
   command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
   ignore_errors: true
+  warn: false
   register: users_chroot_mountpoint_umount
   changed_when: '"not mounted" in users_chroot_mountpoint_umount.stdout'
   when: '"PRESENT" in users_chroot_mount.stdout'
