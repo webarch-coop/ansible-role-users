@@ -80,9 +80,22 @@
   tags:
     - users-update
 
-- name: "Mount /run/mysqld at /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+- name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
   command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/mysqld {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
   when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
+  tags:
+    - users-update
+
+- name: "Check if /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_run_chroot_mount
+  changed_when: '"PRESENT" not in users_chroot_run_chroot_mount.stdout'
+  tags:
+    - users-update
+
+- name: "Mount /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
+  command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/chroot {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
+  when: '"ABSENT" in users_chroot_run_chroot_mount.stdout'
   tags:
     - users-update
 ...
