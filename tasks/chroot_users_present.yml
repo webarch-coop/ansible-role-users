@@ -66,7 +66,8 @@
 
 - name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
   command: "mount --make-private -t ext4 -o ro,bind,nosuid {{ chroot_dir | default('/chroot') }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-  warn: false
+  args:
+    warn: false
   when: '"ABSENT" in users_chroot_mount.stdout'
   tags:
     - users-update
@@ -80,7 +81,8 @@
 
 - name: "Mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
   command: "mount --make-private -t ext4 -o rw,bind,nodev,nosuid {{ item.value.users_home | default('/home/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
-  warn: false
+  args:
+    warn: false
   when: '"ABSENT" in users_chroot_home_mount.stdout'
   tags:
     - users-update
@@ -94,7 +96,8 @@
 
 - name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
   command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/mysqld {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-  warn: false
+  args:
+    warn: false
   when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
   tags:
     - users-update
@@ -108,7 +111,8 @@
 
 - name: "Mount /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
   command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/chroot {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
-  warn: false
+  args:
+    warn: false
   when: '"ABSENT" in users_chroot_run_chroot_mount.stdout'
   tags:
     - users-update
