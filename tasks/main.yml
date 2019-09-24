@@ -329,6 +329,8 @@
       file:
         path: /etc/fstab.d
         state: directory
+      tags:
+        - users-chroot
 
     - name: Systemd mount unit file in place
       copy:
