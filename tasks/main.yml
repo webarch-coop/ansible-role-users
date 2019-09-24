@@ -153,6 +153,7 @@
           loop: "{{ users | dict2items }}"
           when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
           tags:
+            - users-chroot
             - users-update
 
       when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
@@ -332,18 +333,23 @@
       copy:
         src: files/chroot_users_mounts.service
         dest: /lib/systemd/system/chroot_users_mounts.service
+      tags:
+        - users-chroot
 
     - name: Chroot mount script in place
       copy:
         src: files/chroot-users-mounts.sh
         dest: /usr/local/bin/chroot-users-mounts
         mode: "0750"
+      tags:
+        - users-chroot
 
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
       loop: "{{ users | dict2items }}"
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
       tags:
+        - users-chroot
         - users-update
 
     - name: PHP-FPM chroot tasks

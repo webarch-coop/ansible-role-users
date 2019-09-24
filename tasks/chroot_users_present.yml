@@ -37,6 +37,7 @@
     group: "{{ item.value.users_home_group | default(item.key) }}"
     mode: 0750
   tags:
+    - users-chroot
     - users-upate
 
 - name: "Mount point {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} present"
@@ -47,6 +48,7 @@
     group: root
     mode: 0755
   tags:
+    - users-chroot
     - users-update
 
 - name: "Mount script for {{ item.key }} written to /etc/fstab.d/{{ item.key }}"
@@ -55,6 +57,7 @@
     dest: "/etc/fstab.d/{{ item.key }}"
     mode: 0750
   tags:
+    - users-chroot
     - users-update
 
 - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
@@ -62,6 +65,7 @@
   register: users_chroot_mount
   changed_when: '"PRESENT" not in users_chroot_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 
 - name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
@@ -70,6 +74,7 @@
     warn: false
   when: '"ABSENT" in users_chroot_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 
 - name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} is mounted"
@@ -77,6 +82,7 @@
   register: users_chroot_home_mount
   changed_when: '"PRESENT" not in users_chroot_home_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 
 - name: "Mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
@@ -85,6 +91,7 @@
     warn: false
   when: '"ABSENT" in users_chroot_home_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 
 - name: "Check if /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
@@ -92,6 +99,7 @@
   register: users_chroot_mysqld_mount
   changed_when: '"PRESENT" not in users_chroot_mysqld_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 
 - name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
@@ -100,6 +108,7 @@
     warn: false
   when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 
 - name: "Check if /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot is mounted"
@@ -107,6 +116,7 @@
   register: users_chroot_run_chroot_mount
   changed_when: '"PRESENT" not in users_chroot_run_chroot_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 
 - name: "Mount /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
@@ -115,5 +125,6 @@
     warn: false
   when: '"ABSENT" in users_chroot_run_chroot_mount.stdout'
   tags:
+    - users-chroot
     - users-update
 ...
