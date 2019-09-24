@@ -325,10 +325,15 @@
 - name: Chroot users
   block:
 
-    - name: Directory /etc/fstab.d present
+    - name: Chroot directories present
       file:
-        path: /etc/fstab.d
+        path: "{{ dir }}"
         state: directory
+      loop:
+        - /etc/fstab.d
+        - /run/chroot
+      loop_control:
+        loop_var: dir
       tags:
         - users-chroot
 
