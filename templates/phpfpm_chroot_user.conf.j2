@@ -28,7 +28,7 @@ php_admin_value[mail.log] = {{ item.value.users_home | default('/home/' + item.k
 
 pm = {{ item.value.users_phpfpm_pm | default('ondemand') }}
 pm.max_children = {{ item.value.users_phpfpm_max_children | default('3') }}
-{% if users_phpfpm_pm == "dynamic" %}
+{% if item.value.users_phpfpm_pm == "dynamic" %}
 pm.start_servers = {{ item.value.users_phpfpm_pm_start_servers | default('2') }}
 pm.min_spare_servers = {{ item.value.users_phpfpm_pm_min_spare_servers | default('1') }}
 pm.max_spare_servers = {{ item.value.users_phpfpm_pm_max_spare_servers | default('2') }}
