@@ -26,8 +26,11 @@ php_admin_value[soap.wsdl_cache_dir] = {{ item.value.users_home | default('/home
 php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ item.key }}@{{ inventory_hostname }}
 php_admin_value[mail.log] = {{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.mail.log
 
-pm = ondemand
-pm.max_children = {{ users_phpfpm_max_children | default('2') }}
+pm = {{ users_phpfpm_pm | default('ondemand') }}
+pm.max_children = {{ users_phpfpm_max_children | default('3') }}
+pm.start_servers = {{ users_phpfpm_pm_start_servers | default('2') }}
+pm.min_spare_servers = {{ users_phpfpm_pm_min_spare_servers | default('1') }}
+pm.max_spare_servers = {{ users_phpfpm_pm_max_spare_servers | default('2') }}
 pm.process_idle_timeout = 10s;
 pm.max_requests = 1000
 ;pm.status_path = /status
