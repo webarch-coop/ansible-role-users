@@ -1,4 +1,14 @@
 ---
+# Define users_apache to false to skip Apache tasks even if it is installed
+# users_apache: false
+# Define users_mariadb to false to skip MariaDB tasks even if it is installed
+# users_mariadb: false
+# Define users_skell to false to skip skell.d tasks
+# users_skell: false
+# Define users_phpfpm to false to skip PHP FPM tasks
+# users_phpfpm: false
+# Define users_cron to false to skip cron tasks
+# users_cron: false
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_headers:
   - Reply-To = Webarchitects <root@{{ inventory_hostname }}>
@@ -15,13 +25,10 @@ users_forward: true
 users_muttrc: true
 users_sites_dir: sites
 users_cert: user
-# Define users_apache to false to skip Apache tasks even if it is installed
-# users_apache: false
-# Define users_mariadb to false to skip MariaDB tasks even if it is installed
-# users_mariadb: false
-# Define users_skell to false to skip skell.d tasks
-# users_skell: false
-# Define users_phpfpm to false to skip PHP FPM tasks
-# users_phpfpm: false
-# Define users_cron to false to skip cron tasks
-# users_cron: false
+# https://www.php.net/manual/en/install.fpm.configuration.php#pm
+users_phpfpm_pm: ondemand
+users_phpfpm_pm_max_children: 3
+users_phpfpm_pm_start_servers: 1
+users_phpfpm_pm_min_spare_servers: 1
+users_phpfpm_pm_max_spare_servers: 2
+...
