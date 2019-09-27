@@ -14,6 +14,7 @@
     - letsencrypt
     - logrotate
     - users-update
+    - users-cron
 
 - name: Set a fact for the Debian version
   set_fact:
@@ -23,6 +24,7 @@
     - letsencrypt
     - logrotate
     - users-update
+    - users-cron
 
 - name: Load package information as facts
   package_facts:
@@ -32,6 +34,7 @@
     - letsencrypt
     - logrotate
     - users-update
+    - users-cron
 
 - name: Fail if ansible_facts.packages is not defined or empty
   fail:
@@ -42,6 +45,7 @@
     - letsencrypt
     - logrotate
     - users-update
+    - users-cron
 
 - name: PHP FPM tasks
   block:
@@ -486,6 +490,7 @@
       when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( users_crontab is defined or users_crontab == False )
       tags:
         - users-update
+        - users-cron
 
     - name: Crontab present for users
       include_tasks: crontab_users_present.yml
@@ -493,6 +498,7 @@
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( users_crontab is not defined or users_crontab == True )
       tags:
         - users-update
+        - users-cron
 
   when: ( users_cron is not defined ) or ( users_cron == True )
 ...

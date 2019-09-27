@@ -4,7 +4,8 @@
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
     state: absent
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Daily cron jobs for {{ item.key }} absent"
   cron:
@@ -13,7 +14,8 @@
     cron_file: "chroot_cron_daily_{{ item.key }}"
     state: absent
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Hourly cron jobs for {{ item.key }} absent"
   cron:
@@ -23,7 +25,8 @@
     state: absent
     hour: "*"
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Daily cron jobs for {{ item.key }} absent"
   cron:
@@ -31,7 +34,8 @@
     user: "{{ item.key }}"
     state: absent
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Hourly cron jobs for {{ item.key }} absent"
   cron:
@@ -39,7 +43,8 @@
     user: "{{ item.key }}"
     state: absent
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Daily MariaDB dump cron job absent"
   cron:
@@ -47,5 +52,6 @@
     user: "{{ item.key }}"
     state: absent
   tags:
-    - update-users
+    - users-update
+    - users-cron
 ...

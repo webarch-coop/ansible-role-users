@@ -7,40 +7,46 @@
     group: "{{ item.key }}"
     mode: 0750
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md in place"
   copy:
     src: files/CRON_README.md
     dest: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Check if {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min exists"
   stat:
     path: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
   register: users_cron_min_file
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Generate {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
   shell: "echo {{ 59 | random }} > {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
   when: ( users_cron_min_file.stat is not defined ) or ( users_cron_min_file.stat.exists == False )
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: "Read the minute from {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
   slurp:
     src: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
   register: users_cron_min_b64encoded
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: Set a variable for the users crontab minute
   set_fact:
     users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
   tags:
-    - update-users
+    - users-update
+    - users-cron
 
 - name: Generate files to be run by root in /etc/cron.d for chrooted users
   block:
@@ -54,7 +60,8 @@
         minute: "{{ users_cron_min }}"
         hour: "05"
       tags:
-        - update-users
+        - users-update
+        - users-cron
 
     - name: "Hourly cron jobs for {{ item.key }}"
       cron:
@@ -65,7 +72,8 @@
         minute: "{{ users_cron_min }}"
         hour: "*"
       tags:
-        - update-users
+        - users-update
+        - users-cron
 
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists ) and ( "chroot" in item.value.users_groups )
 
@@ -80,7 +88,8 @@
         minute: "{{ users_cron_min }}"
         hour: "05"
       tags:
-        - update-users
+        - users-update
+        - users-cron
 
     - name: "Hourly cron jobs for {{ item.key }}"
       cron:
@@ -90,7 +99,8 @@
         minute: "{{ users_cron_min }}"
         hour: "*"
       tags:
-        - update-users
+        - users-update
+        - users-cron
 
   when: '"chroot" not in item.value.users_groups'
 
@@ -105,5 +115,6 @@
     - ( users_mariadb is not defined ) or ( users_mariadb == True )
     - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
   tags:
-    - update-users
+    - users-update
+    - users-cron
 ...
