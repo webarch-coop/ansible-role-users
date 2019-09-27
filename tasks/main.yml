@@ -15,6 +15,7 @@
     - logrotate
     - users-update
     - users-cron
+    - users-mariadb
 
 - name: Set a fact for the Debian version
   set_fact:
@@ -25,6 +26,7 @@
     - logrotate
     - users-update
     - users-cron
+    - users-mariadb
 
 - name: Load package information as facts
   package_facts:
@@ -35,6 +37,7 @@
     - logrotate
     - users-update
     - users-cron
+    - users-mariadb
 
 - name: Fail if ansible_facts.packages is not defined or empty
   fail:
@@ -46,6 +49,7 @@
     - logrotate
     - users-update
     - users-cron
+    - users-mariadb
 
 - name: PHP FPM tasks
   block:
@@ -179,6 +183,7 @@
       when: ( users_mariadb is not defined ) or ( users_mariadb == True )
       tags:
         - users-update
+        - users-mariadb
 
     - name: Absent users home directories removed
       file:
@@ -250,6 +255,7 @@
         - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
       tags:
         - users-update
+        - users-mariadb
 
     - name: Quotas set
       include_tasks: quota.yml
