@@ -6,7 +6,7 @@
   tags:
     - update-users
 
-- name: "Daily cron jobs for {{ item.key }}"
+- name: "Daily cron jobs for {{ item.key }} absent"
   cron:
     name: "Daily cron jobs"
     user: root
@@ -15,7 +15,7 @@
   tags:
     - update-users
 
-- name: "Hourly cron jobs for {{ item.key }}"
+- name: "Hourly cron jobs for {{ item.key }} absent"
   cron:
     name: "Hourly cron jobs"
     user: root
@@ -25,7 +25,7 @@
   tags:
     - update-users
 
-- name: "Daily cron jobs for {{ item.key }}"
+- name: "Daily cron jobs for {{ item.key }} absent"
   cron:
     name: "Daily cron jobs"
     user: "{{ item.key }}"
@@ -33,9 +33,17 @@
   tags:
     - update-users
 
-- name: "Hourly cron jobs for {{ item.key }}"
+- name: "Hourly cron jobs for {{ item.key }} absent"
   cron:
     name: "Hourly cron jobs"
+    user: "{{ item.key }}"
+    state: absent
+  tags:
+    - update-users
+
+- name: "Daily MariaDB dump cron job absent"
+  cron:
+    name: "Nightly MySQL database backup for {{ item.key }}"
     user: "{{ item.key }}"
     state: absent
   tags:
