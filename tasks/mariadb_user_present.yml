@@ -5,6 +5,7 @@
   register: users_mycnf
   tags:
     - users-update
+    - users-mariadb
 
 - block:
 
@@ -14,6 +15,7 @@
       register: users_mariadb_password_gen
       tags:
         - users-update
+        - users-mariadb
 
     - name: Set a fact for the mariadb_password
       set_fact:
@@ -21,6 +23,7 @@
       no_log: true
       tags:
         - users-update
+        - users-mariadb
 
   when: users_mycnf.stat.exists == False
 
@@ -33,6 +36,7 @@
       register: users_mariadb_password_read
       tags:
         - users-update
+        - users-mariadb
 
     - name: Set a fact for the mariadb_password
       set_fact:
@@ -40,6 +44,7 @@
       no_log: true
       tags:
         - users-update
+        - users-mariadb
 
   when: users_mycnf.stat.exists == True
 
@@ -49,6 +54,7 @@
   when: ( users_mariadb_password is not defined ) or ( users_mariadb_password == "" )
   tags:
     - users-update
+    - users-mariadb
 
 - name: "mariadb_password written to {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
   template:
@@ -61,6 +67,7 @@
   no_log: true
   tags:
     - users-update
+    - users-mariadb
 
 - name: "The databases that {{ item.key }} has access to"
   command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
@@ -68,12 +75,14 @@
   register: users_mariadb_list
   tags:
     - users-update
+    - users-mariadb
 
 - name: "Set a fact for the databases to delete for {{ item.key }}"
   set_fact:
     users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(item.value.users_mariadb_databases) }}"
   tags:
     - users-update
+    - users-mariadb
 
 - name: "Databases absent for {{ item.key }}"
   mysql_db:
@@ -87,6 +96,7 @@
     loop_var: db
   tags:
     - users-update
+    - users-mariadb
 
 - name: "Databases present for {{ item.key }}"
   mysql_db:
@@ -99,12 +109,14 @@
     loop_var: db
   tags:
     - users-update
+    - users-mariadb
 
 - name: "Set a variable for mysql_user priv for {{ item.key }}"
   set_fact:
     users_mariadb_priv: "{% if item.value.users_mariadb_databases[0] is defined %}{% for db in item.value.users_mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
   tags:
     - users-update
+    - users-mariadb
 
 - name: "Print priv for {{ item.key }}"
   debug:
@@ -112,6 +124,7 @@
     verbosity: 1
   tags:
     - users-update
+    - users-mariadb
 
 - name: "MariaDB {{ item.key }} user present"
   mysql_user:
@@ -125,6 +138,7 @@
   no_log: true
   tags:
     - users-update
+    - users-mariadb
 
 - name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
   stat:
@@ -133,6 +147,7 @@
   when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True )
   tags:
     - users-update
+    - users-mariadb
 
 - block:
 
@@ -150,6 +165,7 @@
       when: item.value.users_email is defined and item.value.users_email != ""
       tags:
         - users-update
+        - users-mariadb
 
     - name: "Notification date recorded in {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
       lineinfile:
@@ -163,6 +179,7 @@
         mode: 0640
       tags:
         - users-update
+        - users-mariadb
 
   when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True ) and ( users_notify_mariadb_passwd_file.stat.exists == False )
 
@@ -175,3 +192,5 @@
     mode: 0700
   tags:
     - users-update
+    - users-mariadb
+...

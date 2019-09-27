@@ -5,7 +5,7 @@
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
-    mode: 0750
+    mode: "0750"
   tags:
     - users-update
     - users-cron
@@ -58,7 +58,7 @@
         user: root
         job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }} sudo -u {{ item.key }} PATH=/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ item.value.users_home | default('/home/' + item.key) }}/tmp /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ item.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ item.value.users_email }}; fi"
         minute: "{{ users_cron_min }}"
-        hour: "05"
+        hour: "{{ users_cron_daily_hour | default('05') }}"
       tags:
         - users-update
         - users-cron
@@ -86,7 +86,7 @@
         user: "{{ item.key }}"
         job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
         minute: "{{ users_cron_min }}"
-        hour: "05"
+        hour: "{{ users_cron_daily_hour | default('05') }}"
       tags:
         - users-update
         - users-cron
@@ -110,7 +110,7 @@
     job: "/usr/local/bin/mysql-backup-user"
     user: "{{ item.key }}"
     minute: "{{ users_cron_min }}"
-    hour: "04"
+    hour: "{{ users_cron_mysqldump_hour | default('04') }}"
   when:
     - ( users_mariadb is not defined ) or ( users_mariadb == True )
     - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
