@@ -1,7 +1,9 @@
 ---
-- name: Slay installed
+- name: Packages present
   apt:
-    pkg: slay
+    pkg:
+      - mutt
+      - slay
     state: present
 
 - name: Check /etc/debian_version
