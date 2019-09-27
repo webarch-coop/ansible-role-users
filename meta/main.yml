@@ -23,35 +23,35 @@ galaxy_info:
   #
   # NOTE: A tag is limited to a single word comprised of alphanumeric characters.
   #       Maximum 20 tags per role.
-dependencies:
-  - name: scripts
-    src: https://git.coop/webarch/scripts
-    version: master
-  - name: ssh
-    src: https://git.coop/webarch/ssh
-    version: master
-  - name: quota
-    src: https://git.coop/webarch/quota
-    version: master
-  - name: apache
-    src: https://git.coop/webarch/apache
-    version: master
-  - name: acmesh
-    src: https://git.coop/webarch/acmesh
-    version: master
-  - name: mariadb
-    src: https://git.coop/webarch/mariadb
-    version: master
-  - name: wpcli
-    src: https://git.coop/webarch/wpcli
-    version: master
-  - name: wordpress
-    src: https://git.coop/webarch/wordpress
-    version: master
-  - name: matomo
-    src: https://git.coop/webarch/matomo
-    version: master
-  - name: phpmyadmin
-    src: https://git.coop/webarch/phpmyadmin
-    version: master
+# dependencies:
+  # - name: scripts
+  #   src: https://git.coop/webarch/scripts
+  #   version: master
+  # - name: ssh
+  #   src: https://git.coop/webarch/ssh
+  #   version: master
+  # - name: quota
+  #   src: https://git.coop/webarch/quota
+  #   version: master
+  # - name: apache
+  #   src: https://git.coop/webarch/apache
+  #   version: master
+  # - name: acmesh
+  #   src: https://git.coop/webarch/acmesh
+  #   version: master
+  # - name: mariadb
+  #   src: https://git.coop/webarch/mariadb
+  #   version: master
+  # - name: wpcli
+  #   src: https://git.coop/webarch/wpcli
+  #   version: master
+  # - name: wordpress
+  #   src: https://git.coop/webarch/wordpress
+  #   version: master
+  # - name: matomo
+  #   src: https://git.coop/webarch/matomo
+  #   version: master
+  # - name: phpmyadmin
+  #   src: https://git.coop/webarch/phpmyadmin
+  #   version: master
 ...
