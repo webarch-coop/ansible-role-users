@@ -12,7 +12,7 @@
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_headers:
-  - Reply-To = {{ users_notify_reply_to }} 
+  - Reply-To = {{ users_notify_reply_to }}
   - X-Auto-Response-Suppress = All
 users_notify_subject_tag: webarchitects
 users_notify_signature: |
@@ -34,7 +34,7 @@ users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_cron_daily_hour: "05"
 users_cron_mysqldump_hour: "04"
-# Set users_cron_tmpdir_hour to false to disable deletion of users 
+# Set users_cron_tmpdir_hour to false to disable deletion of users
 # TMPDIR files which are older than a week
 users_cron_tmpdir_hour: "00"
 ...
