@@ -109,6 +109,7 @@
     env: true
     name: USER
     value: "{{ item.key }}"
+    user: "{{ item.key }}"
   tags:
     - users-update
     - users-cron
@@ -118,6 +119,7 @@
     env: true
     name: TMPDIR
     value: "{{ item.value.users_home | default('/home/' + item.key) }}/tmp"
+    user: "{{ item.key }}"
     insertafter: USER
   tags:
     - users-update
@@ -128,6 +130,7 @@
     env: true
     name: PATH
     value: "{{ item.value.users_home | default('/home/' + item.key) }}/bin:/usr/local/bin:/usr/bin:/bin"
+    user: "{{ item.key }}"
     insertafter: TMPDIR
   tags:
     - users-update
