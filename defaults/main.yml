@@ -37,4 +37,6 @@ users_cron_mysqldump_hour: "04"
 # Set users_cron_tmpdir_hour to false to disable deletion of users
 # TMPDIR files which are older than a week
 users_cron_tmpdir_hour: "00"
+# How old are TMPDIR files allowed to be before they are deleted
+users_cron_tmpdir_max_age_days: 2
 ...

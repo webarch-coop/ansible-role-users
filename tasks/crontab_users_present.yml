@@ -148,10 +148,10 @@
     - users-update
     - users-cron
 
-- name: "Daily deletion of users TMPDIR files which are older than a week"
+- name: "Daily deletion of users TMPDIR files which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old"
   cron:
     name: "Daily deletion of TMPDIR files for {{ item.key }}"
-    job: "find {{ item.value.users_home | default('/home/' + item.key) }}/tmp -type f -mtime +7 -delete &>/dev/null"
+    job: "find {{ item.value.users_home | default('/home/' + item.key) }}/tmp -type f -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
     user: "{{ item.key }}"
     minute: "{{ users_cron_min }}"
     hour: "{{ users_cron_tmpdir_hour }}"
