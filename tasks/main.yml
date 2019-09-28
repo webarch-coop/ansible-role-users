@@ -495,7 +495,7 @@
     - name: Crontab absent for users
       include_tasks: crontab_users_absent.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( users_crontab is defined or users_crontab == False )
+      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( users_crontab is defined and users_crontab == False )
       tags:
         - users-update
         - users-cron
