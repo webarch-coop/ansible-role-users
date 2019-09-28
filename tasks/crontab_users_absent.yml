@@ -46,6 +46,15 @@
     - users-update
     - users-cron
 
+- name: "Daily deletion of users TMPDIR files which are older than a week absent"
+  cron:
+    name: "Daily deletion of TMPDIR files for {{ item.key }}"
+    user: "{{ item.key }}"
+    state: absent
+  tags:
+    - users-update
+    - users-cron
+
 - name: "Daily MariaDB dump cron job absent"
   cron:
     name: "Nightly MySQL database backup for {{ item.key }}"

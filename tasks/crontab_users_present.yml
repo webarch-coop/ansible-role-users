@@ -104,6 +104,47 @@
 
   when: '"chroot" not in item.value.users_groups'
 
+- name: "USER env var added to {{ item.key }} crontab"
+  cron:
+    env: true
+    name: USER
+    value: "{{ item.key }}"
+  tags:
+    - users-update
+    - users-cron
+
+- name: "TMPDIR env var added to {{ item.key }} crontab"
+  cron:
+    env: true
+    name: TMPDIR
+    value: "{{ item.value.users_home | default('/home/' + item.key) }}/tmp"
+    insertafter: USER
+  tags:
+    - users-update
+    - users-cron
+
+- name: "PATH env var added to {{ item.key }} crontab"
+  cron:
+    env: true
+    name: PATH
+    value: "{{ item.value.users_home | default('/home/' + item.key) }}/bin:/usr/local/bin:/usr/bin:/bin"
+    insertafter: TMPDIR
+  tags:
+    - users-update
+    - users-cron
+
+- name: "Daily deletion of users TMPDIR files which are older than a week"
+  cron:
+    name: "Daily deletion of TMPDIR files for {{ item.key }}"
+    job: "find {{ item.value.users_home | default('/home/' + item.key) }}/tmp -type f -mtime +7 -delete &>/dev/null"
+    user: "{{ item.key }}"
+    minute: "{{ users_cron_min }}"
+    hour: "{{ users_cron_tmpdir_hour }}"
+  when: ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+  tags:
+    - users-update
+    - users-cron
+
 - name: "Daily MariaDB dump cron job in place for users with databases"
   cron:
     name: "Nightly MySQL database backup for {{ item.key }}"
