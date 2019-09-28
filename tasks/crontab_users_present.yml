@@ -107,7 +107,7 @@
 - name: "Daily MariaDB dump cron job in place for users with databases"
   cron:
     name: "Nightly MySQL database backup for {{ item.key }}"
-    job: "/usr/local/bin/mysql-backup-user"
+    job: "/usr/local/bin/mysql-backup-user {{ item.key }}"
     user: "{{ item.key }}"
     minute: "{{ users_cron_min }}"
     hour: "{{ users_cron_mysqldump_hour | default('04') }}"
