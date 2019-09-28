@@ -28,6 +28,19 @@
     - users-update
     - users-cron
 
+- name: "Cron job files for {{ item.key }} absent"
+  file:
+    path: "/etc/cron.d/{{ file }}"
+    state: absent
+  loop:
+    - "chroot_cron_daily_{{ item.key }}"
+    - "chroot_cron_hourly_{{ item.key }}"
+  loop_control:
+    loop_var: file
+  tags:
+    - users-update
+    - users-cron
+
 - name: "Daily cron jobs for {{ item.key }} absent"
   cron:
     name: "Daily cron jobs"

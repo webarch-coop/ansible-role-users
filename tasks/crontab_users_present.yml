@@ -136,6 +136,18 @@
     - users-update
     - users-cron
 
+- name: "MAILTO env var added to {{ item.key }} crontab"
+  cron:
+    env: true
+    name: MAILTO
+    value: "{{ item.value.users_email }}"
+    user: "{{ item.key }}"
+    insertafter: PATH
+  when: item.value.users_email is defined and item.value.users_email != ""
+  tags:
+    - users-update
+    - users-cron
+
 - name: "Daily deletion of users TMPDIR files which are older than a week"
   cron:
     name: "Daily deletion of TMPDIR files for {{ item.key }}"
