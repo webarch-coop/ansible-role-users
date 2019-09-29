@@ -148,14 +148,31 @@
     - users-update
     - users-cron
 
-- name: "Daily deletion of users TMPDIR files which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old"
+- name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
   cron:
     name: "Daily deletion of TMPDIR files for {{ item.key }}"
-    job: "find {{ item.value.users_home | default('/home/' + item.key) }}/tmp -type f -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
+    job: "find -P {{ item.value.users_home | default('/home/' + item.key) }}/tmp -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
+    state: present
     user: "{{ item.key }}"
     minute: "{{ users_cron_min }}"
     hour: "{{ users_cron_tmpdir_hour }}"
-  when: ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+  when:
+    - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+    - ( item.value.users_cron_tmpdir_clean is not defined ) or ( item.value.users_cron_tmpdir_clean == True )
+  tags:
+    - users-update
+    - users-cron
+
+- name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
+  cron:
+    name: "Daily deletion of TMPDIR files for {{ item.key }}"
+    state: absent
+    user: "{{ item.key }}"
+    minute: "{{ users_cron_min }}"
+    hour: "{{ users_cron_tmpdir_hour }}"
+  when:
+    - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+    - ( item.value.users_cron_tmpdir_clean is defined ) and ( item.value.users_cron_tmpdir_clean == False )
   tags:
     - users-update
     - users-cron
