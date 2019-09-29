@@ -29,6 +29,7 @@
   with_items:
     - .bash_history
     - .mysql_history
+    - .selected_editor
     - .yarnrc
 
 - name: "Skel {{ users_skeleton }} private directories present"
