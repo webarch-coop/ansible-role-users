@@ -129,7 +129,7 @@
   cron:
     env: true
     name: PATH
-    value: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin:/usr/local/bin:/usr/bin:/bin"
+    value: "/usr/local/bin:/usr/bin:/bin"
     user: "{{ item.key }}"
     insertafter: TMPDIR
   tags:
