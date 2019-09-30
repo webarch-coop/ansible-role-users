@@ -9,6 +9,10 @@
 # users_phpfpm: false
 # Define users_cron to false to skip cron tasks
 # users_cron: false
+# Users home directories to be created as sub-directories of users_basedir
+# NOTE that you can set an individual users_home to override this, for example 
+# for www-data set users_home: /var/www and for root set users_home: /root
+users_basedir: /home
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_headers:
@@ -34,8 +38,8 @@ users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_cron_daily_hour: "05"
 users_cron_mysqldump_hour: "04"
-# Set users_cron_tmpdir_hour to false to disable deletion of users
-# TMPDIR files which are older than a week
+# Set users_cron_tmpdir_hour to false to disable deletion of users TMPDIR
+# files and directories which are older than a week for the whole server
 users_cron_tmpdir_hour: "00"
 # How old are TMPDIR files allowed to be before they are deleted
 users_cron_tmpdir_max_age_days: 2

@@ -52,14 +52,14 @@
     - users-update
 
 # /chroot-users/$USER/home/$USER
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
   register: users_chroot_users_home_mount
   tags:
     - users-update
 
-- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
-  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
   args:
     warn: false
   ignore_errors: true
@@ -94,9 +94,9 @@
   tags:
     - users-update
 
-- name: "Directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }} absent"
+- name: "Directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} absent"
   file:
-    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }}"
+    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
     state: absent
   tags:
     - users-update

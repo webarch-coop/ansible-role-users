@@ -1,7 +1,7 @@
 ---
-- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md absent"
+- name: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/README.md absent"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/README.md"
     state: absent
   tags:
     - users-update

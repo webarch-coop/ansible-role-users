@@ -46,8 +46,8 @@
 {% if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"
 {% endif %}
-  DocumentRoot "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
-  <Directory "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
+  DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+  <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     DirectoryIndex index.php index.html index.shtml index.htm index.xhtml wsh.shtml
@@ -63,8 +63,8 @@
           SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost/"
 
 {% else %}
-          # SetHandler "proxy:unix:{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
-          SetHandler "proxy:unix:{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
+          # SetHandler "proxy:unix:{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
+          SetHandler "proxy:unix:{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
 {% endif %}
         </If>
       </FilesMatch>
@@ -92,8 +92,8 @@
   </Directory>
   CustomLog /var/log/apache2/{{ item.key }}_access.log bandwidth
   LogLevel error
-  ErrorLog  {{ item.value.users_home | default('/home/' + item.key) }}/logs/apache.error.log
-  CustomLog {{ item.value.users_home | default('/home/' + item.key) }}/logs/apache.access.log combinedio
+  ErrorLog  {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/apache.error.log
+  CustomLog {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/apache.access.log combinedio
 </VirtualHost>
 {% endfor %}
 

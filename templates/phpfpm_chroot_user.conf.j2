@@ -4,8 +4,8 @@
 user = {{ item.key }} 
 group = {{ item.key }}
 chroot = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}
-listen = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock
-;listen = {{ item.value.users_home | default('/home/' + item.key) }}/php-fpm.sock
+listen = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
+;listen = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
 listen.owner = root
 listen.group = {{ item.key }}
 listen.mode = 0660
@@ -13,18 +13,18 @@ listen.mode = 0660
 ;listen.acl_groups =
 listen.allowed_clients = 127.0.0.1
 
-env[TMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
-env[TMPDIR] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
-env[TEMP] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+env[TMP] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
+env[TMPDIR] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
+env[TEMP] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
 
-chdir = {{ item.value.users_home | default('/home/' + item.key) }}
+chdir = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}
 ; https://www.php.net/install.fpm.configuration
-php_admin_value[session.save_path] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
-php_admin_value[upload_tmp_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
-php_admin_value[sys_temp_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
-php_admin_value[soap.wsdl_cache_dir] = {{ item.value.users_home | default('/home/' + item.key) }}/tmp
+php_admin_value[session.save_path] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
+php_admin_value[upload_tmp_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
+php_admin_value[sys_temp_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
+php_admin_value[soap.wsdl_cache_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
 php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ item.key }}@{{ inventory_hostname }}
-php_admin_value[mail.log] = {{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.mail.log
+php_admin_value[mail.log] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.mail.log
 
 pm = {{ item.value.users_phpfpm_pm | default('ondemand') }}
 pm.max_children = {{ item.value.users_phpfpm_max_children | default('3') }}
@@ -38,10 +38,10 @@ pm.max_requests = 1000
 ;pm.status_path = /status
 ;ping.path = /ping
 
-php_admin_value[error_log] = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/fpm-php.error.log
+php_admin_value[error_log] = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/fpm-php.error.log
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-access.log = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.access.log
-slowlog = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.slow.log
+access.log = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.access.log
+slowlog = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
 

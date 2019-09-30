@@ -18,6 +18,7 @@
     - users-update
     - users-cron
     - users-mariadb
+    - users-scripts
 
 - name: Set a fact for the Debian version
   set_fact:
@@ -29,6 +30,7 @@
     - users-update
     - users-cron
     - users-mariadb
+    - users-scripts
 
 - name: Load package information as facts
   package_facts:
@@ -40,6 +42,7 @@
     - users-update
     - users-cron
     - users-mariadb
+    - users-scripts
 
 - name: Fail if ansible_facts.packages is not defined or empty
   fail:
@@ -52,6 +55,7 @@
     - users-update
     - users-cron
     - users-mariadb
+    - users-scripts
 
 - name: PHP FPM tasks
   block:
@@ -190,7 +194,7 @@
 
     - name: Absent users home directories removed
       file:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
         state: absent
       loop: "{{ users | dict2items }}"
       tags:
@@ -301,7 +305,7 @@
 
     - name: Email address for user absent so no .forward
       file:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.forward"
         state: absent
       loop: "{{ users | dict2items }}"
       when: ( users_forward == False ) or ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( item.value.users_email is not defined or item.value.users_email == "" )
@@ -311,7 +315,7 @@
     - name: Email address in .forward
       template:
         src: templates/forward.j2
-        dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.forward"
+        dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.forward"
         owner: "{{ item.key }}"
         group: "{{ item.key }}"
         mode: 0644
@@ -325,7 +329,7 @@
 - name: Create a .muttrc for each user if it doesn't exist
   template:
     src: templates/muttrc.j2
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.muttrc"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.muttrc"
     force: false
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
@@ -377,8 +381,8 @@
       block:
 
         - name: PHP-FPM chroot logrotation config in place
-          copy:
-            src: files/phpfpm_users_logrotate
+          template:
+            src: templates/phpfpm_users_logrotate.j2
             dest: /etc/logrotate.d/phpfpm_users_logrotate
             owner: root
             group: root
@@ -455,10 +459,11 @@
         - users-update
         - apache
         - letsencrypt
+        - users-scripts
 
     - name: Users Apache logrotation config in place
-      copy:
-        src: files/apache_users_logrotate
+      template:
+        src: templates/apache_users_logrotate.j2
         dest: /etc/logrotate.d/apache_users_logrotate
         owner: root
         group: root
@@ -500,6 +505,7 @@
       tags:
         - users-update
         - users-cron
+        - users-scripts
 
     - name: Crontab present for users
       include_tasks: crontab_users_present.yml
@@ -508,6 +514,7 @@
       tags:
         - users-update
         - users-cron
+        - users-scripts
 
   when: ( users_cron is not defined ) or ( users_cron == True )
 ...

@@ -2,7 +2,7 @@
 - name: SSH public keys downloaded
   get_url:
     url: "{{ key_url }}"
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_{{ key_idex }}"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys_{{ key_idex }}"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0600
@@ -16,7 +16,7 @@
     - users-update
 
 - name: cat all the authorized_keys_* public keys to ~/.ssh/.authorized_keys
-  shell: "for f in {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys ; chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys ; chmod 600 {{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
+  shell: "for f in {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys ; chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys ; chmod 600 {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys"
   register: users_ssh_public_keys_content
   changed_when: false
   tags:
@@ -25,8 +25,8 @@
 
 - name: Copy ~/.ssh/.authorized_keys to ~/ssh/authorized_keys if changed
   copy:
-    src: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/.authorized_keys"
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/authorized_keys"
+    src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys"
     remote_src: true
     force: false
     validate: ssh-keygen -lf %s
@@ -41,7 +41,7 @@
 - name: SSH README.md in place
   copy:
     src: files/SSH_README.md
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh/README.md"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/README.md"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0600

@@ -33,9 +33,9 @@
     - users-chroot
     - users-update
 
-- name: "Mount point {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }} present"
+- name: "Mount point {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
   file:
-    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default('/home/' + item.key) }}"
+    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
     state: directory
     owner: root
     group: "{{ item.value.users_home_group | default(item.key) }}"
@@ -81,16 +81,16 @@
     - users-chroot
     - users-update
 
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
   register: users_chroot_home_mount
   changed_when: '"PRESENT" not in users_chroot_home_mount.stdout'
   tags:
     - users-chroot
     - users-update
 
-- name: "Mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
-  command: "mount --make-private -t ext4 -o rw,bind,nodev,nosuid {{ item.value.users_home | default('/home/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default('/home/' + item.key) }}"
+- name: "Mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+  command: "mount --make-private -t ext4 -o rw,bind,nodev,nosuid {{ item.value.users_home | default(users_basedir + '/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
   args:
     warn: false
   when: '"ABSENT" in users_chroot_home_mount.stdout'

@@ -78,7 +78,7 @@
 
 - name: "Apache {{ item.key }}/{{ users_sites_dir }} directory present"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}"
     state: directory
     owner: "{{ item.key }}"
     # group: "{{ apache_user | default('www-data') }}"
@@ -90,7 +90,7 @@
 
 - name: "Apache DocumentRoot present"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
     state: directory
     owner: "{{ item.key }}"
     # group: "{{ apache_user | default('www-data') }}"
@@ -103,9 +103,9 @@
     - apache
     - users-update
 
-- name: "Apache log directory {{ item.value.users_home | default('/home/' + item.key) }}/logs present"
+- name: "Apache log directory {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs present"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs"
     state: directory
     owner: root
     group: "{{ item.key }}"
@@ -122,8 +122,8 @@
     - apache
     - users-update
 
-- name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
-  shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
+- name: "MariaDB password read from {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
+  shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
   no_log: true
   register: users_mariadb_password_read
   changed_when: false
@@ -187,7 +187,7 @@
   vars:
     wordpress_user: "{{ item.key }}"
     wordpress_group: "{{ item.key }}"
-    wordpress_docroot: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    wordpress_docroot: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     wordpress_docroot_mode: "0750"
     wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
     wordpress_dbuser: "{{ item.key }}"
@@ -223,9 +223,9 @@
   vars:
     matomo_user: "{{ item.key }}"
     matomo_url: "https://{{ vhost.value.users_apache_server_name }}/"
-    matomo_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
-    matomo_html: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    matomo_private: "{{ item.value.users_home | default('/home/' + item.key) }}/private"
+    matomo_home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    matomo_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    matomo_private: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private"
     matomo_db_username: "{{ item.key }}"
     matomo_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     matomo_db_host: localhost
@@ -258,15 +258,27 @@
     phpmyadmin_db_socket: /var/run/mysqld/mysqld.sock
     phpmyadmin_db_host: localhost
     phpmyadmin_db_port: 3306
-    phpmyadmin_home: "{{ item.value.users_home | default('/home/' + item.key) }}"
-    phpmyadmin_private: "{{ item.value.users_home | default('/home/' + item.key) }}/private"
-    phpmyadmin_html: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    phpmyadmin_html_upload_dir: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
-    phpmyadmin_html_save_dir: "{{ item.value.users_home | default('/home/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
+    phpmyadmin_home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    phpmyadmin_private: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private"
+    phpmyadmin_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    phpmyadmin_html_upload_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
+    phpmyadmin_html_save_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
   tags:
     - users-update
+
+- name: Include daily scripts role
+  include_tasks: users_daily_scripts.yml
+  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+  when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
+  tags:
+    - users-update
+  tags:
+    - users-update
+    - users-scripts
 ...

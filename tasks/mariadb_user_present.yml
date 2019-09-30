@@ -1,7 +1,7 @@
 ---
-- name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
+- name: "Stat {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
   stat:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
   register: users_mycnf
   tags:
     - users-update
@@ -29,8 +29,8 @@
 
 - block:
 
-    - name: "MariaDB password read from {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
-      shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
+    - name: "MariaDB password read from {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
+      shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
       no_log: true
       changed_when: false
       register: users_mariadb_password_read
@@ -56,10 +56,10 @@
     - users-update
     - users-mariadb
 
-- name: "mariadb_password written to {{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
+- name: "mariadb_password written to {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
   template:
     src: templates/my.cnf.j2
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.my.cnf"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
     owner: "{{ item.key }}"
     group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0400
@@ -140,9 +140,9 @@
     - users-update
     - users-mariadb
 
-- name: "Stat {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
+- name: "Stat {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd file"
   stat:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd"
   register: users_notify_mariadb_passwd_file
   when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True )
   tags:
@@ -167,9 +167,9 @@
         - users-update
         - users-mariadb
 
-    - name: "Notification date recorded in {{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd file"
+    - name: "Notification date recorded in {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd file"
       lineinfile:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}/.notify_mariadb_passwd"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd"
         line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
         create: true
         state: present
@@ -185,7 +185,7 @@
 
 - name: Directory present for database backups
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/private/mysql-backups"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private/mysql-backups"
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.value.users_group | default(item.key) }}"

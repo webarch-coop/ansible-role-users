@@ -21,7 +21,7 @@
       - "group: {{ item.value.users_group | default(item.key) }}"
       - "groups: {{ item.value.users_groups | default([]) | join(',') or \ omit }}"
       - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit}}"
-      - "home: {{ item.value.users_home | default('/home/' + item.key) }}"
+      - "home: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
       - "shell: {{ item.value.users_shell | default('/bin/bash', true) }}"
       - "skeleton: {{ item.value.users_skel | default(omit) }}"
       - "system: {{ item.value.users_system | default('no', false) }}"
@@ -38,7 +38,7 @@
     name: "{{ item.key }}"
     group: "{{ item.value.users_group | default(item.key) }}"
     groups: "{{ users_all_groups | default([]) | join(',') or \ omit }}"
-    home: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
     create_home: true
     shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
     skeleton: "{{ item.value.users_skel | default(omit) }}"
@@ -49,7 +49,7 @@
 
 - name: "Chown user home directory owner to {{ item.value.users_home_owner | default(item.key) }}"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
     state: directory
     owner: "{{ item.value.users_home_owner | default(item.key) }}"
   tags:
@@ -57,7 +57,7 @@
 
 - name: "Chown user home directory group to {{ item.value.users_home_group | default(item.key) }}"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
     state: directory
     group: "{{ item.value.users_home_group | default(item.key) }}"
   tags:
@@ -65,19 +65,19 @@
 
 - name: "Chmod users home directory {{ item.value.users_home_mode | default('0750') }}"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
     state: directory
     mode: "{{ item.value.users_home_mode | default('0750') }}"
   tags:
     - users-update
 
 - debug:
-    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
+    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh"
     verbosity: 1
 
 - name: "SSH private directories present for {{ item.key }}"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.ssh"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh"
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
@@ -96,7 +96,7 @@
 - name: Set default editor
   copy:
     src: "files/{{ item.value.users_editor }}/selected_editor"
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.selected_editor"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.selected_editor"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0644
@@ -107,7 +107,7 @@
 - name: .vimrc in place
   copy:
     src: "files/vim/vimrc"
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.vimrc"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.vimrc"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0644
@@ -116,12 +116,12 @@
     - users-update
 
 - debug:
-    msg: "bashrc: {{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
+    msg: "bashrc: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.bashrc"
   when: item.value.users_editor is defined and item.value.users_editor == 'vim'
 
 - name: vim set to be default editor
   lineinfile:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.bashrc"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.bashrc"
     line: 'export EDITOR="vim"'
     state: present
     create: true
@@ -132,7 +132,7 @@
 - name: .gitconfig in place
   template:
     src: templates/gitconfig.j2
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/.gitconfig"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.gitconfig"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
     mode: 0644

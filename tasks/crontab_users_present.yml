@@ -1,7 +1,7 @@
 ---
-- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin present"
+- name: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin present"
   file:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/bin"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin"
     state: directory
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
@@ -10,32 +10,32 @@
     - users-update
     - users-cron
 
-- name: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md in place"
+- name: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/README.md in place"
   copy:
     src: files/CRON_README.md
-    dest: "{{ item.value.users_home | default('/home/' + item.key) }}/bin/README.md"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/README.md"
   tags:
     - users-update
     - users-cron
 
-- name: "Check if {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min exists"
+- name: "Check if {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.cron_min exists"
   stat:
-    path: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.cron_min"
   register: users_cron_min_file
   tags:
     - users-update
     - users-cron
 
-- name: "Generate {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
-  shell: "echo {{ 59 | random }} > {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+- name: "Generate {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.cron_min"
+  shell: "echo {{ 59 | random }} > {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.cron_min"
   when: ( users_cron_min_file.stat is not defined ) or ( users_cron_min_file.stat.exists == False )
   tags:
     - users-update
     - users-cron
 
-- name: "Read the minute from {{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+- name: "Read the minute from {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.cron_min"
   slurp:
-    src: "{{ item.value.users_home | default('/home/' + item.key) }}/.cron_min"
+    src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.cron_min"
   register: users_cron_min_b64encoded
   tags:
     - users-update
@@ -56,7 +56,7 @@
         name: "Daily cron jobs"
         cron_file: "chroot_cron_daily_{{ item.key }}"
         user: root
-        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }} sudo -u {{ item.key }} PATH=/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ item.value.users_home | default('/home/' + item.key) }}/tmp /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ item.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ item.value.users_email }}; fi"
+        job: "if [ -f {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }} sudo -u {{ item.key }} PATH={{ users_basedir }}/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp /bin/sh {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ item.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ item.value.users_email }}; fi"
         minute: "{{ users_cron_min }}"
         hour: "{{ users_cron_daily_hour | default('05') }}"
       tags:
@@ -68,7 +68,7 @@
         name: "Hourly cron jobs"
         cron_file: "chroot_cron_hourly_{{ item.key }}"
         user: root
-        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }} sudo -u {{ item.key }} PATH=/home/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ item.value.users_home | default('/home/' + item.key) }}/tmp /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ item.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ item.value.users_email }}; fi"
+        job: "if [ -f {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_hourly.sh ]; then /usr/sbin/chroot /chroot-users/{{ item.key }} sudo -u {{ item.key }} PATH={{ users_basedir }}/{{ item.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp /bin/sh {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_hourly.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ item.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ item.value.users_email }}; fi"
         minute: "{{ users_cron_min }}"
         hour: "*"
       tags:
@@ -84,7 +84,7 @@
       cron:
         name: "Daily cron jobs"
         user: "{{ item.key }}"
-        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh ]; then /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_daily.sh; fi"
+        job: "if [ -f {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh ]; then /bin/sh {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh; fi"
         minute: "{{ users_cron_min }}"
         hour: "{{ users_cron_daily_hour | default('05') }}"
       tags:
@@ -95,7 +95,7 @@
       cron:
         name: "Hourly cron jobs"
         user: "{{ item.key }}"
-        job: "if [ -f {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh ]; then /bin/sh {{ item.value.users_home | default('/home/' + item.key) }}/bin/cron_hourly.sh; fi"
+        job: "if [ -f {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_hourly.sh ]; then /bin/sh {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_hourly.sh; fi"
         minute: "{{ users_cron_min }}"
         hour: "*"
       tags:
@@ -118,7 +118,7 @@
   cron:
     env: true
     name: TMPDIR
-    value: "{{ item.value.users_home | default('/home/' + item.key) }}/tmp"
+    value: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp"
     user: "{{ item.key }}"
     insertafter: USER
   tags:
@@ -129,7 +129,7 @@
   cron:
     env: true
     name: PATH
-    value: "{{ item.value.users_home | default('/home/' + item.key) }}/bin:/usr/local/bin:/usr/bin:/bin"
+    value: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin:/usr/local/bin:/usr/bin:/bin"
     user: "{{ item.key }}"
     insertafter: TMPDIR
   tags:
@@ -151,7 +151,7 @@
 - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
   cron:
     name: "Daily deletion of TMPDIR files for {{ item.key }}"
-    job: "find -P {{ item.value.users_home | default('/home/' + item.key) }}/tmp -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
+    job: "find -P {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
     state: present
     user: "{{ item.key }}"
     minute: "{{ users_cron_min }}"

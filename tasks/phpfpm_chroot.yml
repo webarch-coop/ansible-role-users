@@ -78,7 +78,7 @@
 
     - name: Users PHP FPM log directory present
       file:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs"
         state: directory
         owner: root
         group: "{{ item.key }}"
@@ -90,7 +90,7 @@
 
     - name: Users PHP FPM mail log touched
       file:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.mail.log"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.mail.log"
         state: touch
         owner: "{{ item.key }}"
         group: "{{ item.key }}"
@@ -102,7 +102,7 @@
 
     - name: Users PHP FPM slow log touched
       file:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.slow.log"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.slow.log"
         state: touch
         owner: root
         group: "{{ item.key }}"
@@ -114,7 +114,7 @@
 
     - name: Users PHP FPM access log touched
       file:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.access.log"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.access.log"
         state: touch
         owner: root
         group: "{{ item.key }}"
@@ -126,7 +126,7 @@
 
     - name: Users PHP FPM error log touched
       file:
-        path: "{{ item.value.users_home | default('/home/' + item.key) }}/logs/php-fpm.error.log"
+        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.error.log"
         state: touch
         owner: root
         group: "{{ item.key }}"
