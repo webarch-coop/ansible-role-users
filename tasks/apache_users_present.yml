@@ -278,7 +278,5 @@
   when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
   tags:
     - users-update
-  tags:
-    - users-update
     - users-scripts
 ...
