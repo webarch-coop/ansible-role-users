@@ -55,7 +55,7 @@
 - name: "Fail if {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
   fail:
     msg: "The directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
-  when: users_chroot_home_check.stst.exists == False
+  when: users_chroot_home_check.stat.exists == False
   tags:
     - users-chroot
     - users-upate
