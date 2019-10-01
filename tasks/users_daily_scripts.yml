@@ -24,7 +24,7 @@
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh"
     line: "{{ command }}"
     state: present
-    insertafter: "^# BEGIN ANSIBLE SCRIPTS"
+    insertbefore: "^# END ANSIBLE SCRIPTS"
     firstmatch: true
     create: false
     owner: "{{ item.key }}"
