@@ -129,7 +129,7 @@
     - apache
     - users-update
 
-- name: "Deny robots.txt absent for {{ item.key }}" 
+- name: "Deny robots.txt absent for {{ item.key }}"
   file:
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/robots.txt"
     state: absent
