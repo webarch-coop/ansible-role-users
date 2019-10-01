@@ -90,6 +90,7 @@
 {% endif %}
     Require all granted
 {% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
+    Header set X-Robots-Tag "noindex"
     <IfModule mod_rewrite.c>
       # https://docs.phpmyadmin.net/en/latest/faq.html#faq1-42
       RewriteCond %{REQUEST_METHOD} !^(GET|POST)$ [NC,OR]
