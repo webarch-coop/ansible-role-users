@@ -42,6 +42,22 @@
     mode: 0750
   tags:
     - users-chroot
+    - users-update
+
+- name: "Check that {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is present"
+  stat:
+    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+  register: users_chroot_home_check
+  tags:
+    - users-chroot
+    - users-upate
+
+- name: "Fail if {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
+  fail:
+    msg: "The directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
+  when: users_chroot_home_check.stst.exists == False
+  tags:
+    - users-chroot
     - users-upate
 
 - name: "Mount point {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} present"
