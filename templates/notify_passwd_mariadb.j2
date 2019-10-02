@@ -8,8 +8,20 @@ Your MariaDB account and database details for {{ inventory_hostname }}:
   Port:		3306
   Database(s):	{% for d in item.value.users_mariadb_databases %}{{ d }} {% endfor %}
 
-
+{% if ssh_allow_tcp_forwarding is defined and ssh_allow_tcp_forwarding == "yes" %}
+Note that there is no direct external access to the database, however you
+can use a SSH tunnel, see https://docs.webarch.net/wiki/MySQL.
+{% elif ssh_allow_tcp_forwarding is not defined or ssh_allow_tcp_forwarding == "no" %}
 Note that there is no direct external access to the database.
+{% endif %}
+
+{% if phpmyadmin_user is defined and phpmyadmin_domain is defined and phpmyadmin_path is defined %}
+The {{ inventory_hostname }} has phpMyAdmin installed,
+you can use this web interface to the database at this URL with the username 
+and password provided above:
+
+  URL: https://{{ phpmyadmin_domain }}{{ phpmyadmin_path }}/ 
+{% endif %}
 
 All the best
 
