@@ -257,7 +257,7 @@
     wordpress_locale: "{{ vhost.value.wordpress_dbprefix | default('en_GB') }}"
     wordpress_url: "{{ vhost.value.wordpress_url | default('https://' + vhost.value.users_apache_server_name) }}"
     wordpress_title: "{{ vhost.value.wordpress_title | default(vhost.value.users_apache_server_name) }}"
-    wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(vhost.key) }}"
+    wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(item.key) }}"
     wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(item.value.users_email) }}"
     wordpress_notify_from: "{{ users_notify_from }}"
     wordpress_notify_reply_to: "{{ users_notify_reply_to }}"
