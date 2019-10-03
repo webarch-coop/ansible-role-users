@@ -10,8 +10,8 @@ Your MariaDB account and database details for {{ inventory_hostname }}:
 
 
 {% if ssh_allow_tcp_forwarding is defined and ssh_allow_tcp_forwarding == "yes" %}
-Note that there is no direct external access to the database, however you
-can use a SSH tunnel, see https://docs.webarch.net/wiki/MySQL.
+Note that there is no direct external access to the database, however
+you can use a SSH tunnel, see https://docs.webarch.net/wiki/MySQL.
 {% elif ssh_allow_tcp_forwarding is not defined or ssh_allow_tcp_forwarding == "no" %}
 Note that there is no direct external access to the database.
 {% endif %}
@@ -21,7 +21,7 @@ The {{ inventory_hostname }} server has phpMyAdmin installed,
 you can use this web interface to the database at this URL with the
  username and password provided above:
 
-  URL: https://{{ phpmyadmin_domain }}{{ phpmyadmin_path }}
+  URL:          https://{{ phpmyadmin_domain }}{{ phpmyadmin_path }}
 {% endif %}
 
 All the best
