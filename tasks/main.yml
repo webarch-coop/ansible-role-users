@@ -2,6 +2,7 @@
 - name: Packages present
   apt:
     pkg:
+      - bc
       - mutt
       - slay
       - vim
@@ -543,4 +544,10 @@
         - users-scripts
 
   when: ( users_cron is not defined ) or ( users_cron == True )
+
+- name: Firewall tasks included 
+  include_tasks: firewall.yml
+  when: ( users_firewall is defined ) and ( users_firewall == True ) 
+  tags:
+    - users-firewall
 ...
