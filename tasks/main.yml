@@ -486,9 +486,9 @@
       tags:
         - apache
 
-    - name: Users Apache bandwith usage cron tasks present
+    - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present" 
       cron:
-        name: "Email monthly usage stats to {{ users_apache_bandwidth_email }}"
+        name: "Email monthly Apache bandwidth"
         hour: 1
         minute: 0
         day: 1
