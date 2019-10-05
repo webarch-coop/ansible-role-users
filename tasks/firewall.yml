@@ -1,6 +1,7 @@
 ---
 - name: Firewall packages present
   apt:
+    pkgs:
       - iptables
       - iptables-persistent
       - nftables
@@ -14,7 +15,7 @@
   template:
     src: templates/rules.v4.j2
     dest: /etc/iptables/rules.v4
-    backup: yes
+    backup: true
   tags:
     - users-firewall
 
