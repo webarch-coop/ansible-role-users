@@ -146,6 +146,7 @@
         phpfpm_pm_start_servers: "{{ item.value.users_phpfpm_pm_start_servers | default('1') }}"
         phpfpm_pm_min_spare_servers: "{{ item.value.users_phpfpm_pm_min_spare_servers | default('1') }"
         phpfpm_pm_max_spare_servers: "{{ item.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
+      loop: "{{ users | dict2items }}"
       tags:
         - users-update
 
