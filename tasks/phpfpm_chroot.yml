@@ -136,6 +136,19 @@
       tags:
         - users-update
 
+    - name: Check the PHP FPM pm variables
+      include_role:
+        name: php-fpm
+        tasks_from: pool_check.yml
+      vars:
+        phpfpm_pm: "{{ item.value.users_phpfpm_pm | default('ondemand') }}"
+        phpfpm_pm_max_children: "{{ item.value.users_phpfpm_max_children | default('2') }}" 
+        phpfpm_pm_start_servers: "{{ item.value.users_phpfpm_pm_start_servers | default('1') }}"
+        phpfpm_pm_min_spare_servers: "{{ item.value.users_phpfpm_pm_min_spare_servers | default('1') }"
+        phpfpm_pm_max_spare_servers: "{{ item.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
+      tags:
+        - users-update
+
     - name: Users PHP FPM pool.d file present
       template:
         src: templates/phpfpm_chroot_user.conf.j2
