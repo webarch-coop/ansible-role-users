@@ -473,7 +473,29 @@
         group: root
         mode: 0644
       tags:
+        - apache
         - logrotate
+
+    - name: Cron job to delete Apache logs when older than 30 days
+      cron:
+        name: Delete Apache log files
+        hour: 0
+        minute: 0
+        day: 1
+        job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
+      tags:
+        - apache
+
+    - name: Users Apache bandwith usage cron tasks present
+      cron:
+        name: "Email monthly usage stats to {{ users_apache_bandwidth_email }}"
+        hour: 1
+        minute: 0
+        day: 1
+        job: "/usr/local/bin/apache_data_usage_by_user {{ users_apache_bandwidth_email }}"
+      when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email != "" ) 
+      tags:
+        - apache
 
     - name: Apache configtest
       command: apachectl configtest
