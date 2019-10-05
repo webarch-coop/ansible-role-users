@@ -4,6 +4,7 @@
     pkg:
       - mutt
       - slay
+      - vim
     state: present
 
 - name: Check /etc/debian_version
@@ -15,6 +16,7 @@
     - apache
     - letsencrypt
     - logrotate
+    - phpfpm
     - users-update
     - users-cron
     - users-mariadb
@@ -27,6 +29,7 @@
     - apache
     - letsencrypt
     - logrotate
+    - phpfpm
     - users-update
     - users-cron
     - users-mariadb
@@ -39,6 +42,7 @@
     - apache
     - letsencrypt
     - logrotate
+    - phpfpm
     - users-update
     - users-cron
     - users-mariadb
@@ -52,6 +56,7 @@
     - apache
     - letsencrypt
     - logrotate
+    - phpfpm
     - users-update
     - users-cron
     - users-mariadb
@@ -67,6 +72,7 @@
       changed_when: false
       tags:
         - logrotate
+        - phpfpm
         - users-update
 
     - name: php-fpm variable set
@@ -78,6 +84,7 @@
             verbosity: 1
           tags:
             - logrotate
+            - phpfpm
             - users-update
 
         - name: Set a fact for the PHP-FPM version
@@ -86,6 +93,7 @@
           when: users_phpfpm_status.stdout == "installed"
           tags:
             - logrotate
+            - phpfpm
             - users-update
 
       when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
@@ -98,16 +106,10 @@
   register: users_chroot_dir
   tags:
     - logrotate
+    - phpfpm
     - users-update
     - users-chroot
     - users-cron
-
-- name: Packages present
-  apt:
-    pkg:
-      - vim
-    state: present
-    update_cache: true
 
 - name: Skel profiles included
   include_tasks: "skel_{{ users_skeleton }}.yml"
@@ -388,11 +390,13 @@
             group: root
             mode: 0644
           tags:
+            - phpfpm
             - logrotate
 
         - name: Include the PHP FPM chroot tasks
           include_tasks: phpfpm_chroot.yml
           tags:
+            - phpfpm
             - users-update
 
       when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )

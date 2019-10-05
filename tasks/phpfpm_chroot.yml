@@ -5,12 +5,14 @@
     split: ':'
   tags:
     - users-update
+    - phpfpm
 
 - debug:
     var: getent_group
     verbosity: 2
   tags:
     - users-update
+    - phpfpm
 
 - name: Stat /usr/sbin/apache2
   stat:
@@ -18,6 +20,7 @@
   register: users_apache2
   tags:
     - users-update
+    - phpfpm
 
 - name: /etc/apache2/localhost.d present
   file:
@@ -26,6 +29,7 @@
   when: users_apache2.stat.exists
   tags:
     - users-update
+    - phpfpm
 
 - name: Stat /usr/sbin/nginx
   stat:
@@ -33,6 +37,7 @@
   register: users_nginx
   tags:
     - users-update
+    - phpfpm
 
 - name: /etc/nginx/localhost.d present
   file:
@@ -41,6 +46,7 @@
   when: users_nginx.stat.exists
   tags:
     - users-update
+    - phpfpm
 
 - name: PHP FPM users absent
   block:
@@ -52,6 +58,7 @@
       loop: "{{ users | dict2items }}"
       tags:
         - users-update
+        - phpfpm
 
     - name: Users Apache PHP FPM localhost.d file absent
       file:
@@ -61,6 +68,7 @@
       when: users_apache2.stat.exists
       tags:
         - users-update
+        - phpfpm
 
     - name: Users Nginx PHP FPM localhost.d file present
       file:
@@ -70,6 +78,7 @@
       when: users_nginx.stat.exists
       tags:
         - users-update
+        - phpfpm
 
   when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
 
@@ -87,6 +96,7 @@
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
     - name: Users PHP FPM mail log touched
       file:
@@ -99,6 +109,7 @@
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
     - name: Users PHP FPM slow log touched
       file:
@@ -111,6 +122,7 @@
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
     - name: Users PHP FPM access log touched
       file:
@@ -123,6 +135,7 @@
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
     - name: Users PHP FPM error log touched
       file:
@@ -135,6 +148,7 @@
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
     - name: Check the PHP FPM pm variables
       include_role:
@@ -149,6 +163,7 @@
       loop: "{{ users | dict2items }}"
       tags:
         - users-update
+        - phpfpm
 
     - name: Users PHP FPM pool.d file present
       template:
@@ -158,6 +173,7 @@
       when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
     - name: Users Apache PHP FPM localhost.d file present
       template:
@@ -167,6 +183,7 @@
       when: ( users_apache2.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
     - name: Users Nginx PHP FPM localhost.d file present
       template:
@@ -176,6 +193,7 @@
       when: ( users_nginx.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
       tags:
         - users-update
+        - phpfpm
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
 
@@ -185,3 +203,5 @@
     state: restarted
   tags:
     - users-update
+    - phpfpm
+...
