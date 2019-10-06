@@ -12,3 +12,4 @@
   loop: "{{ users_groups_user.value.users_groups }}"
   tags:
     - users-update
+...
