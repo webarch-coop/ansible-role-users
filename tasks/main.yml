@@ -487,14 +487,14 @@
       tags:
         - apache
 
-    - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present" 
+    - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
       cron:
         name: "Email monthly Apache bandwidth"
         hour: 1
         minute: 0
         day: 1
         job: "/usr/local/bin/apache_data_usage_by_user {{ users_apache_bandwidth_email }}"
-      when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email != "" ) 
+      when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email != "" )
       tags:
         - apache
 
@@ -545,9 +545,9 @@
 
   when: ( users_cron is not defined ) or ( users_cron == True )
 
-- name: Firewall tasks included 
+- name: Firewall tasks included
   include_tasks: firewall.yml
-  when: ( users_firewall is defined ) and ( users_firewall == True ) 
+  when: ( users_firewall is defined ) and ( users_firewall == True )
   tags:
     - users-firewall
 ...
