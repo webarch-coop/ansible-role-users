@@ -23,4 +23,11 @@
   shell: "iptables-restore < /etc/iptables/rules.v4"
   tags:
     - users-firewall
+
+- name: fail2ban restarted
+  service:
+    name: fail2ban
+    state: restarted
+  tags:
+    - users-firewall
 ...
