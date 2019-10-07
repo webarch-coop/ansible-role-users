@@ -162,6 +162,7 @@
       command: "slay {{ item.key }}"
       loop: "{{ users | dict2items }}"
       tags:
+        - users-chroot
         - users-update
 
     - name: Chroot users absent
