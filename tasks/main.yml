@@ -208,6 +208,7 @@
         name: "{{ item.key }}"
         state: absent
         remove: true
+        force: true
       loop: "{{ users | dict2items }}"
       tags:
         - users-update
