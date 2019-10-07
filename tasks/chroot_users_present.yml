@@ -105,7 +105,7 @@
     fstype: ext4
     opts: ro,nosuid,bind,private
     state: mounted
-  when: '"ABSENT" in users_chroot_mount.stdout'
+  # when: '"ABSENT" in users_chroot_mount.stdout'
   tags:
     - users-chroot
     - users-update
@@ -134,7 +134,7 @@
     fstype: ext4
     opts: rw,nodev,nosuid,bind,private
     state: mounted
-  when: '"ABSENT" in users_chroot_home_mount.stdout'
+  # when: '"ABSENT" in users_chroot_home_mount.stdout'
   tags:
     - users-chroot
     - users-update
@@ -163,7 +163,7 @@
     fstype: ext4
     opts: ro,nodev,nosuid,noexec,bind,private
     state: mounted
-  when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
+  # when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
   tags:
     - users-chroot
     - users-update
@@ -192,7 +192,7 @@
     fstype: ext4
     opts: ro,nodev,nosuid,noexec,bind,private
     state: mounted
-  when: '"ABSENT" in users_chroot_run_chroot_mount.stdout'
+  # when: '"ABSENT" in users_chroot_run_chroot_mount.stdout'
   tags:
     - users-chroot
     - users-update
