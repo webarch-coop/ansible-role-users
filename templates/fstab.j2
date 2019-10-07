@@ -4,4 +4,4 @@
 mount --make-private -t ext4 -o ro,bind,nosuid /chroot /chroot-users/{{ item.key }}
 mount --make-private -t ext4 -o rw,bind,nodev,nosuid {{ users_basedir }}/{{ item.key }} /chroot-users/{{ item.key }}{{ users_basedir }}/{{ item.key }}
 mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/mysqld /chroot-users/{{ item.key }}/run/mysqld
-mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/chroot /chroot-users/{{ item.key }}/chroot
+mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/chroot /chroot-users/{{ item.key }}/run/chroot
