@@ -393,12 +393,14 @@
           tags:
             - phpfpm
             - logrotate
+            - users-chroot
 
         - name: Include the PHP FPM chroot tasks
           include_tasks: phpfpm_chroot.yml
           tags:
             - phpfpm
             - users-update
+            - users-chroot
 
       when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
 
