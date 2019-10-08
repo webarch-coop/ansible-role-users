@@ -68,7 +68,7 @@ The other repo should also contain a `users.yml` file that contains:
         users_home_mode: "0750"
         users_system: true
         users_shell: /usr/sbin/nologin
-        users_generate_ssh_key: yes
+        users_generate_ssh_key: true
         users_editor: vim
         users_groups:
           - users
