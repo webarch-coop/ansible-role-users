@@ -376,7 +376,7 @@
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
+      when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( item.value.users_groups is defined and "chroot" in item.value.users_groups )
       tags:
         - users-chroot
         - users-update
