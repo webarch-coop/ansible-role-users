@@ -540,7 +540,11 @@
     - name: Crontab present for users
       include_tasks: crontab_users_present.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( users_crontab is not defined or users_crontab == True )
+      when:
+        - item.key != "root"
+        - ( item.value.users_groups is defined ) and ( "sudo" not in item.value.users_groups )
+        - ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
+        - ( users_crontab is not defined ) or ( users_crontab == True )
       tags:
         - users-update
         - users-cron
