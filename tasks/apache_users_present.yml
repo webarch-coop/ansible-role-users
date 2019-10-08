@@ -277,6 +277,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
   tags:
     - users-update
+    - wordpress
 
 - name: Include Matomo role
   include_role:
@@ -307,6 +308,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
   tags:
     - users-update
+    - matomo
 
 - name: Include phpMyAdmin role
   include_role:
@@ -330,6 +332,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
   tags:
     - users-update
+    - phpmyadmin
 
 - name: Include daily scripts role
   include_tasks: users_daily_scripts.yml

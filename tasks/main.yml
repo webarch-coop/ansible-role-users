@@ -22,6 +22,9 @@
     - users-cron
     - users-mariadb
     - users-scripts
+    - wordpress
+    - matomo
+    - phpmyadmin
 
 - name: Set a fact for the Debian version
   set_fact:
@@ -35,6 +38,9 @@
     - users-cron
     - users-mariadb
     - users-scripts
+    - wordpress
+    - matomo
+    - phpmyadmin
 
 - name: Load package information as facts
   package_facts:
@@ -48,6 +54,9 @@
     - users-cron
     - users-mariadb
     - users-scripts
+    - wordpress
+    - matomo
+    - phpmyadmin
 
 - name: Fail if ansible_facts.packages is not defined or empty
   fail:
@@ -62,6 +71,9 @@
     - users-cron
     - users-mariadb
     - users-scripts
+    - wordpress
+    - matomo
+    - phpmyadmin
 
 - name: PHP FPM tasks
   block:
@@ -468,6 +480,9 @@
         - apache
         - letsencrypt
         - users-scripts
+        - wordpress
+        - matomo
+        - phpmyadmin
 
     - name: Users Apache logrotation config in place
       template:
