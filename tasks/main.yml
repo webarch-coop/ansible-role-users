@@ -228,7 +228,7 @@
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: users_groups_user
-  when: ( users_groups_user.value.users_state is undefined or users_groups_user.value.users_state == "present" ) and ( users_groups_user.value.users_groups is defined )
+  when: ( users_groups_user.value.users_state is not defined or users_groups_user.value.users_state == "present" ) and ( users_groups_user.value.users_groups is defined )
   tags:
     - users-update
 
@@ -282,7 +282,7 @@
       tags:
         - users-update
 
-  when: ( item.value.users_state is undefined ) or ( item.value.users_state == "present" )
+  when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
 
 - name: Users quota CSV file updated
   block:
@@ -324,7 +324,7 @@
         group: "{{ item.key }}"
         mode: 0644
       loop: "{{ users | dict2items }}"
-      when: ( users_forward == True ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( item.value.users_email is defined and item.value.users_email != "" )
+      when: ( users_forward == True ) and ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( item.value.users_email is defined and item.value.users_email != "" )
       tags:
         - users-update
 
@@ -339,7 +339,7 @@
     group: "{{ item.key }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
-  when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( users_muttrc is defined ) and ( users_muttrc == True )
+  when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( users_muttrc is defined ) and ( users_muttrc == True )
   tags:
     - users-update
 
@@ -376,7 +376,7 @@
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
+      when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( "chroot" in item.value.users_groups )
       tags:
         - users-chroot
         - users-update
@@ -540,7 +540,7 @@
     - name: Crontab present for users
       include_tasks: crontab_users_present.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( users_crontab is not defined or users_crontab == True )
+      when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( users_crontab is not defined or users_crontab == True )
       tags:
         - users-update
         - users-cron
