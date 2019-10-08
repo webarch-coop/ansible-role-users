@@ -61,9 +61,9 @@
     - users-chroot
     - users-upate
 
-- name: "Mount point {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} present"
+- name: "Mount point {{ chroot_users_dir | default('/users') }}/{{ item.key }} present"
   file:
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
     state: directory
     owner: root
     group: root
@@ -72,10 +72,10 @@
     - users-chroot
     - users-update
 
-- name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} present"
+- name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/users') }}/{{ item.key }} present"
   mount:
     src: "{{ chroot_dir | default('/chroot') }}"
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
     fstype: ext4
     opts: ro,nosuid,bind,private
     state: mounted
@@ -83,10 +83,10 @@
     - users-chroot
     - users-update
 
-- name: "Mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
+- name: "Mount {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
   mount:
     src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
     fstype: ext4
     opts: rw,nodev,nosuid,bind,private
     state: mounted
@@ -94,10 +94,10 @@
     - users-chroot
     - users-update
 
-- name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld present"
+- name: "Mount /run/mysqld at {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld present"
   mount:
     src: /run/mysqld
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld"
     fstype: ext4
     opts: ro,nodev,nosuid,noexec,bind,private
     state: mounted
@@ -105,10 +105,10 @@
     - users-chroot
     - users-update
 
-- name: "Mount /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot present"
+- name: "Mount /run/chroot at {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot present"
   mount:
     src: "/run/chroot"
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
+    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot"
     fstype: ext4
     opts: ro,nodev,nosuid,noexec,bind,private
     state: mounted
