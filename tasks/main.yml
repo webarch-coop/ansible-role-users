@@ -174,6 +174,7 @@
       command: "slay {{ item.key }}"
       loop: "{{ users | dict2items }}"
       tags:
+        - users-chroot
         - users-update
 
     - name: Chroot users absent
@@ -357,33 +358,6 @@
 
 - name: Chroot users
   block:
-
-    - name: Chroot directories present
-      file:
-        path: "{{ dir }}"
-        state: directory
-      loop:
-        - /etc/fstab.d
-        - /run/chroot
-      loop_control:
-        loop_var: dir
-      tags:
-        - users-chroot
-
-    - name: Systemd mount unit file in place
-      copy:
-        src: files/chroot_users_mounts.service
-        dest: /lib/systemd/system/chroot_users_mounts.service
-      tags:
-        - users-chroot
-
-    - name: Chroot mount script in place
-      copy:
-        src: files/chroot-users-mounts.sh
-        dest: /usr/local/bin/chroot-users-mounts
-        mode: "0750"
-      tags:
-        - users-chroot
 
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml

@@ -1,10 +1,10 @@
 ; Ansible provisioned
 [{{ item.key }}]
-;prefix = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}
+;prefix = {{ chroot_users_dir | default('/users') }}/{{ item.key }}
 user = {{ item.key }} 
 group = {{ item.key }}
-chroot = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}
-listen = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
+chroot = {{ chroot_users_dir | default('/users') }}/{{ item.key }}
+listen = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
 ;listen = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
 listen.owner = root
 listen.group = {{ item.key }}
@@ -38,10 +38,10 @@ pm.max_requests = 1000
 ;pm.status_path = /status
 ;ping.path = /ping
 
-php_admin_value[error_log] = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/fpm-php.error.log
+php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/fpm-php.error.log
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-access.log = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.access.log
-slowlog = {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.slow.log
+access.log = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.access.log
+slowlog = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
 

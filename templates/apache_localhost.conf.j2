@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 <Location /phpfpm-{{ item.key }}-status>
-  SetHandler "proxy:unix:/chroot-users/{{ item.key }}{{ users_basedir }}/stats/php-fpm.sock|fcgi://localhost/"
+  SetHandler "proxy:unix:/users/{{ item.key }}{{ users_basedir }}/stats/php-fpm.sock|fcgi://localhost/"
   Require host localhost 127.0.0.1 ::1
 </Location>
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet

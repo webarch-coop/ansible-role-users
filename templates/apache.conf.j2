@@ -64,7 +64,7 @@
 
 {% else %}
           # SetHandler "proxy:unix:{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
-          SetHandler "proxy:unix:{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
+          SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
 {% endif %}
         </If>
       </FilesMatch>

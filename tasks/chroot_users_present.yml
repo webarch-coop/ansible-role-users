@@ -33,117 +33,50 @@
     - users-chroot
     - users-update
 
-- name: "Mount point {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
+- name: "Mount points for {{ item.key }} present"
   file:
-    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    path: "{{ dir.path }}"
+    owner: "{{ dir.owner }}"
+    group: "{{ dir.group }}"
+    mode: "{{ dir.mode }}"
     state: directory
-    owner: root
-    group: "{{ item.value.users_home_group | default(item.key) }}"
-    mode: 0750
+  loop:
+    - path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+      owner: root
+      group: "{{ item.value.users_home_group | default(item.key) }}"
+      mode: "0750"
+    - path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
+      owner: root
+      group: root
+      mode: "0750"
+  loop_control:
+    loop_var: dir
   tags:
     - users-chroot
     - users-update
 
-- name: "Check that {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is present"
-  stat:
-    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-  register: users_chroot_home_check
-  tags:
-    - users-chroot
-    - users-upate
-
-- name: "Fail if {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
-  fail:
-    msg: "The directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
-  when: users_chroot_home_check.stat.exists == False
-  tags:
-    - users-chroot
-    - users-upate
-
-- name: "Mount point {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} present"
-  file:
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Mount script for {{ item.key }} written to /etc/fstab.d/{{ item.key }}"
-  template:
-    src: templates/fstab.j2
-    dest: "/etc/fstab.d/{{ item.key }}"
-    mode: 0750
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} >/dev/null && echo PRESENT || echo ABSENT"
-  register: users_chroot_mount
-  changed_when: '"PRESENT" not in users_chroot_mount.stdout'
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Mount {{ chroot_dir | default('/chroot') }} at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-  command: "mount --make-private -t ext4 -o ro,bind,nosuid {{ chroot_dir | default('/chroot') }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-  args:
-    warn: false
-  when: '"ABSENT" in users_chroot_mount.stdout'
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
-  register: users_chroot_home_mount
-  changed_when: '"PRESENT" not in users_chroot_home_mount.stdout'
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Mount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-  command: "mount --make-private -t ext4 -o rw,bind,nodev,nosuid {{ item.value.users_home | default(users_basedir + '/' + item.key) }} {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-  args:
-    warn: false
-  when: '"ABSENT" in users_chroot_home_mount.stdout'
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Check if /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
-  register: users_chroot_mysqld_mount
-  changed_when: '"PRESENT" not in users_chroot_mysqld_mount.stdout'
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Mount /run/mysqld at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-  command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/mysqld {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-  args:
-    warn: false
-  when: '"ABSENT" in users_chroot_mysqld_mount.stdout'
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Check if /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot >/dev/null && echo PRESENT || echo ABSENT"
-  register: users_chroot_run_chroot_mount
-  changed_when: '"PRESENT" not in users_chroot_run_chroot_mount.stdout'
-  tags:
-    - users-chroot
-    - users-update
-
-- name: "Mount /run/chroot at {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
-  command: "mount --make-private -t ext4 -o ro,bind,nodev,nosuid,noexec /run/chroot {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
-  args:
-    warn: false
-  when: '"ABSENT" in users_chroot_run_chroot_mount.stdout'
+- name: "Chroot directories mounted for {{ item.key }}"
+  mount:
+    src: "{{ mnt.src }}"
+    path: "{{ mnt.path }}"
+    opts: "{{ mnt.opts }}"
+    fstype: ext4
+    state: mounted
+  loop:
+    - src: "{{ chroot_dir | default('/chroot') }}"
+      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
+      opts: ro,nosuid,bind,private
+    - src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+      opts: rw,nodev,nosuid,bind,private
+    - src: /run/mysqld
+      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld"
+      opts: ro,nodev,nosuid,noexec,bind,private
+    - src: "/run/chroot"
+      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot"
+      opts: ro,nodev,nosuid,noexec,bind,private
+  loop_control:
+    loop_var: mnt
   tags:
     - users-chroot
     - users-update

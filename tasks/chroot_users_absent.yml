@@ -6,6 +6,7 @@
     state: absent
   tags:
     - users-update
+    - users-chroot
 
 - name: "Remove {{ item.key }} from {{ chroot_dir | default('/chroot') }}/etc/group"
   lineinfile:
@@ -14,16 +15,19 @@
     state: absent
   tags:
     - users-update
+    - users-chroot
 
 # /run/chroot
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot >/dev/null && echo PRESENT || echo ABSENT"
+- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot >/dev/null && echo PRESENT || echo ABSENT"
   register: users_chroot_run_chroot_mount
+  changed_when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
   tags:
     - users-update
+    - users-chroot
 
-- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
-  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/chroot"
+- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot unmounted"
+  command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot"
   args:
     warn: false
   ignore_errors: true
@@ -32,16 +36,28 @@
   when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
   tags:
     - users-update
+    - users-chroot
 
-# /run/mysql
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
-  register: users_chroot_mysqld_mount
+- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot absent from /etc/fstab"
+  lineinfile:
+    path: /etc/fstab
+    line: "^/run/chroot {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot"
+    state: absent
   tags:
     - users-update
+    - users-chroot
 
-- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
-  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}/run/mysqld"
+# /run/mysql
+- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_mysqld_mount
+  changed_when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
+  tags:
+    - users-update
+    - users-chroot
+
+- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld unmounted"
+  command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld"
   args:
     warn: false
   ignore_errors: true
@@ -50,16 +66,28 @@
   when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
   tags:
     - users-update
+    - users-chroot
 
-# /chroot-users/$USER/home/$USER
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
-  register: users_chroot_users_home_mount
+- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld absent from /etc/fstab"
+  lineinfile:
+    path: /etc/fstab
+    line: "^/run/mysqld {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld"
+    state: absent
   tags:
     - users-update
+    - users-chroot
 
-- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+# /users/$USER/home/$USER
+- name: "Check if {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_users_home_mount
+  changed_when: '"PRESENT" in users_chroot_users_home_mount.stdout'
+  tags:
+    - users-update
+    - users-chroot
+
+- name: "{{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} unmounted"
+  command: "umount -l {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
   args:
     warn: false
   ignore_errors: true
@@ -68,16 +96,28 @@
   when: '"PRESENT" in users_chroot_users_home_mount.stdout'
   tags:
     - users-update
+    - users-chroot
 
-# /chroot-users/$USER
-- name: "Check if {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}  >/dev/null && echo PRESENT || echo ABSENT"
-  register: users_chroot_mount
+- name: "{{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} absent from /etc/fstab"
+  lineinfile:
+    path: /etc/fstab
+    line: "^{{ item.value.users_home | default(users_basedir + '/' + item.key) }} {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    state: absent
   tags:
     - users-update
+    - users-chroot
 
-- name: "Unmount {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
-  command: "umount -l {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+# /users/$USER
+- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}  >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_mount
+  changed_when: '"PRESENT" in users_chroot_mount.stdout'
+  tags:
+    - users-update
+    - users-chroot
+
+- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }} unmounted"
+  command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ item.key }}"
   args:
     warn: false
   ignore_errors: true
@@ -86,13 +126,24 @@
   when: '"PRESENT" in users_chroot_mount.stdout'
   tags:
     - users-update
+    - users-chroot
 
-- name: "Directory {{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }} absent"
-  file:
-    path: "{{ chroot_users_dir | default('/chroot-users') }}/{{ item.key }}"
+- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }} absent from /etc/fstab"
+  lineinfile:
+    path: /etc/fstab
+    line: "^{{ chroot_dir | default('/chroot') }} {{ chroot_users_dir | default('/users') }}/{{ item.key }}"
     state: absent
   tags:
     - users-update
+    - users-chroot
+
+- name: "Directory {{ chroot_users_dir | default('/users') }}/{{ item.key }} absent"
+  file:
+    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
+    state: absent
+  tags:
+    - users-update
+    - users-chroot
 
 - name: "Directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} absent"
   file:
@@ -100,6 +151,7 @@
     state: absent
   tags:
     - users-update
+    - users-chroot
 
 - name: "Mount script at /etc/fstab.d/{{ item.key }} absent"
   file:
@@ -107,4 +159,5 @@
     state: absent
   tags:
     - users-update
+    - users-chroot
 ...

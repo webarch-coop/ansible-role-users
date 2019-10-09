@@ -75,13 +75,21 @@
     msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh"
     verbosity: 1
 
-- name: "SSH private directories present for {{ item.key }}"
+- name: "Private directories present for {{ item.key }}"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh"
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ dir }}"
     state: directory
     owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0700
+  loop:
+    - backups
+    - bin
+    - private
+    - tmp
+    - .ssh
+  loop_control:
+    loop_var: dir
   tags:
     - users-ssh
     - users-update
@@ -98,7 +106,7 @@
     src: "files/{{ item.value.users_editor }}/selected_editor"
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.selected_editor"
     owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0644
   when: item.value.users_editor is defined and item.value.users_editor != ""
   tags:
@@ -109,7 +117,7 @@
     src: "files/vim/vimrc"
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.vimrc"
     owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0644
   when: item.value.users_editor is defined and item.value.users_editor == 'vim'
   tags:
@@ -134,7 +142,7 @@
     src: templates/gitconfig.j2
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.gitconfig"
     owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    group: "{{ item.value.users_group | default(item.key) }}"
     mode: 0644
   when: ( item.value.users_name is defined and item.value.users_name != "" ) and ( item.value.users_email is defined and item.value.users_email != "" )
   tags:
