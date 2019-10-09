@@ -44,15 +44,15 @@
     - users-chroot
     - users-update
 
-- name: "Check if {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
   register: users_chroot_users_home_mount
   changed_when: '"ABSENT" in users_chroot_users_home_mount.stdout'
   tags:
     - users-update
     - users-chroot
 
-- name: "{{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
+- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
   file:
     path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
     owner: root
