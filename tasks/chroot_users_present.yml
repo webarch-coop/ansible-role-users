@@ -65,7 +65,7 @@
 #   tags:
 #     - users-chroot
 #     - users-update
-# 
+#
 # # This check and the following fail shouldn't be needed
 # - name: "Check that {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is present"
 #   stat:
@@ -74,7 +74,7 @@
 #   tags:
 #     - users-chroot
 #     - users-upate
-# 
+#
 # - name: "Fail if {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
 #   fail:
 #     msg: "The directory {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} doesn't exist"
@@ -82,8 +82,7 @@
 #   tags:
 #     - users-chroot
 #     - users-upate
-# 
-# 
+#
 # - name: "Mount point {{ chroot_users_dir | default('/users') }}/{{ item.key }} present"
 #   file:
 #     path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
@@ -131,7 +130,7 @@
 #   tags:
 #     - users-chroot
 #     - users-update
-# 
+#
 # - name: "Mount {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
 #   mount:
 #     src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
@@ -142,7 +141,7 @@
 #   tags:
 #     - users-chroot
 #     - users-update
-# 
+#
 # - name: "Mount /run/mysqld at {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld present"
 #   mount:
 #     src: /run/mysqld
@@ -153,7 +152,7 @@
 #   tags:
 #     - users-chroot
 #     - users-update
-# 
+#     #
 # - name: "Mount /run/chroot at {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot present"
 #   mount:
 #     src: "/run/chroot"
