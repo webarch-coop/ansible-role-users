@@ -17,6 +17,7 @@
 
     - name: "SHA 512 hash of passwd generated"
       command: "mkpasswd --method=sha-512 {{ users_passwd.stdout }}"
+      no_log: true
       register: users_passwd_hash
       tags:
         - users-update
