@@ -33,27 +33,36 @@
     - users-chroot
     - users-update
 
-- name: "Mount points for {{ item.key }} present"
+- name: "Mount point {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
   file:
-    path: "{{ dir.path }}"
-    owner: "{{ dir.owner }}"
-    group: "{{ dir.group }}"
-    mode: "{{ dir.mode }}"
+    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    owner: root
+    group: "{{ item.value.users_home_group | default(item.key) }}"
+    mode: "0750"
     state: directory
-  loop:
-    - path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-      owner: root
-      group: "{{ item.value.users_home_group | default(item.key) }}"
-      mode: "0750"
-    - path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
-      owner: root
-      group: root
-      mode: "0750"
-  loop_control:
-    loop_var: dir
   tags:
     - users-chroot
     - users-update
+
+- name: "Check if {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+  register: users_chroot_users_home_mount
+  changed_when: '"ABSENT" in users_chroot_users_home_mount.stdout'
+  tags:
+    - users-update
+    - users-chroot
+
+- name: "{{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
+  file:
+    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
+    owner: root
+    group: root
+    mode: "0750"
+    state: directory
+  when: '"ABSENT" in users_chroot_users_home_mount.stdout'
+  tags:
+    - users-update
+    - users-chroot
 
 - name: "Chroot directories mounted for {{ item.key }}"
   mount:
