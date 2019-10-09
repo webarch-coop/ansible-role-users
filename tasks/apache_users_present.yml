@@ -259,6 +259,7 @@
     wordpress_title: "{{ vhost.value.wordpress_title | default(vhost.value.users_apache_server_name) }}"
     wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(item.key) }}"
     wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(item.value.users_email) }}"
+    wordpress_notify: "{{ vhost.value.wordpress_notify | default(omit) }}"
     wordpress_notify_from: "{{ users_notify_from }}"
     wordpress_notify_reply_to: "{{ users_notify_reply_to }}"
     wordpress_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
@@ -277,6 +278,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
   tags:
     - users-update
+    - wordpress
 
 - name: Include Matomo role
   include_role:
@@ -307,6 +309,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
   tags:
     - users-update
+    - matomo
 
 - name: Include phpMyAdmin role
   include_role:
@@ -330,6 +333,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
   tags:
     - users-update
+    - phpmyadmin
 
 - name: Include daily scripts role
   include_tasks: users_daily_scripts.yml

@@ -1,10 +1,11 @@
 ---
+# Use ~/.ssh/.* files to assemble ~/.ssh/authorized_keys and leave a ~/.ssh/README.md to explain what happened
 - name: SSH public keys downloaded
   get_url:
     url: "{{ key_url }}"
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys_{{ key_idex }}"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys_{{ key_idex }}"
     owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    group: "{{ item.value.users_home_group | default(item.key) }}"
     mode: 0600
     force: true
   loop: "{{ item.value.users_ssh_public_keys }}"
@@ -15,15 +16,14 @@
     - users-ssh
     - users-update
 
-- name: cat all the authorized_keys_* public keys to ~/.ssh/.authorized_keys
-  shell: "for f in {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys ; chown {{ item.key }}:{{ item.key }} {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys ; chmod 600 {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys"
-  register: users_ssh_public_keys_content
+- name: cat all the ~/.authorized_keys_* public keys to ~/.ssh/.authorized_keys
+  shell: "for f in {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys_*; do cat ${f}; echo; done > {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys ; chown {{ item.key }}:{{ item.value.users_home_group | default(item.key) }} {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys ; chmod 600 {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys"
   changed_when: false
   tags:
     - users-ssh
     - users-update
 
-- name: Copy ~/.ssh/.authorized_keys to ~/ssh/authorized_keys if changed
+- name: Check ~/.ssh/.authorized_keys is valid and copy to ~/.ssh/authorized_keys if it is
   copy:
     src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys"
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys"
@@ -31,7 +31,7 @@
     force: false
     validate: ssh-keygen -lf %s
     owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    group: "{{ item.value.users_home_group | default(item.key) }}"
     mode: 0600
   ignore_errors: "{{ ansible_check_mode }}"
   tags:
@@ -39,8 +39,8 @@
     - users-update
 
 - name: SSH README.md in place
-  copy:
-    src: files/SSH_README.md
+  template:
+    src: templates/SSH_README.md.j2
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/README.md"
     owner: "{{ item.key }}"
     group: "{{ item.key }}"
@@ -48,14 +48,4 @@
   tags:
     - users-ssh
     - users-update
-
-# More work would be needed above before the Ansible authorized_key module could be used
-# - name: SSH public keys present
-#   authorized_key:
-#     user: "{{ item.key }}"
-#     state: present
-#     exclusive: false
-#     key: "{{ users_ssh_public_keys_content.stdout_lines }}"
-#   tags:
-#     - users-update
 ...
