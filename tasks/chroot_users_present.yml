@@ -35,10 +35,10 @@
 
 - name: "Mount points for {{ item.key }} present"
   file:
-    path: "{{ dir:path }}"
-    owner: "{{ dir:owner }}"
-    group: "{{ dir:group }}"
-    mode: "{{ dir:mode }}"
+    path: "{{ dir.path }}"
+    owner: "{{ dir.owner }}"
+    group: "{{ dir.group }}"
+    mode: "{{ dir.mode }}"
     state: directory
   loop:
     - path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
@@ -98,7 +98,7 @@
   mount:
     src: "{{ mnt.src }}"
     path: "{{ mnt.path }}"
-    opts: "{{ mnt:opts }}"
+    opts: "{{ mnt.opts }}"
     fstype: ext4
     state: mounted
   loop:
