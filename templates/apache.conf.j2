@@ -46,6 +46,9 @@
 {% if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"
 {% endif %}
+{% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
+  IncludeOptional /etc/apache2/conf-available/robots-deny.conf
+{% endif %}
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
@@ -90,12 +93,9 @@
 {% endif %}
     Require all granted
 {%if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
-  IncludeOptional /etc/apache/conf-available/expires-medium.conf
+  IncludeOptional /etc/apache2/conf-available/expires-medium.conf
 {%elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
-  IncludeOptional /etc/apache/conf-available/expires-strict.conf
-{% endif %}
-{% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
-  IncludeOptional /etc/apache/conf-available/robots-deny.conf
+  IncludeOptional /etc/apache2/conf-available/expires-strict.conf
 {% endif %}
   </Directory>
   CustomLog /var/log/apache2/{{ item.key }}_access.log bandwidth
