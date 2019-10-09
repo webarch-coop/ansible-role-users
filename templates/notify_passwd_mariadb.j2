@@ -19,7 +19,7 @@ Note that there is no direct external access to the database.
 {% if phpmyadmin_user is defined and phpmyadmin_domain is defined and phpmyadmin_path is defined %}
 The {{ inventory_hostname }} server has phpMyAdmin installed,
 you can use this web interface to the database at this URL with the
- username and password provided above:
+username and password provided above:
 
   URL:          https://{{ phpmyadmin_domain }}{{ phpmyadmin_path }}
 {% endif %}
