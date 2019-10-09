@@ -114,33 +114,6 @@
     - apache
     - users-update
 
-- name: "Deny robots.txt in place for {{ item.key }}"
-  template:
-    src: templates/robots.txt.j2
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/robots.txt"
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
-    mode: 0644
-  when: ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-  tags:
-    - apache
-    - users-update
-
-- name: "Deny robots.txt absent for {{ item.key }}"
-  file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/robots.txt"
-    state: absent
-  when: ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "absent" )
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-  tags:
-    - apache
-    - users-update
-
 - name: "Check that the SSL cert for {{ item.key }}.{{ inventory_hostname }} is present"
   stat:
     path: "{{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.cert.pem"
