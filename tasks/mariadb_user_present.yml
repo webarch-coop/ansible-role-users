@@ -6,6 +6,7 @@
   tags:
     - users-update
     - users-mariadb
+    - phpmyadmin
 
 - block:
 
@@ -16,6 +17,7 @@
       tags:
         - users-update
         - users-mariadb
+        - phpmyadmin
 
     - name: Set a fact for the mariadb_password
       set_fact:
@@ -24,6 +26,7 @@
       tags:
         - users-update
         - users-mariadb
+        - phpmyadmin
 
   when: users_mycnf.stat.exists == False
 
@@ -38,6 +41,7 @@
       tags:
         - users-update
         - users-mariadb
+        - phpmyadmin
 
     - name: Set a fact for the mariadb_password
       set_fact:
@@ -46,6 +50,7 @@
       tags:
         - users-update
         - users-mariadb
+        - phpmyadmin
 
   when: users_mycnf.stat.exists == True
 
@@ -56,6 +61,7 @@
   tags:
     - users-update
     - users-mariadb
+    - phpmyadmin
 
 - name: "mariadb_password written to {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
   template:
