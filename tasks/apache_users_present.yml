@@ -11,7 +11,7 @@
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-  when: ( users_cert is defined ) and ( users_cert == "vhost" )
+  when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
   tags:
     - apache
     - users-update
@@ -25,6 +25,7 @@
         common_name: "{{ item.key }}.{{ inventory_hostname }}"
         subject_alt_names: []
         reloadcmd: "service apache2 reload"
+      check_mode: true
       tags:
         - apache
         - users-update
@@ -33,6 +34,7 @@
     - name: Set fact for subjectAltNames
       set_fact:
         subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
+      check_mode: true
       loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -61,6 +63,7 @@
       include_role:
         name: acmesh
         tasks_from: letsencrypt
+      when: ansible_check_mode == False
       tags:
         - apache
         - users-update
