@@ -139,6 +139,14 @@
         - users-chroot
         - users-update
 
+    - name: Crontab absent for users
+      include_tasks: crontab_users_absent.yml
+      loop: "{{ users | dict2items }}"
+      tags:
+        - users-update
+        - users-cron
+        - users-scripts
+
     - name: Chroot users absent
       block:
 
@@ -308,6 +316,19 @@
       when: ( item.value.users_notify_passwd is defined ) and ( item.value.users_notify_passwd == True ) and ( item.value.users_email is defined ) and ( item.value.users_email != "" )
       tags:
         - users-update
+
+    - name: Crontab present for users
+      include_tasks: crontab_users_present.yml
+      loop: "{{ users | dict2items }}"
+      when:
+        - item.key != "root"
+        - ( item.value.users_groups is defined ) and ( "sudo" not in item.value.users_groups )
+        - ( users_crontab is not defined ) or ( users_crontab == True )
+        - ( users_cron is not defined ) or ( users_cron == True )
+      tags:
+        - users-update
+        - users-cron
+        - users-scripts
 
   when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
 
@@ -531,33 +552,6 @@
   when:
     - '"apache2" in ansible_facts.packages'
     - ( users_apache is not defined ) or ( users_apache == True )
-
-- name: Cron for user accounts
-  block:
-
-    - name: Crontab absent for users
-      include_tasks: crontab_users_absent.yml
-      loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( users_crontab is defined and users_crontab == False )
-      tags:
-        - users-update
-        - users-cron
-        - users-scripts
-
-    - name: Crontab present for users
-      include_tasks: crontab_users_present.yml
-      loop: "{{ users | dict2items }}"
-      when:
-        - item.key != "root"
-        - ( item.value.users_groups is defined ) and ( "sudo" not in item.value.users_groups )
-        - ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
-        - ( users_crontab is not defined ) or ( users_crontab == True )
-      tags:
-        - users-update
-        - users-cron
-        - users-scripts
-
-  when: ( users_cron is not defined ) or ( users_cron == True )
 
 - name: Firewall tasks included
   include_tasks: firewall.yml
