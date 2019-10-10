@@ -73,6 +73,7 @@
 - name: "The databases that {{ item.key }} has access to"
   command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
   changed_when: false
+  check_mode: false
   register: users_mariadb_list
   tags:
     - users-update
