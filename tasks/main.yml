@@ -214,6 +214,7 @@
         path: "{{ quota_dir }}/quota_user.csv"
         state: touch
         access_time: preserve
+      check_mode: false
       tags:
         - users-update
         - users-quota
@@ -221,6 +222,7 @@
     - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
       command: "md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_before
+      check_mode: false
       changed_when: false
       when: quota_dir is defined
       tags:
@@ -230,6 +232,7 @@
     - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
       shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_after
+      check_mode: false
       changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
       tags:
         - users-update
@@ -239,6 +242,7 @@
       fetch:
         src: "{{ quota_dir }}/quota_user.csv"
         dest: /tmp/
+      check_mode: false
       tags:
         - users-update
         - users-quota
@@ -296,6 +300,7 @@
       when: ( quota_dir is defined ) and ( item.value.users_quota is defined ) and ( item.value.users_quota != "" )
       tags:
         - users-update
+        - users-quota
 
     - name: Set passwds and notify users
       include_tasks: notify_passwd.yml
@@ -312,17 +317,21 @@
     - name: "Updated users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
       shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_after
+      check_mode: false
       changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
       tags:
         - users-update
+        - users-quota
 
     - name: Updated users quotas fetched
       fetch:
         src: "{{ quota_dir }}/quota_user.csv"
         dest: /tmp/
+      check_mode: false
       when: users_repquota_md5sum_after.changed
       tags:
         - users-update
+        - users-quota
 
   when: quota_dir is defined
 
