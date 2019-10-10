@@ -125,7 +125,7 @@
     - users-chroot
     - users-cron
 
-- name: Users absent
+- name: Users absent loops
   block:
 
     - name: Slay any processes running as the user
@@ -246,7 +246,7 @@
   tags:
     - users-update
 
-- name: Users present
+- name: Users present loops
   block:
 
     - name: User group present

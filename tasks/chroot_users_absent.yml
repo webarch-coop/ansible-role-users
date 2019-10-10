@@ -20,6 +20,7 @@
 # /run/chroot
 - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot is mounted"
   shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot >/dev/null && echo PRESENT || echo ABSENT"
+  check_mode: false
   register: users_chroot_run_chroot_mount
   changed_when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
   tags:
@@ -50,6 +51,7 @@
 # /run/mysql
 - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld is mounted"
   shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
+  check_mode: false
   register: users_chroot_mysqld_mount
   changed_when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
   tags:
@@ -80,6 +82,7 @@
 # /users/$USER/home/$USER
 - name: "Check if {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
   shell: "findmnt {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+  check_mode: false
   register: users_chroot_users_home_mount
   changed_when: '"PRESENT" in users_chroot_users_home_mount.stdout'
   tags:
@@ -110,6 +113,7 @@
 # /users/$USER
 - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }} is mounted"
   shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}  >/dev/null && echo PRESENT || echo ABSENT"
+  check_mode: false
   register: users_chroot_mount
   changed_when: '"PRESENT" in users_chroot_mount.stdout'
   tags:
