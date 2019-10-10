@@ -76,7 +76,7 @@
     - matomo
     - phpmyadmin
 
-- name: PHP FPM tasks
+- name: PHP FPM checks
   block:
 
     - name: Check if php-fpm is installed
@@ -124,49 +124,6 @@
     - users-update
     - users-chroot
     - users-cron
-
-- name: Skel profiles included
-  include_tasks: "skel_{{ users_skeleton }}.yml"
-  loop:
-    - www
-  loop_control:
-    loop_var: users_skeleton
-  when: ( users_skell is not defined ) or ( users_skell == True )
-
-- name: Quota tasks
-  block:
-
-    - name: "Touch {{ quota_dir }}/quota_user.csv"
-      file:
-        path: "{{ quota_dir }}/quota_user.csv"
-        state: touch
-        access_time: preserve
-      tags:
-        - users-update
-
-    - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
-      command: "md5sum {{ quota_dir }}/quota_user.csv"
-      register: users_repquota_md5sum_before
-      changed_when: false
-      when: quota_dir is defined
-      tags:
-        - users-update
-
-    - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
-      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
-      register: users_repquota_md5sum_after
-      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
-      tags:
-        - users-update
-
-    - name: Users quotas fetched
-      fetch:
-        src: "{{ quota_dir }}/quota_user.csv"
-        dest: /tmp/
-      tags:
-        - users-update
-
-  when: quota_dir is defined
 
 - name: Users absent
   block:
@@ -236,6 +193,49 @@
         - users-update
 
   when: item.value.users_state is defined and item.value.users_state == "absent"
+
+- name: Skel profiles included
+  include_tasks: "skel_{{ users_skeleton }}.yml"
+  loop:
+    - www
+  loop_control:
+    loop_var: users_skeleton
+  when: ( users_skell is not defined ) or ( users_skell == True )
+
+- name: Quota tasks
+  block:
+
+    - name: "Touch {{ quota_dir }}/quota_user.csv"
+      file:
+        path: "{{ quota_dir }}/quota_user.csv"
+        state: touch
+        access_time: preserve
+      tags:
+        - users-update
+
+    - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
+      command: "md5sum {{ quota_dir }}/quota_user.csv"
+      register: users_repquota_md5sum_before
+      changed_when: false
+      when: quota_dir is defined
+      tags:
+        - users-update
+
+    - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+      register: users_repquota_md5sum_after
+      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+      tags:
+        - users-update
+
+    - name: Users quotas fetched
+      fetch:
+        src: "{{ quota_dir }}/quota_user.csv"
+        dest: /tmp/
+      tags:
+        - users-update
+
+  when: quota_dir is defined
 
 - name: User groups present
   include_tasks: groups.yml
