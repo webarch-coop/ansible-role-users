@@ -359,7 +359,7 @@
       tags:
         - users-update
 
-  when: users_forward is defined
+  when: ( users_forward is defined ) and ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
 
 - name: Create a .muttrc for each user if it doesn't exist
   template:
