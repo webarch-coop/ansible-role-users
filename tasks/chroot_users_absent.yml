@@ -156,12 +156,4 @@
   tags:
     - users-update
     - users-chroot
-
-- name: "Mount script at /etc/fstab.d/{{ item.key }} absent"
-  file:
-    path: "/etc/fstab.d/{{ item.key }}"
-    state: absent
-  tags:
-    - users-update
-    - users-chroot
 ...
