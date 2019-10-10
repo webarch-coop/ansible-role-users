@@ -160,6 +160,7 @@
   shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
   no_log: true
   register: users_mariadb_password_read
+  check_mode: false
   changed_when: false
   tags:
     - users-update
