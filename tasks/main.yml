@@ -476,7 +476,7 @@
             - name: Matomo accounts for users absent
               include_tasks: matomo_users_absent.yml
               loop: "{{ users | dict2items }}"
-              when: ( matomo_user is defined ) and ( item.value.users_state is defined ) and ( item.value.users_state == "absent" )
+              when: (users_matomo_delete_users is defined and users_matomo_delete_users == True ) and ( item.value.users_state is defined ) and ( item.value.users_state == "absent" )
               tags:
                 - matomo
                 - users-update
