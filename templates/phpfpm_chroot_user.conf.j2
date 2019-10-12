@@ -2,7 +2,7 @@
 [{{ item.key }}]
 ;prefix = {{ chroot_users_dir | default('/users') }}/{{ item.key }}
 user = {{ item.key }} 
-group = {{ item.key }}
+group = {{ item.value.users_group | default(item.key) }}
 chroot = {{ chroot_users_dir | default('/users') }}/{{ item.key }}
 listen = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
 ;listen = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
@@ -35,7 +35,7 @@ pm.max_spare_servers = {{ item.value.users_phpfpm_pm_max_spare_servers | default
 {% endif %}
 pm.process_idle_timeout = 10s;
 pm.max_requests = 1000
-;pm.status_path = /status
+pm.status_path = /phpfpm-{{ item.key }}-status
 ;ping.path = /ping
 
 php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/fpm-php.error.log
