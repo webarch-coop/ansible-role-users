@@ -22,6 +22,32 @@
     - users-update
     - apache
 
+- name: "Certcheck crontab for {{ item.key }} absent"
+  cron:
+    name: "Cert check for {{ item.key }}.{{ ansible_hostname }}"
+    job: "ssl-cert-check -qac {{ le_dir }}/{{ item.key }}.{{ ansible_hostname }}.cert.pem -e 'root@localhost'"
+    state: absent
+  tags:
+    - users-update
+    - apache
+    - letsencrypt
+
+- name: "Keys and certs for {{ item.key }}.{{ ansible_hostname }} absent"
+  file:
+    path: "{{ path }}"
+    state: absent
+  loop:
+    - "/root/.acme.sh/{{ item.key }}.{{ ansible_hostname }}_ecc"
+    - "/etc/ssl/le/{{ item.key }}.{{ ansible_hostname }}.cert.pem"
+    - "/etc/ssl/le/{{ item.key }}.{{ ansible_hostname }}.fullchain.pem"
+    - "/etc/ssl/le/{{ item.key }}.{{ ansible_hostname }}.key.pem"
+  loop_control:
+    loop_var: path
+  tags:
+    - users-update
+    - apache
+    - letsencrypt
+
 # There is no Matomo site:delete command yet, when there is this should be added here
 # https://github.com/digitalist-se/extratools/issues/7
 ...
