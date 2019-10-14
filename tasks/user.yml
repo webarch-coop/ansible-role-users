@@ -101,7 +101,7 @@
     - users-ssh
     - users-update
 
-- name: "Generate SSH ECDSA keypair for {{ item.key }}" 
+- name: "Generate SSH ECDSA keypair for {{ item.key }}"
   command: ssh-keygen -q -t ed25519 -f "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519" -q -N "" -C "root@{{ ansible_fqdn }}"
   args:
     creates: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519"
