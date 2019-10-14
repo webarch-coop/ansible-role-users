@@ -94,14 +94,24 @@
     - users-ssh
     - users-update
 
-- name: Users SSH public keys present
+- name: "SSH public keys present for {{ item.key }}"
   include_tasks: ssh.yml
   when: ( item.value.users_ssh_public_keys is defined ) and ( item.value.users_ssh_public_keys != [] )
   tags:
     - users-ssh
     - users-update
 
-- name: Set default editor
+- name: "Generate SSH ECDSA keypair for {{ item.key }}" 
+  command: ssh-keygen -q -t ed25519 -f "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519" -q -N "" -C "root@{{ ansible_fqdn }}"
+  becone: true
+  become_user: "{{ item.key }}"
+  creates: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519"
+  when: ( item.value.users_generate_ssh_key is defined ) and ( item.value.users_generate_ssh_key == True )
+  tags:
+    - users-ssh
+    - users-update
+
+- name: "Set default editor for {{ item.key }}"
   copy:
     src: "files/{{ item.value.users_editor }}/selected_editor"
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.selected_editor"
@@ -112,7 +122,7 @@
   tags:
     - users-update
 
-- name: .vimrc in place
+- name: ".vimrc in place for {{ item.key }}"
   copy:
     src: "files/vim/vimrc"
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.vimrc"
@@ -125,9 +135,10 @@
 
 - debug:
     msg: "bashrc: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.bashrc"
+    verbosity: 1
   when: item.value.users_editor is defined and item.value.users_editor == 'vim'
 
-- name: vim set to be default editor
+- name: "vim set to be default editor for {{ item.key }}"
   lineinfile:
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.bashrc"
     line: 'export EDITOR="vim"'
@@ -137,7 +148,7 @@
   tags:
     - users-update
 
-- name: .gitconfig in place
+- name: ".gitconfig in place for {{ item.key }}"
   template:
     src: templates/gitconfig.j2
     dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.gitconfig"
