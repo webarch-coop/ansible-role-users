@@ -5,10 +5,10 @@
     line: "{{ mount }}"
     state: absent
   loop:
-    - "^/run/chroot {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot"
-    - "^/run/mysqld {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld"
-    - "^{{ item.value.users_home | default(users_basedir + '/' + item.key) }} {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-    - "^{{ chroot_dir | default('/chroot') }} {{ chroot_users_dir | default('/users') }}/{{ item.key }}"
+    - "/run/chroot {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot ext4 "
+    - "/run/mysqld {{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld ext4 "
+    - "{{ item.value.users_home | default(users_basedir + '/' + item.key) }} {{ chroot_users_dir | default('/users') }}{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} ext4 "
+    - "{{ chroot_dir | default('/chroot') }} {{ chroot_users_dir | default('/users') }}/{{ item.key }} ext4 "
   loop_control:
     loop_var: mount
   tags:
