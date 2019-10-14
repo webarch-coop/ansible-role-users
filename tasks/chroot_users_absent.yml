@@ -120,4 +120,9 @@
   tags:
     - users-update
     - users-chroot
+
+- name: "Remove {{ item.key }} from /etc/fstab"
+  include_tasks: chroot_users_absent_fstab.yml
+  tags:
+    - users-update
 ...

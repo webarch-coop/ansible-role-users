@@ -24,6 +24,7 @@
     - users-mariadb
     - users-scripts
     - users-quota
+    - users-fstab
     - wordpress
     - matomo
     - phpmyadmin
@@ -41,6 +42,7 @@
     - users-mariadb
     - users-scripts
     - users-quota
+    - users-fstab
     - wordpress
     - matomo
     - phpmyadmin
@@ -58,6 +60,7 @@
     - users-mariadb
     - users-scripts
     - users-quota
+    - users-fstab
     - wordpress
     - matomo
     - phpmyadmin
@@ -76,6 +79,7 @@
     - users-mariadb
     - users-scripts
     - users-quota
+    - users-fstab
     - wordpress
     - matomo
     - phpmyadmin
@@ -128,6 +132,7 @@
     - users-update
     - users-chroot
     - users-cron
+    - users-fstab
 
 - name: Users absent loops
   block:
@@ -157,6 +162,7 @@
           tags:
             - users-chroot
             - users-update
+            - users-fstab
 
       when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 

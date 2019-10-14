@@ -14,4 +14,5 @@
   tags:
     - users-update
     - users-chroot
+    - users-fstab
 ...
