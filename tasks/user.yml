@@ -103,7 +103,7 @@
 
 - name: "Generate SSH ECDSA keypair for {{ item.key }}" 
   command: ssh-keygen -q -t ed25519 -f "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519" -q -N "" -C "root@{{ ansible_fqdn }}"
-  becone: true
+  become: true
   become_user: "{{ item.key }}"
   creates: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519"
   when: ( item.value.users_generate_ssh_key is defined ) and ( item.value.users_generate_ssh_key == True )
