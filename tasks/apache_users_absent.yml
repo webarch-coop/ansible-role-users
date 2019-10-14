@@ -41,6 +41,7 @@
     - "/etc/ssl/le/{{ item.key }}.{{ ansible_fqdn }}.cert.pem"
     - "/etc/ssl/le/{{ item.key }}.{{ ansible_fqdn }}.fullchain.pem"
     - "/etc/ssl/le/{{ item.key }}.{{ ansible_fqdn }}.key.pem"
+    - "/etc/ssl/le/{{ item.key }}.{{ ansible_fqdn }}.ca.pem"
   loop_control:
     loop_var: path
   tags:
