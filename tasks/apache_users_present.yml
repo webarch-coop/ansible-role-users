@@ -106,6 +106,17 @@
     - apache
     - users-update
 
+- name: HTTP Authentication
+  include_tasks: htauth.yml
+  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+  when: ( vhost.value.users_http_authentication is defined ) and ( vhost.value.users_http_authentication != [] )
+  tags:
+    - apache
+    - users-update
+    - users-htauth
+
 - name: "Apache log directory {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs present"
   file:
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs"

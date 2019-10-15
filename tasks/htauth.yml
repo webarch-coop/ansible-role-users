@@ -1,0 +1,26 @@
+---
+- name: Debug vhost
+  debug:
+    msg:
+      - "vhost.key: {{ vhost.key }}" 
+      - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
+    verbosity: 1
+  tags:
+  - apache
+  - users-update
+  - users-htauth
+
+- name: Debug users_http_authentication loop
+  debug:
+    msg:
+      - "htauth.name: {{ htauth.name }}"
+      - "htauth.password: {{ htauth.password }}"
+    verbosity: 1
+  loop: "{{ vhost.value.users_http_authentication }}"
+  loop_control:
+    loop_var: htauth
+  tags:
+  - apache
+  - users-update
+  - users-htauth
+...
