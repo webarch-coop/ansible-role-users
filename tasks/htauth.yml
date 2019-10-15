@@ -2,6 +2,7 @@
 - name: Debug vhost
   debug:
     msg:
+      - "item.value.users.home: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
       - "vhost.key: {{ vhost.key }}" 
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
     verbosity: 1
