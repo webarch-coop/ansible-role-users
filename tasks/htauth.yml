@@ -3,40 +3,40 @@
   debug:
     msg:
       - "item.value.users.home: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-      - "vhost.key: {{ vhost.key }}" 
+      - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
     verbosity: 1
   tags:
-  - apache
-  - users-update
-  - users-htauth
+    - apache
+    - users-update
+    - users-htauth
 
 - name: Debug users_http_authentication loop
   debug:
     msg:
       - "htauth.name: {{ htauth.name }}"
       - "htauth.password: {{ htauth.password | default(omit) }}"
-      - "htauth.state: {{ htauth.state | default(present) }}"
+      - "htauth.state: {{ htauth.state | default("present") }}"
     verbosity: 1
   loop: "{{ vhost.value.users_http_authentication }}"
   loop_control:
     loop_var: htauth
   tags:
-  - apache
-  - users-update
-  - users-htauth
+    - apache
+    - users-update
+    - users-htauth
 
 - name: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd directory present"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd" 
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd"
     state: directory
     owner: www-data
     group: "{{ item.value.users_group | default(item.key) }}"
     mode: "0750"
   tags:
-  - apache
-  - users-update
-  - users-htauth
+    - apache
+    - users-update
+    - users-htauth
 
 - name: "HTTP Authentication usernames and passwords absent for {{ vhost.value.users_apache_server_name }}"
   htpasswd:
@@ -51,9 +51,9 @@
   loop_control:
     loop_var: htauth
   tags:
-  - apache
-  - users-update
-  - users-htauth
+    - apache
+    - users-update
+    - users-htauth
 
 - name: "HTTP Authentication usernames and passwords present for {{ vhost.value.users_apache_server_name }}"
   htpasswd:
@@ -69,7 +69,7 @@
   loop_control:
     loop_var: htauth
   tags:
-  - apache
-  - users-update
-  - users-htauth
+    - apache
+    - users-update
+    - users-htauth
 ...
