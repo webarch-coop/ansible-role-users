@@ -38,29 +38,29 @@
     - users-update
     - users-htauth
 
-- name: "HTTP Authentication usernames and passwords absent for {{ vhost.value.users_apache_server_name }}"
-  htpasswd:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost.value.users_apache_server_name }}"
-    name: "{{ htauth.name }}"
-    state: absent
-    owner: www-data
-    group: "{{ item.value.users_group | default(item.key) }}"
-    mode: "0640"
-  when: ( htauth.password is not defined or htauth.password == "" ) or ( htauth.state is defined or htauth.state == "absent" )
-  loop: "{{ vhost.value.users_http_authentication }}"
-  loop_control:
-    loop_var: htauth
-  tags:
-    - apache
-    - users-update
-    - users-htauth
+#- name: "HTTP Authentication usernames and passwords absent for {{ vhost.value.users_apache_server_name }}"
+#  htpasswd:
+#    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost.value.users_apache_server_name }}"
+#    name: "{{ htauth.name }}"
+#    state: absent
+#    owner: www-data
+#    group: "{{ item.value.users_group | default(item.key) }}"
+#    mode: "0640"
+#  when: ( htauth.password is not defined or htauth.password == "" ) or ( htauth.state is defined or htauth.state == "absent" )
+#  loop: "{{ vhost.value.users_http_authentication }}"
+#  loop_control:
+#    loop_var: htauth
+#  tags:
+#    - apache
+#    - users-update
+#    - users-htauth
 
-- name: "HTTP Authentication usernames and passwords present for {{ vhost.value.users_apache_server_name }}"
+- name: "HTTP Authentication usernames and passwords for {{ vhost.value.users_apache_server_name }}"
   htpasswd:
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost.value.users_apache_server_name }}"
     name: "{{ htauth.name }}"
     password: "{{ htauth.password }}"
-    state: present
+    state: "{{ htauth.state | default('present') }}" 
     owner: www-data
     group: "{{ item.value.users_group | default(item.key) }}"
     mode: "0640"
