@@ -4,6 +4,7 @@
     pkg:
       - bc
       - mutt
+      - python-passlib
       - slay
       - vim
       - whois

@@ -1,0 +1,58 @@
+---
+- name: Debug vhost
+  debug:
+    msg:
+      - "item.value.users.home: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+      - "vhost.key: {{ vhost.key }}"
+      - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
+    verbosity: 1
+  tags:
+    - apache
+    - users-update
+    - users-htauth
+
+- name: Debug users_htauth_users loop
+  debug:
+    msg:
+      - "htauth.name: {{ htauth.name }}"
+      - "htauth.password: {{ htauth.password | default(omit) }}"
+      - "htauth.state: {{ htauth.state | default('present') }}"
+    verbosity: 1
+  loop: "{{ vhost.value.users_htauth_users }}"
+  loop_control:
+    loop_var: htauth
+  tags:
+    - apache
+    - users-update
+    - users-htauth
+
+- name: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd directory present"
+  file:
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd"
+    state: directory
+    owner: www-data
+    group: "{{ item.value.users_group | default(item.key) }}"
+    mode: "0750"
+  tags:
+    - apache
+    - users-update
+    - users-htauth
+
+- name: "HTTP Authentication usernames and passwords for {{ vhost.value.users_apache_server_name }}"
+  htpasswd:
+    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost.value.users_apache_server_name }}"
+    name: "{{ htauth.name }}"
+    password: "{{ htauth.password }}"
+    state: "{{ htauth.state | default('present') }}"
+    owner: www-data
+    group: "{{ item.value.users_group | default(item.key) }}"
+    mode: "0640"
+  when: ( htauth.password is defined and htauth.password != "" ) and ( htauth.state is not defined or htauth.state == "present" )
+  loop: "{{ vhost.value.users_htauth_users }}"
+  loop_control:
+    loop_var: htauth
+  tags:
+    - apache
+    - users-update
+    - users-htauth
+...
