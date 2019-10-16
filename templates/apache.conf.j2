@@ -91,7 +91,7 @@
     DirectoryIndex index.html index.shtml index.htm index.xhtml wsh.shtml
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 {% endif %}
-{% if vhost.value.users_http_authentication is defined and vhost.value.users_http_authentication != [] %}
+{% if vhost_config.value.users_http_authentication is defined and vhost_config.value.users_http_authentication != [] %}
     AuthName "Authorised Users"
     AuthType Basic
     AuthUserFile {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}
