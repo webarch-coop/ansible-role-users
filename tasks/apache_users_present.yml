@@ -91,7 +91,7 @@
     - apache
     - users-update
 
-- name: "Apache DocumentRoot present"
+- name: "Apache DocumentRoot(s) present for VitualServers for {{ item.key }}"
   file:
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
     state: directory
@@ -106,12 +106,12 @@
     - apache
     - users-update
 
-- name: HTTP Authentication
+- name: "HTTP Authentication htpasswd files present for {{ item.key }}"
   include_tasks: htauth.yml
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-  when: ( vhost.value.users_http_authentication is defined ) and ( vhost.value.users_http_authentication != [] )
+  when: ( vhost.value.users_htauth_users is defined ) and ( vhost.value.users_htauth_users != [] )
   tags:
     - apache
     - users-update
