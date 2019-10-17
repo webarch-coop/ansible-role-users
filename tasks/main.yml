@@ -275,7 +275,7 @@
         - users-update
         - users-quota
 
-  when: quota_dir is defined
+  when: ( users_quota is defined ) and ( users_quota == True ) and ( quota_dir is defined )
 
 - name: User groups present
   include_tasks: groups.yml
