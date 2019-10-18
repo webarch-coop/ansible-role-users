@@ -316,8 +316,8 @@
     phpmyadmin_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     phpmyadmin_html_upload_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
     phpmyadmin_html_save_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
-    phpmyadmin_htauth_user: "{{ vhost.value.users_htauth_users.value.name[0] | default(omit) }}"
-    phpmyadmin_htauth_pass: "{{ vhost.value.users_htauth_users.value.password[0] | default(omit) }}"
+    phpmyadmin_htauth_user: "{{ vhost.value.users_htauth_users.value[0].name | default(omit) }}"
+    phpmyadmin_htauth_pass: "{{ vhost.value.users_htauth_users.value[0].password | default(omit) }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
