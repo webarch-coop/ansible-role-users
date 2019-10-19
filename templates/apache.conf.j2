@@ -52,7 +52,12 @@
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+{% if vhost_config.users_apache_options is defined %}
+    Options {% for option in vhost_config.users_apache_options %}{{ option }}{% endfor %}
+
+{% else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+{% endif %}
     DirectoryIndex index.php index.html index.shtml index.htm index.xhtml wsh.shtml
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
