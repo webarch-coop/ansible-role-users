@@ -52,9 +52,27 @@
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-    DirectoryIndex index.php index.html index.shtml index.htm index.xhtml wsh.shtml
-    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
+{% if vhost_config.users_apache_options is defined %}
+    Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
+
+{% else %}
+    Options {% for option in users_apache_options %} {{ option }}{% endfor %}
+
+{% endif %}
+{% if vhost_config.users_apache_index is defined %}
+    DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
+
+{% else %}
+    DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
+
+{% endif %}
+{% if vhost_config.users_apache_override is defined %}
+    AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
+
+{% else %}
+    AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
+
+{% endif %}
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
     <IfModule proxy_fcgi_module>
       <IfModule setenvif_module>

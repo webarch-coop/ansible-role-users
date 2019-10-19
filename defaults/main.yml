@@ -33,6 +33,26 @@ users_forward: true
 users_muttrc: true
 users_sites_dir: sites
 users_cert: user
+users_apache_options:
+  - -Indexes
+  - +SymlinksIfOwnerMatch
+  - -MultiViews
+  - +IncludesNOEXEC
+  - -ExecCGI
+users_apache_index:
+  - index.php
+  - index.html
+  - index.shtml
+  - index.htm
+  - index.xhtml
+  - wsh.shtml
+users_apache_override:
+  - AuthConfig
+  - FileInfo
+  - Indexes
+  - Limit
+  - Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC
+  - Nonfatal=Override
 # https://www.php.net/manual/en/install.fpm.configuration.php#pm
 users_phpfpm_pm: dynamic
 users_phpfpm_pm_max_children: 3
