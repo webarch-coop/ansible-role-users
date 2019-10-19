@@ -56,19 +56,22 @@
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
 
 {% else %}
-    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+    Options {% for option in users_apache_options %} {{ option }}{% endfor %}
+
 {% endif %}
 {% if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
 
 {% else %}
-    DirectoryIndex index.php index.html index.shtml index.htm index.xhtml wsh.shtml
+    DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
+
 {% endif %}
 {% if vhost_config.users_apache_override is defined %}
-    AllowOverride{% for option in vhost_config.users_apache_override %}{{ option }}{% endfor %}
+    AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
 
 {% else %}
-    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
+    AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
+
 {% endif %}
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
     <IfModule proxy_fcgi_module>
