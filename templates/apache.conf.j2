@@ -49,30 +49,75 @@
 {% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
 {% endif %}
+
+{% if vhost_config.users_apache_htauth_locations is defined %}
+{% for loc in vhost_config.users_apache_htauth_locations %}
+  <Location {% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %} > 
+    AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
+    AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
+    AuthUserFile {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}
+{% if loc.require is defined %}
+{% for req in loc.require %}
+    Require {{ req }}
+{% endfor %}
+{% else %}     
+    Require valid-user
+{% endif %}
+  </Location>
+{% endfor %}
+{% endif %}
+
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-{% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
 {% if vhost_config.users_apache_options is defined %}
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
 
-{% else %}
+{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+
+{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
+
+{% elif users_apache_options is defined %}
     Options {% for option in users_apache_options %} {{ option }}{% endfor %}
+
+{% else %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
 
 {% endif %}
 {% if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
 
-{% else %}
+{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    DirectoryIndex index.php index.html index.htm index.shtml wsh.shtml
+
+{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    DirectoryIndex index.cgi index.pl index.html index.htm index.shtml wsh.shtml
+
+{% elif users_apache_index is defined %}
     DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
+
+{% else %}
+    DirectoryIndex index.html index.htm index.shtml wsh.shtml
 
 {% endif %}
 {% if vhost_config.users_apache_override is defined %}
     AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
 
-{% else %}
+{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
+
+{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
+
+{% elif users_apache_override  is defined %}
     AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
 
+{% else %}
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
+
 {% endif %}
+{% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
     <IfModule proxy_fcgi_module>
       <IfModule setenvif_module>
@@ -91,9 +136,6 @@
       </FilesMatch>
     </IfModule>
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-    DirectoryIndex index.html index.php index.shtml index.xhtml index.cgi index.pl index.htm wsh.shtml
-    AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
     <IfModule fcgid_module>
       <IfModule mime_module>
         <FilesMatch "[^.]+\.cgi$">
@@ -104,23 +146,8 @@
         </FilesMatch>
       </IfModule>
     </IfModule>
-{% else %}
-    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-    DirectoryIndex index.html index.shtml index.htm index.xhtml wsh.shtml
-    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 {% endif %}
-{% if vhost_config.users_htauth_users is defined and vhost_config.users_htauth_users != [] %}
-{% if vhost_config.users_htauth_name is defined %}
-    AuthName "{{ vhost_config.users_htauth_name }}"
-{% else %}
-    AuthName "Authorised Users Only"
-{% endif %}
-    AuthType Basic
-    AuthUserFile {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}
-    Require valid-user
-{% else %}
     Require all granted
-{% endif %}
 {%if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
   IncludeOptional /etc/apache2/conf-available/expires-medium.conf
 {%elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
