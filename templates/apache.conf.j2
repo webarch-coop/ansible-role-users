@@ -72,51 +72,36 @@
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {% if vhost_config.users_apache_options is defined %}
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
-
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-
 {% elif users_apache_options is defined %}
     Options {% for option in users_apache_options %} {{ option }}{% endfor %}
-
 {% else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-
 {% endif %}
 {% if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
-
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     DirectoryIndex index.php index.html index.htm index.shtml wsh.shtml
-
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     DirectoryIndex index.cgi index.pl index.html index.htm index.shtml wsh.shtml
-
 {% elif users_apache_index is defined %}
     DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
-
 {% else %}
     DirectoryIndex index.html index.htm index.shtml wsh.shtml
-
 {% endif %}
 {% if vhost_config.users_apache_override is defined %}
     AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
-
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
-
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
-
 {% elif users_apache_override  is defined %}
     AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
-
 {% else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
-
 {% endif %}
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
