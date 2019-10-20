@@ -49,6 +49,18 @@
 {% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
 {% endif %}
+{ if vhost_config.users_apache_nophp_dirs is defined %}
+{% for dir in vhost_config.users_apache_nophp_dirs %}
+  # No PHP allow in this directory
+  <Directory "{{ dir }}">
+    <FilesMatch "\.php$">
+      <If "-f %{REQUEST_FILENAME}">
+        RemoveHandler .php
+      </If>
+    </FilesMatch>
+  </Directory>
+{% endfor %}
+{% endif %}
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
