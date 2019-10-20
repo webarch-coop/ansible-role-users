@@ -12,6 +12,7 @@
 # Set users_quota to true if the users_basedir is a partition with disk
 # quotas enabled
 users_quota: false
+#
 # Users home directories to be created as sub-directories of users_basedir
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root
@@ -33,9 +34,10 @@ users_forward: true
 users_muttrc: true
 users_sites_dir: sites
 users_cert: user
-# Define the three following arrays if you want to overide the 
-# users_apache_type of php, cgi or the default of static that
-# are set in the apache.conf.j2 template 
+#
+# Define one or more of the the three following arrays if you want to overide
+# the users_apache_type of php, cgi or the default of static that are set in
+# the apache.conf.j2 template:
 # users_apache_options:
 #   - -Indexes
 #   - +SymlinksIfOwnerMatch
@@ -55,12 +57,14 @@ users_cert: user
 #   - Limit
 #   - Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC
 #   - Nonfatal=Override
+#
 # https://www.php.net/manual/en/install.fpm.configuration.php#pm
 users_phpfpm_pm: dynamic
 users_phpfpm_pm_max_children: 3
 users_phpfpm_pm_start_servers: 2
 users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
+#
 users_cron_daily_hour: "05"
 users_cron_mysqldump_hour: "04"
 # Set users_cron_tmpdir_hour to false to disable deletion of users TMPDIR
