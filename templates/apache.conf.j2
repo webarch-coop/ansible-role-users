@@ -127,7 +127,7 @@
   IncludeOptional /etc/apache2/conf-available/expires-strict.conf
 {% endif %}
   </Directory>
-{ if vhost_config.users_apache_nophp_dirs is defined %}
+{% if vhost_config.users_apache_nophp_dirs is defined %}
 {% for dir in vhost_config.users_apache_nophp_dirs %}
   # No PHP allow in this directory
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
