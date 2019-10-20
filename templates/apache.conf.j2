@@ -56,6 +56,7 @@
     AuthUserFile {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}
     AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
+
 {% if loc.require is defined %}
 {% for req in loc.require %}
     Require {{ req }}
@@ -149,9 +150,9 @@
 {% endif %}
     Require all granted
 {%if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
-  IncludeOptional /etc/apache2/conf-available/expires-medium.conf
+    IncludeOptional /etc/apache2/conf-available/expires-medium.conf
 {%elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
-  IncludeOptional /etc/apache2/conf-available/expires-strict.conf
+    IncludeOptional /etc/apache2/conf-available/expires-strict.conf
 {% endif %}
   </Directory>
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
