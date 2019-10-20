@@ -14,7 +14,6 @@
 - name: Debug users_apache_htauth_users loop
   debug:
     msg:
-      - "htauth.location: {{ htauth.location }}"
       - "htauth.name: {{ htauth.name }}"
       - "htauth.password: {{ htauth.password | default(omit) }}"
       - "htauth.state: {{ htauth.state | default('present') }}"
