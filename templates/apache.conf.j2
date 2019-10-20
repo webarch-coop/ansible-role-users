@@ -12,6 +12,11 @@
 </VirtualHost>
 
 <VirtualHost *:443>
+  ServerName {{ vhost_config.users_apache_server_name }}
+{% if vhost_config.users_apache_server_aliases is defined %}
+  ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
+{% endif %}
+
 {% if apache_mods_enabled is defined and "suexec" in apache_mods_enabled %}
 <IfModule suexec_module>
   SuexecUserGroup {{ item.key }} {{ item.key }}
@@ -22,11 +27,6 @@
   AssignUserID {{ item.key }}
   MaxClientsVHost {{ apache_mpm_itk_max_clients_vhost | default('50') }}
 </IfModule>
-{% endif %}
-
-  ServerName {{ vhost_config.users_apache_server_name }}
-{% if vhost_config.users_apache_server_aliases is defined %}
-  ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
 {% endif %}
 
 {% if users_cert is defined %}
