@@ -81,6 +81,7 @@
 {% else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
 {% endif %}
+
 {% if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
@@ -92,6 +93,7 @@
 {% else %}
     DirectoryIndex index.html index.htm index.shtml wsh.shtml
 {% endif %}
+
 {% if vhost_config.users_apache_override is defined %}
     AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
 {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
@@ -103,6 +105,7 @@
 {% else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 {% endif %}
+
 {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
     <IfModule proxy_fcgi_module>
