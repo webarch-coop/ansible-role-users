@@ -38,14 +38,14 @@
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
-    {%- endif %}
+    {%- endif -%}
   {%- endif -%}
   {%- if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"
-  {%- endif %}
+  {%- endif -%}
   {%- if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
-  {% endif -%}
+  {%- endif -%}
   {%- if vhost_config.users_apache_htauth_locations is defined -%}
     {%- for loc in vhost_config.users_apache_htauth_locations %}
   <Location {% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %} > 
@@ -58,7 +58,7 @@
     Require valid-user
       {%- endif %}
   </Location>
-    {% endfor -%}
+    {%- endfor -%}
   {%- endif %}
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
