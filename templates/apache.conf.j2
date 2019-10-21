@@ -27,11 +27,11 @@
   {% endif -%}
   {% if users_cert is defined %}
   SSLEngine on
-    {% if users_cert == "user" %}
+    {%- if users_cert == "user" %}
   SSLCertificateFile            {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.ca.pem
-    {% endif %}
+    {% endif -%}
     {% if users_cert == "vhost" %}
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
