@@ -23,7 +23,10 @@ php_admin_value[session.save_path] = {{ item.value.users_home | default(users_ba
 php_admin_value[upload_tmp_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
 php_admin_value[sys_temp_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
 php_admin_value[soap.wsdl_cache_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
+php_admin_value[uploadprogress.file.contents_template] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp/upload_contents_%s
+php_admin_value[uploadprogress.file.filename_template] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp/upt_%s.txt
 php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ item.key }}@{{ inventory_hostname }}
+;php_admin_value[sendmail_from] = {{ item.key }}@{{ inventory_hostname }}
 php_admin_value[mail.log] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.mail.log
 
 pm = {{ item.value.users_phpfpm_pm | default('ondemand') }}
