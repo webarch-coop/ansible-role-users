@@ -8,7 +8,7 @@
   {% endif %}
   RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
 </VirtualHost>
-
+# {{ vhost }}
 <VirtualHost *:443>
   ServerName {{ vhost_config.users_apache_server_name -}}
   {% if vhost_config.users_apache_server_aliases is defined %}
@@ -36,41 +36,41 @@
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
-    {% endif %}
-  {% endif %}
+    {% endif -%}
+  {% endif -%}
   {% if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"
-  {% endif %}
+  {% endif -%}
   {% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
-  {% endif %}
-  {% if vhost_config.users_apache_htauth_locations is defined %}
+  {% endif -%}
+  {% if vhost_config.users_apache_htauth_locations is defined -%}
     {% for loc in vhost_config.users_apache_htauth_locations %}
   <Location {% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %} > 
     AuthUserFile {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}
     AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
-      {% if loc.require is defined %}{% for req in loc.require %}
+      {%- if loc.require is defined %}{% for req in loc.require %}
     Require {{ req }}
-      {% endfor %}{% else %}     
+      {%- endfor %}{% else %}     
     Require valid-user
-      {% endif %}
+      {%- endif %}
   </Location>
-    {% endfor %}
+    {% endfor -%}
   {% endif %}
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-  {% if vhost_config.users_apache_options is defined %}
+  {%- if vhost_config.users_apache_options is defined %}
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
-  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-  {% elif users_apache_options is defined %}
+  {%- elif users_apache_options is defined %}
     Options {% for option in users_apache_options %} {{ option }}{% endfor %}
-  {% else %}
+  {%- else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-  {% endif %}
+  {% endif -%}
   {% if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
   {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
