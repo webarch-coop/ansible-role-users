@@ -50,8 +50,8 @@
   {%- endif %}
   {%- if vhost_config.users_apache_htauth_locations is defined -%}
     {%- for loc in vhost_config.users_apache_htauth_locations %}
-  <Location {% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %} > 
-    AuthUserFile {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}
+  <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
+    AuthUserFile "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
     AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
       {%- if loc.require is defined %}{% for req in loc.require %}
@@ -105,11 +105,10 @@
       </IfModule>
       <FilesMatch "\.php$">
         <If "-f %{REQUEST_FILENAME}">
-    {%- if "chroot" not in item.value.users_groups %}
-          SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost/"
+    {%- if "chroot" in item.value.users_groups %}
+          SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost"
     {%- else %}
-          # SetHandler "proxy:unix:{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
-          SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
+          SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost"
     {%- endif %}
         </If>
       </FilesMatch>
@@ -128,9 +127,9 @@
   {%- endif %}
     Require all granted
   {%- if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
-    IncludeOptional /etc/apache2/conf-available/expires-medium.conf
+    IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
   {%- elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
-    IncludeOptional /etc/apache2/conf-available/expires-strict.conf
+    IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
   {%- endif %}
   </Directory>
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
