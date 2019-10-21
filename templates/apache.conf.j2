@@ -2,7 +2,8 @@
 
 {%- for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
 
-# {{ vhost }}
+# {{ vhost_config.users_apache_server_name }}
+# {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}
 <VirtualHost *:80>
   ServerName {{ vhost_config.users_apache_server_name }}
   {%- if vhost_config.users_apache_server_aliases is defined %}
@@ -10,7 +11,8 @@
   {%- endif %}
   RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
 </VirtualHost>
-# {{ vhost }}
+# {{ vhost_config.users_apache_server_name }}
+# {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}
 <VirtualHost *:443>
   ServerName {{ vhost_config.users_apache_server_name }}
   {%- if vhost_config.users_apache_server_aliases is defined %}
