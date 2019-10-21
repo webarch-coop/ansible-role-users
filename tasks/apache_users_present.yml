@@ -75,6 +75,8 @@
   template:
     src: templates/apache.conf.j2
     dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+    trim_blocks: false
+    lstrip_blocks: true
   tags:
     - apache
     - users-update
