@@ -3,7 +3,7 @@
 # {{ vhost }}
 <VirtualHost *:80>
   ServerName {{ vhost_config.users_apache_server_name }}
-  {% if vhost_config.users_apache_server_aliases is defined -%}
+  {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
   {%- endif %}
   RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
