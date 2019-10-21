@@ -1,112 +1,100 @@
 # Ansible provisioned
 {% for vhost,vhost_config in item.value.users_apache_virtual_hosts.items() %}
-
 # {{ vhost }}
 <VirtualHost *:80>
   ServerName {{ vhost_config.users_apache_server_name }}
-{% if vhost_config.users_apache_server_aliases is defined %}
+  {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
-{% endif %}
-
+  {% endif %}
   RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
 </VirtualHost>
 
 <VirtualHost *:443>
   ServerName {{ vhost_config.users_apache_server_name }}
-{% if vhost_config.users_apache_server_aliases is defined %}
+  {% if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
-{% endif %}
-
-{% if apache_mods_enabled is defined and "suexec" in apache_mods_enabled %}
-<IfModule suexec_module>
-  SuexecUserGroup {{ item.key }} {{ item.key }}
-</IfModule>
-{% endif %}
-{% if apache_mods_enabled is defined and "mpm_itk" in apache_mods_enabled %}
-<IfModule mpm_itk_module>
-  AssignUserID {{ item.key }}
-  MaxClientsVHost {{ apache_mpm_itk_max_clients_vhost | default('50') }}
-</IfModule>
-{% endif %}
-
-{% if users_cert is defined %}
+  {% endif %}
+  {% if apache_mods_enabled is defined and "suexec" in apache_mods_enabled %}
+  <IfModule suexec_module>
+    SuexecUserGroup {{ item.key }} {{ item.key }}
+  </IfModule>
+  {% endif %}
+  {% if apache_mods_enabled is defined and "mpm_itk" in apache_mods_enabled %}
+  <IfModule mpm_itk_module>
+    AssignUserID {{ item.key }}
+    MaxClientsVHost {{ apache_mpm_itk_max_clients_vhost | default('50') }}
+  </IfModule>
+  {% endif %}
+  {% if users_cert is defined %}
   SSLEngine on
-{% if users_cert == "user" %}
+    {% if users_cert == "user" %}
   SSLCertificateFile            {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.ca.pem
-{% endif %}
-{% if users_cert == "vhost" %}
+    {% endif %}
+    {% if users_cert == "vhost" %}
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
-{% endif %}
-{% endif %}
-
-{% if item.value.users_email is defined and item.value.users_email != "" %}
+    {% endif %}
+  {% endif %}
+  {% if item.value.users_email is defined and item.value.users_email != "" %}
   ServerAdmin "{{ item.value.users_email }}"
-{% endif %}
-{% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
+  {% endif %}
+  {% if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
-{% endif %}
-
-{% if vhost_config.users_apache_htauth_locations is defined %}
-{% for loc in vhost_config.users_apache_htauth_locations %}
+  {% endif %}
+  {% if vhost_config.users_apache_htauth_locations is defined %}
+    {% for loc in vhost_config.users_apache_htauth_locations %}
   <Location {% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %} > 
     AuthUserFile {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}
     AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
-
-{% if loc.require is defined %}
-{% for req in loc.require %}
+      {% if loc.require is defined %}{% for req in loc.require %}
     Require {{ req }}
-{% endfor %}
-{% else %}     
+      {% endfor %}{% else %}     
     Require valid-user
-{% endif %}
+      {% endif %}
   </Location>
-{% endfor %}
-{% endif %}
-
+    {% endfor %}
+  {% endif %}
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-{% if vhost_config.users_apache_options is defined %}
+  {% if vhost_config.users_apache_options is defined %}
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
-{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-{% elif users_apache_options is defined %}
+  {% elif users_apache_options is defined %}
     Options {% for option in users_apache_options %} {{ option }}{% endfor %}
-{% else %}
+  {% else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-{% endif %}
-
-{% if vhost_config.users_apache_index is defined %}
+  {% endif %}
+  {% if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
-{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     DirectoryIndex index.php index.html index.htm index.shtml wsh.shtml
-{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     DirectoryIndex index.cgi index.pl index.html index.htm index.shtml wsh.shtml
-{% elif users_apache_index is defined %}
+  {% elif users_apache_index is defined %}
     DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
-{% else %}
+  {% else %}
     DirectoryIndex index.html index.htm index.shtml wsh.shtml
-{% endif %}
-
-{% if vhost_config.users_apache_override is defined %}
+  {% endif %}
+  {% if vhost_config.users_apache_override is defined %}
     AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
-{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
-{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
-{% elif users_apache_override  is defined %}
+  {% elif users_apache_override  is defined %}
     AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
-{% else %}
+  {% else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
-{% endif %}
+  {% endif %}
 
-{% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+  {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
     <IfModule proxy_fcgi_module>
       <IfModule setenvif_module>
@@ -114,17 +102,16 @@
       </IfModule>
       <FilesMatch "\.php$">
         <If "-f %{REQUEST_FILENAME}">
-{% if "chroot" not in item.value.users_groups %}
+    {% if "chroot" not in item.value.users_groups %}
           SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost/"
-
-{% else %}
+    {% else %}
           # SetHandler "proxy:unix:{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
           SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock|fcgi://localhost/"
-{% endif %}
+    {% endif %}
         </If>
       </FilesMatch>
     </IfModule>
-{% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+  {% elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     <IfModule fcgid_module>
       <IfModule mime_module>
         <FilesMatch "[^.]+\.cgi$">
@@ -135,16 +122,16 @@
         </FilesMatch>
       </IfModule>
     </IfModule>
-{% endif %}
+  {% endif %}
     Require all granted
-{%if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
+  {%if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
     IncludeOptional /etc/apache2/conf-available/expires-medium.conf
-{%elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
+  {%elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
     IncludeOptional /etc/apache2/conf-available/expires-strict.conf
-{% endif %}
+  {% endif %}
   </Directory>
-{% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
-{% for dir in vhost_config.users_apache_nophp_dirs %}
+  {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
+    {% for dir in vhost_config.users_apache_nophp_dirs %}
   # No PHP allowed in this directory
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
     <FilesMatch "\.php$">
@@ -153,13 +140,12 @@
       </If>
     </FilesMatch>
   </Directory>
-{% endfor %}
-{% endif %}
+    {% endfor %}
+  {% endif %}
   CustomLog /var/log/apache2/{{ item.key }}_access.log bandwidth
   LogLevel error
   ErrorLog  {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/apache.error.log
   CustomLog {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/apache.access.log combinedio
 </VirtualHost>
 {% endfor %}
-
 # vim: set ft=apache:
