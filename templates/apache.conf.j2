@@ -102,7 +102,7 @@
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
   {%- endif %}
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-    {# https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
+    {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
     <IfModule proxy_fcgi_module>
       <IfModule setenvif_module>
         SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
@@ -154,4 +154,5 @@
   CustomLog {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/apache.access.log combinedio
 </VirtualHost>
 {%- endfor %}
+
 # vim: set ft=apache:
