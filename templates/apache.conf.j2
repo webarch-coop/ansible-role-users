@@ -51,7 +51,11 @@
   {%- if vhost_config.users_apache_htauth_locations is defined -%}
     {%- for loc in vhost_config.users_apache_htauth_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
+    {%- if loc.type is defined and loc.type == "None" %}
+    # No AuthUserFile for this Location
+    {%- else %}
     AuthUserFile "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+    {%- endif %}
     AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
       {%- if loc.require is defined %}{% for req in loc.require %}
@@ -98,7 +102,7 @@
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
   {%- endif %}
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-    # https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler
+    {# https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
     <IfModule proxy_fcgi_module>
       <IfModule setenvif_module>
         SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
