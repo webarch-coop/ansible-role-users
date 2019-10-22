@@ -49,7 +49,6 @@ users_cert: user
 #   - index.html
 #   - index.shtml
 #   - index.htm
-#   - wsh.shtml
 # users_apache_override:
 #   - AuthConfig
 #   - FileInfo
