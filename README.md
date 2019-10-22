@@ -147,7 +147,7 @@ One drawback with this is that you can't prepend a key with `key_options`, for e
 
 ### Options
 
-Server wide settings for `VirtualHosts` can be set like this (see the commented out variables in [defaults/main.yml](defaults/main.yml):
+Server wide settings for `VirtualHosts` can be set like this (see the commented out variables in [defaults/main.yml](defaults/main.yml)):
 
 ```yml
 users_apache_options:
@@ -178,7 +178,7 @@ DirectoryIndex index.php index.html index.htm index.shtml
 AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 ```
 
-And if it is set to `cgi` then these directives are used:
+And if `users_apache_type` is set to `cgi` then these directives are used:
 
 ```apache
 Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
@@ -186,7 +186,7 @@ DirectoryIndex index.cgi index.pl index.html index.htm index.shtml
 AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 ```
 
-And if it is omitted (or set to a value such as `static`) then these defaults are used:
+And if `users_apache_type` is omitted (or set to a value such as `static`) then these defaults are used:
 
 ```apache
 Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
@@ -205,7 +205,7 @@ The `users_apache_htauth_locations` array can be used to apply HTTP Authenticati
           - name: WordPress Login
             location: /wp-login.php
 ```
-The `users_apache_htauth_users` array can be used to set usernames and passwords, these are written to `~/.htpasswd/` in one file per `users_apache_server_name`, the optional `state` variables ce be set to absent to remove users, for example:
+The `users_apache_htauth_users` array can be used to set usernames and passwords, these are written to `~/.htpasswd/` in one file per `users_apache_server_name`, the optional `state` variables can be set to absent to remove users, for example:
 
 ```yml
         users_apache_htauth_users:
@@ -214,7 +214,7 @@ The `users_apache_htauth_users` array can be used to set usernames and passwords
           - name: baz
             state: absent
 ```
-If the `type` is set to `None` then `AuthUserFile` isn't set then a `require` array can be set [to do things like only allow a few IP addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require), for example:
+If the `type` is set to `None` then `AuthUserFile` isn't set and then a `require` array can be set [to do things like only allow a few IP addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require), for example:
 
 ```yml
         users_apache_htauth_locations:
@@ -425,4 +425,6 @@ It will generate an Apache config like this:
 
 ## TODO
 
+* Better documentation
+* [Better CMS options](https://git.coop/webarch/users/issues/29)
 * Add more options from the [Ansible user module](https://docs.ansible.com/ansible/latest/modules/user_module.html)
