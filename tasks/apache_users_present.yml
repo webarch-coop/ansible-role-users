@@ -208,6 +208,22 @@
         - name: If Matomo is installed
           block:
 
+            - name: Debug matomo addsite
+              debug:
+                msg:
+                  - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
+                  - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
+                  - "matomo_site_urls: {{ vhost.value.users_apache_server_aliases | default ([]) }}"
+                  - "matomo_site_admin: {{ item.key }}"
+                verbosity: 1
+              when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
+              loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+              loop_control:
+                loop_var: vhost
+              tags:
+                - matomo
+                - users-update
+
             - name: addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site
               include_role:
                 name: matomo
@@ -216,7 +232,8 @@
                 matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
                 matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
                 # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
-                matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% endif %}"
+                # matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% endif %}"
+                matomo_site_urls: "{{ vhost.value.users_apache_server_aliases | default ([]) }}"
                 matomo_site_admin: "{{ item.key }}"
               when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
               loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
