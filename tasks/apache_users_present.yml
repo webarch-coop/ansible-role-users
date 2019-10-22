@@ -242,10 +242,6 @@
                 - matomo
                 - users-update
 
-            - name: Debug fail
-              fail:
-                msg: "Check the variables above"
-
           when: user_matomo_config.stat.exists
 
       when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
