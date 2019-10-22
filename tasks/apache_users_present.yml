@@ -214,6 +214,8 @@
                   - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
                   - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
                   - "matomo_site_urls: {{ vhost.value.users_apache_server_aliases | default ([]) }}"
+                  # https://gist.github.com/halberom/b1f6eaed16dba1b298e8
+                  - "TEST: matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\\\1') | list }}{% endif %}"
                   - "matomo_site_admin: {{ item.key }}"
                 verbosity: 1
               when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
