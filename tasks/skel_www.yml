@@ -17,21 +17,6 @@
     - .profile
     - .vimrc
 
-- name: "Skel {{ users_skeleton }} files touched"
-  file:
-    path: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
-    state: touch
-    owner: root
-    group: root
-    mode: 0600
-    modification_time: preserve
-    access_time: preserve
-  with_items:
-    - .bash_history
-    - .mysql_history
-    - .selected_editor
-    - .yarnrc
-
 - name: "Skel {{ users_skeleton }} private directories present"
   file:
     path: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
@@ -48,6 +33,7 @@
     - .git
     - .gnupg
     - .local
+    - .mysql
     - .mutt
     - .npm
     - .ssh
@@ -58,6 +44,21 @@
     - bin
     - private
     - tmp
+
+- name: "Skel {{ users_skeleton }} files touched"
+  file:
+    path: "/usr/local/etc/skel.d/{{ users_skeleton }}/{{ item }}"
+    state: touch
+    owner: root
+    group: root
+    mode: 0600
+    modification_time: preserve
+    access_time: preserve
+  with_items:
+    - .bash_history
+    - .mysql/history
+    - .selected_editor
+    - .yarnrc
 
 - name: "Skel {{ users_skeleton }} WP-CLI config in place"
   copy:
