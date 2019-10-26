@@ -174,7 +174,7 @@
     minute: "{{ users_cron_min }}"
     hour: "{{ users_cron_mysqldump_hour | default('04') }}"
   when:
-    - ( users_mariadb is not defined ) or ( users_mariadb == True )
+    - ( users_mariadb is defined ) and ( users_mariadb == True )
     - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
   tags:
     - users-update

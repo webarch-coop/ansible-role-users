@@ -1,18 +1,20 @@
 ---
-# Define users_apache to false to skip Apache tasks even if it is installed
-# users_apache: false
-# Define users_mariadb to false to skip MariaDB tasks even if it is installed
-# users_mariadb: false
-# Define users_skell to false to skip skell.d tasks
-# users_skell: false
-# Define users_phpfpm to false to skip PHP FPM tasks
-# users_phpfpm: false
-# Define users_cron to false to skip cron tasks
-# users_cron: false
-# Set users_quota to true if the users_basedir is a partition with disk
-# quotas enabled
+# Define users_apache to true for this role to manage the Apache VirtualHosts
+users_apache: false
+# Define users_chroot to true for members of the chroot group to be chrooted
+users_chroot: false
+# Define users_mariadb to true for this role to create MariaDB user and
+# databases 
+users_mariadb: false
+# Define users_skell to true install addtionall skell profiles
+users_skell: false
+# Define users_phpfpm to true for this role to generate PHP FPM pools
+users_phpfpm: false
+# Define users_cron to true for this role to generate cron tasks
+users_cron: false
+# Set users_quota to true for this role to manage users disk quotas, this needs
+# the users_basedir variable to be a partition mounted with quota options
 users_quota: false
-#
 # Users home directories to be created as sub-directories of users_basedir
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root

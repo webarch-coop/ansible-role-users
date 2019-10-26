@@ -1,6 +1,6 @@
 ---
 # Use ~/.ssh/authorized_keys.d/authorized_keys_* files to assemble ~/.ssh/authorized_keys and leave a ~/.ssh/README.md to explain what happened
-- name: ~/.ssh/authorized_keys.d dircetory present
+- name: ~/.ssh/authorized_keys.d directory present
   file:
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys.d"
     state: directory
