@@ -300,6 +300,8 @@
     - name: Users group members present
       include: group_members.yml
       loop: "{{ users | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
       when: ( item.value.users_group_members is defined ) and ( item.value.users_group_members != [] )
       tags:
         - users-update
