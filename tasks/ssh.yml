@@ -30,7 +30,7 @@
 - name: Assemble all the ~/authorized_keys_d/authorized_keys_* public keys to ~/.ssh/authorized_keys
   assemble:
     src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys.d"
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/.authorized_keys"
+    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys"
     remote_src: true
     validate: ssh-keygen -lf %s
   tags:
