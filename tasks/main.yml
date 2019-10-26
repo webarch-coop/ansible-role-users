@@ -455,7 +455,9 @@
       when:
         - ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
 
-  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+  when:
+    - ( users_chroot is defined ) and ( users_chroot == True )
+    - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 
 - name: Matomo login account tasks
   block:
