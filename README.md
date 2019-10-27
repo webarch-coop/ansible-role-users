@@ -133,15 +133,11 @@ The `users_ssh_public_keys` array should be set to a list of one or more URL's f
 
 All the files at the URL's will be downloaded to files named:
 
-* `~/.ssh/authorized_keys_0`
-* `~/.ssh/authorized_keys_1`
-* `~/.ssh/authorized_keys_2`
+* `~/.ssh/authorized_keys.d/authorized_keys_0`
+* `~/.ssh/authorized_keys.d/authorized_keys_1`
+* `~/.ssh/authorized_keys.d/authorized_keys_2`
 
-Then the concaternation of `~/.ssh/authorized_keys_*` will be added to `~/.ssh/authorized_keys`, this means if you want to add additional keys then you can simply add them to this directory, with a suitable filename, eg `~/.ssh/authorized_keys_extra`. 
-
-The `exclusive` option for the [authorized_key module](https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html) is not set to `True` so keys will have to be removed manually.
-
-One drawback with this is that you can't prepend a key with `key_options`, for example, `from="127.0.0.1" ssh-rsa AAA...`, this behavious might be change in the future if we don't use the Ansible authorized_key module for adding the keys.
+Then the `~/.ssh/authorized_keys.d/authorized_keys_*` files are assembled to `~/.ssh/authorized_keys`, this means if you want to add additional keys then you can simply add them to this directory, with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`. 
 
 ## Apache
 
