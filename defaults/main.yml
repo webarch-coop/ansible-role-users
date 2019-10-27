@@ -4,7 +4,7 @@ users_apache: false
 # Define users_chroot to true for members of the chroot group to be chrooted
 users_chroot: false
 # Define users_mariadb to true for this role to create MariaDB user and
-# databases 
+# databases
 users_mariadb: false
 # Define users_skell to true install addtionall skell profiles
 users_skell: false
