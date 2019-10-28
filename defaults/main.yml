@@ -12,9 +12,9 @@ users_skell: false
 users_phpfpm: false
 # Define users_cron to true for this role to generate cron tasks
 users_cron: false
-# Set users_quota to true for this role to manage users disk quotas, this needs
+# Set users_quotaon to true for this role to manage users disk quotas, this needs
 # the users_basedir variable to be a partition mounted with quota options
-users_quota: false
+users_quotaon: false
 # Users home directories to be created as sub-directories of users_basedir
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root
