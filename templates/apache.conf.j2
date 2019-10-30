@@ -66,7 +66,7 @@
   </Location>
     {%- endfor %}
     {%- if "webarch" in apache_conf_enabled %}
-  <Location "/webarch">
+  <Location "/wsh">
     AuthType None
     Require all granted
   </Location>
@@ -76,6 +76,10 @@
     Require all granted
   </Location>
     {%- endif %}
+  <Location "/.well-known/acme-challenge">
+    AuthType None
+    Require all granted
+  </Location>
   {%- endif %}
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
