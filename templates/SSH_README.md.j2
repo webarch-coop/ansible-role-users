@@ -1,14 +1,14 @@
 # {{ ansible_managed }} SSH Public Keys
 
 The SSH `~/.ssh/authorized_keys` file in this directory has been automatically
-assembled from the `~/.ssh/.authorized_keys_X` files (where `X` is a digit), by
-[Ansible](https://git.coop/webarch/users/blob/master/tasks/ssh.yml), into the
-`~/.ssh/.authorized_keys` file and that has been validated and copied to
-`~/.ssh/authorized_keys`.
+assembled from the `~/.ssh/authorized_keys.d/authorized_keys_*` files (where
+`*` is anything), by
+[Ansible](https://git.coop/webarch/users/blob/master/tasks/ssh.yml).
 
 If you wish to manually add keys to the `authorized_keys` file please save the
-keys as `~/.ssh/.authorized_keys_Y` in this directory, (where `Y` is anything
-but a digit, for example a name or letter), in order that your public keys are
-included when the Ansible tasks are next run.
+keys as `~/.ssh/authorized_keys.d/authorized_keys_X`, (where `X` is *anything
+but a digit*, for example a name or letter, Ansible downloads keys and uses a
+digit), in order that your public keys are included when the Ansible tasks are
+next run.
 
 # vim: ft=markdown:

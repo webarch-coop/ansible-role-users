@@ -5,9 +5,8 @@ galaxy_info:
   description: Ansible role for adding user accounts to Debian and Ubuntu servers
   company: Webarchitects Co-operative
   license: license (GPLv3)
-  # groups: Before version 2.3, the only input format allowed was a comma separated string.
-  # Now this parameter accepts a list as well as a comma separated string.
-  min_ansible_version: 2.3
+  # lstrip_blocks added to template module in 2.6
+  min_ansible_version: 2.6
   platforms:
     - name: debian
       versions:

@@ -11,14 +11,14 @@
     - users-update
     - users-htauth
 
-- name: Debug users_htauth_users loop
+- name: Debug users_apache_htauth_users loop
   debug:
     msg:
       - "htauth.name: {{ htauth.name }}"
       - "htauth.password: {{ htauth.password | default(omit) }}"
       - "htauth.state: {{ htauth.state | default('present') }}"
     verbosity: 1
-  loop: "{{ vhost.value.users_htauth_users }}"
+  loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth
   tags:
@@ -48,7 +48,7 @@
     group: "{{ item.value.users_group | default(item.key) }}"
     mode: "0640"
   when: ( htauth.password is defined and htauth.password != "" ) and ( htauth.state is not defined or htauth.state == "present" )
-  loop: "{{ vhost.value.users_htauth_users }}"
+  loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth
   tags:

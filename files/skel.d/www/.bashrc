@@ -114,3 +114,5 @@ fi
 
 # Add ~/bin to $PATH
 export PATH="${HOME}/bin:${PATH}"
+# Directory for MySQL history file
+export MYSQL_HISTFILE="${HOME}/.mysql/history"

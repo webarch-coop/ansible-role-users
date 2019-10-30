@@ -121,12 +121,13 @@
 
       when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
 
-  when: ( users_phpfpm is not defined ) or ( users_phpfpm == True )
+  when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
 
 - name: Check if a chroot exists
   stat:
     path: "{{ chroot_dir | default('/chroot') }}"
   register: users_chroot_dir
+  when: ( users_chroot is defined ) and ( users_chroot == True )
   tags:
     - logrotate
     - phpfpm
@@ -172,7 +173,7 @@
       loop: "{{ users | dict2items }}"
       when:
         - '"apache2" in ansible_facts.packages'
-        - ( users_apache is not defined ) or ( users_apache == True )
+        - ( users_apache is defined ) and ( users_apache == True )
       tags:
         - users-update
         - apache
@@ -180,7 +181,7 @@
     - name: Absent users MariaDB account and databases absent
       include_tasks: mariadb_user_absent.yml
       loop: "{{ users | dict2items }}"
-      when: ( users_mariadb is not defined ) or ( users_mariadb == True )
+      when: ( users_mariadb is defined ) and ( users_mariadb == True )
       tags:
         - users-update
         - users-mariadb
@@ -232,7 +233,7 @@
     - www
   loop_control:
     loop_var: users_skeleton
-  when: ( users_skell is not defined ) or ( users_skell == True )
+  when: ( users_skell is defined ) and ( users_skell == True )
 
 - name: Quota tasks
   block:
@@ -275,7 +276,7 @@
         - users-update
         - users-quota
 
-  when: ( users_quota is defined ) and ( users_quota == True ) and ( quota_dir is defined )
+  when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
 
 - name: User groups present
   include_tasks: groups.yml
@@ -300,6 +301,8 @@
     - name: Users group members present
       include: group_members.yml
       loop: "{{ users | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
       when: ( item.value.users_group_members is defined ) and ( item.value.users_group_members != [] )
       tags:
         - users-update
@@ -316,7 +319,7 @@
       vars:
       loop: "{{ users | dict2items }}"
       when:
-        - ( users_mariadb is not defined ) or ( users_mariadb == True )
+        - ( users_mariadb is defined ) and ( users_mariadb == True )
         - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
       tags:
         - users-update
@@ -345,7 +348,7 @@
         - item.key != "root"
         - ( item.value.users_groups is defined ) and ( "sudo" not in item.value.users_groups )
         - ( users_crontab is not defined ) or ( users_crontab == True )
-        - ( users_cron is not defined ) or ( users_cron == True )
+        - ( users_cron is defined ) and ( users_cron == True )
       tags:
         - users-update
         - users-cron
@@ -449,9 +452,12 @@
             - users-update
             - users-chroot
 
-      when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
+      when:
+        - ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
 
-  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+  when:
+    - ( users_chroot is defined ) and ( users_chroot == True )
+    - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 
 - name: Matomo login account tasks
   block:
@@ -572,7 +578,7 @@
 
   when:
     - '"apache2" in ansible_facts.packages'
-    - ( users_apache is not defined ) or ( users_apache == True )
+    - ( users_apache is defined ) and ( users_apache == True )
 
 - name: Firewall tasks included
   include_tasks: firewall.yml
