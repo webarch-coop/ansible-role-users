@@ -49,17 +49,6 @@
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
   {%- endif %}
   {%- if vhost_config.users_apache_htauth_locations is defined -%}
-    {%- if "webarch" in apache_conf_enabled %}
-  <Location "/webarch">
-    AuthType None
-    Require all granted
-  </Location>
-    {%- elif "mc3" in apache_conf_enabled %}
-  <Location "/mc3">
-    AuthType None
-    Require all granted
-  </Location>
-    {%- endif %}
     {%- for loc in vhost_config.users_apache_htauth_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
     {%- if loc.type is defined and loc.type == "None" %}
@@ -76,6 +65,17 @@
       {%- endif %}
   </Location>
     {%- endfor %}
+    {%- if "webarch" in apache_conf_enabled %}
+  <Location "/webarch">
+    AuthType None
+    Require all granted
+  </Location>
+    {%- elif "mc3" in apache_conf_enabled %}
+  <Location "/mc3">
+    AuthType None
+    Require all granted
+  </Location>
+    {%- endif %}
   {%- endif %}
   DocumentRoot "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}">
