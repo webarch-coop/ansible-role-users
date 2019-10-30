@@ -51,10 +51,12 @@
   {%- if vhost_config.users_apache_htauth_locations is defined -%}
     {%- if "webarch" in apache_conf_enabled %}
   <Location "/webarch">
+    AuthType None
     Require all granted
   </Location>
     {%- elif "mc3" in apache_conf_enabled %}
   <Location "/mc3">
+    AuthType None
     Require all granted
   </Location>
     {%- endif %}
