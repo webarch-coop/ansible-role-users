@@ -64,7 +64,7 @@
     Require valid-user
       {%- endif %}
       {%- if loc.redirect is defined %}
-    Redirect {%- if loc.redirect_code is defined %}{{ loc.redirect_code }} {% else %}temp {% endif %}{{ loc.redirect }}
+    Redirect {% if loc.redirect_code is defined %}{{ loc.redirect_code }} {% else %}temp {% endif %}{{ loc.redirect }}
       {%- endif %}    
   </Location>
     {%- endfor %}
