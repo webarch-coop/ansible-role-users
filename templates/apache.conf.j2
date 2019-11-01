@@ -51,11 +51,11 @@
   {%- if vhost_config.users_apache_htauth_locations is defined -%}
     {%- for loc in vhost_config.users_apache_htauth_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
-    {%- if loc.type is defined and loc.type == "None" %}
+      {%- if loc.type is defined and loc.type == "None" %}
     # No AuthUserFile for this Location
-    {%- else %}
+      {%- else %}
     AuthUserFile "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
-    {%- endif %}
+      {%- endif %}
     AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
       {%- if loc.require is defined %}{% for req in loc.require %}
@@ -63,6 +63,9 @@
       {%- endfor %}{% else %}     
     Require valid-user
       {%- endif %}
+      {%- if loc.redirect is defined %}
+    Redirect {%- if loc.redirect_code is defined %}{{ loc.redirect_code }} {% else %}temp {% endif %}{{ loc.redirect }}
+      {%- endif %}    
   </Location>
     {%- endfor %}
     {%- if "webarch" in apache_conf_enabled %}

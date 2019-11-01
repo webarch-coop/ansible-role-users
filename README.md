@@ -222,6 +222,14 @@ If the `type` is set to `None` then `AuthUserFile` isn't set and then a `require
               - method GET POST
 ```
 
+It is also possible to set `redirect` and `redirect_code`, see [the Apache Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
+```yml
+        users_apache_htauth_locations:
+          - location: old-site/
+            redirect: https://example.org/
+            redirect_code: permanent
+```
+
 ### Expires
 
 The optional `users_apache_expires` variable can be used to select the [medium](https://git.coop/webarch/apache/blob/master/templates/expires-medium.conf.j2) or [strict](https://git.coop/webarch/apache/blob/master/templates/expires-strict.conf.j2) configuration to `Include` into the `VirtualHost`.
