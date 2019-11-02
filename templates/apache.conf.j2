@@ -67,8 +67,8 @@
     Require valid-user
         {%- endif %}
       {%- else %}
-    Redirect{% if loc.redirect_code is defined %} {{ loc.redirect_code }} {% else %} temp {% endif %}{{ loc.redirect }}
-      {%- endif %}    
+    Redirect "{{ loc.redirect }}"
+      {%- endif %}
   </Location>
     {%- endfor %}
     {%- if "webarch" in apache_conf_enabled %}
