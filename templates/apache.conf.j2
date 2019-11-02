@@ -67,8 +67,6 @@
     Require valid-user
         {%- endif %}
       {%- else %}
-    AuthType None 
-    Require all granted
     Redirect{% if loc.redirect_code is defined %} {{ loc.redirect_code }} {% else %} temp {% endif %}{{ loc.redirect }}
       {%- endif %}    
   </Location>
