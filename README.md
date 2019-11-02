@@ -222,12 +222,11 @@ If the `type` is set to `None` then `AuthUserFile` isn't set and then a `require
               - method GET POST
 ```
 
-It is also possible to set `redirect` and `redirect_code`, see [the Apache Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
+It is also possible to set `redirect`, see [the Apache Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
 ```yml
         users_apache_htauth_locations:
           - location: old-site/
             redirect: https://example.org/
-            redirect_code: permanent
 ```
 
 ### Expires
