@@ -71,16 +71,6 @@
 
   when: ( users_cert is defined ) and ( users_cert == 'user' )
 
-- name: "Apache {{ item.key }} sites-available file present"
-  template:
-    src: templates/apache.conf.j2
-    dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
-    trim_blocks: false
-    lstrip_blocks: true
-  tags:
-    - apache
-    - users-update
-
 - name: "Apache {{ item.key }}/{{ users_sites_dir }} directory present"
   file:
     path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}"
@@ -154,6 +144,35 @@
     - apache
     - users-update
 
+- name: "Check if /etc/apache2/sites-available/{{ item.key }}.conf exists already"
+  stat:
+    path: "/etc/apache2/sites-available/{{ item.key }}.conf"
+  register: users_apache_conf_check
+  tags:
+    - apache
+    - users-update
+
+- name: "Apache {{ item.key }} sites-available file copied"
+  copy:
+    src: "/etc/apache2/sites-available/{{ item.key }}.conf"
+    dest: "/etc/apache2/sites-available/.{{ item.key }}.conf.bak"
+    remote_src: true
+  when: users_apache_conf_check.stat.exists
+  tags:
+    - apache
+    - users-update
+
+- name: "Apache {{ item.key }} sites-available file present"
+  template:
+    src: templates/apache.conf.j2
+    dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+    trim_blocks: false
+    lstrip_blocks: true
+  register: users_apache_conf
+  tags:
+    - apache
+    - users-update
+
 - name: "Apache {{ item.key }} sites-enabled symlink present"
   command: "a2ensite {{ item.key }}"
   register: users_a2ensite
@@ -162,6 +181,38 @@
   tags:
     - apache
     - users-update
+
+- name: Apache configtest
+  block:
+
+    - name: "apache2ctl configtest to check /etc/apache2/sites-available/{{ item.key }}.conf"
+      command: apache2ctl configtest
+      register: users_apache2ctl_configtest
+      tags:
+        - apache
+        - users-update
+
+  rescue:
+
+    - name: "apache2ctl configtest failed so reverting changes"
+      copy:
+        src: "/etc/apache2/sites-available/.{{ item.key }}.conf.bak"
+        dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+      when: users_apache_conf_check.stat.exists == True 
+      tags:
+        - apache
+        - users-update
+
+    - name: "apache2ctl configtest failed so removing new config"
+      file:
+        path: "/etc/apache2/sites-available/{{ item.key }}.conf"
+        state: absent
+      when: users_apache_conf_check.stat.exists == False
+      tags:
+        - apache
+        - users-update
+
+  when: users_apache_conf.changed
 
 - name: "Apache {{ item.key }} sites-enabled symlink absent"
   file:
