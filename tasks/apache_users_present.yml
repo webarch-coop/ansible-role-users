@@ -198,6 +198,7 @@
       copy:
         src: "/etc/apache2/sites-available/.{{ item.key }}.conf.bak"
         dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+        remote_src: true
       when: users_apache_conf_check.stat.exists == True 
       tags:
         - apache
@@ -208,6 +209,16 @@
         path: "/etc/apache2/sites-available/{{ item.key }}.conf"
         state: absent
       when: users_apache_conf_check.stat.exists == False
+      tags:
+        - apache
+        - users-update
+
+    - name: Fail as apache2ctl configtest failed
+      fail:
+        msg:
+          - "apache2ctl configtest failed for {{ item.key }}"
+          - "so no changes have been made but you need to"
+          - "check the YAML for this VirtualHost."
       tags:
         - apache
         - users-update
