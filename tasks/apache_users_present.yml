@@ -199,7 +199,7 @@
         src: "/etc/apache2/sites-available/.{{ item.key }}.conf.bak"
         dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
         remote_src: true
-      when: users_apache_conf_check.stat.exists == True 
+      when: users_apache_conf_check.stat.exists == True
       tags:
         - apache
         - users-update
@@ -215,10 +215,12 @@
 
     - name: Fail as apache2ctl configtest failed
       fail:
-        msg:
-          - "apache2ctl configtest failed for {{ item.key }}"
-          - "so no changes have been made but you need to"
-          - "check the YAML for this VirtualHost."
+        msg: |
+          apache2ctl configtest failed for {{ item.key }}
+          as a result apache has not been restarted and no
+          changes thatwould prevent a restart have been
+          left in place but but you need to check the YAML
+          for this VirtualHost.
       tags:
         - apache
         - users-update
