@@ -215,7 +215,9 @@
 
     - name: Fail as apache2ctl configtest failed
       fail:
-        msg: apache2ctl configtest failed for {{ item.key }} and as a result apache has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this VirtualHost.
+        msg:
+          - "apache2ctl configtest failed for {{ item.key }} and as a result apache has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this VirtualHost."
+          - "The error was: {{ users_apache2ctl_configtest.stderr }}"
       tags:
         - apache
         - users-update
