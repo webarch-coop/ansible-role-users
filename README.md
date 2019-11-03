@@ -194,11 +194,11 @@ The arrays, `users_apache_options`, `users_apache_index` and `users_apache_overr
 
 ### Location
 
-The `users_apache_htauth_locations` array can be used to apply HTTP Authentication to directories, for example:
+The `users_apache_locations` array can be used to apply HTTP Authentication to directories, for example:
 
 ```yml
-        users_apache_htauth_locations:
-          - name: WordPress Login
+        users_apache_locations:
+          - authname: WordPress Login
             location: /wp-login.php
 ```
 The `users_apache_htauth_users` array can be used to set usernames and passwords, these are written to `~/.htpasswd/` in one file per `users_apache_server_name`, the optional `state` variables can be set to absent to remove users, for example:
@@ -210,13 +210,13 @@ The `users_apache_htauth_users` array can be used to set usernames and passwords
           - name: baz
             state: absent
 ```
-If the `type` is set to `None` then `AuthUserFile` isn't set and then a `require` array can be set [to do things like only allow a few IP addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require), for example:
+If the `authtype` is set to `None` then `AuthUserFile` isn't set and then a `require` array can be set [to do things like only allow a few IP addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require), for example:
 
 ```yml
-        users_apache_htauth_locations:
-          - name: Drupal Login
+        users_apache_locations:
+          - authname: Drupal Login
             location: /user/login
-            type: None
+            authtype: None
             require:
               - ip 10 172.20 192.168.2
               - method GET POST
@@ -224,7 +224,7 @@ If the `type` is set to `None` then `AuthUserFile` isn't set and then a `require
 
 It is also possible to set `redirect`, see [the Apache Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
 ```yml
-        users_apache_htauth_locations:
+        users_apache_locations:
           - location: old-site/
             redirect: https://example.org/
 ```

@@ -48,19 +48,19 @@
   {%- if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
   {%- endif %}
-  {%- if vhost_config.users_apache_htauth_locations is defined -%}
-    {%- for loc in vhost_config.users_apache_htauth_locations %}
+  {%- if vhost_config.users_apache_locations is defined -%}
+    {%- for loc in vhost_config.users_apache_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
-      {%- if loc.type is defined and loc.type == "None" %}
+      {%- if loc.authtype is defined and loc.authtype == "None" %}
     # No AuthUserFile for this Location as AuthType is None
-      {%- elif loc.type is not defined and loc.redirect is defined %}
+      {%- elif loc.authtype is not defined and loc.redirect is defined %}
     # Redirect Location so no AuthUserFile
       {%- else %}
     AuthUserFile "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       {%- endif %}
       {%- if loc.redirect is not defined %}
-    AuthName "{% if loc.name is defined %}{{ loc.name }}{% else %}Authorised Users{% endif %}"
-    AuthType {% if loc.type is defined %}{{ loc.type }}{% else %}Basic{% endif %}
+    AuthName "{% if loc.authname is defined %}{{ loc.authname }}{% else %}Authorised Users{% endif %}"
+    AuthType {% if loc.authtype is defined %}{{ loc.authtype }}{% else %}Basic{% endif %}
         {%- if loc.require is defined %}{% for req in loc.require %}
     Require {{ req }}
           {%- endfor %}{% else %}     
