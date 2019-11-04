@@ -444,7 +444,7 @@
     loop_var: vhost
   when:
     - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
-    - ( vhost.value.users_apache_htauth_users[0].name is defined ) and ( vhost.value.users_apache_htauth_users[0].password is defined )
+    - ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users[0].name is defined ) and ( vhost.value.users_apache_htauth_users[0].password is defined )
   tags:
     - users-update
     - phpmyadmin
