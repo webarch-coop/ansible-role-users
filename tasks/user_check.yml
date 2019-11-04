@@ -30,10 +30,10 @@
 
   when: user.value.users_ssh_public_keys is defined
 
-- name: Check users_skel is an existing path
+- name: "Check users_skel is an existing path for {{ user.key }}"
   stat:
     path: "{{ user.value.users_skel }}"
   register: user_skell_path
-  failed_when: user.value.users_skel.stat.isdir == False
+  failed_when: user_skell_path.stat.isdir == False
   when: user.value.users_skel is defined
 ...
