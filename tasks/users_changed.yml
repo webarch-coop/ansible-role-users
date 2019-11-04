@@ -16,7 +16,7 @@
     dest: "{{ users_state_dir }}/proposed/{{ user }}.yml"
   loop: "{{ users | dict2items }}" 
   loop_control:
-    loop_ver: user
+    loop_var: user
 
 - name: End test tasks
   fail:
