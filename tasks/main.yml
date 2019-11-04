@@ -8,7 +8,7 @@
 
 - name: Check variables for users to update 
   include_tasks: user_check.yml
-  when: users.key in users_update
+  when: user.key in users_update
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
