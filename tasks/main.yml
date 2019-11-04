@@ -10,29 +10,9 @@
       - whois
     state: present
 
-- name: Check /etc/debian_version
-  shell: "lsb_release -c | awk '{ print $2 }'"
-  register: users_debian_version_check
-  check_mode: false
-  changed_when: false
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
-
 - name: Set a fact for the Debian version
   set_fact:
-    users_debian_version: "{{ users_debian_version_check.stdout }}"
+    users_debian_version: "{{ ansible_distribution_release }}"
   tags:
     - apache
     - letsencrypt
