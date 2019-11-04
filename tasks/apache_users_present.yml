@@ -393,7 +393,7 @@
     - users-update
     - matomo
 
-- name: Include phpMyAdmin role
+- name: Include phpMyAdmin role with no HTTP Authentication
   include_role:
     name: phpmyadmin
   vars:
@@ -410,12 +410,41 @@
     phpmyadmin_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     phpmyadmin_html_upload_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
     phpmyadmin_html_save_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
-    phpmyadmin_htauth_user: "{{ vhost.value.users_apache_htauth_users[0].name | default(omit) }}"
-    phpmyadmin_htauth_pass: "{{ vhost.value.users_apache_htauth_users[0].password | default(omit) }}"
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
+  when:
+    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
+    - ( vhost.value.users_apache_htauth_users[0].name is not defined ) and ( vhost.value.users_apache_htauth_users[0].password is not defined ) 
+  tags:
+    - users-update
+    - phpmyadmin
+
+- name: Include phpMyAdmin role with HTTP Authentication
+  include_role:
+    name: phpmyadmin
+  vars:
+    phpmyadmin_user: "{{ item.key }}"
+    phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
+    phpmyadmin_db_user: "{{ item.key }}"
+    phpmyadmin_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    phpmyadmin_db_socket: /var/run/mysqld/mysqld.sock
+    phpmyadmin_db_host: localhost
+    phpmyadmin_db_port: 3306
+    phpmyadmin_url: "https://{{ vhost.value.users_apache_server_name }}/"
+    phpmyadmin_home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    phpmyadmin_private: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private"
+    phpmyadmin_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    phpmyadmin_html_upload_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
+    phpmyadmin_html_save_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
+    phpmyadmin_htauth_user: "{{ vhost.value.users_apache_htauth_users[0].name }}"
+    phpmyadmin_htauth_pass: "{{ vhost.value.users_apache_htauth_users[0].password }}"
+  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+  when:
+    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
+    - ( vhost.value.users_apache_htauth_users[0].name is defined ) and ( vhost.value.users_apache_htauth_users[0].password is defined ) 
   tags:
     - users-update
     - phpmyadmin
