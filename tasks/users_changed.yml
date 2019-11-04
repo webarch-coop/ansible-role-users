@@ -17,9 +17,10 @@
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
+    label: "{{ user.key }}"
 
 - name: Check users current state files
-  include_tasks: users_state.yml
+  include_tasks: user_state.yml
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
