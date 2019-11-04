@@ -12,8 +12,11 @@
 
 - name: Proposed users state files present
   template:
-    src: users_state.yml.j2
-    dest: 
+    src: user_state.yml.j2
+    dest: "{{ users_state_dir }}/proposed/{{ user }}.yml"
+  loop: "{{ users | dict2items }}" 
+  loop_control:
+    loop_ver: user
 
 - name: End test tasks
   fail:
