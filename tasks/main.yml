@@ -2,6 +2,10 @@
 - name: Check users changed
   include_tasks: users_changed.yml
 
+- name: Print the users to update
+  debug:
+    msg: "User to update: {{ users_update }}"
+
 - name: Check variables for users changed
   include_tasks: user_check.yml
   when: user in users_changed
