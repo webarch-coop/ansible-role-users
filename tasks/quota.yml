@@ -76,7 +76,7 @@
     - users-update
     - users-quota
 
-- name: Print the quota variables that have just beed set
+- name: Print the quota variables that have just been set
   debug:
     msg:
       - "quota: {{ item.value.users_quota }}"

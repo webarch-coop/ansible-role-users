@@ -36,4 +36,10 @@
   register: user_skell_path
   failed_when: user_skell_path.stat.isdir == False
   when: user.value.users_skel is defined
+
+- name: "Check that users_quota is a positive number for {{ user.key }}"
+  assert:
+    that:
+      - user.value.users_quota | human_to_bytes | int > 0 
+  when: user.value.users_quota is defined
 ...
