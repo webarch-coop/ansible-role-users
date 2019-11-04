@@ -33,5 +33,5 @@
 - name: Print the users to update
   debug:
     msg: "User to update: {{ users_update }}"
-    verbosity: 1
+    verbosity: 2
 ...

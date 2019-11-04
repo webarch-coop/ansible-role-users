@@ -6,9 +6,9 @@
   debug:
     msg: "User to update: {{ users_update }}"
 
-- name: Check variables for users changed
+- name: Check variables for users to update 
   include_tasks: user_check.yml
-  when: users.key in users_changed 
+  when: users.key in users_update
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
