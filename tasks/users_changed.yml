@@ -14,9 +14,19 @@
   template:
     src: user_state.yml.j2
     dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
-  loop: "{{ users | dict2items }}" 
+  loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
+
+- name: Check users current state files
+  include_tasks: users_state.yml
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+
+- name: Print the users to update
+  debug:
+    msg: "User to update: {{ users_update }}"
 
 - name: End test tasks
   fail:
