@@ -10,6 +10,9 @@
     loop_var: user
     label: "{{ user.key }}"
 
+- name: End test tasks 
+  fail: 
+    msg: "End of test" 
 
 - name: Packages present
   apt:
