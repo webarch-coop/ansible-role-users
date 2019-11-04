@@ -13,7 +13,7 @@
 - name: Proposed users state files present
   template:
     src: user_state.yml.j2
-    dest: "{{ users_state_dir }}/proposed/{{ user }}.yml"
+    dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
   loop: "{{ users | dict2items }}" 
   loop_control:
     loop_var: user
