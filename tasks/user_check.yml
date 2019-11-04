@@ -1,20 +1,20 @@
 ---
-- name: "Check state for {{ user }}"
+- name: "Check state for {{ user.key }}"
   assert:
     that:
-      - users.state | length
-      - ( user.state == "present" ) or ( user.state == "absent" )
-  when: user.state is defined
+      - user.value.state | length
+      - ( user.value.state == "present" ) or ( user.value.state == "absent" )
+  when: user.value.state is defined
 
-- name: "Check users_ssh_public_keys for {{ user }}"
+- name: "Check users_ssh_public_keys for {{ user.key }}"
   assert:
     that:
-      - user.users_ssh_public_keys | length
-      - user.users_ssh_public_keys[0] is defined
+      - user.value.users_ssh_public_keys | length
+      - user.value.users_ssh_public_keys[0] is defined
   when:
-    - user.users_ssh_public_keys is defined
+    - user.value.users_ssh_public_keys is defined
 
-- name: "Check that users_ssh_public_keys array contains valid URLs for {{ user }}"
+- name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }}"
   uri:
     url: "{{ url }}"
     method: HEAD
@@ -22,7 +22,7 @@
   register: users_ssh_public_key_http
   check_mode: false
   failed_when: users_ssh_public_key_http.status != "200"
-  loop: "{{ user.users_ssh_public_keys }}"
+  loop: "{{ user.value.users_ssh_public_keys }}"
   loop_control:
     loop_var: url
     label: url
