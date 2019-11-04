@@ -1,0 +1,31 @@
+---
+- name: "Check state for {{ user }}"
+  assert:
+    that:
+      - users.state | length
+      - ( user.state == "present" ) or ( user.state == "absent" )
+  when: user.state is defined
+
+- name: "Check users_ssh_public_keys for {{ user }}"
+  assert:
+    that:
+      - user.users_ssh_public_keys | length
+      - user.users_ssh_public_keys[0] is defined
+  when:
+    - user.users_ssh_public_keys is defined
+
+- name: "Check that users_ssh_public_keys array contains valid URLs for {{ user }}"
+  uri:
+    url: "{{ url }}"
+    method: HEAD
+    status_code: 200
+  register: users_ssh_public_key_http
+  check_mode: false
+  failed_when: users_ssh_public_key_http.status != "200"
+  loop: "{{ user.users_ssh_public_keys }}"
+  loop_control:
+    loop_var: url
+    label: url
+  when:
+    - user.users_ssh_public_keys is defined
+...
