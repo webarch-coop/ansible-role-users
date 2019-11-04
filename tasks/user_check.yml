@@ -34,6 +34,6 @@
   stat:
     path: "{{ user.value.users_skel }}"
   register: user_skell_path
-  failed_when: user.value.users_skel.star.isdir == False
+  failed_when: user.value.users_skel.stat.isdir == False
   when: user.value.users_skel is defined
 ...
