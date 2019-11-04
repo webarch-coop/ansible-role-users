@@ -19,6 +19,10 @@
     loop_var: user
     label: "{{ user.key }}"
 
+- name: Set an empty users_update array
+  set_fact:
+    users_update: []
+
 - name: Check users current state files
   include_tasks: user_state.yml
   loop: "{{ users | dict2items }}"

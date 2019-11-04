@@ -1,5 +1,5 @@
 ---
-- name: Check users current state files
+- name: "Check current state file for {{ user.key }}"
   stat:
     path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     checksum_algorithm: sha256
