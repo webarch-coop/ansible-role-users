@@ -6,26 +6,28 @@
       - ( user.value.state == "present" ) or ( user.value.state == "absent" )
   when: user.value.state is defined
 
-- name: "Check users_ssh_public_keys for {{ user.key }}"
-  assert:
-    that:
-      - user.value.users_ssh_public_keys | length
-      - user.value.users_ssh_public_keys[0] is defined
-  when:
-    - user.value.users_ssh_public_keys is defined
+- name: SSH public key URL checks
+  block:
 
-- name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }}"
-  uri:
-    url: "{{ url }}"
-    method: HEAD
-    status_code: 200
-  register: users_ssh_public_key_http
-  check_mode: false
-  failed_when: users_ssh_public_key_http.status != "200"
-  loop: "{{ user.value.users_ssh_public_keys }}"
-  loop_control:
-    loop_var: url
-    label: url
+    - name: "Check users_ssh_public_keys for {{ user.key }}"
+      assert:
+        that:
+          - user.value.users_ssh_public_keys | length
+          - user.value.users_ssh_public_keys[0] is defined
+
+    - name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }}"
+      uri:
+        url: "{{ url }}"
+        method: HEAD
+        return_content: true 
+      register: users_ssh_public_key_headers
+      check_mode: false
+      failed_when: users_ssh_public_key_headers.status != 200
+      loop: "{{ user.value.users_ssh_public_keys }}"
+      loop_control:
+        loop_var: url
+        label: url
+
   when:
     - user.value.users_ssh_public_keys is defined
 ...
