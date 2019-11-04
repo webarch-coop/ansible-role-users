@@ -17,7 +17,7 @@
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
-    # label: "{{ user.key }}"
+    label: "{{ user.key }}"
 
 - name: Set an empty users_update array
   set_fact:
