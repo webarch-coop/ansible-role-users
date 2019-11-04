@@ -9,7 +9,7 @@
 - name: SSH public key URL checks
   block:
 
-    - name: "Check users_ssh_public_keys for {{ user.key }}"
+    - name: "Check users_ssh_public_keys is a non-empty array for {{ user.key }}"
       assert:
         that:
           - user.value.users_ssh_public_keys | length
@@ -26,7 +26,7 @@
       loop: "{{ user.value.users_ssh_public_keys }}"
       loop_control:
         loop_var: url
-        label: url.key
+        label: "{{ url }}" 
 
   when:
     - user.value.users_ssh_public_keys is defined
