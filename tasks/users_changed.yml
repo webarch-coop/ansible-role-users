@@ -1,0 +1,21 @@
+---
+- name: Directories for users state files present
+  file:
+    path: "{{ users_state_dir }}/{{ dir }}"
+    state: directory
+  loop:
+    - current
+    - previous
+    - proposed
+  loop_control:
+    loop_var: dir
+
+- name: Proposed users state files present
+  template:
+    src: users_state.yml.j2
+    dest: 
+
+- name: End test tasks
+  fail:
+    msg: "End of test"
+...

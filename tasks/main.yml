@@ -1,4 +1,7 @@
 ---
+- name: Check users changed
+  import_tasks: users_changed.yml
+
 - name: Packages present
   apt:
     pkg:

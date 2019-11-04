@@ -19,6 +19,7 @@ users_quotaon: false
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root
 users_basedir: /home
+users_state_dir: /root/users
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_headers:
