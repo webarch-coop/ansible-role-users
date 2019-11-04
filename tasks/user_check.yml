@@ -26,7 +26,7 @@
       loop: "{{ user.value.users_ssh_public_keys }}"
       loop_control:
         loop_var: url
-        label: url
+        label: url.key
 
   when:
     - user.value.users_ssh_public_keys is defined
