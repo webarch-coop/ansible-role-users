@@ -413,9 +413,7 @@
   loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-  when:
-    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
-    - vhost.value.users_apache_htauth_users is not defined
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" ) and ( vhost.value.users_apache_htauth_users is not defined )
   tags:
     - users-update
     - phpmyadmin
