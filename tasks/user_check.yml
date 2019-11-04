@@ -27,5 +27,5 @@
     loop_var: url
     label: url
   when:
-    - user.users_ssh_public_keys is defined
+    - user.value.users_ssh_public_keys is defined
 ...
