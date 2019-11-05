@@ -6,6 +6,7 @@
       - mutt
       - python-dns
       - python-dnspython
+      - python3-dnspython
       - python-passlib
       - slay
       - vim
