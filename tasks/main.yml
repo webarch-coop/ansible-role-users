@@ -1,4 +1,18 @@
 ---
+- name: Packages present
+  apt:
+    pkg:
+      - bc
+      - mutt
+      - python-passlib
+      - slay
+      - vim
+      - whois
+    state: present
+
+- name: System state checks
+  include_tasks: system_check.yml
+
 - name: "Variables and facts for {{ inventory_hostname }} written to {{ users_state_dir }}/system.yml"
   template:
     src: system_state.yml.j2
@@ -12,9 +26,6 @@
   debug:
     msg: "User to update: {{ users_update }}"
 
-- name: System state checks
-  include_tasks: system_check.yml
-
 - name: Check variables for users to update
   include_tasks: user_check.yml
   when: user.key in users_update
@@ -26,123 +37,6 @@
 - name: End test tasks
   fail:
     msg: "End of test"
-
-- name: Packages present
-  apt:
-    pkg:
-      - bc
-      - mutt
-      - python-passlib
-      - slay
-      - vim
-      - whois
-    state: present
-
-- name: Set a fact for the Debian version
-  set_fact:
-    users_debian_version: "{{ ansible_distribution_release }}"
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
-
-- name: Load package information as facts
-  package_facts:
-    manager: apt
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
-
-- name: Fail if ansible_facts.packages is not defined or empty
-  fail:
-    msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
-  when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
-
-- name: PHP FPM checks
-  block:
-
-    - name: Check if php-fpm is installed
-      shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
-      register: users_phpfpm_status
-      check_mode: false
-      changed_when: false
-      tags:
-        - logrotate
-        - phpfpm
-        - users-update
-
-    - name: php-fpm variable set
-      block:
-
-        - name: Print the users_phpfpm_status
-          debug:
-            msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
-            verbosity: 1
-          tags:
-            - logrotate
-            - phpfpm
-            - users-update
-
-        - name: Set a fact for the PHP-FPM version
-          set_fact:
-            users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
-          when: users_phpfpm_status.stdout == "installed"
-          tags:
-            - logrotate
-            - phpfpm
-            - users-update
-
-      when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
-
-  when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
-
-- name: Check if a chroot exists
-  stat:
-    path: "{{ chroot_dir | default('/chroot') }}"
-  register: users_chroot_dir
-  when: ( users_chroot is defined ) and ( users_chroot == True )
-  tags:
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-chroot
-    - users-cron
-    - users-fstab
 
 - name: Users absent loops
   block:
