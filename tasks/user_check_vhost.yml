@@ -32,7 +32,7 @@
       loop: "{{ vhost.value.users_apache_server.aliases }}"
       loop_control:
         loop_var: domain
-        lable: "{{ domain }}"
+        label: "{{ domain }}"
 
   when: vhost.value.users_apache_server_aliases is defined
 ...
