@@ -1,13 +1,13 @@
 ---
 # quiet: true can be added when 2.8 is in use see
 # https://docs.ansible.com/ansible/latest/modules/assert_module.html
-- name: "Check that {{ user.key }} contains only lowercase ascii letters and numbers"
+- name: "Check that the username {{ user.key }} contains only lowercase ascii letters and numbers"
   assert:
     that:
       - user.key is regex("^[a-z0-9]*$")
     fail_msg: "The username {{ user.key }} contains characters other than lowercase ascii letters and numbers"
 
-- name: "Check that {{ user.key }} is between 2 and 12 characters long"
+- name: "Check that the username {{ user.key }} is between 2 and 12 characters long"
   assert:
     that:
       - user.key is regex("^.{2,12}$")

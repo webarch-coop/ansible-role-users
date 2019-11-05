@@ -16,5 +16,5 @@
 - name: "Fail if {{ users_domain_ip }} is not a IPv4 address" 
   fail:
     msg: "{{ users_domain }} appears not to resolve to a IP address"
-  when: '"False" in users_domain_ip'
+  when: users_domain_ip == False
 ...
