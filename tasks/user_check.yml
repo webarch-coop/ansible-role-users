@@ -233,9 +233,9 @@
     - name: "Check that each VirtualHost for {{ user.key }} has a ServerName that contains valid characters"
       debug:
         msg: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }}"
-      vars:
-        dig: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }}"
-      failed_when: not dig
+      # vars:
+      #   dig: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }}"
+      # failed_when: not dig
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
