@@ -220,6 +220,16 @@
         loop_var: vhost
         label: "{{ vhost }}"
 
+    - name: "Check that each VirtualHost for {{ user.key }} has a ServerName"
+      assert:
+        that:
+          - vhost.value.users_apache_server_name is defined
+          - vhost.value.users_apache_server_name | length
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost }}"
+
     - name: "Check that each VirtualHost for {{ user.key }} has a ServerName that contains valid characters"
       assert:
         that:
@@ -228,7 +238,6 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost }}"
-
 
   when: user.value.users_apache_virtual_hosts is defined
 
