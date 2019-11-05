@@ -37,6 +37,26 @@
 
   when: user.value.users_groups is defined
 
+- name: "Check users that are members of the {{ user.key }} group"
+  block:
+
+    - name: "Check that the members of {{ user.key }} group is a non-empty array"
+      assert:
+        that:
+          - user.value.users_group_members | length
+          - user.value.users_group_members[0] is defined
+
+    - name: "Check that the groups for {{ user.key }} contain only ascii letters and numbers"
+      assert:
+        that:
+          - group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+      loop: "{{ user.value.users_groups }}"
+      loop_control:
+        loop_var: group
+        label: "{{ group }}"
+
+  when: user.value.users_group_members is defined
+
 - name: "Check that the home directory for {{ user.key }} starts with a slash"
   assert:
     that:
@@ -49,9 +69,24 @@
       - user.value.users_shell in users_shells
   when: user.value.users_shell is defined
 
-- name: "Check that the skeleton for {{ user.key }} starts with a slash"
-  
+- name: "Check users_skel is an existing path for {{ user.key }}"
+  stat:
+    path: "{{ user.value.users_skel }}"
+  register: user_skel_path
+  failed_when: user_skel_path.stat.dir == False
   when: user.value.users_skel is defined
+
+- name: "Check system for {{ user.key }} is yes or no"
+  assert:
+    that:
+      - ( user.value.users_system == "yes" ) or ( user.value.users_system == "no" )  
+  when: user.value.users_system is defined
+
+# TODO check users_home_owner
+
+# TODO users_home_mode
+
+# TODO check users_editor
 
 - name: "Check email address for {{ user.key }}"
   assert:
@@ -82,13 +117,6 @@
         label: "{{ url }}"
 
   when: user.value.users_ssh_public_keys is defined
-
-- name: "Check users_skel is an existing path for {{ user.key }}"
-  stat:
-    path: "{{ user.value.users_skel }}"
-  register: user_skel_path
-  failed_when: user_skel_path.stat.dir == False
-  when: user.value.users_skel is defined
 
 - name: "Check that users_quota is a positive number for {{ user.key }}"
   assert:

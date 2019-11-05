@@ -13,4 +13,22 @@
   debug:
     msg: "Available shells: {{ users_shells }}"
     verbosity: 1
+
+- name: Get all groups
+  getent:
+    database: group
+    split: ':'
+
+- debug:
+    var: getent_group
+    verbosity: 1
+
+- name: Get all users
+  getent:
+    database: passwd
+    split: ':'
+
+- debug:
+    var: getent_passwd
+    verbosity: 1
 ...
