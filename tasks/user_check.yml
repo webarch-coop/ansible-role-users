@@ -49,11 +49,11 @@
       - users_quota_var | human_to_bytes | int > 0
   when: users_quota_var is defined
   loop:
-    - user.value.users_quota
-    - user.value.users_quota_block_softlimit
-    - user.value.users_quota_block_hardlimit
-    - user.value.users_quota_inode_softlimit
-    - user.value.users_quota_inode_hardlimit 
+    - "{{ user.value.users_quota }}"
+    - "{{ user.value.users_quota_block_softlimit }}"
+    - "{{ user.value.users_quota_block_hardlimit }}"
+    - "{{ user.value.users_quota_inode_softlimit }}"
+    - "{{ user.value.users_quota_inode_hardlimit }}"
   loop_control:
     loop_var: users_quota_var
     label: "{{ users_quota_var }}"
