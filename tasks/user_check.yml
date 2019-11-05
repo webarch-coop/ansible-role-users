@@ -14,8 +14,8 @@
 - name: "Check email address for {{ user.key }}"
   assert:
     that:
-      - user.value.email is regex("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
-  when: user.value.email is defined
+      - user.value.users_email is regex("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+  when: user.value.users_email is defined
 
 - name: SSH public key URL checks
   block:
