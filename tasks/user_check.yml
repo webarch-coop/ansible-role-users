@@ -207,54 +207,16 @@
 
 # TODO php checks https://git.coop/webarch/php-fpm/blob/master/tasks/pool_check.yml
 
+# These need to go into a user_vhost_check.yml file called via a vhost loop
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
 
-    - name: "Check the DocumentRoot for each VirtualHost for {{ user.key }} contains valid characters"
-      assert:
-        that:
-          - vhost.key is regex("^[a-zA-Z0-9/_-]*$")
-        fail_msg: "Only letters, numbers, underscores, dashes and forward slashes can be present in the DocumentRoot path" 
+    - name: "Loop thought the VirtualServer's for {{ user.key }}"
+      include_tasks: user_check_vhost.yml
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost }}"
-
-    - name: "Check that each VirtualHost for {{ user.key }} has a ServerName"
-      assert:
-        that:
-          - vhost.value.users_apache_server_name is defined
-          - vhost.value.users_apache_server_name | length
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost }}"
-
-    - name: Set users_vhost_ips is an empty array
-      set_fact:
-        users_vhost_ips: []
-
-    # TODO: check this works with CNAMEs and RR DNS
-    - name: "Check that each VirtualHost for {{ user.key }} has a ServerName that resolves to a IPv4 address"
-      set_fact:
-        users_vhost_ips: "{{ users_vhost_ips }} + [ '{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') | ipv4 }}' ]" 
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost }}"
-
-    - name: Loop thought the the list of users_vhost_ips and fail if any are False
-      fail:
-        msg: "One of the ServerNames for {{ user.key }} doesn't resolve to a IP address"
-      when: ip == "False"
-      loop: "{{ users_vhost_ips }}"
-      loop_control:
-        loop_var: ip
-        label: "{{ ip }}"
-
-    - name: Print the list of users_vhost_ips
-      debug:
-        msg: "IPs: {{ users_vhost_ips }}"
 
   when: user.value.users_apache_virtual_hosts is defined
 
