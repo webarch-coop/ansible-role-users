@@ -40,7 +40,7 @@
 - name: "Check that the home directory for {{ user.key }} starts with a slash"
   assert:
     that:
-      - user.value.users_home is regex("^\/.*$)
+      - user.value.users_home is regex("^\/.*$")
   when: user.value.users_home is defined
 
 - name: "Check email address for {{ user.key }}"
