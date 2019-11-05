@@ -4,6 +4,7 @@
     pkg:
       - bc
       - mutt
+      - python-dnspython
       - python-passlib
       - slay
       - vim
