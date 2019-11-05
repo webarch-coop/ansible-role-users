@@ -1,5 +1,5 @@
 ---
 # {{ ansible_managed }}
 # User config for {{ user.key }}
-{{ user.value | to_nice_yaml(indent=2) }}
+{{ user.value | to_nice_yaml(indent=2, width=1000) }}
 ...
