@@ -59,7 +59,6 @@
       assert:
         that:
           - group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
-        quiet: true
       loop: "{{ user.value.users_groups }}"
       loop_control:
         loop_var: group
