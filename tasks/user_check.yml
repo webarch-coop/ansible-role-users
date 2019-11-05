@@ -4,6 +4,32 @@
     that:
       - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
 
+- name: "Check that the group for {{ user.key }} contains only ascii letters and numbers"
+  assert:
+    that:
+      - user.value.users_group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+  when: user.value.group is defined
+
+- name: "Check the groups for {{ user.key }}"
+  block:
+
+    - name: "Check that the groups for {{ user.key }} is a non-empty array"
+      assert:
+        that:
+          - user.value.users_groups | length
+          - user.value.users_groups[0] is defined
+
+    - name: "Check that the groups for {{ user.key }} contain only ascii letters and numbers"
+      assert:
+        that:
+          - group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+      loop: "{{ user.value.users_groups }}"
+      loop_control:
+        loop_var: group
+        label: "{{ group }}"
+
+  when: user.value.users_groups is defined
+
 - name: "Check state for {{ user.key }}"
   assert:
     that:
