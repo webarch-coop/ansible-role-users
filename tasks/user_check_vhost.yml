@@ -16,4 +16,6 @@
   include_tasks: user_check_domain.yml
   vars:
     users_domain: "{{ vhost.value.users_apache_server_name }}"
+
+# TODO: Check server aliases
 ...

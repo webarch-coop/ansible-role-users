@@ -9,6 +9,10 @@
   set_fact:
     users_domain_ip: "{{ lookup('dig', '{{ users_domain }}') | ipv4 }}" 
 
+- name: Print the IP address
+  debug:
+    msg: "{{ users_domain }} resolves to {{ users_domain_ip }}"
+
 - name: "Fail if {{ users_domain_ip }} is not a IPv4 address" 
   fail:
     msg: "{{ users_domain }} appears not to resolve to a IP address"
