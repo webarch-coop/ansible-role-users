@@ -246,7 +246,7 @@
     - name: Loop thought the the list of users_vhost_ips and fail if any are False
       fail:
         msg: "One of the ServerNames for {{ user.key }} doesn't resolve to a IP address"
-      when: ip == False
+      when: ip == "False"
       loop: "{{ users_vhost_ips }}"
       loop_control:
         loop_var: ip
