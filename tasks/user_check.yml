@@ -1,8 +1,9 @@
 ---
-- name: "Check that {{ user.key }} contains only ascii letters and numbers"
+- name: "Check that {{ user.key }} contains only lowercase ascii letters and numbers"
   assert:
     that:
-      - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+      # - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+      - user.key is regex("^[a-z0-9]*$")
 
 - name: "Check that {{ user.key }} is between 2 and 12 characters long"
   assert:
@@ -169,7 +170,7 @@
       - ( user.value.users_mariadb_notify_passwd == True ) or ( user.value.users_mariadb_notify_passwd == False )
   when: user.value.users_mariadb_notify_passwd is defined
 
-- name: "MariaDB users_mariadb_databases array checks for {{ user.key }}" 
+- name: "MariaDB users_mariadb_databases array checks for {{ user.key }}"
   block:
 
     - name: "Check users_mariadb_databases is a non-empty array for {{ user.key }}"
@@ -178,10 +179,11 @@
           - user.value.users_mariadb_databases | length
           - user.value.users_mariadb_databases[0] is defined
 
-    - name: "Check that the database names only contain lettters, numbers and underscores for {{ user.key }}"
+    - name: "Check that the database names only contain lower case letters, numbers and underscores for {{ user.key }}"
       assert:
         that:
-          - db is regex("^\d*[a-zA-Z][a-zA-Z\d]_*$")
+          # - db is regex("^\d*[a-zA-Z][a-zA-Z\d]_*$")
+          - db is regex("^[a-z0-9_]*$")
       loop: "{{ user.value.users_mariadb_databases }}"
       loop_control:
         loop_var: db
