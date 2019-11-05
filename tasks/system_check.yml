@@ -1,0 +1,14 @@
+---
+- name: Check which shells are present
+  shell: cat /etc/shells | grep -v ^#
+  register: users_shells_check
+
+- name: Array set for shells
+  set_fact:
+    users_shells: "{{ users_shells_check.stdout_lines | list }}"
+
+- name: Print available shells
+  debug:
+    msg: "Available shells: {{ users_shells }]"
+    verbosity: 1
+...

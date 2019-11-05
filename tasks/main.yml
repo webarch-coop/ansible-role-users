@@ -12,6 +12,9 @@
   debug:
     msg: "User to update: {{ users_update }}"
 
+- name: Various system state checks
+  include_tasks: system_check.yml
+
 - name: Check variables for users to update
   include_tasks: user_check.yml
   when: user.key in users_update

@@ -44,9 +44,9 @@
   when: user.value.users_home is defined
 
 - name: "Check that the shell for {{ user.key }} is valid"
-  block:
-
-
+  assert:
+    that:
+      - user.value.users_shell in users_shells 
   when: user.value.users_shell is defined
 
 - name: "Check email address for {{ user.key }}"
