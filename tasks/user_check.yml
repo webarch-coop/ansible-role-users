@@ -233,7 +233,7 @@
     - name: "Check that each VirtualHost for {{ user.key }} has a ServerName that contains valid characters"
       assert:
         that:
-          - "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }} is defined"
+          - "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') | ipaddr }}" 
       # debug:
       #   msg: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }}"
       # vars:
