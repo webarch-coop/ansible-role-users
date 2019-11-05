@@ -9,6 +9,6 @@
 
 - name: Print available shells
   debug:
-    msg: "Available shells: {{ users_shells }]"
+    msg: "Available shells: {{ users_shells }}"
     verbosity: 1
 ...
