@@ -1,4 +1,9 @@
 ---
+- name: "Check that {{ user.key }} contains only ascii letters and numbers"
+  assert:
+    that:
+      - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+
 - name: "Check state for {{ user.key }}"
   assert:
     that:
