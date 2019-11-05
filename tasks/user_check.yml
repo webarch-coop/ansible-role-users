@@ -43,6 +43,12 @@
       - user.value.users_home is regex("^\/.*$")
   when: user.value.users_home is defined
 
+- name: "Check that the shell for {{ user.key }} is valid"
+  block:
+
+
+  when: user.value.users_shell is defined
+
 - name: "Check email address for {{ user.key }}"
   assert:
     that:

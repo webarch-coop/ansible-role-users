@@ -1,7 +1,9 @@
 ---
-- name: "Ansible | List all known variables and facts"
-  debug:
-    var: hostvars[inventory_hostname]
+- name: "Variables and facts for {{ inventory_hostname }} written to {{ users_state_dir }}/system.yml"
+  template:
+    src: system_state.yml.j2
+    dest: "{{ users_state_dir }}/system.yml"
+  check_mode: false
 
 - name: Check users changed
   include_tasks: users_changed.yml
