@@ -231,14 +231,10 @@
         label: "{{ vhost }}"
 
     # TODO: check this works with CNAMEs and RR DNS
-    - name: "Check that each VirtualHost for {{ user.key }} has a ServerName that contains valid characters"
+    - name: "Check that each VirtualHost for {{ user.key }} has a ServerName that resolves to a IP address"
       set_fact:
         users_vhost_ip: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') | ipaddr }}" 
-      # debug:
-      #   msg: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }}"
-      # vars:
-      #   dig: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }}"
-      # failed_when: not dig
+      failed_when: users_vhost_ip is not defined
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
