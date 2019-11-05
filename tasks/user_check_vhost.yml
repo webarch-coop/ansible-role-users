@@ -29,7 +29,7 @@
       include_tasks: user_check_domain.yml
       vars:
         users_domain: "{{ domain }}"
-      loop: "{{ vhost.value.users_apache_server.aliases }}"
+      loop: "{{ vhost.value.users_apache_server_aliases }}"
       loop_control:
         loop_var: domain
         label: "{{ domain }}"
