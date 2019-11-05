@@ -78,7 +78,7 @@
   stat:
     path: "{{ user.value.users_skel }}"
   register: user_skel_path
-  failed_when: user_skel_path.stat.dir == False
+  failed_when: user_skel_path.stat.isdir == False
   when: user.value.users_skel is defined
 
 - name: "Check system for {{ user.key }} is true or false"
