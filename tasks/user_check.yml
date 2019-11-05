@@ -1,8 +1,9 @@
 ---
-- name: "Check that {{ user.key }} contains only ascii letters and numbers and is a max of 12 characters"
+- name: "Check that {{ user.key }} contains only ascii letters and numbers and is between 2 and 12 characters"
   assert:
     that:
-      - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*{1,12}$")
+      - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+      - user.key is regex("^{2,12}$")
 
 - name: "Check state for {{ user.key }}"
   assert:
