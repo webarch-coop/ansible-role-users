@@ -43,18 +43,28 @@
       - user.value.users_quota | human_to_bytes | int > 0 
   when: user.value.users_quota is defined
 
-- name: "Check that quota variables are positive intergers if defined for {{ user.key }}"
+- name: "Check that users_quota_block_softlimit is a positive number for {{ user.key }}"
   assert:
     that:
-      - users_quota_var | human_to_bytes | int > 0
-  when: users_quota_var is defined
-  loop:
-    - "{{ user.value.users_quota }}"
-    - "{{ user.value.users_quota_block_softlimit }}"
-    - "{{ user.value.users_quota_block_hardlimit }}"
-    - "{{ user.value.users_quota_inode_softlimit }}"
-    - "{{ user.value.users_quota_inode_hardlimit }}"
-  loop_control:
-    loop_var: users_quota_var
-    label: "{{ users_quota_var }}"
+      - user.value.users_quota_block_softlimit | human_to_bytes | int > 0
+  when: user.value.users_quota_block_softlimit is defined
+
+- name: "Check that users_quota_block_hardlimit is a positive number for {{ user.key }}"
+  assert:
+    that:
+      - user.value.users_quota_block_hardlimit | human_to_bytes | int > 0
+  when: user.value.users_quota_block_hardlimit is defined
+
+- name: "Check that users_quota_inode_softlimit is a positive number for {{ user.key }}"
+  assert:
+    that:
+      - user.value.users_quota_inode_softlimit | human_to_bytes | int > 0
+  when: user.value.users_quota_inode_softlimit is defined
+
+- name: "Check that users_quota_inode_hardlimit is a positive number for {{ user.key }}"
+  assert:
+    that:
+      - user.value.users_quota_inode_hardlimit | human_to_bytes | int > 0
+  when: user.value.users_quota_inode_hardlimit is defined
+
 ...
