@@ -11,6 +11,12 @@
       - ( user.value.state == "present" ) or ( user.value.state == "absent" )
   when: user.value.state is defined
 
+- name: "Check email address for {{ user.key }}"
+  assert:
+    that:
+      - user.value.email is regex("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+  when: user.value.email is defined
+
 - name: SSH public key URL checks
   block:
 
