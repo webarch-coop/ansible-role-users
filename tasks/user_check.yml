@@ -230,10 +230,10 @@
         loop_var: vhost
         label: "{{ vhost }}"
 
+    # TODO: check this works with CNAMEs and RR DNS
     - name: "Check that each VirtualHost for {{ user.key }} has a ServerName that contains valid characters"
-      assert:
-        that:
-          - "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') | ipaddr }}" 
+      set_fact:
+        users_vhost_ip: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') | ipaddr }}" 
       # debug:
       #   msg: "{{ lookup('dig', '{{ vhost.value.users_apache_server_name }}') }}"
       # vars:
