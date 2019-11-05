@@ -4,6 +4,13 @@
     that:
       - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
 
+- name: "Check state for {{ user.key }}"
+  assert:
+    that:
+      - user.value.state | length
+      - ( user.value.state == "present" ) or ( user.value.state == "absent" )
+  when: user.value.state is defined
+
 - name: "Check that the group for {{ user.key }} contains only ascii letters and numbers"
   assert:
     that:
@@ -30,12 +37,11 @@
 
   when: user.value.users_groups is defined
 
-- name: "Check state for {{ user.key }}"
+- name: "Check that the home directory for {{ user.key }} starts with a slash"
   assert:
     that:
-      - user.value.state | length
-      - ( user.value.state == "present" ) or ( user.value.state == "absent" )
-  when: user.value.state is defined
+      - user.value.users_home is regex("^\/.*$)
+  when: user.value.users_home is defined
 
 - name: "Check email address for {{ user.key }}"
   assert:
