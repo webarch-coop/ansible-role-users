@@ -11,11 +11,28 @@
       - vhost.value.users_apache_server_name is defined
       - vhost.value.users_apache_server_name | length
 
-# TODO: check this works with CNAMEs and RR DNS
 - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName that resolves to a IPv4 address"
   include_tasks: user_check_domain.yml
   vars:
     users_domain: "{{ vhost.value.users_apache_server_name }}"
 
-# TODO: Check server aliases
+- name: "Check ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  block:
+
+    - name: "Check that the ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
+      assert:
+        that:
+          - vhost.value.users_apache_server_aliases | length
+          - vhost.value.users_apache_server_aliases[0] is defined
+
+    - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has ServerAlias' that resolve to IPv4 addresses"
+      include_tasks: user_check_domain.yml
+      vars:
+        users_domain: "{{ domain }}"
+      loop: "{{ vhost.value.users_apache_server.aliases }}"
+      loop_control:
+        loop_var: domain
+        lable: "{{ domain }}"
+
+  when: vhost.value.users_apache_server_aliases is defined
 ...
