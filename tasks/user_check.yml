@@ -205,9 +205,6 @@
 
   when: user.value.users_mariadb_databases is defined
 
-# TODO php checks https://git.coop/webarch/php-fpm/blob/master/tasks/pool_check.yml
-
-# These need to go into a user_vhost_check.yml file called via a vhost loop
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
 
@@ -220,60 +217,5 @@
 
   when: user.value.users_apache_virtual_hosts is defined
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# TODO php checks https://git.coop/webarch/php-fpm/blob/master/tasks/pool_check.yml
 ...
