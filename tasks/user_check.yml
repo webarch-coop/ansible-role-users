@@ -1,8 +1,8 @@
 ---
-- name: "Check that {{ user.key }} contains only ascii letters and numbers"
+- name: "Check that {{ user.key }} contains only ascii letters and numbers and is a max of 12 characters"
   assert:
     that:
-      - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+      - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*{1,12}$")
 
 - name: "Check state for {{ user.key }}"
   assert:
@@ -76,17 +76,21 @@
   failed_when: user_skel_path.stat.dir == False
   when: user.value.users_skel is defined
 
-- name: "Check system for {{ user.key }} is yes or no"
+- name: "Check system for {{ user.key }} is true or false"
   assert:
     that:
-      - ( user.value.users_system == "yes" ) or ( user.value.users_system == "no" )  
+      - ( user.value.users_system == True ) or ( user.value.users_system == False )
   when: user.value.users_system is defined
 
 # TODO check users_home_owner
-
 # TODO users_home_mode
-
 # TODO check users_editor
+
+- name: "Check generate_ssh_key for {{ user.key }} is true or false"
+  assert:
+    that:
+      - ( user.value.users_generate_ssh_key == True ) or ( user.value.users_generate_ssh_key == False )
+  when: user.value.users_generate_ssh_key is defined
 
 - name: "Check email address for {{ user.key }}"
   assert:
@@ -148,4 +152,15 @@
       - user.value.users_quota_inode_hardlimit | human_to_bytes | int > 0
   when: user.value.users_quota_inode_hardlimit is defined
 
+- name: "Check that users_notify_passwd for {{ user.key }} is true or false"
+  assert:
+    that:
+      - ( user.value.users_notify_passwd == True ) or ( user.value.users_notify_passwd == False )
+  when: user.value.users_notify_passwd is defined
+
+
+
+# TODO users_mariadb_*
+# TODO users_phpfpm_*
+# TODO users_apache_*
 ...

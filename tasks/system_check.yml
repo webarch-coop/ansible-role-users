@@ -12,7 +12,7 @@
 - name: Print available shells
   debug:
     msg: "Available shells: {{ users_shells }}"
-    verbosity: 1
+    verbosity: 2
 
 - name: Get all groups
   getent:
@@ -21,7 +21,7 @@
 
 - debug:
     var: getent_group
-    verbosity: 1
+    verbosity: 2
 
 - name: Get all users
   getent:
@@ -30,5 +30,5 @@
 
 - debug:
     var: getent_passwd
-    verbosity: 1
+    verbosity: 2
 ...
