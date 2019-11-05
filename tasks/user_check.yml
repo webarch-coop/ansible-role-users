@@ -3,7 +3,7 @@
   assert:
     that:
       - user.key is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
-      - user.key is regex("^{2,12}$")
+      - user.key is regex("^.{2,12}$")
 
 - name: "Check state for {{ user.key }}"
   assert:
