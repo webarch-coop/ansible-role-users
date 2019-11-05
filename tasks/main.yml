@@ -235,14 +235,6 @@
 
   when: item.value.users_state is defined and item.value.users_state == "absent"
 
-- name: Skel profiles included
-  include_tasks: "skel_{{ users_skeleton }}.yml"
-  loop:
-    - www
-  loop_control:
-    loop_var: users_skeleton
-  when: ( users_skell is defined ) and ( users_skell == True )
-
 - name: Quota tasks
   block:
 

@@ -49,6 +49,10 @@
       - user.value.users_shell in users_shells
   when: user.value.users_shell is defined
 
+- name: "Check that the skeleton for {{ user.key }} starts with a slash"
+  
+  when: user.value.users_skel is defined
+
 - name: "Check email address for {{ user.key }}"
   assert:
     that:
@@ -82,8 +86,8 @@
 - name: "Check users_skel is an existing path for {{ user.key }}"
   stat:
     path: "{{ user.value.users_skel }}"
-  register: user_skell_path
-  failed_when: user_skell_path.stat.isdir == False
+  register: user_skel_path
+  failed_when: user_skel_path.stat.dir == False
   when: user.value.users_skel is defined
 
 - name: "Check that users_quota is a positive number for {{ user.key }}"

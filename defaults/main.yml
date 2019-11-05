@@ -6,8 +6,6 @@ users_chroot: false
 # Define users_mariadb to true for this role to create MariaDB user and
 # databases
 users_mariadb: false
-# Define users_skell to true install addtionall skell profiles
-users_skell: false
 # Define users_phpfpm to true for this role to generate PHP FPM pools
 users_phpfpm: false
 # Define users_cron to true for this role to generate cron tasks

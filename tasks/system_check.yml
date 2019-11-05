@@ -1,6 +1,8 @@
 ---
 - name: Check which shells are present
   shell: cat /etc/shells | grep -v ^#
+  check_mode: false
+  changed_when: false
   register: users_shells_check
 
 - name: Array set for shells
