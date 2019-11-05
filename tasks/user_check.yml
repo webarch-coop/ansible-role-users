@@ -175,7 +175,7 @@
     - name: "Check users_mariadb_databases is a non-empty array for {{ user.key }}"
       assert:
         that:
-          - user.users_mariadb_databases | length
+          - user.value.users_mariadb_databases | length
           - user.value.users_mariadb_databases[0] is defined
 
     - name: "Check that the database names only contain lettters, numbers and underscores for {{ user.key }}"
