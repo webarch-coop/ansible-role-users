@@ -69,8 +69,8 @@
           - user.name is defined 
       loop: "{{ vhost.value.users_apache_htauth_users }}"
       loop_control:
-        loop_var: user
-        label: "{{ user }}"
+        loop_var: htuser
+        label: "{{ htuser }}"
   
   when: vhost.value.users_apache_htauth_users is defined
 ...
