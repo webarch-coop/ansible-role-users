@@ -136,7 +136,7 @@
     - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - option is regex("^[()+-]All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$") 
+          - option is regex("^[+-]+All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$") 
       loop: "{{ vhost.value.users_apache_options }}"
       loop_control:
         loop_var: option
