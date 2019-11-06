@@ -66,7 +66,7 @@
     - name: Loop though the users_apache_htauth_users
       assert:
         that:
-          - user.name is defined 
+          - htuser.name is defined 
       loop: "{{ vhost.value.users_apache_htauth_users }}"
       loop_control:
         loop_var: htuser
