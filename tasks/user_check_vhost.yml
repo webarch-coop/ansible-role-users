@@ -66,7 +66,7 @@
     - name: "Check the users_apache_htauth_users names for {{ vhost.key }} VirtualHost for {{ user.key }} are valid if defined"
       assert:
         that:
-          - htuser.name is defined 
+          - htuser.name is defined
           - htuser.name is regex("^[a-zA-Z0-9_-]*$")
       loop: "{{ vhost.value.users_apache_htauth_users }}"
       loop_control:
@@ -92,6 +92,32 @@
       loop_control:
         loop_var: htuser
         label: "{{ htuser }}"
-  
+
   when: vhost.value.users_apache_htauth_users is defined
+
+- name: "Check users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+
+    # https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype
+    - name: "Check authtype is set to None|Basic|Digest|Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      assert:
+        that:
+          - ( location.authtype == "None" ) or ( location.authtype == "Basic" ) or ( location.authtype == "Digest" ) or ( location.authtype == "Form" )
+      when: location.authtype is defined 
+      loop: "{{ vhost.value.users_apache_locations }}"
+      loop_control:
+        loop_var: location
+        label: "{{ location }}"
+
+    # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
+    - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      assert:
+        that:
+          - ( location.require == "all granted" ) or ( location.require == "all denied" ) or ( location.require is match("method\ .*") ) or ( location.require is match("user\ .*") ) or ( location.require == "valid-user" ) or ( location.require is match("ip\ .*") )
+      when: location.require is defined
+      loop: "{{ vhost.value.users_apache_locations }}"
+      loop_control:
+        loop_var: location
+        label: "{{ location }}"
+
+  when: vhost.value.users_apache_locations is defined
 ...
