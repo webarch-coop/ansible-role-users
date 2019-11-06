@@ -63,10 +63,31 @@
 - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   block:
 
-    - name: Loop though the users_apache_htauth_users
+    - name: "Check the users_apache_htauth_users names for {{ vhost.key }} VirtualHost for {{ user.key }} are valid if defined"
       assert:
         that:
           - htuser.name is defined 
+          - htuser.name is regex("^[a-zA-Z0-9_-]*$")
+      loop: "{{ vhost.value.users_apache_htauth_users }}"
+      loop_control:
+        loop_var: htuser
+        label: "{{ htuser }}"
+
+    - name: "Check that the users_apache_htauth_users passwords for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+      assert:
+        that:
+          - htuser.password is defined
+      when: ( htuser.state is not defined ) or ( htuser.state == "present" )
+      loop: "{{ vhost.value.users_apache_htauth_users }}"
+      loop_control:
+        loop_var: htuser
+        label: "{{ htuser }}"
+
+    - name: "Check that users_apache_htauth_users state is set to present or absent for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      assert:
+        that:
+          - ( htuser.state == "present" ) or ( htuser.state == "absent" )
+      when: htuser.state is defined
       loop: "{{ vhost.value.users_apache_htauth_users }}"
       loop_control:
         loop_var: htuser
