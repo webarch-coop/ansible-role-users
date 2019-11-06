@@ -133,10 +133,10 @@
           - vhost.value.users_apache_options | length
           - vhost.value.users_apache_options[0] is defined
 
-    - name: "Check that all Options start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          -  option is regex("^[+|-].*$") 
+          - option is regex("^[+|-]All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$") 
       loop: "{{ vhost.value.users_apache_options }}"
       loop_control:
         loop_var: option
