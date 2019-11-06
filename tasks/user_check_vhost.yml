@@ -39,7 +39,7 @@
 - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
   assert:
     that:
-      - ( vhost.value.users_apache_type == "php" ) or ( vhost.value.users_apache_type = "cgi" ) or ( vhost.value.users_apache_type = "static" )
+      - ( vhost.value.users_apache_type == "php" ) or ( vhost.value.users_apache_type == "cgi" ) or ( vhost.value.users_apache_type == "static" )
   when: vhost.value.users_apache_type is defined
 
 - name: "Check that users_apache_robots is set to deny is defined for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
