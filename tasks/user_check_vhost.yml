@@ -5,7 +5,7 @@
       - vhost.key is regex("^[a-zA-Z0-9/_-]*$")
     fail_msg: "Only letters, numbers, underscores, dashes and forward slashes can be present in the DocumentRoot path"
 
-- name: "Check that the the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
+- name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
   assert:
     that:
       - vhost.value.users_apache_server_name is defined
@@ -35,4 +35,42 @@
         label: "{{ domain }}"
 
   when: vhost.value.users_apache_server_aliases is defined
+
+- name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
+  assert:
+    that:
+      - ( vhost.value.users_apache_type == "php" ) or ( vhost.value.users_apache_type = "cgi" ) or ( vhost.value.users_apache_type = "static" )
+  when: vhost.value.users_apache_type is defined
+
+- name: "Check that users_apache_robots is set to deny is defined for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+  assert:
+    that:
+      - vhost.value.users_apache_robots == "deny"
+  when: vhost.value.users_apache_robots is defined
+
+- name: "Check that users_apache_expires is set to medium or strict for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+  assert:
+    that:
+      - ( vhost.value.users_apache_expires == "medium" ) or ( vhost.value.users_apache_expires == "strict" )
+  when: vhost.value.users_apache_expires is defined
+
+- name: "Check that users_cms is set to wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+  assert:
+    that:
+      - ( vhost.value.users_cms == "wordpress" ) or ( vhost.value.users_cms == "matomo" ) or ( vhost.value.users_cms == "phpmyadmin" )
+  when: vhost.value.users_cms is defined
+
+- name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  block:
+
+    - name: Loop though the users_apache_htauth_users
+      assert:
+        that:
+          - user.name is defined 
+      loop: "{{ vhost.value.users_apache_htauth_users }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user }}"
+  
+  when: vhost.value.users_apache_htauth_users is defined
 ...
