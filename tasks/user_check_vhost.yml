@@ -109,21 +109,44 @@
         loop_var: location
         label: "{{ location }}"
 
-    # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
-    - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      assert:
-        that:
-          - ( location.require == "all granted" ) or ( location.require == "all denied" ) or ( location.require is match("method\ .*") ) or ( location.require is match("user\ .*") ) or ( location.require == "valid-user" ) or ( location.require is match("ip\ .*") )
-      when: location.require is defined
-      loop: "{{ vhost.value.users_apache_locations }}"
-      loop_control:
-        loop_var: location
-        label: "{{ location }}"
+#    # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
+#    - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+#      assert:
+#        that:
+#          - ( location.require == "all granted" ) or ( location.require == "all denied" ) or ( location.require is match("method\ .*") ) or ( location.require is match("user\ .*") ) or ( location.require == "valid-user" ) or ( location.require is match("ip\ .*") )
+#      when: location.require is defined
+#      loop: "{{ vhost.value.users_apache_locations }}"
+#      loop_control:
+#        loop_var: location
+#        label: "{{ location }}"
 
   when: vhost.value.users_apache_locations is defined
 
+# TODO users_apache_options
 
+- name: "Check that only valid Options are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  block:
 
+    - name: "Check that the Options for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
+      assert:
+        that:
+          - vhost.value.users_apache_options | length
+          - vhost.value.users_apache_otions[0] is defined
+
+    - name: "Check that all Options start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          -  option is regex("^[+|-].*$") 
+      loop: "{{ vhost.value.users_apache_options }}"
+      loop_control:
+        loop_var: option
+        label: "{{ option }}"
+
+  when: vhost.value.users_apache_options is defined
+
+# TODO users_apache_override
+
+# TODO users_apache_index
 
 
 
