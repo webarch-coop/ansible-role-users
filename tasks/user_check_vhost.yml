@@ -98,7 +98,7 @@
 - name: "Check users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
 
     # https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype
-    - name: "Check authtype is set to None|Basic|Digest|Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+    - name: "Check authtype is set to None, Basic, Digest or Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       assert:
         that:
           - ( location.authtype == "None" ) or ( location.authtype == "Basic" ) or ( location.authtype == "Digest" ) or ( location.authtype == "Form" )
@@ -120,4 +120,49 @@
         label: "{{ location }}"
 
   when: vhost.value.users_apache_locations is defined
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ...
