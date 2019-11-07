@@ -217,5 +217,93 @@
 
   when: user.value.users_apache_virtual_hosts is defined
 
-# TODO php checks https://git.coop/webarch/php-fpm/blob/master/tasks/pool_check.yml
+# https://www.php.net/manual/en/install.fpm.configuration.php
+- name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined" 
+  assert:
+    that:
+      - user.value.users_phpfpm_pm is regex("^static|ondemand|dynamic$")
+  when: user.value.users_phpfpm_pm is defined
+
+- name: "Check that PHP-FPM pm.max_children is greater than 1 for {{ user.key }} if defined"
+  assert:
+    that:
+      - user.value.users_phpfpm_pm_max_children | int >= 1
+  when: user.value.users_phpfpm_pm_max_children is defined
+
+- name: "Check the PHP-FPM pm dynamic pool settings for {{ user.key }} if defined"
+  block:
+
+    - name: "Check PHP-FPM pm.start_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_start_servers | int >= 1
+      when: user.value.users_phpfpm_pm_start_servers is defined
+
+    - name: "Check the PHP-FPM pm.min_spare_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_min_spare_servers | int >= 1
+      when: user.value.users_phpfpm_pm_min_spare_servers is defined
+
+    - name: "Check the PHP-FPM pm.max_spare_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_max_spare_servers | int >= 1
+      when: user.value.users_phpfpm_pm_max_spare_servers is defined
+
+    - name: "Check the PHP-FPM users_phpfpm_pm_max_children for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_max_children | int >= 1
+      when: user.value.users_phpfpm_pm_max_children is defined
+
+    - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.start_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_start_servers | int
+      when:
+        - user.value.users_phpfpm_pm_max_children is defined
+        - user.value.users_phpfpm_pm_start_servers is defined
+
+    - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.min_spare_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+      when:
+        - user.value.users_phpfpm_pm_max_children is defined
+        - user.value.users_phpfpm_pm_min_spare_servers is defined
+
+    - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.max_spare_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_max_spare_servers | int
+      when:
+        - user.value.users_phpfpm_pm_max_children is defined
+        - user.value.users_phpfpm_pm_max_spare_servers is defined
+
+    - name: "Check the PHP-FPM pm.start_servers must be greater than pm.min_spare_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_start_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+      when:
+        - user.value.users_phpfpm_pm_start_servers is defined
+        - user.value.users_phpfpm_pm_min_spare_servers is defined
+
+    - name: "Check the PHP-FPM pm.start_servers must less than or equal to pm.max_spare_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_start_servers | int <= user.value.users_phpfpm_pm_max_spare_servers | int
+      when:
+        - user.value.users_phpfpm_pm_start_servers is defined
+        - user.value.users_phpfpm_pm_max_spare_servers is defined
+
+    - name: "Check the PHP-FPM pm.max_spare_servers must be greater than pm.min_spare_servers for {{ user.key }} if defined"
+      assert:
+        that:
+          - user.value.users_phpfpm_pm_max_spare_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+      when:
+        - user.value.users_phpfpm_pm_max_spare_servers is defined
+          user.value.users_phpfpm_pm_min_spare_servers is defined
+
+  when: ( user.value.users_phpfpm_pm is defined ) and ( user.value.users_phpfpm_pm == "dynamic" )
 ...
