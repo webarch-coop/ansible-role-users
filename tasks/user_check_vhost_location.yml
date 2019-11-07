@@ -6,11 +6,16 @@
       - loc.authtype is regex("^(?i)None|Basic|Digest|Form$")
   when: loc.authtype is defined 
 
+- name: "Debug require for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  debug:
+    msg: "require is set to: {{ loc.require }}"
+  when: loc.require is defined
+
 # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
 - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   assert:
     that:
-      - loc.require is regex("(?i)all granted|all denied|env .*|method .*|expr .*|user .*|group .*|valid-user|ip .*")
+      - loc.require is regex("(?i)[not]?all granted|[not]?all denied|[not]?env .*|[not]?method .*|[not]?expr .*|[not]?user .*|[not]?group .*|[not]?valid-user|[not]?ip .*")
   loop: "{{ loc.require }}"
   loop_control:
     loop_var: req
