@@ -11,7 +11,6 @@
   assert:
     that:
       - loc.require is regex("(?i)all granted|all denied|env .*|method .*|expr .*|user .*|group .*|valid-user|ip .*")
-      # - ( loc.require == "all granted" ) or ( loc.require == "all denied" ) or ( loc.require is match("method\ .*") ) or ( loc.require is match("user\ .*") ) or ( loc.require == "valid-user" ) or ( loc.require is match("ip\ .*") )
   loop: "{{ loc.require }}"
   loop_control:
     loop_var: req
