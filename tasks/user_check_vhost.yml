@@ -155,5 +155,22 @@
 
   when: vhost.value.users_apache_override is defined
 
-# TODO users_apache_index
+- name: "Check that file names are listed for the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
+
+    - name: "Check that the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
+      assert:
+        that:
+          - vhost.value.users_apache_index | length
+          - vhost.value.users_apache_index[0] is defined
+
+    - name: "Check that each DirectoryIndex appears to be a filename for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
+      assert:
+        that:
+          - index is regex("\w\.\w")
+      loop: "{{ vhost.value.users_apache_index }}"
+      loop_control:
+        loop_var: index 
+        label: "{{ index }}"
+
+  when: vhost.value.users_apache_index is defined
 ...
