@@ -10,7 +10,8 @@
 - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   assert:
     that:
-      - ( loc.require == "all granted" ) or ( loc.require == "all denied" ) or ( loc.require is match("method\ .*") ) or ( loc.require is match("user\ .*") ) or ( loc.require == "valid-user" ) or ( loc.require is match("ip\ .*") )
+      - loc.require is regex("(?i)all granted|all denied|env .*|method .*|expr .*|user .*|group .*|valid-user|ip .*")
+      # - ( loc.require == "all granted" ) or ( loc.require == "all denied" ) or ( loc.require is match("method\ .*") ) or ( loc.require is match("user\ .*") ) or ( loc.require == "valid-user" ) or ( loc.require is match("ip\ .*") )
   loop: "{{ loc.require }}"
   loop_control:
     loop_var: req
