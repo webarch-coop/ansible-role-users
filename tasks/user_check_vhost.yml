@@ -147,7 +147,7 @@
     - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=[Override|Unknown|All]|Options=[All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.]$")
+          - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
       loop: "{{ vhost.value.users_apache_override }}"
       loop_control:
         loop_var: override
