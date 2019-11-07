@@ -170,7 +170,7 @@
           - index is regex("^\w+\.\w+$")
       loop: "{{ vhost.value.users_apache_index }}"
       loop_control:
-        loop_var: index 
+        loop_var: index
         label: "{{ index }}"
 
   when: vhost.value.users_apache_index is defined
