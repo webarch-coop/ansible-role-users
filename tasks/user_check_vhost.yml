@@ -156,6 +156,7 @@
   when: vhost.value.users_apache_override is defined
 
 - name: "Check that file names are listed for the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
+  block:
 
     - name: "Check that the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
       assert:
