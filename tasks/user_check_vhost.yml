@@ -95,34 +95,13 @@
 
   when: vhost.value.users_apache_htauth_users is defined
 
-- name: "Check users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-  block:
-
-    # https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype
-    - name: "Check authtype is set to None, Basic, Digest or Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      assert:
-        that:
-          - ( location.authtype == "None" ) or ( location.authtype == "Basic" ) or ( location.authtype == "Digest" ) or ( location.authtype == "Form" )
-      when: location.authtype is defined 
-      loop: "{{ vhost.value.users_apache_locations }}"
-      loop_control:
-        loop_var: location
-        label: "{{ location }}"
-
-#    # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
-#    - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-#      assert:
-#        that:
-#          - ( location.require == "all granted" ) or ( location.require == "all denied" ) or ( location.require is match("method\ .*") ) or ( location.require is match("user\ .*") ) or ( location.require == "valid-user" ) or ( location.require is match("ip\ .*") )
-#      when: location.require is defined
-#      loop: "{{ vhost.value.users_apache_locations }}"
-#      loop_control:
-#        loop_var: location
-#        label: "{{ location }}"
-
+- name: "Loop through the users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  include_tasks: user_check_vhost_location.yml
   when: vhost.value.users_apache_locations is defined
-
-# TODO users_apache_options
+  loop: "{{ vhost.value.users_apache_locations }}"
+  loop_control:
+    loop_var: loc
+    label: "{{ loc }}"
 
 - name: "Check that only valid Options are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   block:

@@ -1,0 +1,21 @@
+---
+# https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype
+- name: "Check authtype is set to None, Basic, Digest or Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  assert:
+    that:
+      - ( loc.authtype == "None" ) or ( loc.authtype == "Basic" ) or ( loc.authtype == "Digest" ) or ( loc.authtype == "Form" )
+      - loc.authtype is regex("^(?i)None|Basic|Digest|Form$")
+  when: loc.authtype is defined 
+
+# https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
+- name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  assert:
+    that:
+      - ( loc.require == "all granted" ) or ( loc.require == "all denied" ) or ( loc.require is match("method\ .*") ) or ( loc.require is match("user\ .*") ) or ( loc.require == "valid-user" ) or ( loc.require is match("ip\ .*") )
+  loop: "{{ loc.require }}"
+  loop_control:
+    loop_var: req
+    label: "{{ req }}"
+  when: loc.require is defined
+
+...
