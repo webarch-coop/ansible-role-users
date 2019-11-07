@@ -281,7 +281,7 @@
         - user.value.users_phpfpm_pm_max_children is defined
         - user.value.users_phpfpm_pm_max_spare_servers is defined
 
-    - name: "Check the PHP-FPM pm.start_servers must be greater than pm.min_spare_servers for {{ user.key }} if defined"
+    - name: "Check the PHP-FPM pm.start_servers is greater than pm.min_spare_servers for {{ user.key }} if defined"
       assert:
         that:
           - user.value.users_phpfpm_pm_start_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
