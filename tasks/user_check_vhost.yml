@@ -167,7 +167,7 @@
     - name: "Check that each DirectoryIndex appears to be a filename for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - index is regex("^\w\.\w$")
+          - index is regex("^\w+\.\w+$")
       loop: "{{ vhost.value.users_apache_index }}"
       loop_control:
         loop_var: index 
