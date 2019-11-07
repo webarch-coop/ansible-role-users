@@ -6,11 +6,6 @@
       - loc.authtype is regex("^(?i)None|Basic|Digest|Form$")
   when: loc.authtype is defined 
 
-- name: "Debug require for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-  debug:
-    msg: "require is set to: {{ loc.require }}"
-  when: loc.require is defined
-
 # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
 - name: "Check require for for locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   block:
@@ -31,4 +26,11 @@
         label: "{{ req }}"
 
   when: loc.require is defined
+
+- name: "Check that redirect is set to a URL for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  assert:
+    that:
+      - loc.redirect | length
+      - loc.redirect is regex("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+  when: loc.redirect is defined
 ...
