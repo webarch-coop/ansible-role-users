@@ -135,8 +135,8 @@
 
   when: vhost.value.users_apache_options is defined
 
-# TODO users_apache_override
 - name: "Check that only valid AllowOverride directives are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  block:
 
     - name: "Check that the AllowOverride directives for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
       assert:
