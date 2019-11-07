@@ -3,7 +3,6 @@
 - name: "Check authtype is set to None, Basic, Digest or Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   assert:
     that:
-      - ( loc.authtype == "None" ) or ( loc.authtype == "Basic" ) or ( loc.authtype == "Digest" ) or ( loc.authtype == "Form" )
       - loc.authtype is regex("^(?i)None|Basic|Digest|Form$")
   when: loc.authtype is defined 
 
