@@ -100,10 +100,6 @@
 - name: "Check the locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   block:
 
-    - name: Debug locations
-      debug:
-        msg: "locations: {{ vhost.value.users_apache_locations }}"
-
     - name: "Check that the locations for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
       assert:
         that:
