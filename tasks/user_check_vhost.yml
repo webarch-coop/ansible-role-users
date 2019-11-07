@@ -97,13 +97,23 @@
 
   when: vhost.value.users_apache_htauth_users is defined
 
-- name: "Loop through the users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-  include_tasks: user_check_vhost_location.yml
+- name: "Check the locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  block:
+
+    - name: "Check that the locations for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
+      assert:
+        that:
+          - vhost.value.users_apache_locations | length
+          - vhost.value.users_apache_locations[0] is defined
+
+    - name: "Loop through the users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      include_tasks: user_check_vhost_location.yml
+      loop: "{{ vhost.value.users_apache_locations }}"
+      loop_control:
+        loop_var: loc
+        label: "{{ loc }}"
+
   when: vhost.value.users_apache_locations is defined
-  loop: "{{ vhost.value.users_apache_locations }}"
-  loop_control:
-    loop_var: loc
-    label: "{{ loc }}"
 
 - name: "Check that only valid Options are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   block:
