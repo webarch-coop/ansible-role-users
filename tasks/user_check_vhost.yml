@@ -263,5 +263,5 @@
         - vhost.value.users_phpfpm_pm_max_spare_servers is defined
           vhost.value.users_phpfpm_pm_min_spare_servers is defined
 
-  when: ( vhost.value.users_phpfpm_pm is defined ( and ( vhost.value.users_phpfpm_pm == "dynamic" )
+  when: ( vhost.value.users_phpfpm_pm is defined ) and ( vhost.value.users_phpfpm_pm == "dynamic" )
 ...
