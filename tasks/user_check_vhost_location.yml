@@ -12,14 +12,23 @@
   when: loc.require is defined
 
 # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
-- name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-  assert:
-    that:
-      - loc.require is regex("(?i)[not]?all granted|[not]?all denied|[not]?env .*|[not]?method .*|[not]?expr .*|[not]?user .*|[not]?group .*|[not]?valid-user|[not]?ip .*")
-  loop: "{{ loc.require }}"
-  loop_control:
-    loop_var: req
-    label: "{{ req }}"
-  when: loc.require is defined
+- name: "Check require for for locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+  block:
 
+    - name: "Check that require is set to a non-empty array for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      assert:
+        that:
+          - loc.require | length
+          - loc.require[0] is defined
+
+    - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      assert:
+        that:
+          - req is regex("(?i)[not]?all granted|[not]?all denied|[not]?env .*|[not]?method .*|[not]?expr .*|[not]?user .*|[not]?group .*|[not]?valid-user|[not]?ip .*")
+      loop: "{{ loc.require }}"
+      loop_control:
+        loop_var: req
+        label: "{{ req }}"
+
+  when: loc.require is defined
 ...
