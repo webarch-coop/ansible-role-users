@@ -32,7 +32,7 @@
     - name: Add all the users to the users_update array
       set_fact:
         updates_users: "{{ update_users }} + [ '{{ user.key }}' ]"
-        loop: "{{ users | dict2items }}"
+      loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
