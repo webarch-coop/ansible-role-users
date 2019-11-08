@@ -1,4 +1,8 @@
 ---
+# If users_update_strategy is set to "all" then all users will be configured
+# everytime the tasks in this rol are run, it it is set to "changed" than only
+# user accounts that have changes will be updated.
+users_update_strategy: changed
 # Define users_apache to true for this role to manage the Apache VirtualHosts
 users_apache: false
 # Define users_chroot to true for members of the chroot group to be chrooted

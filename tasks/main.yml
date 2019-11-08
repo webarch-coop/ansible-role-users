@@ -22,12 +22,38 @@
     dest: "{{ users_state_dir }}/proposed.yml"
   check_mode: false
 
-- name: Check users changed
-  include_tasks: users_changed.yml
+- name: Set an empty users_update array
+  set_fact:
+    users_update: []
 
-- name: Print the users to update
-  debug:
-    msg: "User to update: {{ users_update }}"
+- name: Set users to update to all
+  block:
+
+    - name: Add all the users to the users_update array
+      set_fact:
+        updates_users: "{{ update_users }} + [ '{{ user.key }}' ]"
+        loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: Print all the users to update
+      debug:
+        msg: "User to update: {{ users_update }}"
+
+  when: ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
+
+- name: Check which users accounts are changed
+  block:
+
+    - name: Check users changed
+      include_tasks: users_changed.yml
+
+    - name: Print the changed users to update
+      debug:
+        msg: "User to update: {{ users_update }}"
+
+  when: ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
 
 - name: Check variables for users to update
   include_tasks: user_check.yml
