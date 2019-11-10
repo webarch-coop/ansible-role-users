@@ -62,6 +62,7 @@
         path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       tags:
@@ -74,6 +75,7 @@
         path: "/etc/apache2/localhost.d/{{ user.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when: users_apache2.stat.exists
@@ -87,6 +89,7 @@
         path: "/etc/nginx/localhost.d/{{ user.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when: users_nginx.stat.exists
@@ -110,6 +113,7 @@
         group: "{{ user.key }}"
         mode: 0750
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when:
@@ -128,6 +132,7 @@
         group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when:
@@ -146,6 +151,7 @@
         group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when:
@@ -164,6 +170,7 @@
         group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when:
@@ -182,6 +189,7 @@
         group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when:
@@ -203,6 +211,7 @@
         phpfpm_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}"
         phpfpm_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when: user.key in users_update
@@ -216,6 +225,7 @@
         src: templates/phpfpm_chroot_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when:
@@ -231,6 +241,9 @@
         src: apache_localhost.conf.j2
         dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       when:
         - ( user.key in users_update ) and ( users_apache2.stat.exists )
         - ( user.value.users_state is undefined or user.value.users_state == "present" )
@@ -245,6 +258,7 @@
         src: nginx_localhost.conf.j2
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
       loop: "{{ users | dict2items }}"
+      loop_control:
         loop_var: user
         label: "{{ user.key }}"
       when:

@@ -4,7 +4,7 @@
   loop: "{{ user.value.users_groups }}"
   loop_control:
     loop_var: group
-    label: "{{ group }}" 
+    label: "{{ group }}"
   tags:
     - users-update
 
@@ -13,8 +13,9 @@
     name: "{{ group }}"
     state: present
   loop: "{{ user.value.users_groups }}"
+  loop_control:
     loop_var: group
-    label: "{{ group }}" 
+    label: "{{ group }}"
   tags:
     - users-update
 ...
