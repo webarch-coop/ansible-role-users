@@ -63,12 +63,6 @@
     loop_var: user
     label: "{{ user.key }}"
 
-- name: End test tasks
-  fail:
-    msg:
-      - "Users to update: {{ users_update }}"
-      - "End of test"
-
 - name: Users absent loops
   block:
 
