@@ -2,10 +2,10 @@
 # Use ~/.ssh/authorized_keys.d/authorized_keys_* files to assemble ~/.ssh/authorized_keys and leave a ~/.ssh/README.md to explain what happened
 - name: ~/.ssh/authorized_keys.d directory present
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys.d"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
     state: directory
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_home_group | default(item.key) }}"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_home_group | default(user.key) }}"
     mode: 0700
   tags:
     - users-ssh
@@ -14,12 +14,12 @@
 - name: SSH public keys downloaded
   get_url:
     url: "{{ key_url }}"
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_home_group | default(item.key) }}"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_home_group | default(user.key) }}"
     mode: 0600
     force: true
-  loop: "{{ item.value.users_ssh_public_keys }}"
+  loop: "{{ user.value.users_ssh_public_keys }}"
   loop_control:
     loop_var: key_url
     index_var: key_idex
@@ -29,8 +29,8 @@
 
 - name: Assemble all the ~/authorized_keys_d/authorized_keys_* public keys to ~/.ssh/authorized_keys
   assemble:
-    src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys.d"
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/authorized_keys"
+    src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys"
     remote_src: true
     validate: ssh-keygen -lf %s
   tags:
@@ -40,9 +40,9 @@
 - name: SSH README.md in place
   template:
     src: templates/SSH_README.md.j2
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/README.md"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_home_group | default(user.key) }}"
     mode: 0600
   tags:
     - users-ssh

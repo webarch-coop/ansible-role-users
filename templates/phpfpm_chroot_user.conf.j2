@@ -1,50 +1,50 @@
 ; Ansible provisioned
-[{{ item.key }}]
-;prefix = {{ chroot_users_dir | default('/users') }}/{{ item.key }}
-user = {{ item.key }} 
-group = {{ item.value.users_group | default(item.key) }}
-chroot = {{ chroot_users_dir | default('/users') }}/{{ item.key }}
-listen = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
-;listen = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/php-fpm.sock
+[{{ user.key }}]
+;prefix = {{ chroot_users_dir | default('/users') }}/{{ user.key }}
+user = {{ user.key }} 
+group = {{ user.value.users_group | default(user.key) }}
+chroot = {{ chroot_users_dir | default('/users') }}/{{ user.key }}
+listen = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+;listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 listen.owner = root
-listen.group = {{ item.key }}
+listen.group = {{ user.key }}
 listen.mode = 0660
 ;listen.acl_users =
 ;listen.acl_groups =
 listen.allowed_clients = 127.0.0.1
 
-env[TMP] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
-env[TMPDIR] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
-env[TEMP] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
+env[TMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+env[TMPDIR] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+env[TEMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 
-chdir = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}
+chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
 ; https://www.php.net/install.fpm.configuration
-php_admin_value[session.save_path] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
-php_admin_value[upload_tmp_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
-php_admin_value[sys_temp_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
-php_admin_value[soap.wsdl_cache_dir] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp
-php_admin_value[uploadprogress.file.contents_template] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp/upload_contents_%s
-php_admin_value[uploadprogress.file.filename_template] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/tmp/upt_%s.txt
-php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ item.key }}@{{ inventory_hostname }}
-php_admin_value[sendmail_from] = {{ item.key }}@{{ inventory_hostname }}
-php_admin_value[mail.log] = {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.mail.log
+php_admin_value[session.save_path] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+php_admin_value[upload_tmp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+php_admin_value[sys_temp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+php_admin_value[soap.wsdl_cache_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+php_admin_value[uploadprogress.file.contents_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upload_contents_%s
+php_admin_value[uploadprogress.file.filename_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt
+php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ user.key }}@{{ inventory_hostname }}
+php_admin_value[sendmail_from] = {{ user.key }}@{{ inventory_hostname }}
+php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log
 
-pm = {{ item.value.users_phpfpm_pm | default('ondemand') }}
-pm.max_children = {{ item.value.users_phpfpm_max_children | default('2') }}
-{% if item.value.users_phpfpm_pm == "dynamic" %}
-pm.start_servers = {{ item.value.users_phpfpm_pm_start_servers | default('1') }}
-pm.min_spare_servers = {{ item.value.users_phpfpm_pm_min_spare_servers | default('1') }}
-pm.max_spare_servers = {{ item.value.users_phpfpm_pm_max_spare_servers | default('1') }}
+pm = {{ user.value.users_phpfpm_pm | default('ondemand') }}
+pm.max_children = {{ user.value.users_phpfpm_max_children | default('2') }}
+{% if user.value.users_phpfpm_pm == "dynamic" %}
+pm.start_servers = {{ user.value.users_phpfpm_pm_start_servers | default('1') }}
+pm.min_spare_servers = {{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}
+pm.max_spare_servers = {{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}
 {% endif %}
 pm.process_idle_timeout = 10s;
 pm.max_requests = 1000
-pm.status_path = /phpfpm-{{ item.key }}-status
+pm.status_path = /phpfpm-{{ user.key }}-status
 ;ping.path = /ping
 
-php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/fpm-php.error.log
+php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/fpm-php.error.log
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-access.log = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.access.log
-slowlog = {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.slow.log
+access.log = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
+slowlog = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
 

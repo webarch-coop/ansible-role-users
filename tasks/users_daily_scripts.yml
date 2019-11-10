@@ -1,34 +1,34 @@
 ---
-- name: "Check if {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh exists"
+- name: "Check if {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh exists"
   stat:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh"
   register: users_bin_cron_daily
   tags:
     - users-update
     - users-scripts
 
-- name: "Blank {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh in place"
+- name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh in place"
   template:
     src: templates/cron_daily.sh.j2
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh"
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0750"
   when: users_bin_cron_daily.stat.exists == False
   tags:
     - users-update
     - users-scripts
 
-- name: "Daily scripts in place for {{ item.key }}"
+- name: "Daily scripts in place for {{ user.key }}"
   lineinfile:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/bin/cron_daily.sh"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh"
     line: "{{ command }}"
     state: present
     insertbefore: "^# END ANSIBLE SCRIPTS"
     firstmatch: true
     create: false
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0750"
   loop: "{{ vhost.value.users_daily_scripts }}"
   loop_control:

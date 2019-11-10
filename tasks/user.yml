@@ -1,86 +1,86 @@
 ---
-- name: "Set a fact for the {{ item.key }} users own group as a list"
+- name: "Set a fact for the {{ user.key }} users own group as a list"
   set_fact:
     users_own_group:
-      - "{{ item.key }}"
+      - "{{ user.key }}"
   tags:
     - users-update
 
-- name: "Set a fact for the {{ item.key }} users groups which includes the users own group, as a list"
+- name: "Set a fact for the {{ user.key }} users groups which includes the users own group, as a list"
   set_fact:
     users_all_groups:
-      - "{{ item.value.users_groups | default(omit) + users_own_group }}"
-  when: ( item.value.users_groups is defined ) and ( item.value.users_groups != [] )
+      - "{{ user.value.users_groups | default(omit) + users_own_group }}"
+  when: ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
   tags:
     - users-update
 
-- name: "Print debugging info for {{ item.key }}"
+- name: "Print debugging info for {{ user.key }}"
   debug:
     msg:
-      - "name: {{ item.key }}"
-      - "group: {{ item.value.users_group | default(item.key) }}"
-      - "groups: {{ item.value.users_groups | default([]) | join(',') or \ omit }}"
+      - "name: {{ user.key }}"
+      - "group: {{ user.value.users_group | default(user.key) }}"
+      - "groups: {{ user.value.users_groups | default([]) | join(',') or \ omit }}"
       - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit}}"
-      - "home: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-      - "shell: {{ item.value.users_shell | default('/bin/bash', true) }}"
-      - "skeleton: {{ item.value.users_skel | default(omit) }}"
-      - "system: {{ item.value.users_system | default('no', false) }}"
-      - "editor: {{ item.value.users_editor | default('vim', true) }}"
-      - "home owner: {{ item.value.users_home_owner | default(item.key) }}"
-      - "home group: {{ item.value.users_home_group | default(item.key) }}"
-      - "home mode: {{ item.value.users_home_mode | default(0700) }}"
-      - "generate ssh key: {{ item.value.users_generate_ssh_key | default('false') }}"
-      # - "email: {{ item.value.users_email }}"
+      - "home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+      - "shell: {{ user.value.users_shell | default('/bin/bash', true) }}"
+      - "skeleton: {{ user.value.users_skel | default(omit) }}"
+      - "system: {{ user.value.users_system | default('no', false) }}"
+      - "editor: {{ user.value.users_editor | default('vim', true) }}"
+      - "home owner: {{ user.value.users_home_owner | default(user.key) }}"
+      - "home group: {{ user.value.users_home_group | default(user.key) }}"
+      - "home mode: {{ user.value.users_home_mode | default(0700) }}"
+      - "generate ssh key: {{ user.value.users_generate_ssh_key | default('false') }}"
+      # - "email: {{ user.value.users_email }}"
     verbosity: 1
 
-- name: "User account for {{ item.key }} present"
+- name: "User account for {{ user.key }} present"
   user:
-    name: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    name: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     groups: "{{ users_all_groups | default([]) | join(',') or \ omit }}"
-    home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     create_home: true
-    shell: "{{ item.value.users_shell | default('/bin/bash', true) }}"
-    skeleton: "{{ item.value.users_skel | default(omit) }}"
-    generate_ssh_key: "{{ item.value.users_generate_ssh_key | default('false') }}"
-    system: "{{ item.value.users_system | default('no', false) }}"
+    shell: "{{ user.value.users_shell | default('/bin/bash', true) }}"
+    skeleton: "{{ user.value.users_skel | default(omit) }}"
+    generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
+    system: "{{ user.value.users_system | default('no', false) }}"
   tags:
     - users-update
 
-- name: "Chown user home directory owner to {{ item.value.users_home_owner | default(item.key) }}"
+- name: "Chown user home directory owner to {{ user.value.users_home_owner | default(user.key) }}"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: directory
-    owner: "{{ item.value.users_home_owner | default(item.key) }}"
+    owner: "{{ user.value.users_home_owner | default(user.key) }}"
   tags:
     - users-update
 
-- name: "Chown user home directory group to {{ item.value.users_home_group | default(item.key) }}"
+- name: "Chown user home directory group to {{ user.value.users_home_group | default(user.key) }}"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: directory
-    group: "{{ item.value.users_home_group | default(item.key) }}"
+    group: "{{ user.value.users_home_group | default(user.key) }}"
   tags:
     - users-update
 
-- name: "Chmod users home directory {{ item.value.users_home_mode | default('0750') }}"
+- name: "Chmod users home directory {{ user.value.users_home_mode | default('0750') }}"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: directory
-    mode: "{{ item.value.users_home_mode | default('0750') }}"
+    mode: "{{ user.value.users_home_mode | default('0750') }}"
   tags:
     - users-update
 
 - debug:
-    msg: "name: {{ item.key }} | ssh dir: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh"
+    msg: "name: {{ user.key }} | ssh dir: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh"
     verbosity: 1
 
-- name: "Private directories present for {{ item.key }}"
+- name: "Private directories present for {{ user.key }}"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ dir }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ dir }}"
     state: directory
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0700
   loop:
     - backups
@@ -90,73 +90,78 @@
     - .ssh
   loop_control:
     loop_var: dir
+    label: "{{ dir }}"
   tags:
     - users-ssh
     - users-update
 
-- name: "SSH public keys present for {{ item.key }}"
+- name: "SSH public keys present for {{ user.key }}"
   include_tasks: ssh.yml
-  when: ( item.value.users_ssh_public_keys is defined ) and ( item.value.users_ssh_public_keys != [] )
+  when: ( user.value.users_ssh_public_keys is defined ) and ( user.value.users_ssh_public_keys != [] )
   tags:
     - users-ssh
     - users-update
 
-- name: "Generate SSH ECDSA keypair for {{ item.key }}"
-  command: ssh-keygen -q -t ed25519 -f "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519" -q -N "" -C "root@{{ ansible_fqdn }}"
+- name: "Generate SSH ECDSA keypair for {{ user.key }}"
+  command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "root@{{ ansible_fqdn }}"
   args:
-    creates: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.ssh/id_ed25519"
+    creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
   become: true
-  become_user: "{{ item.key }}"
-  when: ( item.value.users_generate_ssh_key is defined ) and ( item.value.users_generate_ssh_key == True )
+  become_user: "{{ user.key }}"
+  when: ( user.value.users_generate_ssh_key is defined ) and ( user.value.users_generate_ssh_key == True )
   tags:
     - users-ssh
     - users-update
 
-- name: "Set default editor for {{ item.key }}"
+- name: "Set default editor for {{ user.key }}"
   copy:
-    src: "files/{{ item.value.users_editor }}/selected_editor"
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.selected_editor"
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    src: "files/{{ user.value.users_editor }}/selected_editor"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.selected_editor"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0644
-  when: item.value.users_editor is defined and item.value.users_editor != ""
+  when: ( user.value.users_editor is defined ) and ( user.value.users_editor != "" )
   tags:
     - users-update
 
-- name: ".vimrc in place for {{ item.key }}"
-  copy:
-    src: "files/vim/vimrc"
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.vimrc"
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
-    mode: 0644
-  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
-  tags:
-    - users-update
+- name: Vim tasks
+  block:
 
-- debug:
-    msg: "bashrc: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.bashrc"
-    verbosity: 1
-  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
+    - name: ".vimrc in place for {{ user.key }}"
+      copy:
+        src: "files/vim/vimrc"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.vimrc"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: 0644
+      tags:
+        - users-update
 
-- name: "vim set to be default editor for {{ item.key }}"
-  lineinfile:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.bashrc"
-    line: 'export EDITOR="vim"'
-    state: present
-    create: true
-  when: item.value.users_editor is defined and item.value.users_editor == 'vim'
-  tags:
-    - users-update
+    - debug:
+        msg: "bashrc: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        verbosity: 1
 
-- name: ".gitconfig in place for {{ item.key }}"
+    - name: "vim set to be default editor for {{ user.key }}"
+      lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        line: 'export EDITOR="vim"'
+        state: present
+        create: true
+      tags:
+        - users-update
+
+  when: user.value.users_editor is defined and user.value.users_editor == 'vim'
+
+- name: ".gitconfig in place for {{ user.key }}"
   template:
     src: templates/gitconfig.j2
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.gitconfig"
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.gitconfig"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0644
-  when: ( item.value.users_name is defined and item.value.users_name != "" ) and ( item.value.users_email is defined and item.value.users_email != "" )
+  when:
+    - ( user.value.users_name is defined and user.value.users_name != "" )
+    - ( user.value.users_email is defined and user.value.users_email != "" )
   tags:
     - users-update
 ...

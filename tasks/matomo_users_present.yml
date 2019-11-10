@@ -5,10 +5,10 @@
     name: matomo
     tasks_from: adduser.yml
   vars:
-    matomo_login: "{{ item.key }}"
-    matomo_login_home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-    matomo_login_email: "{{ item.value.users_email }}"
-    matomo_notify_passwd: "{{ item.value.users_matomo_notify_passwd | default(true) }}"
+    matomo_login: "{{ user.key }}"
+    matomo_login_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    matomo_login_email: "{{ user.value.users_email }}"
+    matomo_notify_passwd: "{{ user.value.users_matomo_notify_passwd | default(true) }}"
     matomo_notify_from: "{{ users_notify_from }}"
     matomo_notify_reply_to: "{{ users_notify_reply_to }}"
     matomo_notify_subject_tag: "{{ users_notify_subject_tag }}"

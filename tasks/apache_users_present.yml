@@ -8,9 +8,10 @@
     common_name: "{{ vhost.value.users_apache_server_name }}"
     subject_alt_names: "{{ vhost.value.users_apache_server_aliases }}"
     reloadcmd: "service apache2 reload"
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
   tags:
     - apache
@@ -20,9 +21,9 @@
 - name: Let's Encrypt one cert per user tasks
   block:
 
-    - name: "Set {{ item.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
+    - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
       set_fact:
-        common_name: "{{ item.key }}.{{ inventory_hostname }}"
+        common_name: "{{ user.key }}.{{ inventory_hostname }}"
         subject_alt_names: []
         reloadcmd: "service apache2 reload"
       check_mode: true
@@ -35,9 +36,10 @@
       set_fact:
         subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
       check_mode: true
-      loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
+        label: "{{ vhost }}"
       tags:
         - apache
         - users-update
@@ -71,101 +73,103 @@
 
   when: ( users_cert is defined ) and ( users_cert == 'user' )
 
-- name: "Apache {{ item.key }}/{{ users_sites_dir }} directory present"
+- name: "Apache {{ user.key }}/{{ users_sites_dir }} directory present"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}"
     state: directory
-    owner: "{{ item.key }}"
+    owner: "{{ user.key }}"
     # group: "{{ apache_user | default('www-data') }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
   tags:
     - apache
     - users-update
 
-- name: "Apache DocumentRoot(s) present for VitualServers for {{ item.key }}"
+- name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
     state: directory
-    owner: "{{ item.key }}"
+    owner: "{{ user.key }}"
     # group: "{{ apache_user | default('www-data') }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
-  loop: "{{ item.value.users_apache_virtual_hosts.keys() | list }}"
+  loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   tags:
     - apache
     - users-update
 
-- name: "HTTP Authentication htpasswd files present for {{ item.key }}"
+- name: "HTTP Authentication htpasswd files present for {{ user.key }}"
   include_tasks: htauth.yml
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   tags:
     - apache
     - users-update
     - users-htauth
 
-- name: "Apache log directory {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs present"
+- name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
     state: directory
     owner: root
-    group: "{{ item.key }}"
+    group: "{{ user.key }}"
     mode: 0750
   tags:
     - apache
     - users-update
 
-- name: "Check that the SSL cert for {{ item.key }}.{{ inventory_hostname }} is present"
+- name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
-    path: "{{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.cert.pem"
+    path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
   register: users_apache_tls_cert_check
   tags:
     - apache
     - users-update
 
-- name: "Check that the SSL key for {{ item.key }}.{{ inventory_hostname }} is present"
+- name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
-    path: "{{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.key.pem"
+    path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
   register: users_apache_tls_key_check
   tags:
     - apache
     - users-update
 
-- name: "Check that the SSL ca file for {{ item.key }}.{{ inventory_hostname }} is present"
+- name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
-    path: "{{ le_dir }}/{{ item.key }}.{{ inventory_hostname }}.ca.pem"
+    path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
   register: users_apache_tls_ca_check
   tags:
     - apache
     - users-update
 
-- name: "Check if /etc/apache2/sites-available/{{ item.key }}.conf exists already"
+- name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
   stat:
-    path: "/etc/apache2/sites-available/{{ item.key }}.conf"
+    path: "/etc/apache2/sites-available/{{ user.key }}.conf"
   register: users_apache_conf_check
   tags:
     - apache
     - users-update
 
-- name: "Apache {{ item.key }} sites-available file copied"
+- name: "Apache {{ user.key }} sites-available file copied"
   copy:
-    src: "/etc/apache2/sites-available/{{ item.key }}.conf"
-    dest: "/etc/apache2/sites-available/.{{ item.key }}.conf.bak"
+    src: "/etc/apache2/sites-available/{{ user.key }}.conf"
+    dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
     remote_src: true
   when: users_apache_conf_check.stat.exists
   tags:
     - apache
     - users-update
 
-- name: "Apache {{ item.key }} sites-available file present"
+- name: "Apache {{ user.key }} sites-available file present"
   template:
     src: templates/apache.conf.j2
-    dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+    dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
     trim_blocks: false
     lstrip_blocks: true
   register: users_apache_conf
@@ -173,8 +177,8 @@
     - apache
     - users-update
 
-- name: "Apache {{ item.key }} sites-enabled symlink present"
-  command: "a2ensite {{ item.key }}"
+- name: "Apache {{ user.key }} sites-enabled symlink present"
+  command: "a2ensite {{ user.key }}"
   register: users_a2ensite
   changed_when: '"already enabled" not in users_a2ensite.stdout'
   when: ( users_apache_tls_cert_check.stat.exists ) and ( users_apache_tls_key_check.stat.exists ) and ( users_apache_tls_ca_check.stat.exists )
@@ -185,7 +189,7 @@
 - name: Apache configtest
   block:
 
-    - name: "apache2ctl configtest to check /etc/apache2/sites-available/{{ item.key }}.conf"
+    - name: "apache2ctl configtest to check /etc/apache2/sites-available/{{ user.key }}.conf"
       command: apache2ctl configtest
       register: users_apache2ctl_configtest
       tags:
@@ -196,8 +200,8 @@
 
     - name: "apache2ctl configtest failed, saving failed config"
       copy:
-        src: "/etc/apache2/sites-available/{{ item.key }}.conf"
-        dest: "/etc/apache2/sites-available/{{ item.key }}.conf.broken"
+        src: "/etc/apache2/sites-available/{{ user.key }}.conf"
+        dest: "/etc/apache2/sites-available/{{ user.key }}.conf.broken"
         remote_src: true
       tags:
         - apache
@@ -205,8 +209,8 @@
 
     - name: "apache2ctl configtest failed so reverting changes"
       copy:
-        src: "/etc/apache2/sites-available/.{{ item.key }}.conf.bak"
-        dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+        src: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+        dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
         remote_src: true
       when: users_apache_conf_check.stat.exists == True
       tags:
@@ -218,10 +222,11 @@
         path: "{{ file }}"
         state: absent
       loop:
-        - "/etc/apache2/sites-available/{{ item.key }}.conf"
-        - "/etc/apache2/sites-enabled/{{ item.key }}.conf"
+        - "/etc/apache2/sites-available/{{ user.key }}.conf"
+        - "/etc/apache2/sites-enabled/{{ user.key }}.conf"
       loop_control:
         loop_var: file
+        label: "{{ file }}"
       when: users_apache_conf_check.stat.exists == False
       tags:
         - apache
@@ -230,8 +235,8 @@
     - name: Fail as apache2ctl configtest failed
       fail:
         msg:
-          - "apache2ctl configtest failed for {{ item.key }} and as a result apache has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this VirtualHost."
-          - "The broken config is available in /etc/apache2/sites-available/{{ item.key }}.conf.broken"
+          - "apache2ctl configtest failed for {{ user.key }} and as a result apache has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this VirtualHost."
+          - "The broken config is available in /etc/apache2/sites-available/{{ user.key }}.conf.broken"
           - "The error was: {{ users_apache2ctl_configtest.stderr }}"
       tags:
         - apache
@@ -239,17 +244,17 @@
 
   when: users_apache_conf.changed
 
-- name: "Apache {{ item.key }} sites-enabled symlink absent"
+- name: "Apache {{ user.key }} sites-enabled symlink absent"
   file:
-    path: "/etc/apache2/sites-enabled/{{ item.key }}.conf"
+    path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
     state: absent
   when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
   tags:
     - apache
     - users-update
 
-- name: "MariaDB password read from {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
-  shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
+- name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
+  shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
   no_log: true
   register: users_mariadb_password_read
   check_mode: false
@@ -290,12 +295,13 @@
                   - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
                   - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
                   - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
-                  - "matomo_site_admin: {{ item.key }}"
+                  - "matomo_site_admin: {{ user.key }}"
                 verbosity: 1
               when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
-              loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+              loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
               loop_control:
                 loop_var: vhost
+                label: "{{ vhost }}"
               tags:
                 - matomo
                 - users-update
@@ -309,11 +315,12 @@
                 matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
                 # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
                 matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
-                matomo_site_admin: "{{ item.key }}"
+                matomo_site_admin: "{{ user.key }}"
               when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
-              loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+              loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
               loop_control:
                 loop_var: vhost
+                label: "{{ vhost }}"
               tags:
                 - matomo
                 - users-update
@@ -328,19 +335,19 @@
   include_role:
     name: wordpress
   vars:
-    wordpress_user: "{{ item.key }}"
-    wordpress_group: "{{ item.key }}"
-    wordpress_docroot: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    wordpress_user: "{{ user.key }}"
+    wordpress_group: "{{ user.key }}"
+    wordpress_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     wordpress_docroot_mode: "0750"
-    wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
-    wordpress_dbuser: "{{ item.key }}"
+    wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    wordpress_dbuser: "{{ user.key }}"
     wordpress_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     wordpress_dbprefix: "{{ vhost.value.wordpress_dbprefix | default('wp_') }}"
     wordpress_locale: "{{ vhost.value.wordpress_dbprefix | default('en_GB') }}"
     wordpress_url: "{{ vhost.value.wordpress_url | default('https://' + vhost.value.users_apache_server_name) }}"
     wordpress_title: "{{ vhost.value.wordpress_title | default(vhost.value.users_apache_server_name) }}"
-    wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(item.key) }}"
-    wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(item.value.users_email) }}"
+    wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(user.key) }}"
+    wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(user.value.users_email) }}"
     wordpress_notify: "{{ vhost.value.wordpress_notify | default(omit) }}"
     wordpress_notify_from: "{{ users_notify_from }}"
     wordpress_notify_reply_to: "{{ users_notify_reply_to }}"
@@ -351,12 +358,13 @@
     wordpress_matomo_url: "{{ matomo_url }}"
     wordpress_matomo_home: "{{ matomo_home }}"
     wordpress_matomo_html: "{{ matomo_html }}"
-    wordpress_matomo_login: "{{ item.key }}"
-    wordpress_matomo_login_email: "{{ vhost.value.matomo_login_email | default(item.value.users_email) }}"
+    wordpress_matomo_login: "{{ user.key }}"
+    wordpress_matomo_login_email: "{{ vhost.value.matomo_login_email | default(user.value.users_email) }}"
     wordpress_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
   tags:
     - users-update
@@ -366,28 +374,29 @@
   include_role:
     name: matomo
   vars:
-    matomo_user: "{{ item.key }}"
+    matomo_user: "{{ user.key }}"
     matomo_url: "https://{{ vhost.value.users_apache_server_name }}/"
-    matomo_home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-    matomo_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    matomo_private: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private"
-    matomo_db_username: "{{ item.key }}"
+    matomo_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    matomo_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    matomo_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    matomo_db_username: "{{ user.key }}"
     matomo_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     matomo_db_host: localhost
-    matomo_dbname: "{% if vhost.value.matomo_dbname is defined %}{{ vhost.value.matomo_dbname }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
+    matomo_dbname: "{% if vhost.value.matomo_dbname is defined %}{{ vhost.value.matomo_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     matomo_first_site_name: "{{ vhost.value.matomo_first_site_name | default(inventory_hostname) }}"
     matomo_first_site_url: "{{ vhost.value.matomo_first_site_url | default('http://' + inventory_hostname + '/') }}"
-    matomo_first_user: "{{ vhost.value.matomo_first_user | default(item.key) }}"
-    matomo_first_user_email: "{{ item.value.users_email | default('root@' + inventory_hostname) }}"
+    matomo_first_user: "{{ vhost.value.matomo_first_user | default(user.key) }}"
+    matomo_first_user_email: "{{ user.value.users_email | default('root@' + inventory_hostname) }}"
     matomo_notify_from: "{{ users_notify_from }}"
     matomo_notify_reply_to: "{{ users_notify_reply_to }}"
     matomo_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     matomo_notify_headers: "{{ users_notify_headers }}"
     matomo_notify_passwd: "{{ vhost.value.matomo_notify_passwd | default(true) }}"
     matomo_email_signature: "{{ users_notify_signature }}"
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
   tags:
     - users-update
@@ -397,22 +406,23 @@
   include_role:
     name: phpmyadmin
   vars:
-    phpmyadmin_user: "{{ item.key }}"
-    phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
-    phpmyadmin_db_user: "{{ item.key }}"
+    phpmyadmin_user: "{{ user.key }}"
+    phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    phpmyadmin_db_user: "{{ user.key }}"
     phpmyadmin_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     phpmyadmin_db_socket: /var/run/mysqld/mysqld.sock
     phpmyadmin_db_host: localhost
     phpmyadmin_db_port: 3306
     phpmyadmin_url: "https://{{ vhost.value.users_apache_server_name }}/"
-    phpmyadmin_home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-    phpmyadmin_private: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private"
-    phpmyadmin_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    phpmyadmin_html_upload_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
-    phpmyadmin_html_save_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+    phpmyadmin_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    phpmyadmin_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    phpmyadmin_html_upload_dir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
+    phpmyadmin_html_save_dir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" ) and ( vhost.value.users_apache_htauth_users is not defined )
   tags:
     - users-update
@@ -422,24 +432,25 @@
   include_role:
     name: phpmyadmin
   vars:
-    phpmyadmin_user: "{{ item.key }}"
-    phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ item.value.users_mariadb_databases[0] }}{% endif %}"
-    phpmyadmin_db_user: "{{ item.key }}"
+    phpmyadmin_user: "{{ user.key }}"
+    phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    phpmyadmin_db_user: "{{ user.key }}"
     phpmyadmin_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     phpmyadmin_db_socket: /var/run/mysqld/mysqld.sock
     phpmyadmin_db_host: localhost
     phpmyadmin_db_port: 3306
     phpmyadmin_url: "https://{{ vhost.value.users_apache_server_name }}/"
-    phpmyadmin_home: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-    phpmyadmin_private: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private"
-    phpmyadmin_html: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    phpmyadmin_html_upload_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
-    phpmyadmin_html_save_dir: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
+    phpmyadmin_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    phpmyadmin_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    phpmyadmin_html_upload_dir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/uploads"
+    phpmyadmin_html_save_dir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}/saves"
     phpmyadmin_htauth_user: "{{ vhost.value.users_apache_htauth_users[0].name }}"
     phpmyadmin_htauth_pass: "{{ vhost.value.users_apache_htauth_users[0].password }}"
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   when:
     - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
     - ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users[0].name is defined ) and ( vhost.value.users_apache_htauth_users[0].password is defined )
@@ -449,9 +460,10 @@
 
 - name: Include daily scripts role
   include_tasks: users_daily_scripts.yml
-  loop: "{{ item.value.users_apache_virtual_hosts | dict2items }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
+    label: "{{ vhost }}"
   when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
   tags:
     - users-update

@@ -1,7 +1,7 @@
 ---
-- name: "Stat {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
+- name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
   stat:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
   register: users_mycnf
   tags:
     - users-update
@@ -10,7 +10,7 @@
 
 - block:
 
-    - name: "Generate a random password for {{ item.key }} MariaDB account as ~/.my.cnf doesn't exist"
+    - name: "Generate a random password for {{ user.key }} MariaDB account as ~/.my.cnf doesn't exist"
       command: pwgen -n 20 1
       no_log: true
       register: users_mariadb_password_gen
@@ -32,8 +32,8 @@
 
 - block:
 
-    - name: "MariaDB password read from {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
-      shell: "my_print_defaults --defaults-file='{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
+    - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
+      shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
       no_log: true
       changed_when: false
       check_mode: false
@@ -63,12 +63,12 @@
     - users-mariadb
     - phpmyadmin
 
-- name: "mariadb_password written to {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
+- name: "mariadb_password written to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
   template:
     src: templates/my.cnf.j2
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.my.cnf"
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0400
     force: true
   no_log: true
@@ -76,8 +76,8 @@
     - users-update
     - users-mariadb
 
-- name: "The databases that {{ item.key }} has access to"
-  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
+- name: "The databases that {{ user.key }} has access to"
+  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
   changed_when: false
   check_mode: false
   register: users_mariadb_list
@@ -85,14 +85,14 @@
     - users-update
     - users-mariadb
 
-- name: "Set a fact for the databases to delete for {{ item.key }}"
+- name: "Set a fact for the databases to delete for {{ user.key }}"
   set_fact:
-    users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(item.value.users_mariadb_databases) }}"
+    users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(user.value.users_mariadb_databases) }}"
   tags:
     - users-update
     - users-mariadb
 
-- name: "Databases absent for {{ item.key }}"
+- name: "Databases absent for {{ user.key }}"
   mysql_db:
     name: "{{ db }}"
     state: absent
@@ -102,31 +102,33 @@
   when: ( users_mariadb_delete_list is defined ) and ( users_mariadb_delete_list != [] )
   loop_control:
     loop_var: db
+    label: "{{ db }}"
   tags:
     - users-update
     - users-mariadb
 
-- name: "Databases present for {{ item.key }}"
+- name: "Databases present for {{ user.key }}"
   mysql_db:
     name: "{{ db }}"
     state: present
     login_user: root
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  loop: "{{ item.value.users_mariadb_databases }}"
+  loop: "{{ user.value.users_mariadb_databases }}"
   loop_control:
     loop_var: db
+    label: "{{ db }}"
   tags:
     - users-update
     - users-mariadb
 
-- name: "Set a variable for mysql_user priv for {{ item.key }}"
+- name: "Set a variable for mysql_user priv for {{ user.key }}"
   set_fact:
-    users_mariadb_priv: "{% if item.value.users_mariadb_databases[0] is defined %}{% for db in item.value.users_mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
+    users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
   tags:
     - users-update
     - users-mariadb
 
-- name: "Print priv for {{ item.key }}"
+- name: "Print priv for {{ user.key }}"
   debug:
     var: users_mariadb_priv
     verbosity: 1
@@ -134,9 +136,9 @@
     - users-update
     - users-mariadb
 
-- name: "MariaDB {{ item.key }} user present"
+- name: "MariaDB {{ user.key }} user present"
   mysql_user:
-    name: "{{ item.key }}"
+    name: "{{ user.key }}"
     password: "{{ users_mariadb_password }}"
     priv: "{{ users_mariadb_priv }}"
     state: present
@@ -148,55 +150,55 @@
     - users-update
     - users-mariadb
 
-- name: "Stat {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd file"
+- name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
   stat:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd"
   register: users_notify_mariadb_passwd_file
-  when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True )
+  when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd == True )
   tags:
     - users-update
     - users-mariadb
 
 - block:
 
-    - name: "Password notification email sent to {{ item.value.users_email }}"
+    - name: "Password notification email sent to {{ user.value.users_email }}"
       mail:
         from: "{{ users_notify_from | default('Webarchitects') }} <root@{{ inventory_hostname }}>"
-        to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
-        subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ item.key }} on {{ inventory_hostname }}"
+        to: "{{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
+        subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ user.key }} on {{ inventory_hostname }}"
         headers: "{{ users_notify_headers }}"
         charset: us-ascii
         body: "{{ lookup('template', 'templates/notify_passwd_mariadb.j2') }}"
         host: localhost
         port: 25
         secure: never
-      when: item.value.users_email is defined and item.value.users_email != ""
+      when: user.value.users_email is defined and user.value.users_email != ""
       tags:
         - users-update
         - users-mariadb
 
-    - name: "Notification date recorded in {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd file"
+    - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
       lineinfile:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_mariadb_passwd"
-        line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd"
+        line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
         create: true
         state: present
         insertafter: EOF
         owner: root
-        group: "{{ item.key }}"
+        group: "{{ user.key }}"
         mode: 0640
       tags:
         - users-update
         - users-mariadb
 
-  when: ( item.value.users_mariadb_notify_passwd is defined ) and ( item.value.users_mariadb_notify_passwd == True ) and ( users_notify_mariadb_passwd_file.stat.exists == False )
+  when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd == True ) and ( users_notify_mariadb_passwd_file.stat.exists == False )
 
 - name: Directory present for database backups
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/private/mysql-backups"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private/mysql-backups"
     state: directory
-    owner: "{{ item.key }}"
-    group: "{{ item.value.users_group | default(item.key) }}"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0700
   tags:
     - users-update

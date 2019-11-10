@@ -59,9 +59,11 @@
 
     - name: Users PHP FPM pool.d file absent
       file:
-        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
+        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-update
         - users-chroot
@@ -69,9 +71,11 @@
 
     - name: Users Apache PHP FPM localhost.d file absent
       file:
-        path: "/etc/apache2/localhost.d/{{ item.key }}.conf"
+        path: "/etc/apache2/localhost.d/{{ user.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
+        loop_var: user
+        label: "{{ user.key }}"
       when: users_apache2.stat.exists
       tags:
         - users-update
@@ -80,29 +84,37 @@
 
     - name: Users Nginx PHP FPM localhost.d file present
       file:
-        path: "/etc/nginx/localhost.d/{{ item.key }}.conf"
+        path: "/etc/nginx/localhost.d/{{ user.key }}.conf"
         state: absent
       loop: "{{ users | dict2items }}"
+        loop_var: user
+        label: "{{ user.key }}"
       when: users_nginx.stat.exists
       tags:
         - users-update
         - users-chroot
         - phpfpm
 
-  when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "phpfpm" not in item.value.users_groups or "chroot" not in item.value.users_groups )
+  when:
+    - user.key in users_update
+    - ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "phpfpm" not in user.value.users_groups or "chroot" not in user.value.users_groups )
 
 - name: PHP FPM users present
   block:
 
     - name: Users PHP FPM log directory present
       file:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
         state: directory
         owner: root
-        group: "{{ item.key }}"
+        group: "{{ user.key }}"
         mode: 0750
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key in users_update
+        - ( user.value.users_state is undefined or user.value.users_state == "present" ) and ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
@@ -110,13 +122,17 @@
 
     - name: Users PHP FPM mail log touched
       file:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.mail.log"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log"
         state: touch
-        owner: "{{ item.key }}"
-        group: "{{ item.key }}"
+        owner: "{{ user.key }}"
+        group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key in users_update
+        - ( user.value.users_state is undefined or user.value.users_state == "present" ) and ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
@@ -124,13 +140,17 @@
 
     - name: Users PHP FPM slow log touched
       file:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.slow.log"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
         state: touch
         owner: root
-        group: "{{ item.key }}"
+        group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key in users_update
+        - ( user.value.users_state is undefined or user.value.users_state == "present" ) and ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
@@ -138,13 +158,17 @@
 
     - name: Users PHP FPM access log touched
       file:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.access.log"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
         state: touch
         owner: root
-        group: "{{ item.key }}"
+        group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key in users_update
+        - ( user.value.users_state is undefined or user.value.users_state == "present" ) and ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
@@ -152,13 +176,17 @@
 
     - name: Users PHP FPM error log touched
       file:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/logs/php-fpm.error.log"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.error.log"
         state: touch
         owner: root
-        group: "{{ item.key }}"
+        group: "{{ user.key }}"
         mode: 0640
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key in users_update
+        - ( user.value.users_state is undefined or user.value.users_state == "present" ) and ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
@@ -169,12 +197,15 @@
         name: php-fpm
         tasks_from: pool_check.yml
       vars:
-        phpfpm_pm: "{{ item.value.users_phpfpm_pm | default('dynamic') }}"
-        phpfpm_pm_max_children: "{{ item.value.users_phpfpm_max_children | default('2') }}"
-        phpfpm_pm_start_servers: "{{ item.value.users_phpfpm_pm_start_servers | default('1') }}"
-        phpfpm_pm_min_spare_servers: "{{ item.value.users_phpfpm_pm_min_spare_servers | default('1') }}"
-        phpfpm_pm_max_spare_servers: "{{ item.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
+        phpfpm_pm: "{{ user.value.users_phpfpm_pm | default('dynamic') }}"
+        phpfpm_pm_max_children: "{{ user.value.users_phpfpm_max_children | default('2') }}"
+        phpfpm_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') }}"
+        phpfpm_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}"
+        phpfpm_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
       loop: "{{ users | dict2items }}"
+        loop_var: user
+        label: "{{ user.key }}"
+      when: user.key in users_update
       tags:
         - users-update
         - users-chroot
@@ -183,9 +214,13 @@
     - name: Users PHP FPM pool.d file present
       template:
         src: templates/phpfpm_chroot_user.conf.j2
-        dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ item.key }}.conf"
+        dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key in users_update
+        - ( user.value.users_state is undefined or user.value.users_state == "present" ) and ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
@@ -194,9 +229,12 @@
     - name: Users Apache PHP FPM localhost.d file present
       template:
         src: apache_localhost.conf.j2
-        dest: "/etc/apache2/localhost.d/{{ item.key }}.conf"
+        dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
       loop: "{{ users | dict2items }}"
-      when: ( users_apache2.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+      when:
+        - ( user.key in users_update ) and ( users_apache2.stat.exists )
+        - ( user.value.users_state is undefined or user.value.users_state == "present" )
+        - ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
@@ -207,7 +245,12 @@
         src: nginx_localhost.conf.j2
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
       loop: "{{ users | dict2items }}"
-      when: ( users_nginx.stat.exists ) and ( item.value.users_state is undefined or item.value.users_state == "present" ) and ( "phpfpm" in item.value.users_groups and "chroot" in item.value.users_groups )
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( user.key in users_update ) and ( users_nginx.stat.exists )
+        - ( user.value.users_state is undefined or user.value.users_state == "present" )
+        - ( "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups )
       tags:
         - users-update
         - users-chroot
