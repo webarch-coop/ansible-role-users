@@ -65,7 +65,9 @@
 
 - name: End test tasks
   fail:
-    msg: "End of test"
+    msg:
+      - "Users to update: {{ users_update }}"
+      - "End of test"
 
 - name: Users absent loops
   block:
