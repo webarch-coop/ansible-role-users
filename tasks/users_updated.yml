@@ -1,8 +1,8 @@
 ---
 - name: Current users state files moved to the previous directory for updated users
   copy:
-    src: "{{ users_state_dir }}/current/{{ user.key }}/yml"
-    dest: "{{ users_state_dir }}/previous/{{ user.key }}/yml"
+    src: "{{ users_state_dir }}/current/{{ user.key }}.yml"
+    dest: "{{ users_state_dir }}/previous/{{ user.key }}.yml"
     remote_src: true
   loop: "{{ users | dict2items }}"
   loop_control:
@@ -12,8 +12,8 @@
 
 - name: Proposed users state files moved to the current directory for updated users
   copy:
-    src: "{{ users_state_dir }}/proposed/{{ user.key }}/yml"
-    dest: "{{ users_state_dir }}/current/{{ user.key }}/yml"
+    src: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
+    dest: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     remote_src: true
   loop: "{{ users | dict2items }}"
   loop_control:
