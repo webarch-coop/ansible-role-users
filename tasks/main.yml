@@ -596,5 +596,10 @@
     - users-firewall
 
 - name: Users state files updated
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+  when: user.key in users_update
   include_tasks: users_updated.yml
 ...
