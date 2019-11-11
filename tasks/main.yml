@@ -594,4 +594,7 @@
   when: ( users_firewall is defined ) and ( users_firewall == True )
   tags:
     - users-firewall
+
+- name: Users state files updated
+  include_tasks: users_updated.yml
 ...

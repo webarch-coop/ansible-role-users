@@ -1,0 +1,23 @@
+---
+- name: Current users state files moved to the previous directory for updated users
+  copy:
+    src: "{{ users_state_dir }}/current/{{ user }}/yml"
+    dest: "{{ users_state_dir }}/previous/{{ user }}/yml"
+    remote_src: true
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+  when: user.key in users_update
+
+- name: Proposed users state files moved to the current directory for updated users
+  copy:
+    src: "{{ users_state_dir }}/proposed/{{ user }}/yml"
+    dest: "{{ users_state_dir }}/current/{{ user }}/yml"
+    remote_src: true
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+  when: user.key in users_update
+...
