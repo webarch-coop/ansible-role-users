@@ -583,12 +583,6 @@
     - '"apache2" in ansible_facts.packages'
     - ( users_apache is defined ) and ( users_apache == True )
 
-- name: Firewall tasks included
-  include_tasks: firewall.yml
-  when: ( users_firewall is defined ) and ( users_firewall == True )
-  tags:
-    - users-firewall
-
 - name: Users state files updated
   loop: "{{ users | dict2items }}"
   loop_control:
@@ -596,4 +590,10 @@
     label: "{{ user.key }}"
   when: user.key in users_update
   include_tasks: users_updated.yml
+
+- name: Firewall tasks included
+  include_tasks: firewall.yml
+  when: ( users_firewall is defined ) and ( users_firewall == True )
+  tags:
+    - users-firewall
 ...
