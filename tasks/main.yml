@@ -16,12 +16,6 @@
 - name: System state checks
   include_tasks: system_check.yml
 
-- name: "Proposed variables and facts for {{ inventory_hostname }} written to {{ users_state_dir }}/proposed.yml"
-  template:
-    src: system_state.yml.j2
-    dest: "{{ users_state_dir }}/proposed.yml"
-  check_mode: false
-
 - name: Set an empty users_update array
   set_fact:
     users_update: []
