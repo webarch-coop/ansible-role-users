@@ -13,8 +13,13 @@
       - whois
     state: present
 
-- name: System state checks
+- name: System checks
   include_tasks: system_check.yml
+
+- name: Directory for state present
+  file:
+    path: "{{ users_state_dir }}"
+    state: directory
 
 - name: "Proposed variables and facts for {{ inventory_hostname }} written to {{ users_state_dir }}/proposed.yml"
   template:
