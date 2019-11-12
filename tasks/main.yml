@@ -607,4 +607,22 @@
     label: "{{ user.key }}"
   when: user.key in users_update
   include_tasks: users_updated.yml
+
+- name: "Check if a current variables and facts for {{ inventory_hostname }} exists at {{ users_state_dir }}/current.yml"
+  stat:
+    path: "{{ users_state_dir }}/current.yml"
+  register: users_state_system_current
+
+- name: "Copy the {{ users_state_dir }}/current.yml file to {{ users_state_dir }}/previous.yml"
+  copy:
+    src: "{{ users_state_dir }}/current.yml"
+    dest: "{{ users_state_dir }}/previous.yml"
+    remote_src: true
+  when: ( users_state_system_current is defined ) and ( users_state_system_current.stat.exists )
+
+- name: "Copy the {{ users_state_dir }}/proposed.yml file to {{ users_state_dir }}/current.yml"
+  copy:
+    src: "{{ users_state_dir }}/proposed.yml"
+    dest: "{{ users_state_dir }}/current.yml"
+    remote_src: true
 ...
