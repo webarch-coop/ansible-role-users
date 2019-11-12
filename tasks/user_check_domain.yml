@@ -4,9 +4,14 @@
   set_fact:
     users_domain_ip: ""
 
+- name: Print the domain name
+  debug:
+    msg: "users_domain: {{ users_domain }}"
+    verbosity: 1
+
 - name: Set a fact for the domain we are testing
   set_fact:
-    users_domain_ip: "{{ lookup('dig', '{{ users_domain }}') | ipv4 }}"
+    users_domain_ip: "{{ query('dig', '{{ users_domain }}') | ipv4 }}"
 
 - name: Print the IP address
   debug:
