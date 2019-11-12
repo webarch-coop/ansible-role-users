@@ -1,5 +1,7 @@
 # {{ ansible_managed }}
 
 [client]
-user="{{ item.key }}"
+user="{{ user.key }}"
 password="{{ users_mariadb_password }}"
+
+# vim: syntax=dosini

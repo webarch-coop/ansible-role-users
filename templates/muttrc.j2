@@ -1,8 +1,9 @@
+# {{ ansible_managed }}
 set tmpdir="~/tmp"
 set folder="~/.mutt"
 set record="+sent"
-set sendmail="/usr/sbin/sendmail -f{{ item.key }}@{{ inventory_hostname }}"
+set sendmail="/usr/sbin/sendmail -f{{ user.key }}@{{ inventory_hostname }}"
 set hostname="{{ inventory_hostname }}"
-{% if item.value.users_email is defined %}
-set from="{% if item.value.users_name is defined %}{{ item.value.users_name }}{% endif %} <{{ item.key }}@{{ inventory_hostname }}>"
+{% if user.value.users_email is defined %}
+set from="{% if user.value.users_name is defined %}{{ user.value.users_name }}{% endif %} <{{ user.key }}@{{ inventory_hostname }}>"
 {% endif %}

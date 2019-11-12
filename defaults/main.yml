@@ -1,4 +1,8 @@
 ---
+# If users_update_strategy is set to "all" then all users will be configured
+# everytime the tasks in this rol are run, it it is set to "changed" than only
+# user accounts that have changes will be updated.
+users_update_strategy: changed
 # Define users_apache to true for this role to manage the Apache VirtualHosts
 users_apache: false
 # Define users_chroot to true for members of the chroot group to be chrooted
@@ -6,8 +10,6 @@ users_chroot: false
 # Define users_mariadb to true for this role to create MariaDB user and
 # databases
 users_mariadb: false
-# Define users_skell to true install addtionall skell profiles
-users_skell: false
 # Define users_phpfpm to true for this role to generate PHP FPM pools
 users_phpfpm: false
 # Define users_cron to true for this role to generate cron tasks
@@ -19,6 +21,7 @@ users_quotaon: false
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root
 users_basedir: /home
+users_state_dir: /root/users
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_headers:
