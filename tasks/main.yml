@@ -230,7 +230,7 @@
     label: "{{ user.key }}"
   when:
     - ( users_update is defined ) and ( users_update != [] )
-    - ( user.key in users_update )
+    - ( user.key is defined ) and ( user.key in users_update )
     - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
     - ( user.value.users_state is not defined or user.value.users_state == "present" )
   tags:
@@ -323,7 +323,8 @@
         - users-scripts
 
   when:
-    - ( user.key in users_update )
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
     - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
 
 - name: Users quota CSV file updated
