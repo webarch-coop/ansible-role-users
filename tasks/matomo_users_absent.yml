@@ -5,7 +5,7 @@
     name: matomo
     tasks_from: deleteuser.yml
   vars:
-    matomo_login: "{{ item.key }}"
+    matomo_login: "{{ user.key }}"
   tags:
     - users-update
 ...

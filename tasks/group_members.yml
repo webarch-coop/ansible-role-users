@@ -1,10 +1,11 @@
 ---
 # Ideally this would check if the command needs to be run before running it
-- name: "Users that have membership of {{ item.value.users_group | default(item.key) }} group"
-  command: "usermod -a -G {{ item.value.users_group | default(item.key) }} {{ users_group_member }}"
-  loop: "{{ item.value.users_group_members }}"
+- name: "Users that have membership of {{ user.value.users_group | default(user.key) }} group"
+  command: "usermod -a -G {{ user.value.users_group | default(user.key) }} {{ member }}"
+  loop: "{{ user.value.users_group_members }}"
   loop_control:
-    loop_var: users_group_member
+    loop_var: member
+    label: "{{ member }}"
   tags:
     - users-update
 ...

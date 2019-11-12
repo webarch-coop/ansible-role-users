@@ -1,8 +1,8 @@
-Hi {{ item.value.users_name | default(item.key) }}
+Hi {{ user.value.users_name | default(user.key) }}
 
 Your SFTP / SSH account details for {{ inventory_hostname }}:
 
-  Username:	{{ item.key }}
+  Username:	{{ user.key }}
   Password:	{{ users_passwd.stdout }}
   Server:	{{ inventory_hostname }}
   Port:		22

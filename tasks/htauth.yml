@@ -2,7 +2,7 @@
 - name: Debug vhost
   debug:
     msg:
-      - "item.value.users.home: {{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+      - "user.value.users.home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
     verbosity: 1
@@ -21,17 +21,18 @@
   loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth
+    label: "{{ htauth }}"
   tags:
     - apache
     - users-update
     - users-htauth
 
-- name: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd directory present"
+- name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd directory present"
   file:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd"
     state: directory
     owner: www-data
-    group: "{{ item.value.users_group | default(item.key) }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0750"
   tags:
     - apache
@@ -40,17 +41,18 @@
 
 - name: "HTTP Authentication usernames and passwords for {{ vhost.value.users_apache_server_name }}"
   htpasswd:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.htpasswd/{{ vhost.value.users_apache_server_name }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.value.users_apache_server_name }}"
     name: "{{ htauth.name }}"
     password: "{{ htauth.password }}"
     state: "{{ htauth.state | default('present') }}"
     owner: www-data
-    group: "{{ item.value.users_group | default(item.key) }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0640"
   when: ( htauth.password is defined and htauth.password != "" ) and ( htauth.state is not defined or htauth.state == "present" )
   loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth
+    label: "{{ htauth }}"
   tags:
     - apache
     - users-update

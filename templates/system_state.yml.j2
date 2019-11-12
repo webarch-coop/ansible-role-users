@@ -1,0 +1,6 @@
+---
+# {{ ansible_managed }}
+# All variables for {{ inventory_hostname }}
+{{ hostvars[inventory_hostname] | to_nice_yaml(indent=2, width=1000) }}
+# vim: set ft=yml
+...

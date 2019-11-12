@@ -1,14 +1,14 @@
 ---
-- name: "Stat {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_passwd file"
+- name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd file"
   stat:
-    path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_passwd"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd"
   register: users_notify_passwd_file
   tags:
     - users-update
 
 - block:
 
-    - name: "Random passwd for {{ item.key }} generated"
+    - name: "Random passwd for {{ user.key }} generated"
       command: pwgen -n 20 1
       no_log: true
       register: users_passwd
@@ -22,37 +22,37 @@
       tags:
         - users-update
 
-    - name: "Password set for {{ item.key }}"
+    - name: "Password set for {{ user.key }}"
       user:
-        name: "{{ item.key }}"
+        name: "{{ user.key }}"
         password: "{{ users_passwd_hash.stdout }}"
       tags:
         - users-update
 
-    - name: "Password notification email sent to {{ item.value.users_email }}"
+    - name: "Password notification email sent to {{ user.value.users_email }}"
       mail:
         from: "{{ users_notify_from | default('Webarchitects') }} <root@{{ inventory_hostname }}>"
-        to: "{{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
-        subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ item.key }} on {{ inventory_hostname }}"
+        to: "{{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
+        subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ user.key }} on {{ inventory_hostname }}"
         headers: "{{ users_notify_headers }}"
         charset: us-ascii
         body: "{{ lookup('template', 'templates/notify_passwd.j2') }}"
         host: localhost
         port: 25
         secure: never
-      when: item.value.users_email is defined and item.value.users_email != ""
+      when: user.value.users_email is defined and user.value.users_email != ""
       tags:
         - users-update
 
-    - name: "Notification date recorded in {{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_passwd file"
+    - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd file"
       lineinfile:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.notify_passwd"
-        line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ item.value.users_name | default(item.key) }} <{{ item.value.users_email }}>"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd"
+        line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
         create: true
         state: present
         insertafter: EOF
         owner: root
-        group: "{{ item.key }}"
+        group: "{{ user.key }}"
         mode: 0640
       tags:
         - users-update

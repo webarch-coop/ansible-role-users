@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
-location /phpfpm-{{ item.key }}-status {
+location /phpfpm-{{ user.key }}-status {
   include fastcgi.conf;
-  fastcgi_pass unix:/users/{{ item.key }}{{ users_basedir }}/stats/php-fpm.sock;
+  fastcgi_pass unix:/users/{{ user.key }}{{ users_basedir }}/stats/php-fpm.sock;
   allow 127.0.0.1;
   deny all;
 }

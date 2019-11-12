@@ -1,12 +1,12 @@
-Hi {{ item.value.users_name | default(item.key) }}
+Hi {{ user.value.users_name | default(user.key) }}
 
 Your MariaDB account and database details for {{ inventory_hostname }}:
 
-  Username:	{{ item.key }}
+  Username:	{{ user.key }}
   Password:	{{ users_mariadb_password }}
   Server:	localhost
   Port:		3306
-  Database(s):	{% for d in item.value.users_mariadb_databases %}{{ d }} {% endfor %}
+  Database(s):	{% for d in user.value.users_mariadb_databases %}{{ d }} {% endfor %}
 
 
 {% if ssh_allow_tcp_forwarding is defined and ssh_allow_tcp_forwarding == "yes" %}

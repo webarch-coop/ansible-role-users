@@ -1,9 +1,13 @@
+# {{ ansible_managed }}
+
 [user]
-        name = {{ item.value.users_name }} 
-        email = {{ item.value.users_email }}
+        name = {{ user.value.users_name }} 
+        email = {{ user.value.users_email }}
 
 [push]
         default = simple
 
 [transfer]
         fsckobjects = true
+
+# vim: syntax=gitconfig

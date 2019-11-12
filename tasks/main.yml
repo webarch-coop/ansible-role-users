@@ -4,144 +4,74 @@
     pkg:
       - bc
       - mutt
+      - python-dns
+      - python-dnspython
+      - python3-dnspython
       - python-passlib
       - slay
       - vim
       - whois
     state: present
 
-- name: Check /etc/debian_version
-  shell: "lsb_release -c | awk '{ print $2 }'"
-  register: users_debian_version_check
+- name: System state checks
+  include_tasks: system_check.yml
+
+- name: "Proposed variables and facts for {{ inventory_hostname }} written to {{ users_state_dir }}/proposed.yml"
+  template:
+    src: system_state.yml.j2
+    dest: "{{ users_state_dir }}/proposed.yml"
   check_mode: false
-  changed_when: false
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
 
-- name: Set a fact for the Debian version
+- name: Set an empty users_update array
   set_fact:
-    users_debian_version: "{{ users_debian_version_check.stdout }}"
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
+    users_update: []
 
-- name: Load package information as facts
-  package_facts:
-    manager: apt
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
-
-- name: Fail if ansible_facts.packages is not defined or empty
-  fail:
-    msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
-  when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
-  tags:
-    - apache
-    - letsencrypt
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
-
-- name: PHP FPM checks
+- name: Set users to update to all
   block:
 
-    - name: Check if php-fpm is installed
-      shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
-      register: users_phpfpm_status
-      check_mode: false
-      changed_when: false
-      tags:
-        - logrotate
-        - phpfpm
-        - users-update
+    - name: Add all the users to the users_update array
+      set_fact:
+        updates_users: "{{ users_update }} + [ '{{ user.key }}' ]"
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
 
-    - name: php-fpm variable set
-      block:
+    - name: Print all the users to update
+      debug:
+        msg: "User to update: {{ users_update }}"
 
-        - name: Print the users_phpfpm_status
-          debug:
-            msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
-            verbosity: 1
-          tags:
-            - logrotate
-            - phpfpm
-            - users-update
+  when: ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
 
-        - name: Set a fact for the PHP-FPM version
-          set_fact:
-            users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
-          when: users_phpfpm_status.stdout == "installed"
-          tags:
-            - logrotate
-            - phpfpm
-            - users-update
+- name: Check which users accounts are changed
+  block:
 
-      when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
+    - name: Check users changed
+      include_tasks: users_changed.yml
 
-  when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
+    - name: Print the changed users to update
+      debug:
+        msg: "User to update: {{ users_update }}"
 
-- name: Check if a chroot exists
-  stat:
-    path: "{{ chroot_dir | default('/chroot') }}"
-  register: users_chroot_dir
-  when: ( users_chroot is defined ) and ( users_chroot == True )
-  tags:
-    - logrotate
-    - phpfpm
-    - users-update
-    - users-chroot
-    - users-cron
-    - users-fstab
+  when: ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
+
+- name: Check variables for users to update
+  include_tasks: user_check.yml
+  when: user.key in users_update
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
 
 - name: Users absent loops
   block:
 
     - name: Slay any processes running as the user
-      command: "slay {{ item.key }}"
+      command: "slay {{ user.key }}"
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-chroot
         - users-update
@@ -149,6 +79,9 @@
     - name: Crontab absent for users
       include_tasks: crontab_users_absent.yml
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-update
         - users-cron
@@ -160,7 +93,10 @@
         - name: Include the chroot users /etc/fstab entries absent tasks
           include_tasks: chroot_users_absent_fstab.yml
           loop: "{{ users | dict2items }}"
-          when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
           tags:
             - users-chroot
             - users-update
@@ -171,8 +107,11 @@
     - name: Include Apache config tasks absent users
       include_tasks: apache_users_absent.yml
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       when:
-        - '"apache2" in ansible_facts.packages'
+        - ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache == True )
       tags:
         - users-update
@@ -181,6 +120,9 @@
     - name: Absent users MariaDB account and databases absent
       include_tasks: mariadb_user_absent.yml
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       when: ( users_mariadb is defined ) and ( users_mariadb == True )
       tags:
         - users-update
@@ -192,7 +134,10 @@
         - name: Include the chroot users mounts absent tasks
           include_tasks: chroot_users_absent.yml
           loop: "{{ users | dict2items }}"
-          when: ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( "chroot" not in item.value.users_groups )
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
           tags:
             - users-chroot
             - users-update
@@ -201,39 +146,40 @@
 
     - name: Absent users home directories removed
       file:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         state: absent
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-update
 
     - name: Users accounts absent
       user:
-        name: "{{ item.key }}"
+        name: "{{ user.key }}"
         state: absent
         remove: true
         force: true
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-update
 
     - name: User groups absent
       group:
-        name: "{{ item.key }}"
+        name: "{{ user.key }}"
         state: absent
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-update
 
-  when: item.value.users_state is defined and item.value.users_state == "absent"
-
-- name: Skel profiles included
-  include_tasks: "skel_{{ users_skeleton }}.yml"
-  loop:
-    - www
-  loop_control:
-    loop_var: users_skeleton
-  when: ( users_skell is defined ) and ( users_skell == True )
+  when: ( user.value.users_state is defined ) and ( user.value.users_state == "absent" ) and ( user.key in users_update )
 
 - name: Quota tasks
   block:
@@ -282,8 +228,11 @@
   include_tasks: groups.yml
   loop: "{{ users | dict2items }}"
   loop_control:
-    loop_var: users_groups_user
-  when: ( users_groups_user.value.users_state is not defined or users_groups_user.value.users_state == "present" ) and ( users_groups_user.value.users_groups is defined )
+    loop_var: user
+    label: "{{ user.key }}"
+  when:
+    - ( user.value.users_state is not defined or user.value.users_state == "present" )
+    - ( user.value.users_groups is defined ) and ( user.key in users_update )
   tags:
     - users-update
 
@@ -292,9 +241,12 @@
 
     - name: User group present
       group:
-        name: "{{ item.key }}"
+        name: "{{ user.key }}"
         state: present
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-update
 
@@ -302,14 +254,18 @@
       include: group_members.yml
       loop: "{{ users | dict2items }}"
       loop_control:
-        label: "{{ item.key }}"
-      when: ( item.value.users_group_members is defined ) and ( item.value.users_group_members != [] )
+        loop_var: user
+        label: "{{ user.key }}"
+      when: ( user.value.users_group_members is defined ) and ( user.value.users_group_members != [] )
       tags:
         - users-update
 
     - name: User accounts present
       include_tasks: user.yml
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       tags:
         - users-ssh
         - users-update
@@ -318,9 +274,12 @@
       include_tasks: mariadb_user_present.yml
       vars:
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       when:
         - ( users_mariadb is defined ) and ( users_mariadb == True )
-        - ( item.value.users_mariadb_databases is defined ) and ( item.value.users_mariadb_databases != [] )
+        - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
       tags:
         - users-update
         - users-mariadb
@@ -329,7 +288,10 @@
     - name: Quotas set
       include_tasks: quota.yml
       loop: "{{ users | dict2items }}"
-      when: ( quota_dir is defined ) and ( item.value.users_quota is defined ) and ( item.value.users_quota != "" )
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when: ( quota_dir is defined ) and ( user.value.users_quota is defined ) and ( user.value.users_quota != "" )
       tags:
         - users-update
         - users-quota
@@ -337,16 +299,22 @@
     - name: Set passwds and notify users
       include_tasks: notify_passwd.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_notify_passwd is defined ) and ( item.value.users_notify_passwd == True ) and ( item.value.users_email is defined ) and ( item.value.users_email != "" )
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when: ( user.value.users_notify_passwd is defined ) and ( user.value.users_notify_passwd == True ) and ( user.value.users_email is defined ) and ( user.value.users_email != "" )
       tags:
         - users-update
 
     - name: Crontab present for users
       include_tasks: crontab_users_present.yml
       loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
       when:
-        - item.key != "root"
-        - ( item.value.users_groups is defined ) and ( "sudo" not in item.value.users_groups )
+        - user.key != "root"
+        - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
         - ( users_crontab is not defined ) or ( users_crontab == True )
         - ( users_cron is defined ) and ( users_cron == True )
       tags:
@@ -354,7 +322,9 @@
         - users-cron
         - users-scripts
 
-  when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
+  when:
+    - ( user.key in users_update )
+    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
 
 - name: Users quota CSV file updated
   block:
@@ -385,37 +355,54 @@
 
     - name: Email address for user absent so no .forward
       file:
-        path: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.forward"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
         state: absent
       loop: "{{ users | dict2items }}"
-      when: ( users_forward == False ) or ( item.value.users_state is defined and item.value.users_state == "absent" ) or ( item.value.users_email is not defined or item.value.users_email == "" )
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when: ( users_forward == False ) or ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( user.value.users_email is not defined or user.value.users_email == "" )
       tags:
         - users-update
 
     - name: Email address in .forward
       template:
         src: templates/forward.j2
-        dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.forward"
-        owner: "{{ item.key }}"
-        group: "{{ item.key }}"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
         mode: 0644
       loop: "{{ users | dict2items }}"
-      when: ( users_forward == True ) and ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( item.value.users_email is defined and item.value.users_email != "" )
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( users_forward == True )
+        - ( user.value.users_state is not defined or user.value.users_state == "present" )
+        - ( user.value.users_email is defined and user.value.users_email != "" )
       tags:
         - users-update
 
-  when: ( users_forward is defined ) and ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
+  when:
+    - ( users_forward is defined ) and ( user.key in users_update )
+    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
 
 - name: Create a .muttrc for each user if it doesn't exist
   template:
     src: templates/muttrc.j2
-    dest: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}/.muttrc"
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.muttrc"
     force: false
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0644
   loop: "{{ users | dict2items }}"
-  when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( users_muttrc is defined ) and ( users_muttrc == True )
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+  when:
+    - ( user.key in users_update )
+    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+    - ( users_muttrc is defined ) and ( users_muttrc == True )
   tags:
     - users-update
 
@@ -425,7 +412,13 @@
     - name: Include the chroot present users tasks
       include_tasks: chroot_users_present.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_state is not defined or item.value.users_state == "present" ) and ( item.value.users_groups is defined and "chroot" in item.value.users_groups )
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( user.key in users_update )
+        - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+        - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
       tags:
         - users-chroot
         - users-update
@@ -489,7 +482,13 @@
             - name: Matomo accounts for users absent
               include_tasks: matomo_users_absent.yml
               loop: "{{ users | dict2items }}"
-              when: (users_matomo_delete_users is defined and users_matomo_delete_users == True ) and ( item.value.users_state is defined ) and ( item.value.users_state == "absent" )
+              loop_control:
+                loop_var: user
+                label: "{{ user.key }}"
+              when:
+                - ( user.key in users_update )
+                - ( users_matomo_delete_users is defined ) and ( users_matomo_delete_users == True )
+                - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
               tags:
                 - matomo
                 - users-update
@@ -497,7 +496,12 @@
             - name: Matomo accounts for users present
               include_tasks: matomo_users_present.yml
               loop: "{{ users | dict2items }}"
-              when: ( item.value.users_state is not defined ) or ( item.value.users_state == "present" )
+              loop_control:
+                loop_var: user
+                label: "{{ user.key }}"
+              when:
+                - ( user.key in users_update )
+                - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
               tags:
                 - matomo
                 - users-update
@@ -514,7 +518,12 @@
     - name: Include Apache config tasks present users
       include_tasks: apache_users_present.yml
       loop: "{{ users | dict2items }}"
-      when: ( item.value.users_apache_virtual_hosts is defined ) and ( item.value.users_state is not defined or item.value.users_state == "present" )
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( user.key in users_update ) and ( user.value.users_apache_virtual_hosts is defined )
+        - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
       tags:
         - users-update
         - apache
@@ -585,4 +594,12 @@
   when: ( users_firewall is defined ) and ( users_firewall == True )
   tags:
     - users-firewall
+
+- name: Users state files updated
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+  when: user.key in users_update
+  include_tasks: users_updated.yml
 ...

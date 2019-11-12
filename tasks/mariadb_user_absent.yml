@@ -1,12 +1,12 @@
 ---
-- name: "The databases that {{ item.key }} has access to"
-  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ item.key }}';" mysql
+- name: "The databases that {{ user.key }} has access to"
+  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
   register: users_mariadb_list
   tags:
     - users-update
     - users-mariadb
 
-- name: "Databases absent for {{ item.key }}"
+- name: "Databases absent for {{ user.key }}"
   mysql_db:
     name: "{{ db }}"
     state: absent
@@ -20,9 +20,9 @@
     - users-update
     - users-mariadb
 
-- name: "MariaDB user {{ item.key }} absent"
+- name: "MariaDB user {{ user.key }} absent"
   mysql_user:
-    name: "{{ item.key }}"
+    name: "{{ user.key }}"
     state: absent
     login_user: root
     login_unix_socket: /var/run/mysqld/mysqld.sock

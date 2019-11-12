@@ -1,6 +1,6 @@
 ---
-- name: "Read {{ item.key }} entry from /etc/passwd"
-  command: "grep ^{{ item.key }}: /etc/passwd"
+- name: "Read {{ user.key }} entry from /etc/passwd"
+  command: "grep ^{{ user.key }}: /etc/passwd"
   check_mode: false
   register: users_etc_passwd
   changed_when: false
@@ -8,7 +8,7 @@
     - users-chroot
     - users-update
 
-- name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/passwd"
+- name: "{{ user.key }} present in {{ chroot_dir | default('/chroot') }}/etc/passwd"
   lineinfile:
     path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
     line: "{{ users_etc_passwd.stdout }}"
@@ -17,8 +17,8 @@
     - users-chroot
     - users-update
 
-- name: "Read {{ item.key }} entry from /etc/group"
-  command: "grep ^{{ item.key }}: /etc/group"
+- name: "Read {{ user.key }} entry from /etc/group"
+  command: "grep ^{{ user.key }}: /etc/group"
   check_mode: false
   register: users_etc_group
   changed_when: false
@@ -26,7 +26,7 @@
     - users-chroot
     - users-update
 
-- name: "{{ item.key }} present in {{ chroot_dir | default('/chroot') }}/etc/group"
+- name: "{{ user.key }} present in {{ chroot_dir | default('/chroot') }}/etc/group"
   lineinfile:
     path: "{{ chroot_dir | default('/chroot') }}/etc/group"
     line: "{{ users_etc_group.stdout }}"
@@ -35,19 +35,19 @@
     - users-chroot
     - users-update
 
-- name: "Mount point {{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
+- name: "Mount point {{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
   file:
-    path: "{{ chroot_dir | default('/chroot') }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    path: "{{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     owner: root
-    group: "{{ item.value.users_home_group | default(item.key) }}"
+    group: "{{ user.value.users_home_group | default(user.key) }}"
     mode: "0750"
     state: directory
   tags:
     - users-chroot
     - users-update
 
-- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
+  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} >/dev/null && echo PRESENT || echo ABSENT"
   check_mode: false
   register: users_chroot_users_home_mount
   changed_when: '"ABSENT" in users_chroot_users_home_mount.stdout'
@@ -55,9 +55,9 @@
     - users-update
     - users-chroot
 
-- name: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }} present"
+- name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
   file:
-    path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
+    path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
     owner: root
     group: root
     mode: "0750"
@@ -67,7 +67,7 @@
     - users-update
     - users-chroot
 
-- name: "Chroot directories mounted for {{ item.key }}"
+- name: "Chroot directories mounted for {{ user.key }}"
   mount:
     src: "{{ mnt.src }}"
     path: "{{ mnt.path }}"
@@ -76,19 +76,20 @@
     state: mounted
   loop:
     - src: "{{ chroot_dir | default('/chroot') }}"
-      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}"
+      path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
       opts: ro,nosuid,bind,private
-    - src: "{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
-      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}{{ item.value.users_home | default(users_basedir + '/' + item.key) }}"
+    - src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+      path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       opts: rw,nodev,nosuid,bind,private
     - src: /run/mysqld
-      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/mysqld"
+      path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld"
       opts: ro,nodev,nosuid,noexec,bind,private
     - src: "/run/chroot"
-      path: "{{ chroot_users_dir | default('/users') }}/{{ item.key }}/run/chroot"
+      path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot"
       opts: ro,nodev,nosuid,noexec,bind,private
   loop_control:
     loop_var: mnt
+    label: "{{ mnt }}"
   tags:
     - users-chroot
     - users-update

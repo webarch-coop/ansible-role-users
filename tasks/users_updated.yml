@@ -1,0 +1,19 @@
+---
+- name: "Check if a current state files exists for {{ user.key }}"
+  stat:
+    path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
+  register: users_current_state_file
+
+- name: "Current state file moved to the previous directory for {{ user.key }}"
+  copy:
+    src: "{{ users_state_dir }}/current/{{ user.key }}.yml"
+    dest: "{{ users_state_dir }}/previous/{{ user.key }}.yml"
+    remote_src: true
+  when: ( users_current_state_file is defined ) and ( users_current_state_file.stat.exists )
+
+- name: "Proposed users state file moved to the current directory for {{ user.key }}"
+  copy:
+    src: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
+    dest: "{{ users_state_dir }}/current/{{ user.key }}.yml"
+    remote_src: true
+...
