@@ -88,7 +88,7 @@
 
     - name: "Copy /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       copy:
-        src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf" 
+        src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
         remote_src: true
       when: users_phpfpm_pool_conf_check.stat.exists

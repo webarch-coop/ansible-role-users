@@ -19,9 +19,9 @@
     path: "{{ file }}"
     state: absent
   loop:
-     - "/etc/apache2/sites-available/{{ user.key }}.conf"
-     - "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
-     - "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+    - "/etc/apache2/sites-available/{{ user.key }}.conf"
+    - "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
+    - "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
   loop_control:
     loop_var: file
     label: "{{ file }}"
