@@ -218,10 +218,6 @@
 
   when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
 
-- name: Debug variables
-  debug:
-    msg: "users_update : {{ users_update }}"
-
 - name: User groups present
   include_tasks: groups.yml
   loop: "{{ users | dict2items }}"
