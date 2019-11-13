@@ -130,34 +130,34 @@
             - users-chroot
             - phpfpm
 
-       - name: "php-fpm{{ users_phpfpm_version }} --test failed, so reverting changes"
-         copy:
-           src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
-           dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-           remote_src: true
-         when: users_phpfpm_pool_conf_check.stat.exists == True
-         tags:
-           - users-update
-           - users-chroot
-           - phpfpm
-
-       - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
-         file:
-           path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-           state: absent
-         when: users_phpfpm_pool_conf_check.stat.exists == False
+        - name: "php-fpm{{ users_phpfpm_version }} --test failed, so reverting changes"
+          copy:
+            src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+            dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+            remote_src: true
+          when: users_phpfpm_pool_conf_check.stat.exists == True
           tags:
             - users-update
             - users-chroot
             - phpfpm
 
-      - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
-        fail:
-          msg:
-            - "php-fpm{{ users_phpfpm_version }} --test failed for {{ user.key }} and as a result php-fpm has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this user."
-            - "The broken config is available in /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
-            - "The error was: {{ users_phpfpm_pool_configtest.stderr }}"
-        tags:
+        - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
+          file:
+            path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+            state: absent
+          when: users_phpfpm_pool_conf_check.stat.exists == False
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+        - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
+          fail:
+            msg:
+              - "php-fpm{{ users_phpfpm_version }} --test failed for {{ user.key }} and as a result php-fpm has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this user."
+              - "The broken config is available in /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+              - "The error was: {{ users_phpfpm_pool_configtest.stderr }}"
+          tags:
             - users-update
             - users-chroot
             - phpfpm
