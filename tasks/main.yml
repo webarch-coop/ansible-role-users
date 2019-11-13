@@ -218,6 +218,10 @@
 
   when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
 
+- name: Debug variables
+  debug:
+    msg: "users_update : {{ users_update }}"
+
 - name: User groups present
   include_tasks: groups.yml
   loop: "{{ users | dict2items }}"
@@ -225,8 +229,10 @@
     loop_var: user
     label: "{{ user.key }}"
   when:
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
+    - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
     - ( user.value.users_state is not defined or user.value.users_state == "present" )
-    - ( user.value.users_groups is defined ) and ( user.key in users_update )
   tags:
     - users-update
 
@@ -317,7 +323,8 @@
         - users-scripts
 
   when:
-    - ( user.key in users_update )
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
     - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
 
 - name: Users quota CSV file updated
