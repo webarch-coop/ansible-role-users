@@ -127,8 +127,6 @@
         - phpfpm
         - users-update
 
-      when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
-
   when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
 
 - name: Check if a chroot exists
