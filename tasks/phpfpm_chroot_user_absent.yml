@@ -1,0 +1,19 @@
+---
+- name: "PHP FPM files for {{ user.key }} absent"
+  file:
+    path: "{{ file }}"
+    state: absent
+  loop:
+    - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+    - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+    - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+    - "/etc/apache2/localhost.d/{{ user.key }}.conf"
+    - "/etc/nginx/localhost.d/{{ user.key }}.conf"
+  loop_control:
+    loop_var: file
+    label: "{{ file }}"
+  tags:
+    - users-update
+    - users-chroot
+    - phpfpm
+...

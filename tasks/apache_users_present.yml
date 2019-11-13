@@ -201,7 +201,7 @@
     - name: "apache2ctl configtest failed, saving failed config"
       copy:
         src: "/etc/apache2/sites-available/{{ user.key }}.conf"
-        dest: "/etc/apache2/sites-available/{{ user.key }}.conf.broken"
+        dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
         remote_src: true
       tags:
         - apache

@@ -87,12 +87,30 @@
     - matomo
     - phpmyadmin
 
+- name: Stat /usr/sbin/apache2
+  stat:
+    path: /usr/sbin/apache2
+  register: users_apache2
+  tags:
+    - users-update
+    - users-chroot
+    - phpfpm
+
+- name: Stat /usr/sbin/nginx
+  stat:
+    path: /usr/sbin/nginx
+  register: users_nginx
+  tags:
+    - users-update
+    - users-chroot
+    - phpfpm
+
 - name: PHP FPM checks
   block:
 
-    - name: Check if php-fpm is installed
-      shell: "dpkg -s php{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}-fpm | grep ^Status | awk '{ print $4 }'"
-      register: users_phpfpm_status
+    - name: Run phpquery -V
+      command: phpquery -V
+      register: users_phpquery
       check_mode: false
       changed_when: false
       tags:
@@ -100,26 +118,14 @@
         - phpfpm
         - users-update
 
-    - name: php-fpm variable set
-      block:
-
-        - name: Print the users_phpfpm_status
-          debug:
-            msg: "users_phpfpm_status: {{ users_phpfpm_status.stdout }}"
-            verbosity: 1
-          tags:
-            - logrotate
-            - phpfpm
-            - users-update
-
-        - name: Set a fact for the PHP-FPM version
-          set_fact:
-            users_phpfpm_version: "{% if users_debian_version == 'stretch' %}7.0{% elif users_debian_version == 'buster' %}7.3{% elif users_debian_version == 'bionic' %}7.2{% endif %}"
-          when: users_phpfpm_status.stdout == "installed"
-          tags:
-            - logrotate
-            - phpfpm
-            - users-update
+    - name: Set a fact for the PHP-FPM version
+      set_fact:
+        users_phpfpm_version: "{{ users_phpquery.stdout | trim }}"
+      when: ( users_phpquery is defined ) and ( users_phpquery.stdout != "" )
+      tags:
+        - logrotate
+        - phpfpm
+        - users-update
 
       when: ( users_phpfpm_status is defined ) and ( users_phpfpm_status != "" )
 

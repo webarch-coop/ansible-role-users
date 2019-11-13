@@ -111,6 +111,21 @@
         - users-update
         - apache
 
+    - name: Include PHP FPM chroot users absent tasks
+      include_tasks: phpfpm_chroot_user_absent.yml
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
+        - ( users_chroot is defined ) and ( users_chroot == True )
+        - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
     - name: Absent users MariaDB account and databases absent
       include_tasks: mariadb_user_absent.yml
       loop: "{{ users | dict2items }}"
@@ -423,24 +438,60 @@
     - name: PHP-FPM chroot tasks
       block:
 
-        - name: PHP-FPM chroot logrotation config in place
-          template:
-            src: templates/phpfpm_users_logrotate.j2
-            dest: /etc/logrotate.d/phpfpm_users_logrotate
-            owner: root
-            group: root
-            mode: 0644
+        - name: PHP-FPM chroot tasks
+          include_tasks: phpfpm_chroot.yml
           tags:
             - phpfpm
             - logrotate
             - users-chroot
 
-        - name: Include the PHP FPM chroot tasks
-          include_tasks: phpfpm_chroot.yml
+        - name: Include the PHP FPM chroot user present tasks
+          include_tasks: phpfpm_chroot_user_present.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key in users_update )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
           tags:
             - phpfpm
             - users-update
             - users-chroot
+
+        - name: Include the PHP FPM chroot user absent tasks
+          include_tasks: phpfpm_chroot_user_absent.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key in users_update )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+            - ( user.value.users_groups is defined ) and ( "phpfpm" not in user.value.users_groups ) or ( "chroot" not in user.value.users_groups )
+          tags:
+            - phpfpm
+            - users-update
+            - users-chroot
+
+        - name: PHP FPM configtest
+          command: "php-fpm{{ users_phpfpm_version }} --test"
+          register: users_phpfpm_configtest
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+        - name: Restart php-fpm
+          service:
+            name: "php{{ users_phpfpm_version }}-fpm"
+            state: restarted
+          when: '"test is successful" in users_phpfpm_configtest.stdout'
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
 
       when:
         - ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )

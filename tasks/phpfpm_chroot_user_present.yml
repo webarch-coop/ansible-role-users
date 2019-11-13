@@ -1,0 +1,190 @@
+---
+- name: PHP FPM users present
+  block:
+
+    - name: Users PHP FPM log directory present
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
+        state: directory
+        owner: root
+        group: "{{ user.key }}"
+        mode: 0750
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: Users PHP FPM mail log touched
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log"
+        state: touch
+        owner: "{{ user.key }}"
+        group: "{{ user.key }}"
+        mode: 0640
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: Users PHP FPM slow log touched
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
+        state: touch
+        owner: root
+        group: "{{ user.key }}"
+        mode: 0640
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: Users PHP FPM access log touched
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
+        state: touch
+        owner: root
+        group: "{{ user.key }}"
+        mode: 0640
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: Users PHP FPM error log touched
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.error.log"
+        state: touch
+        owner: root
+        group: "{{ user.key }}"
+        mode: 0640
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: Check the PHP FPM pm variables
+      include_role:
+        name: php-fpm
+        tasks_from: pool_check.yml
+      vars:
+        phpfpm_pm: "{{ user.value.users_phpfpm_pm | default('dynamic') }}"
+        phpfpm_pm_max_children: "{{ user.value.users_phpfpm_max_children | default('2') }}"
+        phpfpm_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') }}"
+        phpfpm_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}"
+        phpfpm_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf exists"
+      stat:
+        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+      register: users_phpfpm_pool_conf_check
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: "Copy /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+      copy:
+        src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf" 
+        dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+        remote_src: true
+      when: users_phpfpm_pool_conf_check.stat.exists
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: "PHP FPM pool.d file present for {{ user.key }}"
+      template:
+        src: templates/phpfpm_chroot_user.conf.j2
+        dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+      register: users_phpfpm_pool_conf
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: "PHP FPM pool.d configtest for {{ user.key }}"
+      block:
+
+        - name: "PHP FPM pool.d configtest for {{ user.key }}"
+          command: "php-fpm{{ users_phpfpm_version }} --test"
+          register: users_phpfpm_pool_configtest
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+      rescue:
+
+        - name: "php-fpm{{ users_phpfpm_version }} --test failed, saving failed config"
+          copy:
+            src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+            dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+            remote_src: true
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+       - name: "php-fpm{{ users_phpfpm_version }} --test failed, so reverting changes"
+         copy:
+           src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+           dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+           remote_src: true
+         when: users_phpfpm_pool_conf_check.stat.exists == True
+         tags:
+           - users-update
+           - users-chroot
+           - phpfpm
+
+       - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
+         file:
+           path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+           state: absent
+         when: users_phpfpm_pool_conf_check.stat.exists == False
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+      - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
+        fail:
+          msg:
+            - "php-fpm{{ users_phpfpm_version }} --test failed for {{ user.key }} and as a result php-fpm has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this user."
+            - "The broken config is available in /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+            - "The error was: {{ users_phpfpm_pool_configtest.stderr }}"
+        tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+      when: users_phpfpm_pool_conf.changed
+
+    - name: Users Apache PHP FPM localhost.d file present
+      template:
+        src: apache_localhost.conf.j2
+        dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+      when:
+        - users_apache2.stat.exists
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+    - name: Users Nginx PHP FPM localhost.d file present
+      template:
+        src: nginx_localhost.conf.j2
+        dest: "/etc/nginx/localhost.d/{{ item }}.conf"
+      when:
+        - users_nginx.stat.exists
+      tags:
+        - users-update
+        - users-chroot
+        - phpfpm
+
+  when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
+...
