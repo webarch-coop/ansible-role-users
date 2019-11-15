@@ -29,8 +29,7 @@ php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ user.key }}@{{ in
 php_admin_value[sendmail_from] = {{ user.key }}@{{ inventory_hostname }}
 php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log
 
-pm = foobar
-;pm = {{ user.value.users_phpfpm_pm | default('ondemand') }}
+pm = {{ user.value.users_phpfpm_pm | default('ondemand') }}
 pm.max_children = {{ user.value.users_phpfpm_max_children | default('2') }}
 {% if user.value.users_phpfpm_pm == "dynamic" %}
 pm.start_servers = {{ user.value.users_phpfpm_pm_start_servers | default('1') }}
