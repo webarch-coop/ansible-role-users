@@ -1,0 +1,210 @@
+---
+- name: User groups present
+  include_tasks: groups.yml
+  when:
+    - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
+  tags:
+    - users-update
+
+- name: User group present
+  group:
+    name: "{{ user.key }}"
+    state: present
+  tags:
+    - users-update
+
+- name: Users group members present
+  include: group_members.yml
+  when: ( user.value.users_group_members is defined ) and ( user.value.users_group_members != [] )
+  tags:
+    - users-update
+
+- name: User accounts present
+  include_tasks: user.yml
+  tags:
+    - users-ssh
+    - users-update
+
+- name: Users MariaDB accounts and databases created and passwords read or set
+  include_tasks: mariadb_user_present.yml
+  when:
+    - ( users_mariadb is defined ) and ( users_mariadb == True )
+    - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+  tags:
+    - users-update
+    - users-mariadb
+    - phpmyadmin
+
+- name: Quotas set
+  include_tasks: quota.yml
+  when: ( quota_dir is defined ) and ( user.value.users_quota is defined ) and ( user.value.users_quota != "" )
+  tags:
+    - users-update
+    - users-quota
+
+- name: Set passwds and notify users
+  include_tasks: notify_passwd.yml
+  when: ( user.value.users_notify_passwd is defined ) and ( user.value.users_notify_passwd == True ) and ( user.value.users_email is defined ) and ( user.value.users_email != "" )
+  tags:
+    - users-update
+
+- name: Crontab present for users
+  include_tasks: crontab_users_present.yml
+  when:
+    - user.key != "root"
+    - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
+    - ( users_crontab is not defined ) or ( users_crontab == True )
+    - ( users_cron is defined ) and ( users_cron == True )
+  tags:
+    - users-update
+    - users-cron
+    - users-scripts
+
+- name: Create or remove a .forward file
+  block:
+
+    - name: Email address for user absent so no .forward
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
+        state: absent
+      when: ( users_forward == False ) or ( user.value.users_email is not defined or user.value.users_email == "" )
+      tags:
+        - users-update
+
+    - name: Email address in .forward
+      template:
+        src: templates/forward.j2
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+      when: ( users_forward == True ) and ( user.value.users_email is defined and user.value.users_email != "" )
+      tags:
+        - users-update
+
+  when: users_forward is defined
+
+- name: Create a .muttrc for each user if it doesn't exist
+  template:
+    src: templates/muttrc.j2
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.muttrc"
+    force: false
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
+    mode: 0644
+  when:
+    - ( users_muttrc is defined ) and ( users_muttrc == True )
+  tags:
+    - users-update
+
+- name: Chroot users
+  block:
+
+    - name: Include the chroot present users tasks
+      include_tasks: chroot_users_present.yml
+      when:
+        - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
+      tags:
+        - users-chroot
+        - users-update
+
+    - name: PHP-FPM chroot tasks
+      block:
+
+        - name: PHP-FPM chroot tasks
+          include_tasks: phpfpm_chroot.yml
+          tags:
+            - phpfpm
+            - logrotate
+            - users-chroot
+
+        - name: Include the PHP FPM chroot user present tasks
+          include_tasks: phpfpm_chroot_user_present.yml
+          when:
+            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
+          tags:
+            - phpfpm
+            - users-update
+            - users-chroot
+
+        - name: Include the PHP FPM chroot user absent tasks
+          include_tasks: phpfpm_chroot_user_absent.yml
+          when:
+            - ( user.value.users_groups is defined ) and ( "phpfpm" not in user.value.users_groups ) or ( "chroot" not in user.value.users_groups )
+          tags:
+            - phpfpm
+            - users-update
+            - users-chroot
+
+        - name: PHP FPM configtest
+          command: "php-fpm{{ users_phpfpm_version }} --test"
+          register: users_phpfpm_configtest
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+        - name: Restart php-fpm
+          service:
+            name: "php{{ users_phpfpm_version }}-fpm"
+            state: restarted
+          when: '"test is successful" in users_phpfpm_configtest.stdout'
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
+      when: ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+
+  when:
+    - ( users_chroot is defined ) and ( users_chroot == True )
+    - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+
+- name: Matomo login account tasks
+  block:
+
+    - name: "Check if the Matomo {{ matomo_user }} system user account exists"
+      shell: "id {{ matomo_user }} && echo true || echo false"
+      check_mode: false
+      register: user_matomo_user_check
+      changed_when: '"no such user" in user_matomo_user_check.stderr'
+      tags:
+        - matomo
+        - users-update
+
+    - name: Matomo user login account tasks
+      block:
+
+        - name: Check if Matomo config file exists
+          stat:
+            path: "{{ matomo_html }}/config/config.ini.php"
+          check_mode: false
+          register: user_matomo_config
+          tags:
+            - matomo
+            - users-update
+
+        - name: Matomo accounts for users present
+          include_tasks: matomo_users_present.yml
+          when: user_matomo_config.stat.exists
+          tags:
+            - matomo
+            - users-update
+
+      when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
+
+  when: ( matomo_user is defined ) and ( matomo_user != "" )
+
+- name: Include Apache config tasks present users
+  include_tasks: apache_users_present.yml
+  when:
+    - '"apache2" in ansible_facts.packages'
+    - ( users_apache is defined ) and ( users_apache == True )
+  tags:
+    - users-update
+    - apache
+    - letsencrypt
+    - users-scripts
+    - wordpress
+    - matomo
+    - phpmyadmin
+...
