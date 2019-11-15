@@ -25,7 +25,7 @@
 
     - name: Add all the users to the users_update array
       set_fact:
-        updates_users: "{{ users_update }} + [ '{{ user.key }}' ]"
+        users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
       loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
@@ -51,7 +51,9 @@
 
 - name: Check variables for users to update
   include_tasks: user_check.yml
-  when: user.key in users_update
+  when:
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
@@ -59,6 +61,10 @@
 
 - name: User absent loop
   include_tasks: user_absent.yml
+  when:
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
+    - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
@@ -72,161 +78,30 @@
     - users-scripts
     - users-update
 
-  when: ( user.value.users_state is defined ) and ( user.value.users_state == "absent" ) and ( user.key in users_update )
-
-- name: Quota tasks
-  block:
-
-    - name: "Touch {{ quota_dir }}/quota_user.csv"
-      file:
-        path: "{{ quota_dir }}/quota_user.csv"
-        state: touch
-        access_time: preserve
-      check_mode: false
-      tags:
-        - users-update
-        - users-quota
-
-    - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
-      command: "md5sum {{ quota_dir }}/quota_user.csv"
-      register: users_repquota_md5sum_before
-      check_mode: false
-      changed_when: false
-      when: quota_dir is defined
-      tags:
-        - users-update
-        - users-quota
-
-    - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
-      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
-      register: users_repquota_md5sum_after
-      check_mode: false
-      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
-      tags:
-        - users-update
-        - users-quota
-
-    - name: Users quotas fetched
-      fetch:
-        src: "{{ quota_dir }}/quota_user.csv"
-        dest: /tmp/
-      check_mode: false
-      tags:
-        - users-update
-        - users-quota
-
-  when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
-
-- name: User groups present
-  include_tasks: groups.yml
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-  when:
-    - ( users_update is defined ) and ( users_update != [] )
-    - ( user.key is defined ) and ( user.key in users_update )
-    - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
-    - ( user.value.users_state is not defined or user.value.users_state == "present" )
-  tags:
-    - users-update
-
-- name: Users present loops
-  block:
-
-    - name: User group present
-      group:
-        name: "{{ user.key }}"
-        state: present
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      tags:
-        - users-update
-
-    - name: Users group members present
-      include: group_members.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when: ( user.value.users_group_members is defined ) and ( user.value.users_group_members != [] )
-      tags:
-        - users-update
-
-    - name: User accounts present
-      include_tasks: user.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      tags:
-        - users-ssh
-        - users-update
-
-    - name: Users MariaDB accounts and databases created and passwords read or set
-      include_tasks: mariadb_user_present.yml
-      vars:
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( users_mariadb is defined ) and ( users_mariadb == True )
-        - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
-      tags:
-        - users-update
-        - users-mariadb
-        - phpmyadmin
-
-    - name: Quotas set
-      include_tasks: quota.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when: ( quota_dir is defined ) and ( user.value.users_quota is defined ) and ( user.value.users_quota != "" )
-      tags:
-        - users-update
-        - users-quota
-
-    - name: Set passwds and notify users
-      include_tasks: notify_passwd.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when: ( user.value.users_notify_passwd is defined ) and ( user.value.users_notify_passwd == True ) and ( user.value.users_email is defined ) and ( user.value.users_email != "" )
-      tags:
-        - users-update
-
-    - name: Crontab present for users
-      include_tasks: crontab_users_present.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - user.key != "root"
-        - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
-        - ( users_crontab is not defined ) or ( users_crontab == True )
-        - ( users_cron is defined ) and ( users_cron == True )
-      tags:
-        - users-update
-        - users-cron
-        - users-scripts
-
+- name: User present loop
+  include_tasks: user_present.yml
   when:
     - ( users_update is defined ) and ( users_update != [] )
     - ( user.key is defined ) and ( user.key in users_update )
     - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+  tags:
+    - apache
+    - phpfpm
+    - users-chroot
+    - users-cron
+    - users-fstab
+    - users-scripts
+    - users-update
 
 - name: Users quota CSV file updated
   block:
 
     - name: "Updated users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
-      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 700 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_after
       check_mode: false
       changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
@@ -239,286 +114,12 @@
         src: "{{ quota_dir }}/quota_user.csv"
         dest: /tmp/
       check_mode: false
-      when: users_repquota_md5sum_after.changed
+      when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
       tags:
         - users-update
         - users-quota
 
   when: quota_dir is defined
-
-- name: Create or remove a .forward file for each user
-  block:
-
-    - name: Email address for user absent so no .forward
-      file:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
-        state: absent
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when: ( users_forward == False ) or ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( user.value.users_email is not defined or user.value.users_email == "" )
-      tags:
-        - users-update
-
-    - name: Email address in .forward
-      template:
-        src: templates/forward.j2
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0644
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( users_forward == True )
-        - ( user.value.users_state is not defined or user.value.users_state == "present" )
-        - ( user.value.users_email is defined and user.value.users_email != "" )
-      tags:
-        - users-update
-
-  when:
-    - ( users_forward is defined ) and ( user.key in users_update )
-    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-
-- name: Create a .muttrc for each user if it doesn't exist
-  template:
-    src: templates/muttrc.j2
-    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.muttrc"
-    force: false
-    owner: "{{ user.key }}"
-    group: "{{ user.value.users_group | default(user.key) }}"
-    mode: 0644
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-  when:
-    - ( user.key in users_update )
-    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-    - ( users_muttrc is defined ) and ( users_muttrc == True )
-  tags:
-    - users-update
-
-- name: Chroot users
-  block:
-
-    - name: Include the chroot present users tasks
-      include_tasks: chroot_users_present.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( user.key in users_update )
-        - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-        - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
-      tags:
-        - users-chroot
-        - users-update
-
-    - name: PHP-FPM chroot tasks
-      block:
-
-        - name: PHP-FPM chroot tasks
-          include_tasks: phpfpm_chroot.yml
-          tags:
-            - phpfpm
-            - logrotate
-            - users-chroot
-
-        - name: Include the PHP FPM chroot user present tasks
-          include_tasks: phpfpm_chroot_user_present.yml
-          loop: "{{ users | dict2items }}"
-          loop_control:
-            loop_var: user
-            label: "{{ user.key }}"
-          when:
-            - ( user.key in users_update )
-            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
-          tags:
-            - phpfpm
-            - users-update
-            - users-chroot
-
-        - name: Include the PHP FPM chroot user absent tasks
-          include_tasks: phpfpm_chroot_user_absent.yml
-          loop: "{{ users | dict2items }}"
-          loop_control:
-            loop_var: user
-            label: "{{ user.key }}"
-          when:
-            - ( user.key in users_update )
-            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-            - ( user.value.users_groups is defined ) and ( "phpfpm" not in user.value.users_groups ) or ( "chroot" not in user.value.users_groups )
-          tags:
-            - phpfpm
-            - users-update
-            - users-chroot
-
-        - name: PHP FPM configtest
-          command: "php-fpm{{ users_phpfpm_version }} --test"
-          register: users_phpfpm_configtest
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
-
-        - name: Restart php-fpm
-          service:
-            name: "php{{ users_phpfpm_version }}-fpm"
-            state: restarted
-          when: '"test is successful" in users_phpfpm_configtest.stdout'
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
-
-      when: ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
-
-  when:
-    - ( users_chroot is defined ) and ( users_chroot == True )
-    - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
-
-- name: Matomo login account tasks
-  block:
-
-    - name: "Check if the Matomo {{ matomo_user }} system user account exists"
-      shell: "id {{ matomo_user }} && echo true || echo false"
-      check_mode: false
-      register: user_matomo_user_check
-      changed_when: '"no such user" in user_matomo_user_check.stderr'
-      tags:
-        - matomo
-        - users-update
-
-    - name: Matomo user login account tasks
-      block:
-
-        - name: Check if Matomo config file exists
-          stat:
-            path: "{{ matomo_html }}/config/config.ini.php"
-          check_mode: false
-          register: user_matomo_config
-          tags:
-            - matomo
-            - users-update
-
-        - name: If Matomo is installed
-          block:
-
-            - name: Matomo accounts for users absent
-              include_tasks: matomo_users_absent.yml
-              loop: "{{ users | dict2items }}"
-              loop_control:
-                loop_var: user
-                label: "{{ user.key }}"
-              when:
-                - ( user.key in users_update )
-                - ( users_matomo_delete_users is defined ) and ( users_matomo_delete_users == True )
-                - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
-              tags:
-                - matomo
-                - users-update
-
-            - name: Matomo accounts for users present
-              include_tasks: matomo_users_present.yml
-              loop: "{{ users | dict2items }}"
-              loop_control:
-                loop_var: user
-                label: "{{ user.key }}"
-              when:
-                - ( user.key in users_update )
-                - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-              tags:
-                - matomo
-                - users-update
-
-          when: user_matomo_config.stat.exists
-
-      when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
-
-  when: ( matomo_user is defined ) and ( matomo_user != "" )
-
-- name: Apache config for users present
-  block:
-
-    - name: Include Apache config tasks present users
-      include_tasks: apache_users_present.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( user.key in users_update ) and ( user.value.users_apache_virtual_hosts is defined )
-        - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-      tags:
-        - users-update
-        - apache
-        - letsencrypt
-        - users-scripts
-        - wordpress
-        - matomo
-        - phpmyadmin
-
-    - name: Users Apache logrotation config in place
-      template:
-        src: templates/apache_users_logrotate.j2
-        dest: /etc/logrotate.d/apache_users_logrotate
-        owner: root
-        group: root
-        mode: 0644
-      tags:
-        - apache
-        - logrotate
-
-    - name: Cron job to delete Apache logs when older than 30 days
-      cron:
-        name: Delete Apache log files
-        hour: 0
-        minute: 0
-        day: 1
-        job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
-      tags:
-        - apache
-
-    - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
-      cron:
-        name: "Email monthly Apache bandwidth"
-        hour: 1
-        minute: 0
-        day: 1
-        job: "/usr/local/bin/apache_data_usage_by_user {{ users_apache_bandwidth_email }}"
-      when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email != "" )
-      tags:
-        - apache
-
-    - name: Apache configtest
-      command: apachectl configtest
-      register: users_apachectl_configtest
-      changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
-      check_mode: false
-      tags:
-        - users-update
-        - apache
-        - letsencrypt
-
-    - name: Apache restart
-      service:
-        name: apache2
-        state: restarted
-      when: '"Syntax OK" in users_apachectl_configtest.stderr'
-      tags:
-        - users-update
-        - apache
-        - letsencrypt
-
-  when:
-    - '"apache2" in ansible_facts.packages'
-    - ( users_apache is defined ) and ( users_apache == True )
 
 - name: Users state files updated
   loop: "{{ users | dict2items }}"

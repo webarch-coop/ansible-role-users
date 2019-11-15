@@ -148,6 +148,15 @@
     - apache
     - users-update
 
+- name: "Apache {{ user.key }} sites-enabled symlink absent"
+  file:
+    path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
+    state: absent
+  when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
+  tags:
+    - apache
+    - users-update
+
 - name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
   stat:
     path: "/etc/apache2/sites-available/{{ user.key }}.conf"
@@ -177,24 +186,35 @@
     - apache
     - users-update
 
-- name: "Apache {{ user.key }} sites-enabled symlink present"
-  command: "a2ensite {{ user.key }}"
-  register: users_a2ensite
-  changed_when: '"already enabled" not in users_a2ensite.stdout'
-  when: ( users_apache_tls_cert_check.stat.exists ) and ( users_apache_tls_key_check.stat.exists ) and ( users_apache_tls_ca_check.stat.exists )
-  tags:
-    - apache
-    - users-update
-
 - name: Apache configtest
   block:
 
-    - name: "apache2ctl configtest to check /etc/apache2/sites-available/{{ user.key }}.conf"
+    - name: "Apache {{ user.key }} sites-enabled symlink present"
+      command: "a2ensite {{ user.key }}"
+      register: users_a2ensite
+      changed_when: '"already enabled" not in users_a2ensite.stdout'
+      tags:
+        - apache
+        - users-update
+
+    - name: "apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
       command: apache2ctl configtest
+      changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
+      check_mode: false
       register: users_apache2ctl_configtest
       tags:
         - apache
         - users-update
+
+    - name: Apache restart
+      service:
+        name: apache2
+        state: restarted
+      when: ( users_apachectl_configtest is defined ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
+      tags:
+        - users-update
+        - apache
+        - letsencrypt
 
   rescue:
 
@@ -232,6 +252,14 @@
         - apache
         - users-update
 
+    - name: "Apache {{ user.key }} sites-enabled symlink absent"
+      command: "a2dissite {{ user.key }}"
+      register: users_a2dissite
+      changed_when: '"already enabled" not in users_a2dissite.stdout'
+      tags:
+        - apache
+        - users-update
+
     - name: Fail as apache2ctl configtest failed
       fail:
         msg:
@@ -242,16 +270,9 @@
         - apache
         - users-update
 
-  when: users_apache_conf.changed
-
-- name: "Apache {{ user.key }} sites-enabled symlink absent"
-  file:
-    path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
-    state: absent
-  when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
-  tags:
-    - apache
-    - users-update
+  when:
+    - ( users_apache_conf is defined ) and ( users_apache_conf.stat.exists ) and ( users_apache_conf.changed )
+    - ( users_apache_tls_cert_check.stat.exists ) and ( users_apache_tls_key_check.stat.exists ) and ( users_apache_tls_ca_check.stat.exists )
 
 - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
   shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"

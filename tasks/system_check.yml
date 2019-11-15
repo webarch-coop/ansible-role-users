@@ -132,4 +132,53 @@
     - users-chroot
     - users-cron
     - users-fstab
+
+- name: Quota tasks
+  block:
+
+    - name: "Touch {{ quota_dir }}/quota_user.csv"
+      file:
+        path: "{{ quota_dir }}/quota_user.csv"
+        state: touch
+        access_time: preserve
+      check_mode: false
+      tags:
+        - users-update
+        - users-quota
+
+    - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
+      command: "md5sum {{ quota_dir }}/quota_user.csv"
+      register: users_repquota_md5sum_before
+      check_mode: false
+      changed_when: false
+      when: quota_dir is defined
+      tags:
+        - users-update
+        - users-quota
+
+    - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+      register: users_repquota_md5sum_after
+      check_mode: false
+      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+      tags:
+        - users-update
+        - users-quota
+
+    - name: Users quotas fetched
+      fetch:
+        src: "{{ quota_dir }}/quota_user.csv"
+        dest: /tmp/
+      check_mode: false
+      tags:
+        - users-update
+        - users-quota
+
+  when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
+
+- name: Include Apache tasks
+  include_tasks: apache.yml
+  when:
+    - '"apache2" in ansible_facts.packages'
+    - ( users_apache is defined ) and ( users_apache == True )
 ...
