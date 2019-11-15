@@ -15,7 +15,7 @@
   file:
     path: /etc/apache2/localhost.d
     state: directory
-  when: users_apache2.stat.exists
+  when: '"apache2" in ansible_facts.packages'
   tags:
     - users-update
     - users-chroot
@@ -25,7 +25,7 @@
   file:
     path: /etc/nginx/localhost.d
     state: directory
-  when: users_nginx.stat.exists
+  when: '"nginx" in ansible_facts.packages'
   tags:
     - users-update
     - users-chroot

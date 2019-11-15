@@ -87,26 +87,17 @@
     - matomo
     - phpmyadmin
 
-- name: Stat /usr/sbin/apache2
-  stat:
-    path: /usr/sbin/apache2
-  register: users_apache2
-  tags:
-    - users-update
-    - users-chroot
-    - phpfpm
-
-- name: Stat /usr/sbin/nginx
-  stat:
-    path: /usr/sbin/nginx
-  register: users_nginx
-  tags:
-    - users-update
-    - users-chroot
-    - phpfpm
-
 - name: PHP FPM checks
   block:
+
+    - name: Check that php-fpm is installed
+      assert:
+        that:
+          - '"php-fpm" in ansible_facts.packages' 
+      tags:
+        - logrotate
+        - phpfpm
+        - users-update
 
     - name: Run phpquery -V
       command: phpquery -V

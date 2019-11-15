@@ -169,7 +169,7 @@
         src: apache_localhost.conf.j2
         dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
       when:
-        - users_apache2.stat.exists
+        - '"apache2" in ansible_facts.packages' 
       tags:
         - users-update
         - users-chroot
@@ -180,7 +180,7 @@
         src: nginx_localhost.conf.j2
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
       when:
-        - users_nginx.stat.exists
+        - '"nginx" in ansible_facts.packages' 
       tags:
         - users-update
         - users-chroot
