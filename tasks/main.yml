@@ -118,7 +118,7 @@
         loop_var: user
         label: "{{ user.key }}"
       when:
-        - ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
+        - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
         - ( users_chroot is defined ) and ( users_chroot == True )
         - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
       tags:
@@ -493,8 +493,7 @@
             - users-chroot
             - phpfpm
 
-      when:
-        - ( users_phpfpm_status is defined ) and ( users_phpfpm_status.stdout == "installed" )
+      when: ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
 
   when:
     - ( users_chroot is defined ) and ( users_chroot == True )
