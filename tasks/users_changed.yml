@@ -24,7 +24,7 @@
 - name: Debug
   debug:
     msg: "User changed: {{ result.user.key }}"
-  loop: "{{ users_state_file.results | dict2items }}"
+  loop: "{{ users_state_file.results }}"
   loop_control:
     loop_var: result
     label: "{{ result.key }}"
