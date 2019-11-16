@@ -118,6 +118,16 @@
             - users-chroot
             - phpfpm
 
+        - name: "PHP FPM restarted for changes for {{ user.key }}"
+          service:
+            name: "php{{ users_phpfpm_version }}-fpm"
+            state: restarted
+          when: '"test is successful" in users_phpfpm_pool_configtest.stdout'
+          tags:
+            - users-update
+            - users-chroot
+            - phpfpm
+
       rescue:
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, saving failed config"
