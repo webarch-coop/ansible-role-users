@@ -30,20 +30,25 @@
     loop_var: result
     label: "{{ result }}"
 
-- name: Fail
-  fail:
-    msg: Test
-
 - name: Set an empty users_update array
   set_fact:
     users_update: []
 
-# TODO This could be more efficient as the files that are changed should already be known...
-- name: Check users current state files
-  include_tasks: user_state.yml
-  loop: "{{ users | dict2items }}"
+- name: Users that need updating
+  set_fact:
+    users_update: "{{ users_update }} + [ '{{ result.user.key }}' ]"
+  when: result.changed
+  loop: "{{ users_state_file.results }}"
   loop_control:
-    loop_var: user
+    loop_var: result
+    label: "{{ result }}"
+
+# TODO This could be more efficient as the files that are changed should already be known...
+# - name: Check users current state files
+#   include_tasks: user_state.yml
+#   loop: "{{ users | dict2items }}"
+#   loop_control:
+#     loop_var: user
 
 - name: Print the users to update
   debug:
