@@ -21,35 +21,19 @@
     loop_var: user
     label: "{{ user.key }}"
 
-- name: Debug print the state template results
+- name: Debug
   debug:
-    var: users_state_file
-
-- name: Debug print the state template results
-  debug:
-    var: "{{ result.user.user.key }}"
-  loop: "{{ users_state_file.results }}"
+    msg: "User changed: {{ result.users.key }}"
+  loop: "{{ users_state_file | dict2items }}"
   loop_control:
     loop_var: result
-
-- name: Users changed
-  set_fact:
-    users_update: "{{ users_update }} + [ '{{ file.user.key }}' ]"
-  check_mode: false
-  when: file.changed 
-  loop: "{{ users_state_file.results }}"
-  loop_control:
-    loop_var: file
-    label: "{{ file.key }}"
-
-- name: Debug print the users_update array
-  debug:
-    var: users_update
+    label: "{{ result.key }}"
 
 - name: Set an empty users_update array
   set_fact:
     users_update: []
 
+# TODO This could be more efficient as the files that are changed should already be known...
 - name: Check users current state files
   include_tasks: user_state.yml
   loop: "{{ users | dict2items }}"
