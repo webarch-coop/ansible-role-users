@@ -22,10 +22,10 @@
     label: "{{ user.key }}"
 
 # The following will list the user state files that have changed
-# however if the tasks were not full completed then just using 
+# however if the tasks were not full completed then just using
 # this would result in changes not being applied, so a check of
 # the proposed vs the current state files is needed.
-# 
+#
 # - name: Users that need updating
 #   set_fact:
 #     users_check_state: "{{ users_check_state }} + [ '{{ result.user.key }}' ]"
@@ -38,6 +38,7 @@
 - name: Users who have proposed state files changed
   debug:
     msg: "User with proposed state file changed: {{ result.user.key }}"
+    verbosity: 1
   when: result.changed
   loop: "{{ users_state_file.results }}"
   loop_control:
