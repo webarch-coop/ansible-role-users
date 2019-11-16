@@ -27,7 +27,7 @@
 
 - name: Debug print the state template results
   debug:
-    var: "{{ file.user.user }}"
+    var: "{{ file.file.user }}"
   loop: "{{ users_state_file.results }}"
   loop_control:
     loop_var: file
