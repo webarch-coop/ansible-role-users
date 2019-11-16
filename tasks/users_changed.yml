@@ -23,7 +23,7 @@
 
 - name: Debug
   debug:
-    msg: "User changed: {{ result.user.user.key }}"
+    msg: "User changed: {{ result.user.key }}"
   loop: "{{ users_state_file.results }}"
   loop_control:
     loop_var: result
