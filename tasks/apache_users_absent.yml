@@ -9,10 +9,36 @@
 
 - name: "Apache {{ user.key }} sites-enabled symlink absent"
   command: "a2dissite {{ user.key }}"
+  register: users_apache_site_enabled_absent
   when: users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk
   tags:
     - users-update
     - apache
+
+- name: Conditional Apache restart
+  block:
+
+    - name: "apache2ctl configtest to check deletion of /etc/apache2/sites-enabled/{{ user.key }}.conf"
+      command: apache2ctl configtest
+      changed_when: '"Syntax OK" not in users_apachectl_configtest.stderr'
+      check_mode: false
+      register: users_apache2ctl_configtest
+      tags:
+        - apache
+        - users-update
+        - letsencrypt
+
+    - name: Apache restart
+      service:
+        name: apache2
+        state: restarted
+      when: ( users_apachectl_configtest is defined ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
+      tags:
+        - users-update
+        - apache
+        - letsencrypt
+
+  when: ( users_apache_site_enabled is defined ) and ( users_apache_site_enabled.stat.exists )
 
 - name: "Apache {{ user.key }} sites-available file(s) absent"
   file:
@@ -56,8 +82,6 @@
     - apache
     - letsencrypt
 
-# TODO Restart Apache when site has bee deleted
-
-# There is no Matomo site:delete command yet, when there is this should be added here
+# There is no Matomo site:delete command yet, when there is this should perhaps be added here
 # https://github.com/digitalist-se/extratools/issues/7
 ...
