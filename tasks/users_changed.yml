@@ -15,10 +15,15 @@
     src: user_state.yml.j2
     dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
   check_mode: false
+  register: users_state_file
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
     label: "{{ user.key }}"
+
+- name: Debug print the state template results
+  debug:
+    var: users_state_file
 
 - name: Set an empty users_update array
   set_fact:
