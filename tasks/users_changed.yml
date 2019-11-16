@@ -23,11 +23,15 @@
 
 - name: Debug
   debug:
-    msg: "User changed: {{ result.user.item.user.key }}"
+    msg: "User changed: {{ result.user.user.key }}"
   loop: "{{ users_state_file.results }}"
   loop_control:
     loop_var: result
     label: "{{ result }}"
+
+- name: Fail
+  fail:
+    msg: Test
 
 - name: Set an empty users_update array
   set_fact:
