@@ -27,10 +27,10 @@
 
 - name: Debug print the state template results
   debug:
-    var: "{{ file.item.user }}"
+    var: "{{ results.result.user.key }}"
   loop: "{{ users_state_file.results }}"
   loop_control:
-    loop_var: file
+    loop_var: result
 
 - name: Users changed
   set_fact:
