@@ -27,7 +27,7 @@
   loop: "{{ users_state_file.results }}"
   loop_control:
     loop_var: result
-    label: "{{ result.key }}"
+    label: "{{ result }}"
 
 - name: Set an empty users_update array
   set_fact:
