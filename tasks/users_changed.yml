@@ -33,7 +33,7 @@
 #   loop: "{{ users_state_file.results }}"
 #   loop_control:
 #     loop_var: result
-#     label: "{{ result }}"
+#     label: "{{ result.user.key }}"
 
 - name: Users who have proposed state files changed
   debug:
