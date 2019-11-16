@@ -16,4 +16,6 @@
     - users-update
     - users-chroot
     - phpfpm
+
+# TODO Configtest and restart for PHP FPM after pool.d file is deleted
 ...

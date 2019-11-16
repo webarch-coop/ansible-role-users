@@ -122,7 +122,7 @@
           service:
             name: "php{{ users_phpfpm_version }}-fpm"
             state: restarted
-          when: '"test is successful" in users_phpfpm_pool_configtest.stdout'
+          when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
           tags:
             - users-update
             - users-chroot

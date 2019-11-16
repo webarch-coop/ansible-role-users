@@ -56,6 +56,8 @@
     - apache
     - letsencrypt
 
+# TODO Restart Apache when site has bee deleted
+
 # There is no Matomo site:delete command yet, when there is this should be added here
 # https://github.com/digitalist-se/extratools/issues/7
 ...

@@ -21,34 +21,38 @@
     loop_var: user
     label: "{{ user.key }}"
 
-- name: Debug
-  debug:
-    msg: "User changed: {{ result.user.key }}"
-  when: result.changed
-  loop: "{{ users_state_file.results }}"
-  loop_control:
-    loop_var: result
-    label: "{{ result }}"
+# The following will list the user state files that have changed
+# however if the tasks were not full completed then just using 
+# this would result in changes not being applied, so a check of
+# the proposed vs the current state files is needed.
+#
+# - name: Debug
+#   debug:
+#     msg: "User changed: {{ result.user.key }}"
+#   when: result.changed
+#   loop: "{{ users_state_file.results }}"
+#   loop_control:
+#     loop_var: result
+#     label: "{{ result }}"
+# 
+# - name: Users that need updating
+#   set_fact:
+#     users_check_state: "{{ users_check_state }} + [ '{{ result.user.key }}' ]"
+#   when: result.changed
+#   loop: "{{ users_state_file.results }}"
+#   loop_control:
+#     loop_var: result
+#     label: "{{ result }}"
 
-- name: Set an empty users_update array
+- name: Set an empty users_update arrays
   set_fact:
     users_update: []
 
-- name: Users that need updating
-  set_fact:
-    users_update: "{{ users_update }} + [ '{{ result.user.key }}' ]"
-  when: result.changed
-  loop: "{{ users_state_file.results }}"
+- name: Check users current state files
+  include_tasks: user_state.yml
+  loop: "{{ users | dict2items }}"
   loop_control:
-    loop_var: result
-    label: "{{ result }}"
-
-# TODO This could be more efficient as the files that are changed should already be known...
-# - name: Check users current state files
-#   include_tasks: user_state.yml
-#   loop: "{{ users | dict2items }}"
-#   loop_control:
-#     loop_var: user
+    loop_var: user
 
 - name: Print the users to update
   debug:
