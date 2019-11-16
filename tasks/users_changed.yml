@@ -24,6 +24,7 @@
 - name: Debug
   debug:
     msg: "User changed: {{ result.user.key }}"
+  when: result.changed
   loop: "{{ users_state_file.results }}"
   loop_control:
     loop_var: result
