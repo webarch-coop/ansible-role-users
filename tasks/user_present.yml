@@ -135,24 +135,6 @@
             - users-update
             - users-chroot
 
-#        - name: PHP FPM configtest
-#          command: "php-fpm{{ users_phpfpm_version }} --test"
-#          register: users_phpfpm_configtest
-#          tags:
-#            - users-update
-#            - users-chroot
-#            - phpfpm
-#
-#        - name: Restart php-fpm
-#          service:
-#            name: "php{{ users_phpfpm_version }}-fpm"
-#            state: restarted
-#          when: '"test is successful" in users_phpfpm_configtest.stdout'
-#          tags:
-#            - users-update
-#            - users-chroot
-#            - phpfpm
-
       when: ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
 
   when:
