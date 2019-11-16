@@ -31,7 +31,6 @@
   loop: "{{ users_state_file.results }}"
   loop_control:
     loop_var: file
-    label: "{{ file.key }}"
 
 - name: Users changed
   set_fact:
