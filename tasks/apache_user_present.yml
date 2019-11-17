@@ -91,7 +91,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost.key }}"
+    label: "{{ vhost }}"
   tags:
     - apache
     - users-update
