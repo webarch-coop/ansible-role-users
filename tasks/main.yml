@@ -12,6 +12,8 @@
       - vim
       - whois
     state: present
+  tags:
+    - users-packages
 
 - name: System setup and checks
   include_tasks: system.yml
