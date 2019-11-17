@@ -1,6 +1,6 @@
 ---
 # One cert per VirtualHost
-- name: Let's Encrypt cert per vhost role included
+- name: "Let's Encrypt cert per vhost role included for {{ user.key }}"
   include_role:
     name: acmesh
     tasks_from: letsencrypt
@@ -18,7 +18,7 @@
     - users-update
     - letsencrypt
 
-- name: Let's Encrypt one cert per user tasks
+- name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
   block:
 
     - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
@@ -32,7 +32,7 @@
         - users-update
         - letsencrypt
 
-    - name: Set fact for subjectAltNames
+    - name: "Set fact for subjectAltNames for {{ user.key }}"
       set_fact:
         subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
       check_mode: true
@@ -45,23 +45,18 @@
         - users-update
         - letsencrypt
 
-    - debug:
-        msg: "subject_alt_names is set to: {{ subject_alt_names }}"
+    - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
+      debug:
+        msg:
+          - "subject_alt_names is set to: {{ subject_alt_names }}"
+          - "common_name is set to: {{ common_name }}"
         verbosity: 1
       tags:
         - apache
         - users-update
         - letsencrypt
 
-    - debug:
-        msg: "common_name is set to: {{ common_name }}"
-        verbosity: 1
-      tags:
-        - apache
-        - users-update
-        - letsencrypt
-
-    - name: Let's Encrypt cert role included
+    - name: "Let's Encrypt cert role included for {{ user.key }}"
       include_role:
         name: acmesh
         tasks_from: letsencrypt
@@ -284,7 +279,7 @@
   tags:
     - users-update
 
-- name: Matomo site tasks
+- name: "Matomo site tasks for {{ user.key }}"
   block:
 
     - name: "Check if the Matomo {{ matomo_user }} system user account exists"
@@ -296,7 +291,7 @@
         - matomo
         - users-update
 
-    - name: Matomo site tasks
+    - name: "Matomo site tasks for {{ user.key }}"
       block:
 
         - name: Check if Matomo config file exists
@@ -311,7 +306,7 @@
         - name: If Matomo is installed
           block:
 
-            - name: Debug matomo addsite
+            - name: "Debug matomo addsite for {{ user.key }}"
               debug:
                 msg:
                   - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
@@ -328,7 +323,7 @@
                 - matomo
                 - users-update
 
-            - name: addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site
+            - name: "addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site for {{ user.key }}"
               include_role:
                 name: matomo
                 tasks_from: addsite.yml
@@ -353,7 +348,7 @@
 
   when: ( matomo_user is defined ) and ( matomo_user != "" )
 
-- name: Include WordPress role
+- name: "Include WordPress role for {{ user.key }}"
   include_role:
     name: wordpress
   vars:
@@ -392,7 +387,7 @@
     - users-update
     - wordpress
 
-- name: Include Matomo role
+- name: "Include Matomo role for {{ user.key }}"
   include_role:
     name: matomo
   vars:
@@ -424,7 +419,7 @@
     - users-update
     - matomo
 
-- name: Include phpMyAdmin role with no HTTP Authentication
+- name: "Include phpMyAdmin role with no HTTP Authentication for {{ user.key }}"
   include_role:
     name: phpmyadmin
   vars:
@@ -451,7 +446,7 @@
     - users-update
     - phpmyadmin
 
-- name: Include phpMyAdmin role with HTTP Authentication
+- name: "Include phpMyAdmin role with HTTP Authentication for {{ user.key }}"
   include_role:
     name: phpmyadmin
   vars:
@@ -481,8 +476,8 @@
     - users-update
     - phpmyadmin
 
-- name: Include daily scripts role
-  include_tasks: users_daily_scripts.yml
+- name: "Include daily scripts role for {{ user.key }}"
+  include_tasks: user_daily_scripts.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost

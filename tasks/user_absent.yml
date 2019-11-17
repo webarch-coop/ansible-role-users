@@ -1,22 +1,22 @@
 ---
-- name: Slay any processes running as the user
+- name: "Slay any processes running as user {{ user.key }}"
   command: "slay {{ user.key }}"
   tags:
     - users-chroot
     - users-update
 
-- name: Crontab absent for users
-  include_tasks: crontab_users_absent.yml
+- name: "Crontab absent for user {{ user.key }}"
+  include_tasks: crontab_user_absent.yml
   tags:
     - users-update
     - users-cron
     - users-scripts
 
-- name: Chroot users absent from /etc/fstab
+- name: "Chroot user {{ user.key }} absent from /etc/fstab"
   block:
 
-    - name: Include the chroot users /etc/fstab entries absent tasks
-      include_tasks: chroot_users_absent_fstab.yml
+    - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
+      include_tasks: chroot_user_absent_fstab.yml
       when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
       tags:
         - users-chroot
@@ -25,8 +25,8 @@
 
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 
-- name: Include Apache config tasks absent users
-  include_tasks: apache_users_absent.yml
+- name: "Include Apache config tasks absent user for {{ user.key }}"
+  include_tasks: apache_user_absent.yml
   when:
     - ( "apache2" in ansible_facts.packages )
     - ( users_apache is defined ) and ( users_apache == True )
@@ -34,7 +34,7 @@
     - users-update
     - apache
 
-- name: Include PHP FPM chroot users absent tasks
+- name: "Include PHP FPM chroot user absent tasks for {{ user.key }}"
   include_tasks: phpfpm_chroot_user_absent.yml
   when:
     - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
@@ -45,7 +45,7 @@
     - users-chroot
     - phpfpm
 
-- name: Absent users MariaDB account and databases absent
+- name: "Absent user {{ user.key }} MariaDB account and databases absent"
   include_tasks: mariadb_user_absent.yml
   when: ( users_mariadb is defined ) and ( users_mariadb == True )
   tags:
@@ -55,8 +55,8 @@
 - name: Chroot users mounts absent
   block:
 
-    - name: Include the chroot users mounts absent tasks
-      include_tasks: chroot_users_absent.yml
+    - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
+      include_tasks: chroot_user_absent.yml
       when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
       tags:
         - users-chroot
@@ -64,14 +64,14 @@
 
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 
-- name: Absent users home directories removed
+- name: "Absent user {{ user.key }} home directorie removed"
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: absent
   tags:
     - users-update
 
-- name: Users accounts absent
+- name: "User account {{ user.key }} absent"
   user:
     name: "{{ user.key }}"
     state: absent
@@ -80,7 +80,7 @@
   tags:
     - users-update
 
-- name: User groups absent
+- name: "User {{ user.key }} groups absent"
   group:
     name: "{{ user.key }}"
     state: absent

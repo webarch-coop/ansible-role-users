@@ -13,8 +13,8 @@
       - whois
     state: present
 
-- name: System state checks
-  include_tasks: system_check.yml
+- name: System setup and checks
+  include_tasks: system.yml
 
 - name: Set an empty users_update array
   set_fact:

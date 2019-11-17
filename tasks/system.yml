@@ -87,6 +87,13 @@
     - matomo
     - phpmyadmin
 
+- name: PHP-FPM chroot tasks
+  include_tasks: phpfpm_chroot.yml
+  tags:
+    - phpfpm
+    - logrotate
+    - users-chroot
+
 - name: PHP FPM checks
   block:
 
