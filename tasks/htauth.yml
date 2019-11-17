@@ -21,7 +21,7 @@
   loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth
-    label: "{{ htauth }}"
+    label: "{{ htauth.name }}"
   tags:
     - apache
     - users-update
@@ -52,7 +52,7 @@
   loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth
-    label: "{{ htauth }}"
+    label: "{{ htauth.name }}"
   tags:
     - apache
     - users-update

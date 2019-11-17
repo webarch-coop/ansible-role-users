@@ -54,6 +54,7 @@
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
+    label: "{{ user.key }}"
 
 - name: Print the users to update
   debug:

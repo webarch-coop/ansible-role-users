@@ -16,6 +16,7 @@
   when: ( users_mariadb_list.stdout_lines is defined ) and ( users_mariadb_list.stdout_lines != [] )
   loop_control:
     loop_var: db
+    label: "{{ db }}"
   tags:
     - users-update
     - users-mariadb

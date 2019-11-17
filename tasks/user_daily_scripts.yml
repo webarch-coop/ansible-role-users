@@ -33,6 +33,7 @@
   loop: "{{ vhost.value.users_daily_scripts }}"
   loop_control:
     loop_var: command
+    label: "{{ command }}"
   tags:
     - users-update
     - users-scripts

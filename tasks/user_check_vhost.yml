@@ -73,7 +73,7 @@
       loop: "{{ vhost.value.users_apache_htauth_users }}"
       loop_control:
         loop_var: htuser
-        label: "{{ htuser }}"
+        label: "{{ htuser.name }}"
 
     - name: "Check that the users_apache_htauth_users passwords for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
       assert:
@@ -83,7 +83,7 @@
       loop: "{{ vhost.value.users_apache_htauth_users }}"
       loop_control:
         loop_var: htuser
-        label: "{{ htuser }}"
+        label: "{{ htuser.name }}"
 
     - name: "Check that users_apache_htauth_users state is set to present or absent for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       assert:
@@ -93,7 +93,7 @@
       loop: "{{ vhost.value.users_apache_htauth_users }}"
       loop_control:
         loop_var: htuser
-        label: "{{ htuser }}"
+        label: "{{ htuser.name }}"
 
   when: vhost.value.users_apache_htauth_users is defined
 

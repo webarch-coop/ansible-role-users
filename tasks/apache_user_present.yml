@@ -11,7 +11,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
   tags:
     - apache
@@ -39,7 +39,7 @@
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
-        label: "{{ vhost }}"
+        label: "{{ vhost.key }}"
       tags:
         - apache
         - users-update
@@ -91,7 +91,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   tags:
     - apache
     - users-update
@@ -101,7 +101,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   tags:
     - apache
@@ -318,7 +318,7 @@
               loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
               loop_control:
                 loop_var: vhost
-                label: "{{ vhost }}"
+                label: "{{ vhost.key }}"
               tags:
                 - matomo
                 - users-update
@@ -337,7 +337,7 @@
               loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
               loop_control:
                 loop_var: vhost
-                label: "{{ vhost }}"
+                label: "{{ vhost.key }}"
               tags:
                 - matomo
                 - users-update
@@ -381,7 +381,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
   tags:
     - users-update
@@ -413,7 +413,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
   tags:
     - users-update
@@ -440,7 +440,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" ) and ( vhost.value.users_apache_htauth_users is not defined )
   tags:
     - users-update
@@ -468,7 +468,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   when:
     - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
     - ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users[0].name is defined ) and ( vhost.value.users_apache_htauth_users[0].password is defined )
@@ -481,7 +481,7 @@
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
   tags:
     - users-update
