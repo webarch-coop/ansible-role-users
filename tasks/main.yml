@@ -127,7 +127,7 @@
     loop_var: user
     label: "{{ user.key }}"
   when: user.key in users_update
-  include_tasks: users_updated.yml
+  include_tasks: user_updated.yml
 
 - name: Firewall tasks included
   include_tasks: firewall.yml
