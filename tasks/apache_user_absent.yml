@@ -77,7 +77,7 @@
     - "/etc/ssl/le/{{ user.key }}.{{ ansible_fqdn }}.ca.pem"
   loop_control:
     loop_var: path
-    label: "{{ file }}"
+    label: "{{ path }}"
   tags:
     - users-update
     - apache
