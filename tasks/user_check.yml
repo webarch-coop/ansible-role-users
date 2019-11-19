@@ -210,14 +210,13 @@
 
     - name: "Loop thought the VirtualServer's for {{ user.key }}"
       include_tasks: user_check_vhost.yml
+      when: ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts != [] )
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost }}"
 
-  when:
-    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-    - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts != [] )
+  when: ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
 
 # https://www.php.net/manual/en/install.fpm.configuration.php
 - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"
