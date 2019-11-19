@@ -187,7 +187,7 @@
         that:
           - db is regex("^[a-z0-9_]*$")
         fail_msg: "The database name, {{ db }} must only contain lower case letters, numbers and underscores"
-      loop: "{{ user.value.users_mariadb_databases }}"
+      Loop: "{{ user.value.users_mariadb_databases }}"
       loop_control:
         loop_var: db
         label: "{{ db }}"
@@ -204,6 +204,11 @@
         label: "{{ db }}"
 
   when: user.value.users_mariadb_databases is defined
+
+- name: Debug
+  debug:
+    msg: "user.value.users_state: {{ user.value.users_state }}"
+    verbosity: 1 
 
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
