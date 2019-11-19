@@ -53,7 +53,10 @@
 
 - name: User absent loop
   include_tasks: user_absent.yml
-  when: ( user.key is defined ) and ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
+  when:
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
+    - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
