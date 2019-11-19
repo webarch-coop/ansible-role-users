@@ -187,7 +187,7 @@
         that:
           - db is regex("^[a-z0-9_]*$")
         fail_msg: "The database name, {{ db }} must only contain lower case letters, numbers and underscores"
-      Loop: "{{ user.value.users_mariadb_databases }}"
+      loop: "{{ user.value.users_mariadb_databases }}"
       loop_control:
         loop_var: db
         label: "{{ db }}"
