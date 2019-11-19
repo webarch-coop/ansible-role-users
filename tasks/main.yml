@@ -51,22 +51,9 @@
 
   when: ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
 
-- name: Check variables for users to update
-  include_tasks: user_check.yml
-  when:
-    - ( users_update is defined ) and ( users_update != [] )
-    - ( user.key is defined ) and ( user.key in users_update )
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-
 - name: User absent loop
   include_tasks: user_absent.yml
-  when:
-    - ( users_update is defined ) and ( users_update != [] )
-    - ( user.key is defined ) and ( user.key in users_update )
-    - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
+  when: ( user.key is defined ) and ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
@@ -79,6 +66,17 @@
     - users-fstab
     - users-scripts
     - users-update
+
+- name: Check variables for users to update
+  include_tasks: user_check.yml
+  when:
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
+    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
 
 - name: User present loop
   include_tasks: user_present.yml
