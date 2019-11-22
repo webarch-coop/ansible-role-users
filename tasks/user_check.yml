@@ -205,6 +205,17 @@
 
   when: user.value.users_mariadb_databases is defined
 
+- name: "Check MariaDB users_mariadb_privileges for {{ user.key }}"
+  block:
+
+    - name: "Check users_mariadb_privileges is a non-empty array for {{ user.key }}"
+      assert:
+        that:
+          - user.value.users_mariadb_privileges | length
+          - user.value.users_mariadb_privileges[0] is defined
+
+  when: user.value.users_mariadb_privileges is defined
+
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
 

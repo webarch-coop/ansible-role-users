@@ -121,18 +121,18 @@
     - users-update
     - users-mariadb
 
-- name: "Set a variable for mysql_user privileges for {{ user.key }} when they have privileges defined"
-  set_fact:
-    users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in users_mariadb_privileges %}{{ p}}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
-  when: ( user.value.users_mariadb_privileges is defined ) and ( user.value.users_mariadb_privileges != [] )
-  tags:
-    - users-update
-    - users-mariadb
-
 - name: "Set a variable for mysql_user privileges for {{ user.key }} using the default privileges"
   set_fact:
     users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in users_mariadb_privileges %}{{ p}}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
   when: user.value.users_mariadb_privileges is not defined
+  tags:
+    - users-update
+    - users-mariadb
+
+- name: "Set a variable for mysql_user privileges for {{ user.key }} when they have privileges defined"
+  set_fact:
+    users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in users_mariadb_privileges %}{{ p}}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
+  when: ( user.value.users_mariadb_privileges is defined ) and ( user.value.users_mariadb_privileges != [] )
   tags:
     - users-update
     - users-mariadb
