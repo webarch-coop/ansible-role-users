@@ -10,7 +10,8 @@ users_chroot: false
 # Define users_mariadb to true for this role to create MariaDB user and
 # databases
 users_mariadb: false
-# MySQL user privileges
+# MySQL user privileges copied from
+# https://www.a2hosting.com/kb/developer-corner/mysql/mysql-user-privileges-on-shared-servers
 users_mariadb_privileges:
   - ALTER
   - CREATE
