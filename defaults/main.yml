@@ -12,7 +12,7 @@ users_chroot: false
 users_mariadb: false
 # MySQL user privileges copied from
 # https://www.a2hosting.com/kb/developer-corner/mysql/mysql-user-privileges-on-shared-servers
-users_mariadb_privileges:
+users_mariadb_database_privileges:
   - ALTER
   - CREATE
   - CREATE ROUTINE

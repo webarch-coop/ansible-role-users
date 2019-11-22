@@ -205,27 +205,27 @@
 
   when: user.value.users_mariadb_databases is defined
 
-- name: "Check MariaDB users_mariadb_privileges for {{ user.key }}"
+- name: "Check MariaDB users_mariadb_database_privileges for {{ user.key }}"
   block:
 
-    - name: "Check users_mariadb_privileges is a non-empty array for {{ user.key }}"
+    - name: "Check users_mariadb_database_privileges is a non-empty array for {{ user.key }}"
       assert:
         that:
-          - user.value.users_mariadb_privileges | length
-          - user.value.users_mariadb_privileges[0] is defined
+          - user.value.users_mariadb_database_privileges | length
+          - user.value.users_mariadb_database_privileges[0] is defined
 
-    # https://mariadb.com/kb/en/library/grant/
-    - name: "Check that the privileges are valid for {{ user.key }}"
+    # https://mariadb.com/kb/en/library/grant/#database-privileges
+    - name: "Check that the MariaDB database privileges are valid for {{ user.key }}"
       assert:
         that:
-          - priv is regex("^ALL|CREATE USER|FILE|GRANT OPTION|PROCESS|RELOAD|REPLICATION CLIENT|REPLICATION SLAVE|SHOW DATABASES|SHUTDOWN|SUPER|CREATE|CREATE ROUTINE|CREATE TEMPORARY TABLES|DROP|EVENT|LOCK TABLES|ALTER|CREATE|CREATE VIEW|DELETE|DELETE HISTORY|DROP|INDEX|INSERT|REFERENCES|SELECT|SHOW VIEW|TRIGGER|UPDATE|INSERT \\(*\\)|REFERENCES \\(*\\)|SELECT \\(*\\)|UPDATE \\(*\\)|ALTER ROUTINE|EXECUTE|PROXY$")
+          - priv is regex("^ALL|CREATE|CREATE ROUTINE|CREATE TEMPORARY TABLES|DROP|EVENT|LOCK TABLES$")
         fail_msg: "Privilege, {{ priv }} is not valid"
-      loop: "{{ user.value.users_mariadb_privileges }}"
+      loop: "{{ user.value.users_mariadb_database_privileges }}"
       loop_control:
         loop_var: priv
         label: "{{ priv }}"
 
-  when: user.value.users_mariadb_privileges is defined
+  when: user.value.users_mariadb_database_privileges is defined
 
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
