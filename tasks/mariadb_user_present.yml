@@ -123,7 +123,7 @@
 
 - name: "Set a variable for mysql_user priv for {{ user.key }}"
   set_fact:
-    users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:ALL{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
+    users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in users_mariadb_privileges %}{{ p}}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
   tags:
     - users-update
     - users-mariadb
