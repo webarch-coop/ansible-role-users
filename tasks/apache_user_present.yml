@@ -196,7 +196,7 @@
       command: apache2ctl configtest
       check_mode: false
       register: users_apache2ctl_configtest
-      changed_when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" not in users_apachectl_configtest.stderr )
+      changed_when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
       tags:
         - apache
         - users-update
@@ -205,7 +205,7 @@
       service:
         name: apache2
         state: restarted
-      when: ( users_apachectl_configtest is defined ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
+      when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" in users_apache2ctl_configtest.stderr )
       tags:
         - users-update
         - apache
