@@ -283,7 +283,6 @@
 
   when:
     - ( users_apache_conf is defined )
-    - ( users_apache_conf_check is defined ) and ( users_apache_conf_check.stat.exists )
     - ( users_apache_tls_cert_check.stat.exists ) and ( users_apache_tls_key_check.stat.exists ) and ( users_apache_tls_ca_check.stat.exists )
 
 - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
