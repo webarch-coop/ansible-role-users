@@ -139,7 +139,7 @@
 
 - name: "Print db priv for {{ user.key }}"
   debug:
-    var: users_mariadb_db_priv
+    var: users_mariadb_priv
   tags:
     - users-update
     - users-mariadb
