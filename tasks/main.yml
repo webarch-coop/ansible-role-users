@@ -75,7 +75,7 @@
   when:
     - ( users_update is defined ) and ( users_update != [] )
     - ( user.key is defined ) and ( user.key in users_update )
-    - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+    - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
