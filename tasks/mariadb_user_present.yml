@@ -153,7 +153,7 @@
     update_password: always
     login_user: root
     login_unix_socket: /var/run/mysqld/mysqld.sock
-  # no_log: true
+  no_log: true
   tags:
     - users-update
     - users-mariadb
