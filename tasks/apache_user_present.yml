@@ -213,6 +213,15 @@
 
   rescue:
 
+    - name: The results of apache2ctl configtest
+      debug:
+        msg:
+          - "apache2ctl configtest stdout: {{ users_apache2ctl_configtest.stdout }}"
+          - "apache2ctl configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
+      tags:
+        - apache
+        - users-update
+
     - name: "apache2ctl configtest failed, saving failed config"
       copy:
         src: "/etc/apache2/sites-available/{{ user.key }}.conf"
