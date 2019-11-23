@@ -16,15 +16,15 @@
 - name: "Check state for {{ user.key }}"
   assert:
     that:
-      - user.value.state | length
-      - ( user.value.state == "present" ) or ( user.value.state == "absent" )
-  when: user.value.state is defined
+      - user.value.users_state | length
+      - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" )
+  when: user.value.users_state is defined
 
 - name: "Check that the group for {{ user.key }} contains only ascii letters and numbers"
   assert:
     that:
       - user.value.users_group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
-  when: user.value.group is defined
+  when: user.value.users_group is defined
 
 - name: "Check the groups for {{ user.key }}"
   block:
