@@ -132,7 +132,7 @@
 - name: "Set a variable for mysql_user db priv for {{ user.key }} when they have privileges defined"
   set_fact:
     users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in user.value.users_mariadb_database_privileges %}{{ p}}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
-  when: ( user.value.users_mariadb_database privileges is defined ) and ( user.value.users_mariadb_database_privileges != [] )
+  when: ( user.value.users_mariadb_database_privileges is defined ) and ( user.value.users_mariadb_database_privileges != [] )
   tags:
     - users-update
     - users-mariadb
