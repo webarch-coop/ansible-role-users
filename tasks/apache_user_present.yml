@@ -213,10 +213,17 @@
 
   rescue:
 
-    - name: The results of apache2ctl configtest
+    - name: Standard out from apache2ctl configtest
       debug:
         msg:
           - "apache2ctl configtest stdout: {{ users_apache2ctl_configtest.stdout }}"
+      tags:
+        - apache
+        - users-update
+
+    - name: Standard error from apache2ctl configtest
+      debug:
+        msg:
           - "apache2ctl configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
       tags:
         - apache
