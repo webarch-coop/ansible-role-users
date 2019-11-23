@@ -214,11 +214,11 @@
           - user.value.users_mariadb_database_privileges | length
           - user.value.users_mariadb_database_privileges[0] is defined
 
-    # https://mariadb.com/kb/en/library/grant/#database-privileges
+    # https://mariadb.com/kb/en/library/grant/#table-privileges
     - name: "Check that the MariaDB database privileges are valid for {{ user.key }}"
       assert:
         that:
-          - priv is regex("^ALL|CREATE|CREATE ROUTINE|CREATE TEMPORARY TABLES|DROP|EVENT|LOCK TABLES$")
+          - priv is regex("^ALL|ALTER|CREATE|CREATEVIEW|DELETE|DELETEHISTORY|DROP|GRANTOPTION|INDEX|INSERT|REFERENCES|SELECT|SHOWVIEW|TRIGGER|UPDATE$")
         fail_msg: "Privilege, {{ priv }} is not valid"
       loop: "{{ user.value.users_mariadb_database_privileges }}"
       loop_control:
