@@ -21,6 +21,7 @@
 - name: Set an empty users_update array
   set_fact:
     users_update: []
+  when: users_update is not defined
 
 - name: Set users to update to all
   block:
@@ -37,7 +38,9 @@
       debug:
         msg: "User to update: {{ users_update }}"
 
-  when: ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
+  when:
+    - ( users_update is defined ) and ( users_update == [] )
+    - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
 
 - name: Check which users accounts are changed
   block:
@@ -49,7 +52,9 @@
       debug:
         msg: "User to update: {{ users_update }}"
 
-  when: ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
+  when:
+    - ( users_update is defined ) and ( users_update == [] )
+    - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
 
 - name: User absent loop
   include_tasks: user_absent.yml
