@@ -140,7 +140,7 @@
 - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
   cron:
     name: "Daily deletion of TMPDIR files for {{ user.key }}"
-    job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
+    job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/ -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
     state: present
     user: "{{ user.key }}"
     minute: "{{ users_cron_min }}"
