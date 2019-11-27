@@ -39,7 +39,6 @@
 - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
   assert:
     that:
-      # - ( vhost.value.users_apache_type == "php" ) or ( vhost.value.users_apache_type == "cgi" ) or ( vhost.value.users_apache_type == "static" )
       - vhost.value.users_apache_type is regex("php|cgi|static")
   when: vhost.value.users_apache_type is defined
 
@@ -55,11 +54,10 @@
       - ( vhost.value.users_apache_expires == "medium" ) or ( vhost.value.users_apache_expires == "strict" )
   when: vhost.value.users_apache_expires is defined
 
-- name: "Check that users_cms is set to wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+- name: "Check that users_cms is set to drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
   assert:
     that:
-      # - ( vhost.value.users_cms == "wordpress" ) or ( vhost.value.users_cms == "matomo" ) or ( vhost.value.users_cms == "phpmyadmin" )
-      - vhost.value.users_cms is regex("wordpress|matomo|phpmyadmin")
+      - vhost.value.users_cms is regex("drupal|wordpress|matomo|phpmyadmin")
   when: vhost.value.users_cms is defined
 
 - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
