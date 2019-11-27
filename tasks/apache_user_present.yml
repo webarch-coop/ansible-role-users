@@ -402,6 +402,45 @@
     - users-update
     - wordpress
 
+- name: "Include Drupal role for {{ user.key }}"
+  include_role:
+    name: drupal
+  vars:
+    drupal_user: "{{ user.key }}"
+    drupal_group: "{{ user.key }}"
+    drupal_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    drupal_docroot_mode: "0750"
+    drupal_dbname: "{% if vhost.value.drupal_dbname is defined %}{{ vhost.value.drupal_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    drupal_dbuser: "{{ user.key }}"
+    drupal_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    drupal_dbprefix: "{{ vhost.value.drupal_dbprefix | default('wp_') }}"
+    drupal_locale: "{{ vhost.value.drupal_dbprefix | default('en_GB') }}"
+    drupal_url: "{{ vhost.value.drupal_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    drupal_title: "{{ vhost.value.drupal_title | default(vhost.value.users_apache_server_name) }}"
+    drupal_admin_user: "{{ vhost.value.drupal_admin_user | default(user.key) }}"
+    drupal_admin_email: "{{ vhost.value.drupal_admin_email | default(user.value.users_email) }}"
+    drupal_notify: "{{ vhost.value.drupal_notify | default(omit) }}"
+    drupal_notify_from: "{{ users_notify_from }}"
+    drupal_notify_reply_to: "{{ users_notify_reply_to }}"
+    drupal_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    drupal_notify_headers: "{{ users_notify_headers }}"
+    drupal_notify_signature: "{{ users_notify_signature }}"
+    # drupal_matomo_user: "{{ matomo_user }}"
+    # drupal_matomo_url: "{{ matomo_url }}"
+    # drupal_matomo_home: "{{ matomo_home }}"
+    # drupal_matomo_html: "{{ matomo_html }}"
+    # drupal_matomo_login: "{{ user.key }}"
+    # drupal_matomo_login_email: "{{ vhost.value.matomo_login_email | default(user.value.users_email) }}"
+    # drupal_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "drupal" )
+  tags:
+    - users-update
+    - drupal
+
 - name: "Include Matomo role for {{ user.key }}"
   include_role:
     name: matomo
