@@ -444,6 +444,41 @@
     - users-update
     - drupal
 
+- name: "Include Kimai role for {{ user.key }}"
+  include_role:
+    name: kimai
+  vars:
+    kimai_user: "{{ user.key }}"
+    kimai_group: "{{ user.value.users_group | default(user.key) }}"
+    kimai_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    kimai_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    kimai_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    kimai_docroot_mode: "0750"
+    kimai_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    kimai_url: "{{ vhost.value.kimai_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    kimai_title: "{{ vhost.value.kimai_title | default(vhost.value.users_apache_server_name) }}"
+    kimai_locale: "{{ vhost.value.kimai_locale | default('en') }}"
+    kimai_dbname: "{% if vhost.value.kimai_dbname is defined %}{{ vhost.value.kimai_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    kimai_dbuser: "{{ vhost.value.kimai_dbuser | default(user.key) }}"
+    kimai_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    kimai_dbprefix: "{{ vhost.value.kimai_dbprefix | default('') }}"
+    kimai_admin_user: "{{ vhost.value.kimai_admin_user | default(user.key) }}"
+    kimai_admin_email: "{{ vhost.value.kimai_admin_email | default(user.value.users_email) }}"
+    kimai_notify: "{{ vhost.value.kimai_notify | default(true) }}"
+    kimai_notify_from: "{{ users_notify_from }}"
+    kimai_notify_reply_to: "{{ users_notify_reply_to }}"
+    kimai_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    kimai_notify_headers: "{{ users_notify_headers }}"
+    kimai_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "kimai" )
+  tags:
+    - users-update
+    - kimai
+
 - name: "Include Matomo role for {{ user.key }}"
   include_role:
     name: matomo
