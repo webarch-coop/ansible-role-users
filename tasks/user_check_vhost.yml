@@ -54,10 +54,10 @@
       - ( vhost.value.users_apache_expires == "medium" ) or ( vhost.value.users_apache_expires == "strict" )
   when: vhost.value.users_apache_expires is defined
 
-- name: "Check that users_cms is set to kamai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+- name: "Check that users_cms is set to kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
   assert:
     that:
-      - vhost.value.users_cms is regex("kamai|drupal|wordpress|matomo|phpmyadmin")
+      - vhost.value.users_cms is regex("kimai|drupal|wordpress|matomo|phpmyadmin")
   when: vhost.value.users_cms is defined
 
 - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
