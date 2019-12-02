@@ -465,7 +465,7 @@
     kimai_admin_user: "{{ vhost.value.kimai_admin_user | default(user.key) }}"
     kimai_admin_email: "{{ vhost.value.kimai_admin_email | default(user.value.users_email) }}"
     kimai_notify: "{{ vhost.value.kimai_notify | default(true) }}"
-    kimai_notify_from: "{{ users_notify_from }}"
+    kimai_notify_from: "{{ user.key }}@{{ inventory_hostname }}"
     kimai_notify_reply_to: "{{ users_notify_reply_to }}"
     kimai_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     kimai_notify_headers: "{{ users_notify_headers }}"
