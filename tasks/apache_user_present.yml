@@ -488,7 +488,7 @@
     nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
     nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    nextcloud_docroot_mode: "0750"
+    nextcloud_version: "{{ vhost.value.nextcloud_version }}"
     nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
     nextcloud_url: "{{ vhost.value.nextcloud_url | default('https://' + vhost.value.users_apache_server_name) }}"
     nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
