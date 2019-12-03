@@ -479,6 +479,48 @@
     - users-update
     - kimai
 
+- name: "Include Nextcloud role for {{ user.key }}"
+  include_role:
+    name: nextcloud
+  vars:
+    nextcloud_user: "{{ user.key }}"
+    nextcloud_group: "{{ user.value.users_group | default(user.key) }}"
+    nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    nextcloud_docroot_mode: "0750"
+    nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    nextcloud_url: "{{ vhost.value.nextcloud_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
+    nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
+    nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
+    nextcloud_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
+    nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
+    nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
+    nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) }}"
+    nextcloud_notify_from: "{{ users_notify_from }}"
+    nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
+    nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    nextcloud_notify_headers: "{{ users_notify_headers }}"
+    nextcloud_notify_signature: "{{ users_notify_signature }}"
+    # nextcloud_matomo_user: "{{ matomo_user }}"
+    # nextcloud_matomo_url: "{{ matomo_url }}"
+    # nextcloud_matomo_home: "{{ matomo_home }}"
+    # nextcloud_matomo_html: "{{ matomo_html }}"
+    # nextcloud_matomo_login: "{{ user.key }}"
+    # nextcloud_matomo_login_email: "{{ vhost.value.matomo_login_email | default(user.value.users_email) }}"
+    # nextcloud_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
+  tags:
+    - users-update
+    - nextcloud
+
 - name: "Include Matomo role for {{ user.key }}"
   include_role:
     name: matomo
