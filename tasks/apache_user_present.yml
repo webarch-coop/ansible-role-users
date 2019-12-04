@@ -493,6 +493,7 @@
     nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
     nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
     nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default('false') }}"
+    nextcloud_sendmail: "{{ vhost.value.nextcloud_sendmail | default('true') }}"
     nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) }}"
     nextcloud_notify_from: "{{ users_notify_from }}"
     nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
