@@ -195,6 +195,7 @@
         that:
           - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
+          - ( vhost.value.drupal_dbname is defined ) and ( vhost.value.drupal_dbname in user.value.users_mariadb_databases )
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "drupal" )
 
