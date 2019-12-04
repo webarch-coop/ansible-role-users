@@ -50,7 +50,7 @@
   {%- endif %}
   {%- if vhost_config.users_apache_sts is defined %}
   <IfModule headers_module>
-    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endif %}"
+    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
   </IfModule>
   {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
