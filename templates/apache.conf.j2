@@ -48,6 +48,11 @@
   {%- if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
   {%- endif %}
+  {%- if vhost_config.users_apache_sts is defined %}
+  <IfModule headers_module>
+    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endif %}"
+  </IfModule>
+  {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
