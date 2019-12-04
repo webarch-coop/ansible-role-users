@@ -211,6 +211,7 @@
           - vhost.value.kimai_version is defined
           - vhost.value.kimai_app_env is defined
           - ( vhost.value.kimai_admin_user is defined ) and ( vhost.value.kimai_admin_user is regex("^[a-z0-9_-]*$") )
+          - vhost.value.users_apache_sts is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "kimai" )
 
@@ -227,6 +228,7 @@
           - vhost.value.matomo_first_site_url is defined
           - vhost.value.matomo_first_user is defined
           - vhost.value.matomo_first_user_email is defined
+          - vhost.value.users_apache_sts is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
 
@@ -244,6 +246,7 @@
           - vhost.value.nextcloud_version is defined
           - ( vhost.value.nextcloud_autoupdate is defined ) and ( vhost.value.nextcloud_autoupdate or not vhost.value.nextcloud_autoupdate )
           - ( vhost.value.users_apache_options is defined ) and ( "+MultiViews" in vhost.value.users_apache_options ) and ( "+SymLinksIfOwnerMatch" in vhost.value.users_apache_options )
+          - vhost.value.users_apache_sts is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
 
@@ -256,7 +259,8 @@
           - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
           - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
-          - ( vhost.value.phpmyadmin_dbname is defined ) and ( vhost.value.phpmyadmin_dbname in user.value.users_mariadb_databases )
+          - ( vhost.value.phpmyadmin_db is defined ) and ( vhost.value.phpmyadmin_db in user.value.users_mariadb_databases )
+          - vhost.value.users_apache_sts is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
 
