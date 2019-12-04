@@ -197,6 +197,7 @@
           - ( vhost.value.nextcloud_admin_user is defined ) and ( vhost.value.nextcloud_admin_user is regex("^[a-z0-9_-]*$") )
           - vhost.value.nextcloud_version is defined
           - ( vhost.value.nextcloud_autoupdate is defined ) and ( vhost.value.nextcloud_autoupdate or not vhost.value.nextcloud_autoupdate )
+          - ( vhost.value.users_apache_options is defined ) and ( "+MultiViews" in vhost.value.users_apache_options ) and ( "+SymLinksIfOwnerMatch" in vhost.value.users_apache_options )
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" ) 
 ...
