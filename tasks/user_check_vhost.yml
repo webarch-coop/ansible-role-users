@@ -54,12 +54,6 @@
       - ( vhost.value.users_apache_expires == "medium" ) or ( vhost.value.users_apache_expires == "strict" )
   when: vhost.value.users_apache_expires is defined
 
-- name: "Check that users_cms is set to nextcloud, kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-  assert:
-    that:
-      - vhost.value.users_cms is regex("nextcloud|kimai|drupal|wordpress|matomo|phpmyadmin")
-  when: vhost.value.users_cms is defined
-
 - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
   block:
 
@@ -186,6 +180,24 @@
       - vhost.value.users_apache_nophp_dirs | length
       - vhost.value.users_apache_nophp_dirs[0] is defined
   when: vhost.value.users_apache_nophp_dirs is defined
+
+- name: "Check that users_cms is set to flarum, nextcloud, kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+  assert:
+    that:
+      - vhost.value.users_cms is regex("flarum|nextcloud|kimai|drupal|wordpress|matomo|phpmyadmin")
+  when: vhost.value.users_cms is defined
+
+- name: "Flarum checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  block:
+
+    - name: "Check that required Flarum variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( "phpfpm" in user.value.users_groups )
+          - vhost.value.users_apache_type == "php"
+          - ( vhost.value.flarum_dbname is defined ) and ( vhost.value.flarum_dbname in user.value.users_mariadb_databases )
+
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "flarum" )
 
 - name: "Drupal checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:

@@ -510,6 +510,43 @@
     - users-update
     - nextcloud
 
+- name: "Include Flarum role for {{ user.key }}"
+  include_role:
+    name: flarum
+  vars:
+    flarum_user: "{{ user.key }}"
+    flarum_group: "{{ user.value.users_group | default(user.key) }}"
+    flarum_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    flarum_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    flarum_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    flarum_version: "{{ vhost.value.flarum_version }}"
+    flarum_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    flarum_url: "{{ vhost.value.flarum_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    flarum_title: "{{ vhost.value.flarum_title | default(vhost.value.users_apache_server_name) }}"
+    flarum_locale: "{{ vhost.value.flarum_locale | default('en') }}"
+    flarum_dbname: "{% if vhost.value.flarum_dbname is defined %}{{ vhost.value.flarum_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    flarum_dbuser: "{{ vhost.value.flarum_dbuser | default(user.key) }}"
+    flarum_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    flarum_dbprefix: "{{ vhost.value.flarum_dbprefix | default('') }}"
+    flarum_admin_user: "{{ vhost.value.flarum_admin_user | default(user.key) }}"
+    flarum_admin_email: "{{ vhost.value.flarum_admin_email | default(user.value.users_email) }}"
+    flarum_autoupdate: "{{ vhost.value.flarum_autoupdate | default(false) }}"
+    flarum_sendmail: "{{ vhost.value.flarum_sendmail | default(true) }}"
+    flarum_notify: "{{ vhost.value.flarum_notify | default(true) }}"
+    flarum_notify_from: "{{ users_notify_from }}"
+    flarum_notify_reply_to: "{{ users_notify_reply_to }}"
+    flarum_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    flarum_notify_headers: "{{ users_notify_headers }}"
+    flarum_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "flarum" )
+  tags:
+    - users-update
+    - flarum
+
 - name: "Include Matomo role for {{ user.key }}"
   include_role:
     name: matomo
