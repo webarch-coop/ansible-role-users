@@ -547,6 +547,45 @@
     - users-update
     - flarum
 
+- name: "Include MediaWiki role for {{ user.key }}"
+  include_role:
+    name: mediawiki
+  vars:
+    mediawiki_user: "{{ user.key }}"
+    mediawiki_group: "{{ user.value.users_group | default(user.key) }}"
+    mediawiki_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    mediawiki_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    mediawiki_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    mediawiki_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    mediawiki_version: "{{ vhost.value.mediawiki_version }}"
+    mediawiki_version_patch: "{{ vhost.value.mediawiki_version_patch }}"
+    mediawiki_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    mediawiki_url: "{{ vhost.value.mediawiki_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    mediawiki_title: "{{ vhost.value.mediawiki_title | default(vhost.value.users_apache_server_name) }}"
+    mediawiki_locale: "{{ vhost.value.mediawiki_locale | default('en') }}"
+    mediawiki_dbname: "{% if vhost.value.mediawiki_dbname is defined %}{{ vhost.value.mediawiki_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    mediawiki_dbuser: "{{ vhost.value.mediawiki_dbuser | default(user.key) }}"
+    mediawiki_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    mediawiki_dbprefix: "{{ vhost.value.mediawiki_dbprefix | default('') }}"
+    mediawiki_admin_user: "{{ vhost.value.mediawiki_admin_user | default(user.key) }}"
+    mediawiki_admin_email: "{{ vhost.value.mediawiki_admin_email | default(user.value.users_email) }}"
+    mediawiki_autoupdate: "{{ vhost.value.mediawiki_autoupdate | default(false) }}"
+    mediawiki_sendmail: "{{ vhost.value.mediawiki_sendmail | default(true) }}"
+    mediawiki_notify: "{{ vhost.value.mediawiki_notify | default(true) }}"
+    mediawiki_notify_from: "{{ users_notify_from }}"
+    mediawiki_notify_reply_to: "{{ users_notify_reply_to }}"
+    mediawiki_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    mediawiki_notify_headers: "{{ users_notify_headers }}"
+    mediawiki_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "mediawiki" )
+  tags:
+    - users-update
+    - mediawiki
+
 - name: "Include Matomo role for {{ user.key }}"
   include_role:
     name: matomo
