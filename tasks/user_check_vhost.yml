@@ -181,10 +181,10 @@
       - vhost.value.users_apache_nophp_dirs[0] is defined
   when: vhost.value.users_apache_nophp_dirs is defined
 
-- name: "Check that users_cms is set to flarum, nextcloud, kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+- name: "Check that users_cms is set to mediawiki, flarum, nextcloud, kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
   assert:
     that:
-      - vhost.value.users_cms is regex("flarum|nextcloud|kimai|drupal|wordpress|matomo|phpmyadmin")
+      - vhost.value.users_cms is regex("mediawiki|flarum|nextcloud|kimai|drupal|wordpress|matomo|phpmyadmin")
   when: vhost.value.users_cms is defined
 
 - name: "Flarum checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
