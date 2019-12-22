@@ -532,6 +532,7 @@
     flarum_admin_email: "{{ vhost.value.flarum_admin_email | default(user.value.users_email) }}"
     flarum_autoupdate: "{{ vhost.value.flarum_autoupdate | default(false) }}"
     flarum_sendmail: "{{ vhost.value.flarum_sendmail | default(true) }}"
+    flarum_mail_from: "{{ vhost.value.flarum_mail_from | default(user.key + '@' + inventory_hostname) }}" 
     flarum_notify: "{{ vhost.value.flarum_notify | default(true) }}"
     flarum_notify_from: "{{ users_notify_from }}"
     flarum_notify_reply_to: "{{ users_notify_reply_to }}"
