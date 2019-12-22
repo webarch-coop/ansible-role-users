@@ -290,7 +290,7 @@
     - name: "Check that mediawiki_mail_from is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - vhost.value.mediawiki_password_sender is regex(".+\@.+\..+")
+          - vhost.value.mediawiki_password_sender is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
       when: vhost.value.mediawiki_mail_from is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "mediawiki" )
@@ -308,7 +308,7 @@
     - name: "Check that flarum_mail_from is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - vhost.value.flarum_mail_from is regex(".+\@.+\..+")
+          - vhost.value.flarum_mail_from is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
       when: vhost.value.flarum_mail_from is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "flarum" )
