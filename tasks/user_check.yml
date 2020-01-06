@@ -227,7 +227,7 @@
 
   when: user.value.users_mariadb_database_privileges is defined
 
-# An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml) 
+# An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml)
 # is needed here because of this issue
 # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
 - name: "Include the loop for VirtualServer's for {{ user.key }}"
