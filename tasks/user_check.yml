@@ -230,6 +230,15 @@
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
 
+    - name: "Debug the VirtualServer's for {{ user.key }}"
+      debug:
+        msg: "VirtualServer: {{ vhost | to_nice_yaml }}"
+        verbosity: 1
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost }}"
+
     - name: "Loop thought the VirtualServer's for {{ user.key }}"
       include_tasks: user_check_vhost.yml
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
