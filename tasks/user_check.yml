@@ -235,7 +235,7 @@
       debug:
         msg: "{{ user.key }} is a member of {{ group }}"
         verbosity: 1
-      loop: "{{ user.value.users_groups | dict2items }}"
+      loop: "{{ user.value.users_groups }}"
       loop_control:
         loop_var: group
         label: "{{ group }}"
