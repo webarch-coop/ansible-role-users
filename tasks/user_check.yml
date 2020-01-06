@@ -237,7 +237,9 @@
         loop_var: vhost
         label: "{{ vhost }}"
 
-  when: user.value.users_apache_virtual_hosts is defined
+  when:
+    - user.value.users_apache_virtual_hosts is defined
+    - user.value.users_apache_virtual_hosts != []
 
 # https://www.php.net/manual/en/install.fpm.configuration.php
 - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"
