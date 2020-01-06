@@ -231,15 +231,16 @@
   block:
     
     # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
-    - name: Set a empty array for user.value.users_apache_virtual_hosts
-      set_fact:
-        user.value.users_apache_virtual_hosts: []
-      when: user.value.users_apache_virtual_hosts[0] is not defined
+    #- name: Set a empty array for user.value.users_apache_virtual_hosts
+    #  set_fact:
+    #    user.value.users_apache_virtual_hosts: []
+    #  when: user.value.users_apache_virtual_hosts[0] is not defined
 
     - name: "Debug the VirtualServer's for {{ user.key }}"
       debug:
         msg: "VirtualServer: {{ vhost | to_nice_yaml }}"
         verbosity: 1
+      when: vhost[0] is defined
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -247,6 +248,7 @@
 
     - name: "Loop thought the VirtualServer's for {{ user.key }}"
       include_tasks: user_check_vhost.yml
+      when: vhost[0] is defined
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
