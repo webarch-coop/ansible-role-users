@@ -227,6 +227,7 @@
 
   when: user.value.users_mariadb_database_privileges is defined
 
+# https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
 
@@ -247,7 +248,6 @@
         label: "{{ vhost }}"
 
   when:
-    - user.value.users_apache_virtual_hosts is defined
     - user.value.users_apache_virtual_hosts[0] is defined
 
 # https://www.php.net/manual/en/install.fpm.configuration.php
