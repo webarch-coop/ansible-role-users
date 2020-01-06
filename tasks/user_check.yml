@@ -231,9 +231,18 @@
 - name: VirtualHosts checks for users who are not sudoers
   block:
 
+    - name: "Debug groups for {{ user.key }}"
+      debug:
+        msg: "{{ user.key }} is a member of {{ group }}"
+        verbosity: 1
+      loop: "{{ user.value.users_groups | dict2items }}"
+      loop_control:
+        loop_var: group
+        label: "{{ group }}"
+
     - name: "Apache VirtualHosts checks for {{ user.key }}"
       block:
-    
+
         #- name: Set a empty array for user.value.users_apache_virtual_hosts
         #  set_fact:
         #    user.value.users_apache_virtual_hosts: []
@@ -257,9 +266,8 @@
             loop_var: vhost
             label: "{{ vhost }}"
 
-      when: 
+      when:
         - user.value.users_apache_virtual_hosts is defined
-        - vhost[0] is defined
 
   when: ( "sudo" not in user.value.users_groups )
 
