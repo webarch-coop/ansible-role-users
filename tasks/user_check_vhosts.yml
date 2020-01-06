@@ -1,0 +1,20 @@
+---
+# The contents of this file cannot be in user_check.yml because of this issue
+# https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
+
+- name: "Debug the VirtualServer's for {{ user.key }}"
+  debug:
+    msg: "VirtualServer: {{ vhost | to_nice_yaml }}"
+    verbosity: 2
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost }}"
+
+- name: "Loop thought the VirtualServer's for {{ user.key }}"
+  include_tasks: user_check_vhost.yml
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost }}"
+...

@@ -227,27 +227,12 @@
 
   when: user.value.users_mariadb_database_privileges is defined
 
-- name: Debug
-  debug:
-    msg: user.value.users_apache_virtual_hosts is defined
-  when:
-    - user.value.users_apache_virtual_hosts is defined
-
-- name: Debug
-  debug:
-    msg: user.value.users_apache_virtual_hosts is not defined
-  when:
-    - user.value.users_apache_virtual_hosts is not defined
-
+# An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml) 
+# is needed here because of this issue
 # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
-- name: VirtualHosts checks for users who are not sudoers
-  block:
-
-    - name: "Include the loop for VirtualServer's for {{ user.key }}"
-      include_tasks: user_check_vhosts.yml
-
-  when:
-    - user.value.users_apache_virtual_hosts is defined
+- name: "Include the loop for VirtualServer's for {{ user.key }}"
+  include_tasks: user_check_vhosts.yml
+  when: user.value.users_apache_virtual_hosts is defined
 
 # https://www.php.net/manual/en/install.fpm.configuration.php
 - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"
