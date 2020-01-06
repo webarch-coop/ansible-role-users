@@ -232,8 +232,8 @@
     
     # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
     - name: Set a empty array for user.value.users_apache_virtual_hosts
-        set_fact:
-          user.value.users_apache_virtual_hosts: []
+      set_fact:
+        user.value.users_apache_virtual_hosts: []
       when: user.value.users_apache_virtual_hosts[0] is not defined
 
     - name: "Debug the VirtualServer's for {{ user.key }}"
