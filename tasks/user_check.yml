@@ -227,9 +227,14 @@
 
   when: user.value.users_mariadb_database_privileges is defined
 
-# https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
 - name: "Apache VirtualHosts checks for {{ user.key }}"
   block:
+    
+    # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
+    - name: Set a empty array for user.value.users_apache_virtual_hosts
+        set_fact:
+          user.value.users_apache_virtual_hosts: []
+      when: user.value.users_apache_virtual_hosts[0] is not defined
 
     - name: "Debug the VirtualServer's for {{ user.key }}"
       debug:
@@ -247,8 +252,7 @@
         loop_var: vhost
         label: "{{ vhost }}"
 
-  when:
-    - user.value.users_apache_virtual_hosts[0] is defined
+  when: user.value.users_apache_virtual_hosts is defined
 
 # https://www.php.net/manual/en/install.fpm.configuration.php
 - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"
