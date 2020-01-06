@@ -243,46 +243,10 @@
 - name: VirtualHosts checks for users who are not sudoers
   block:
 
-    - name: "Debug groups for {{ user.key }}"
-      debug:
-        msg: "{{ user.key }} is a member of {{ group }}"
-        verbosity: 1
-      loop: "{{ user.value.users_groups }}"
-      loop_control:
-        loop_var: group
-        label: "{{ group }}"
-
-    - name: "Apache VirtualHosts checks for {{ user.key }}"
-      block:
-
-        #- name: Set a empty array for user.value.users_apache_virtual_hosts
-        #  set_fact:
-        #    user.value.users_apache_virtual_hosts: []
-        #  when: user.value.users_apache_virtual_hosts[0] is not defined
-
-        - name: "Debug the VirtualServer's for {{ user.key }}"
-          debug:
-            msg: "VirtualServer: {{ vhost | to_nice_yaml }}"
-            verbosity: 1
-          when: vhost[0] is defined
-          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-          loop_control:
-            loop_var: vhost
-            label: "{{ vhost }}"
-
-        - name: "Loop thought the VirtualServer's for {{ user.key }}"
-          include_tasks: user_check_vhost.yml
-          when: vhost[0] is defined
-          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-          loop_control:
-            loop_var: vhost
-            label: "{{ vhost }}"
-
-      when:
-        - user.value.users_apache_virtual_hosts is defined
+    - name: "Include the loop for VirtualServer's for {{ user.key }}"
+      include_tasks: user_check_vhosts.yml
 
   when:
-    - ( "sudo" not in user.value.users_groups )
     - user.value.users_apache_virtual_hosts is defined
 
 # https://www.php.net/manual/en/install.fpm.configuration.php
