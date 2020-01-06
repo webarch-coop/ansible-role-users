@@ -269,7 +269,9 @@
       when:
         - user.value.users_apache_virtual_hosts is defined
 
-  when: ( "sudo" not in user.value.users_groups )
+  when:
+    - ( "sudo" not in user.value.users_groups )
+    - user.value.users_apache_virtual_hosts is defined
 
 # https://www.php.net/manual/en/install.fpm.configuration.php
 - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"
