@@ -227,6 +227,18 @@
 
   when: user.value.users_mariadb_database_privileges is defined
 
+- name: Debug
+  debug:
+    msg: user.value.users_apache_virtual_hosts is defined
+  when:
+    - user.value.users_apache_virtual_hosts is defined
+
+- name: Debug
+  debug:
+    msg: user.value.users_apache_virtual_hosts is not defined
+  when:
+    - user.value.users_apache_virtual_hosts is not defined
+
 # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
 - name: VirtualHosts checks for users who are not sudoers
   block:
