@@ -227,7 +227,7 @@
 
   when: user.value.users_mariadb_database_privileges is defined
 
- https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
+# https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
 - name: VirtualHosts checks for users who are not sudoers
   block:
 
