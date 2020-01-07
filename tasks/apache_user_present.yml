@@ -582,6 +582,10 @@
     mediawiki_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     mediawiki_notify_headers: "{{ users_notify_headers }}"
     mediawiki_notify_signature: "{{ users_notify_signature }}"
+    mediawiki_matomo_domain: "{{ matomo_domain }}"
+    mediawiki_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+    mediawiki_matomo_html: "{{ matomo_html }}"
+    mediawiki_matomo_user: "{{ matomo_user }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
