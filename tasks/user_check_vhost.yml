@@ -327,6 +327,16 @@
         that: vhost.value.mediawiki_locale is regex("^[a-z-]")
       when: vhost.value.mediawiki_locale is defined
 
+    - name: "Check that the mediawiki_dbprefix is less than 6 numbers or letters for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.mediawiki_dbprefix is regex("^[a-zA-Z0-9]*$")
+          - vhost.value.mediawiki_dbprefix is regex("^.{1,6}$")
+        fail_msg: "The database name, {{ db }} must be more than 2 but less than or equal to 25 characters long"
+
+
+      when: vhost.value.mediawiki_dbprefix is defined
+
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "mediawiki" )
 
 - name: "Flarum checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
