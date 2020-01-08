@@ -302,8 +302,7 @@
     - name: "Check that mediawiki_url starts with https:// for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - vhost.value.mediawiki_url is regex("^https:\/\/.*$") )
-          - 
+          - vhost.value.mediawiki_url is regex("^https:\/\/.*$")
       when: vhost.value.mediawiki_url is defined
 
     - name: "Check that mediawiki_domain is the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -320,7 +319,7 @@
           - ( vhost.value.mediawiki_domain == vhost.key ) or ( vhost.value.mediawiki_domain in vhost.users_apache_server_aliases )
       when: 
         - vhost.value.mediawiki_domain is defined
-        - ( vhost.users_apache_server_aliases is defined ) and ( vhost.users_apache_server_aliases == [] )
+        - ( vhost.users_apache_server_aliases is defined ) and ( vhost.users_apache_server_aliases[0] is defined )
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "mediawiki" )
 
