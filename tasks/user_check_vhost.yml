@@ -309,7 +309,7 @@
       assert:
         that:
           - vhost.value.mediawiki_domain == vhost.key
-      when: 
+      when:
         - vhost.value.mediawiki_domain is defined
         - ( vhost.users_apache_server_aliases is not defined ) or ( vhost.users_apache_server_aliases == [] )
 
@@ -317,7 +317,7 @@
       assert:
         that:
           - ( vhost.value.mediawiki_domain == vhost.key ) or ( vhost.value.mediawiki_domain in vhost.users_apache_server_aliases )
-      when: 
+      when:
         - vhost.value.mediawiki_domain is defined
         - ( vhost.users_apache_server_aliases is defined ) and ( vhost.users_apache_server_aliases[0] is defined )
 
