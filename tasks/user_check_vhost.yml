@@ -273,10 +273,15 @@
         that:
           - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
-          - vhost.value.wordpress_dbuser == user.key
           - vhost.value.wordpress_dbname is defined
           - vhost.value.wordpress_dbname[1] is not defined
           - vhost.value.wordpress_dbname in user.value.users_mariadb_databases
+
+    - name: "Check that the wordpress_dbuser is {{ user.key }} is defined for {{ vhost.key }} VirtualHost"
+      assert:
+        that:
+          - vhost.value.wordpress_dbuser == user.key
+      when: vhost.value.wordpress_dbuser is defined
 
     - name: "Check that the wordpress_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
@@ -331,6 +336,18 @@
           - vhost.value.wordpress_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.wordpress_admin_user is regex("^.{2,12}$")
       when: vhost.value.wordpress_admin_user is defined
+
+    - name: "Check that the wordpress_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.wordpress_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+      when: vhost.value.wordpress_admin_email is defined
+
+    - name: "Check that wordpress_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( vhost.value.wordpress_notify ) or ( not vhost.value.wordpress_notify )
+      when: vhost.value.wordpress_notify is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
 
