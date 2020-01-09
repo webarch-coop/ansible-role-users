@@ -299,10 +299,11 @@
     - name: "Check the mediawiki_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block: 
 
-        - name: "Check that the mediawiki_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that the mediawiki_url doesn't contain or end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - vhost.value.mediawiki_url is not regex("/$")
+              - vhost.value.mediawiki_url is not regex("[/]")
 
         - name: Set a fact for the mediawiki_url without a protcol
           set_fact:
@@ -311,13 +312,13 @@
         - name: "Check that mediawiki_url domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - ( vhost.value.mediawiki_url_domain == vhost.key )
+              - ( mediawiki_url_domain == vhost.key )
           when: ( vhost.value.users_apache_server_aliases is not defined )
 
         - name: "Check that mediawiki_url domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - ( vhost.value.mediawiki_url_domain == vhost.key ) or ( vhost.value.mediawiki_url_domain in vhost.value.users_apache_server_aliases )
+              - ( mediawiki_url_domain == vhost.key ) or ( mediawiki_url_domain in vhost.value.users_apache_server_aliases )
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
       when: vhost.value.mediawiki_url is defined
