@@ -299,11 +299,10 @@
     - name: "Check the mediawiki_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block: 
 
-        - name: "Check that the mediawiki_url doesn't contain or end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that the mediawiki_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - vhost.value.mediawiki_url is not regex("/$")
-              - vhost.value.mediawiki_url is not regex("[/]")
 
         - name: Set a fact for the mediawiki_url without a protcol
           set_fact:
