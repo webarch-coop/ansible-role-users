@@ -296,8 +296,29 @@
           - vhost.value.mediawiki_password_sender is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
       when: vhost.value.mediawiki_password_sender is defined
 
-    # TODO: Check that mediawiki_url contains either the ServerName or a ServerAlias
-    #       Check that the mediawiki_domain is either the ServerName or a ServerAlias
+    - name: "Check that mediawiki_url equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( 'https://' + mediawiki_url == vhost.key )
+      when: ( vhost.value.mediawiki_url is defined ) and ( vhost.value.users_apache_server_aliases is not defined )
+
+    - name: "Check that mediawiki_url contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( 'https://' + mediawiki_url == vhost.key ) or ( 'https://' + mediawiki_url in vhost.value.users_apache_server_aliases )
+      when: ( vhost.value.mediawiki_url is defined ) and ( vhost.value.users_apache_server_aliases is defined )
+
+    - name: "Check that mediawiki_domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( mediawiki_domain == vhost.key )
+      when: ( vhost.value.mediawiki_domain is defined ) and ( vhost.value.users_apache_server_aliases is not defined )
+
+    - name: "Check that mediawiki_domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( mediawiki_domain == vhost.key ) or ( mediawiki_domain in vhost.value.users_apache_server_aliases )
+      when: ( vhost.value.mediawiki_domain is defined ) and ( vhost.value.users_apache_server_aliases is defined )
 
     - name: "Check that mediawiki_url starts with https:// for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
