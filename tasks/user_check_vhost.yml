@@ -318,7 +318,7 @@
           assert:
             that:
               - ( vhost.value.mediawiki_url_domain == vhost.key ) or ( vhost.value.mediawiki_url_domain in vhost.value.users_apache_server_aliases )
-          when: and ( vhost.value.users_apache_server_aliases is defined )
+          when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
       when: vhost.value.mediawiki_url is defined
 
