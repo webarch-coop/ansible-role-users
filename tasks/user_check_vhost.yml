@@ -233,8 +233,6 @@
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
 
-
-
 - name: "Nextcloud checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:
 
@@ -329,10 +327,10 @@
         that: vhost.value.mediawiki_locale is regex("^[a-z-]")
       when: vhost.value.mediawiki_locale is defined
 
-    - name: "Check that the mediawiki_dbprefix is less than 6 numbers or letters for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that the mediawiki_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - vhost.value.mediawiki_dbprefix is regex("^[a-zA-Z0-9]*$")
+          - vhost.value.mediawiki_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.mediawiki_dbprefix is regex("^.{1,6}$")
       when: vhost.value.mediawiki_dbprefix is defined
 
