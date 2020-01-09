@@ -273,13 +273,15 @@
         that:
           - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
+          - vhost.value.wordpress_dbuser == user.key
           - vhost.value.wordpress_dbname is defined
-          - vhost.value.wordpress_dbname[0] is not defined
+          - vhost.value.wordpress_dbname[1] is not defined
           - vhost.value.wordpress_dbname in user.value.users_mariadb_databases
 
     - name: "Check that the wordpress_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
+          - 
           - vhost.value.wordpress_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.wordpress_dbprefix is regex("^.{1,6}$")
       when: vhost.value.wordpress_dbprefix is defined
