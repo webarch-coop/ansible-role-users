@@ -288,7 +288,7 @@
       when: vhost.value.wordpress_locale is defined
 
     - name: "Check the wordpress_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      block: 
+      block:
 
         - name: "Check that the wordpress_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
@@ -319,14 +319,14 @@
           - vhost.value.wordpress_title | length
       when: vhost.value.wordpress_title is defined
 
-- name: "Check that the wordpress_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert:
-    that:
-      - vhost.value.wordpress_admin_user | length
-      - vhost.value.wordpress_admin_user[0] is not defined
-      - vhost.value.wordpress_admin_user is regex("^[a-zA-Z0-9]*$")
-      - vhost.value.wordpress_admin_user is regex("^.{2,12}$")
-  when: vhost.value.wordpress_admin_user is defined
+    - name: "Check that the wordpress_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.wordpress_admin_user | length
+          - vhost.value.wordpress_admin_user[0] is not defined
+          - vhost.value.wordpress_admin_user is regex("^[a-zA-Z0-9]*$")
+          - vhost.value.wordpress_admin_user is regex("^.{2,12}$")
+      when: vhost.value.wordpress_admin_user is defined
 
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
 

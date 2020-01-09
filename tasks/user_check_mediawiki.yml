@@ -19,7 +19,7 @@
   when: vhost.value.mediawiki_password_sender is defined
 
 - name: "Check the mediawiki_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  block: 
+  block:
 
     - name: "Check that the mediawiki_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
