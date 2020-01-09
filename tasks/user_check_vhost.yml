@@ -274,7 +274,6 @@
           - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
           - vhost.value.wordpress_dbname is defined
-          - vhost.value.wordpress_dbname[1] is not defined
           - vhost.value.wordpress_dbname in user.value.users_mariadb_databases
 
     - name: "Check that the wordpress_dbuser is {{ user.key }} is defined for {{ vhost.key }} VirtualHost"
@@ -332,7 +331,6 @@
       assert:
         that:
           - vhost.value.wordpress_admin_user | length
-          - vhost.value.wordpress_admin_user[0] is not defined
           - vhost.value.wordpress_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.wordpress_admin_user is regex("^.{2,12}$")
       when: vhost.value.wordpress_admin_user is defined
