@@ -1,0 +1,98 @@
+---
+- name: "Check that required Nextcloud variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( "phpfpm" in user.value.users_groups )
+      - vhost.value.users_apache_type == "php"
+      - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
+      - ( vhost.value.nextcloud_dbname is defined ) and ( vhost.value.nextcloud_dbname in user.value.users_mariadb_databases )
+      - ( vhost.value.nextcloud_admin_user is defined ) and ( vhost.value.nextcloud_admin_user is regex("^[a-z0-9_-]*$") )
+      - ( vhost.value.nextcloud_version is defined ) and ( vhost.value.nextcloud_version is regex("^[0-9]{2}.[0-9]{1,2}.[0-9]{1,2}$") )
+      - ( vhost.value.nextcloud_autoupdate is defined ) and ( vhost.value.nextcloud_autoupdate or not vhost.value.nextcloud_autoupdate )
+      - ( vhost.value.users_apache_options is defined ) and ( "+MultiViews" in vhost.value.users_apache_options ) and ( "+SymLinksIfOwnerMatch" in vhost.value.users_apache_options )
+      - vhost.value.users_apache_sts is defined
+
+- name: "Check the nextcloud_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  block:
+
+    - name: "Check that the nextcloud_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.nextcloud_url is not regex("/$")
+
+    - name: Set a fact for the nextcloud_url without a protcol
+      set_fact:
+        nextcloud_url_domain: "{{ vhost.value.nextcloud_url | regex_replace('^https://') }}"
+
+    - name: "Check that nextcloud_url domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( nextcloud_url_domain == vhost.key )
+      when: ( vhost.value.users_apache_server_aliases is not defined )
+
+    - name: "Check that nextcloud_url domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( nextcloud_url_domain == vhost.key ) or ( nextcloud_url_domain in vhost.value.users_apache_server_aliases )
+      when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
+
+  when: vhost.value.nextcloud_url is defined
+
+- name: "Check the nextcloud_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert: 
+    that:
+      - vhost.value.nextcloud_title | length
+  when: vhost.value.nextcloud_title is defined
+
+# https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/language_configuration.html
+- name: "Check that the nextcloud_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that: vhost.value.nextcloud_locale is regex("^^[a-z]{2,3}[_]{0.1}[A-Z]{0,2}$")
+  when: vhost.value.nextcloud_locale is defined
+
+- name: "Check that the nextcloud_dbuser is {{ user.key }} is defined for {{ vhost.key }} VirtualHost"
+  assert:
+    that:
+      - vhost.value.nextcloud_dbuser == user.key
+  when: vhost.value.nextcloud_dbuser is defined
+
+- name: "Check that the nextcloud_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - vhost.value.nextcloud_dbprefix | length
+      - vhost.value.nextcloud_dbprefix is regex("^[a-zA-Z0-9_]*$")
+      - vhost.value.nextcloud_dbprefix is regex("^.{1,6}$")
+  when: vhost.value.nextcloud_dbprefix is defined
+
+- name: "Check that the nextcloud_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that: 
+      - vhost.value.nextcloud_admin_user | length
+      - vhost.value.nextcloud_admin_user is regex("^[a-zA-Z0-9]*$")
+      - vhost.value.nextcloud_admin_user is regex("^.{2,12}$")
+  when: vhost.value.nextcloud_admin_user is defined
+
+- name: "Check that the nextcloud_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - vhost.value.nextcloud_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+  when: vhost.value.nextcloud_admin_email is defined
+  
+- name: "Check that nextcloud_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.wordpress_notify == False )
+  when: vhost.value.nextcloud_autoupdate is defined
+  
+- name: "Check that nextcloud_sendmail is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( vhost.value.nextcloud_sendmail == True ) or ( vhost.value.wordpress_sendmail == False )
+  when: vhost.value.nextcloud_sendmail is defined
+  
+- name: "Check that nextcloud_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( vhost.value.nextcloud_notify == True ) or ( vhost.value.wordpress_notify == False )
+  when: vhost.value.nextcloud_notify is defined
+...

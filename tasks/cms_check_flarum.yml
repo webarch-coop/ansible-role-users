@@ -1,0 +1,110 @@
+---
+- name: "Check that required Flarum variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( "phpfpm" in user.value.users_groups )
+      - vhost.value.users_apache_type == "php"
+      - ( vhost.value.flarum_dbname is defined ) and ( vhost.value.flarum_dbname in user.value.users_mariadb_databases )
+
+- name: "Check the flarum_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  block:
+  
+    - name: "Check that the flarum_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.flarum_url is not regex("/$")
+
+    - name: Set a fact for the flarum_url without a protcol
+      set_fact:
+        flarum_url_domain: "{{ vhost.value.flarum_url | regex_replace('^https://') }}"
+
+    - name: "Check that flarum_url domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( flarum_url_domain == vhost.key )
+      when: ( vhost.value.users_apache_server_aliases is not defined )
+  
+    - name: "Check that flarum_url domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( flarum_url_domain == vhost.key ) or ( flarum_url_domain in vhost.value.users_apache_server_aliases )
+      when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
+
+  when: vhost.value.flarum_url is defined
+
+- name: "Check the flarum_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert: 
+    that:
+      - vhost.value.flarum_title | length
+  when: vhost.value.flarum_title is defined
+
+- name: "Check the flarum_description is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert: 
+    that:
+      - vhost.value.flarum_description | length
+  when: vhost.value.flarum_description is defined
+
+- name: "Check the flarum_welcome_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert: 
+    that:
+      - vhost.value.flarum_welcome_title | length
+  when: vhost.value.flarum_welcome_title is defined
+
+- name: "Check the flarum_welcome_message is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert: 
+    that:
+      - vhost.value.flarum_welcome_message | length
+  when: vhost.value.flarum_welcome_message is defined
+
+# https://flarum.org/docs/extend/i18n.html
+- name: "Check that the flarum_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that: vhost.value.flarum_locale is regex("^^[a-z]{2,3}[_]{0.1}[A-Z]{0,2}$")
+  when: vhost.value.flarum_locale is defined
+
+- name: "Check that the flarum_dbuser is {{ user.key }} is defined for {{ vhost.key }} VirtualHost"
+  assert:
+    that:
+      - vhost.value.flarum_dbuser == user.key
+  when: vhost.value.flarum_dbuser is defined
+
+- name: "Check that the flarum_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - vhost.value.flarum_dbprefix | length
+      - vhost.value.flarum_dbprefix is regex("^[a-zA-Z0-9_]*$")
+      - vhost.value.flarum_dbprefix is regex("^.{1,6}$")
+  when: vhost.value.flarum_dbprefix is defined
+
+- name: "Check that the flarum_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that: 
+      - vhost.value.flarum_admin_user | length
+      - vhost.value.flarum_admin_user is regex("^[a-zA-Z0-9]*$")
+      - vhost.value.flarum_admin_user is regex("^.{2,12}$")
+  when: vhost.value.flarum_admin_user is defined
+
+- name: "Check that the flarum_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - vhost.value.flarum_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+  when: vhost.value.flarum_admin_email is defined
+  
+- name: "Check that flarum_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( vhost.value.flarum_autoupdate == True ) or ( vhost.value.wordpress_notify == False )
+  when: vhost.value.flarum_autoupdate is defined
+  
+- name: "Check that flarum_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( vhost.value.flarum_notify == True ) or ( vhost.value.wordpress_notify == False )
+  when: vhost.value.flarum_notify is defined
+
+- name: "Check that flarum_mail_from is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - vhost.value.flarum_mail_from is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+  when: vhost.value.flarum_mail_from is defined
+...
