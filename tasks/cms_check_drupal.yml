@@ -33,7 +33,7 @@
   when: vhost.value.drupal_url is defined
 
 - name: "Check the drupal_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert: 
+  assert:
     that:
       - vhost.value.drupal_title | length
   when: vhost.value.drupal_title is defined

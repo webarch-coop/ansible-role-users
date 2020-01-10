@@ -192,20 +192,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "drupal" )
 
 - name: "Kimai checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  block:
-
-    - name: "Check that required Kimai variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - ( "phpfpm" in user.value.users_groups )
-          - vhost.value.users_apache_type == "php"
-          - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
-          - ( vhost.value.kimai_dbname is defined ) and ( vhost.value.kimai_dbname in user.value.users_mariadb_databases )
-          - vhost.value.kimai_version is defined
-          - vhost.value.kimai_app_env is defined
-          - ( vhost.value.kimai_admin_user is defined ) and ( vhost.value.kimai_admin_user is regex("^[a-z0-9_-]*$") )
-          - vhost.value.users_apache_sts is defined
-
+  include_tasks: cms_check_kimai.yml
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "kimai" )
 
 - name: "Matomo checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
