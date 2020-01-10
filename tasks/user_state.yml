@@ -30,9 +30,16 @@
 
 - name: "Debug for {{ user.key }}"
   debug:
-    msg:
-      - "users_current_state checksum for {{ user.key }}: {{ users_current_state.stat.checksum }}"
-      - "users_proposed_state checksum for {{ user.key }}: {{ users_proposed_state.stat.checksum }}"
-      - "users_update: {{ users_update }}"
+    msg: "users_current_state checksum for {{ user.key }}: {{ users_current_state.stat.checksum }}"
+    verbosity: 1
+
+- name: "Debug for {{ user.key }}"
+  debug:
+    msg: "users_proposed_state checksum for {{ user.key }}: {{ users_proposed_state.stat.checksum }}"
+    verbosity: 1
+
+- name: "Debug for {{ user.key }}"
+  debug:
+    msg: "users_update: {{ users_update }}"
     verbosity: 1
 ...
