@@ -7,5 +7,5 @@
       - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
       - ( vhost.value.phpmyadmin_db is defined ) and ( vhost.value.phpmyadmin_db in user.value.users_mariadb_databases )
       - vhost.value.users_apache_sts is defined
-      - phpmyadmin_version is defined
+      - vhost.value.phpmyadmin_version is defined
 ...
