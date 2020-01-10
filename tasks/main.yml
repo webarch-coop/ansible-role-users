@@ -56,6 +56,19 @@
     - ( users_update is defined ) and ( users_update == [] )
     - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
 
+- name: Print users to add or update
+  debug:
+    msg: "User to update: {{ user }}"
+    verbosity: 1
+  when:
+    - ( users_update is defined ) and ( users_update != [] )
+    - ( user.key is defined ) and ( user.key in users_update )
+    - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+
 - name: User absent loop
   include_tasks: user_absent.yml
   when:
@@ -81,15 +94,6 @@
     - ( users_update is defined ) and ( users_update != [] )
     - ( user.key is defined ) and ( user.key in users_update )
     - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-
-- name: Print users to add or update
-  debug:
-    var: {{ user }} 
-    verbosity: 1
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
