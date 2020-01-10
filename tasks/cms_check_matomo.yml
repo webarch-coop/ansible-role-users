@@ -1,0 +1,13 @@
+---
+- name: "Check that required Matomo variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  assert:
+    that:
+      - ( "phpfpm" in user.value.users_groups )
+      - vhost.value.users_apache_type == "php"
+      - ( vhost.value.matomo_dbname is defined ) and ( vhost.value.matomo_dbname in user.value.users_mariadb_databases )
+      - vhost.value.matomo_first_site_name is defined
+      - vhost.value.matomo_first_site_url is defined
+      - vhost.value.matomo_first_user is defined
+      - vhost.value.matomo_first_user_email is defined
+      - vhost.value.users_apache_sts is defined
+...

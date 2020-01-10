@@ -196,20 +196,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "kimai" )
 
 - name: "Matomo checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  block:
-
-    - name: "Check that required Matomo variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - ( "phpfpm" in user.value.users_groups )
-          - vhost.value.users_apache_type == "php"
-          - ( vhost.value.matomo_dbname is defined ) and ( vhost.value.matomo_dbname in user.value.users_mariadb_databases )
-          - vhost.value.matomo_first_site_name is defined
-          - vhost.value.matomo_first_site_url is defined
-          - vhost.value.matomo_first_user is defined
-          - vhost.value.matomo_first_user_email is defined
-          - vhost.value.users_apache_sts is defined
-
+  include_tasks: cms_check_matomo.yml
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
 
 - name: "Nextcloud checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -217,17 +204,7 @@
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
 
 - name: "phpMyAdmin checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  block:
-
-    - name: "Check that required phpMyAdmin variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - ( "phpfpm" in user.value.users_groups )
-          - vhost.value.users_apache_type == "php"
-          - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
-          - ( vhost.value.phpmyadmin_db is defined ) and ( vhost.value.phpmyadmin_db in user.value.users_mariadb_databases )
-          - vhost.value.users_apache_sts is defined
-
+  include_tasks: cms_check_phpmyadmin.yml
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
 
 - name: "WordPress checks for {{ vhost.key }} VirtualHost for {{ user.key }}"

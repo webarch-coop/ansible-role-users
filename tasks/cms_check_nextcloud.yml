@@ -39,7 +39,7 @@
   when: vhost.value.nextcloud_url is defined
 
 - name: "Check the nextcloud_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert: 
+  assert:
     that:
       - vhost.value.nextcloud_title | length
   when: vhost.value.nextcloud_title is defined
@@ -66,7 +66,7 @@
 
 - name: "Check that the nextcloud_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
-    that: 
+    that:
       - vhost.value.nextcloud_admin_user | length
       - vhost.value.nextcloud_admin_user is regex("^[a-zA-Z0-9]*$")
       - vhost.value.nextcloud_admin_user is regex("^.{2,12}$")
@@ -77,19 +77,19 @@
     that:
       - vhost.value.nextcloud_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
   when: vhost.value.nextcloud_admin_email is defined
-  
+
 - name: "Check that nextcloud_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
     that:
       - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.wordpress_notify == False )
   when: vhost.value.nextcloud_autoupdate is defined
-  
+
 - name: "Check that nextcloud_sendmail is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
     that:
       - ( vhost.value.nextcloud_sendmail == True ) or ( vhost.value.wordpress_sendmail == False )
   when: vhost.value.nextcloud_sendmail is defined
-  
+
 - name: "Check that nextcloud_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
     that:
