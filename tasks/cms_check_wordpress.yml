@@ -24,7 +24,7 @@
 # https://wpastra.com/docs/complete-list-wordpress-locale-codes/
 - name: "Check that the wordpress_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
-    that: vhost.value.wordpress_locale is regex("^^[a-z]{2,3}?_?[A-Z]{2}$")
+    that: vhost.value.wordpress_locale is regex("^^[a-z]{2,3}[_]{0.1}[A-Z]{0,2}$")
   when: vhost.value.wordpress_locale is defined
 
 - name: "Check the wordpress_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
