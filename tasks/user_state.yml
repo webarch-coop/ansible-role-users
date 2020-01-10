@@ -1,4 +1,9 @@
 ---
+- name: Set users_current_state and users_proposed_state to empty variables
+  set_fact:
+    users_current_state: ""
+    users_proposed_state: ""
+
 - name: "Check current state file for {{ user.key }}"
   stat:
     path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
