@@ -26,7 +26,7 @@
 - name: Set users to update to all
   block:
 
-    - name: Add all the users to the users_update array
+    - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
       set_fact:
         users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
       loop: "{{ users | dict2items }}"
@@ -34,7 +34,7 @@
         loop_var: user
         label: "{{ user.key }}"
 
-    - name: Print all the users to update
+    - name: Print the users to update if users_update_strategy is not set or set to all
       debug:
         msg: "User to update: {{ users_update }}"
 

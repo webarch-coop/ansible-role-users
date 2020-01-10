@@ -10,7 +10,7 @@
     users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
   when: users_current_state.stat.exists == False
 
-- name: Check the users proposed state file
+- name: "Check the proposed state file for {{ user.key }}"
   stat:
     path: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
     checksum_algorithm: sha256
