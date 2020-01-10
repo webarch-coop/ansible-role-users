@@ -16,14 +16,15 @@
 - name: "Check that the wordpress_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
     that:
-      - 
+      - vhost.value.wordpress_dbprefix | length 
       - vhost.value.wordpress_dbprefix is regex("^[a-zA-Z0-9_]*$")
       - vhost.value.wordpress_dbprefix is regex("^.{1,6}$")
   when: vhost.value.wordpress_dbprefix is defined
 
+# https://wpastra.com/docs/complete-list-wordpress-locale-codes/
 - name: "Check that the wordpress_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
-    that: vhost.value.wordpress_locale is regex("^^[a-z]*?_?[A-Z]*$")
+    that: vhost.value.wordpress_locale is regex("^^[a-z]{2,3}?_?[A-Z]{2}$")
   when: vhost.value.wordpress_locale is defined
 
 - name: "Check the wordpress_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
