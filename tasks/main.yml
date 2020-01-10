@@ -56,6 +56,10 @@
     - ( users_update is defined ) and ( users_update == [] )
     - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
 
+- name: Debug fail
+  fail:
+    msg: Stop to debug
+
 - name: Print users to add or update
   debug:
     msg: "User to update: {{ user }}"
