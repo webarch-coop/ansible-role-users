@@ -39,7 +39,6 @@
         msg: "User to update: {{ users_update }}"
 
   when:
-    - ( users_update is defined ) and ( users_update == [] )
     - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
 
 - name: Check which users accounts are changed
@@ -53,7 +52,6 @@
         msg: "User to update: {{ users_update }}"
 
   when:
-    - ( users_update is defined ) and ( users_update == [] )
     - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
 
 - name: Debug fail
