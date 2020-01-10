@@ -76,6 +76,6 @@
 - name: "Check that wordpress_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
     that:
-      - ( vhost.value.wordpress_notify ) or ( not vhost.value.wordpress_notify )
+      - ( vhost.value.wordpress_notify == True ) or ( vhost.value.wordpress_notify == False )
   when: vhost.value.wordpress_notify is defined
 ...
