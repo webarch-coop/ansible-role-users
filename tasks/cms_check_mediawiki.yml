@@ -1,7 +1,4 @@
 ---
-- name: "MediaWiki checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  block:
-
 - name: "Check that required MediaWiki variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
     that:
