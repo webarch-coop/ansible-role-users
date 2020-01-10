@@ -86,6 +86,15 @@
     loop_var: user
     label: "{{ user.key }}"
 
+- name: Print users to add or update
+  debug:
+    var: {{ user }} 
+    verbosity: 1
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    loop_var: user
+    label: "{{ user.key }}"
+
 - name: User present loop
   include_tasks: user_present.yml
   when:
