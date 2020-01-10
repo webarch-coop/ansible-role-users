@@ -22,4 +22,12 @@
   when:
     - users_current_state.stat.exists
     - users_current_state.stat.checksum != users_proposed_state.stat.checksum
+
+- name: "Debug for {{ user.key }}"
+  debug:
+    msg:
+      - "users_current_state checksum for {{ user.key }}: {{ users_current_state.stat.checksum }}"
+      - "users_proposed_state checksum for {{ user.key }}: {{ users_proposed_state.stat.checksum }}"
+      - "users_update: {{ users_update }}"
+    verbosity: 1
 ...
