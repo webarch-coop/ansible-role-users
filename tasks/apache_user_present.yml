@@ -595,6 +595,7 @@
     name: matomo
   vars:
     matomo_user: "{{ user.key }}"
+    matomo_group: "{{ user.value.users_group | default(user.key) }}"
     matomo_url: "https://{{ vhost.value.users_apache_server_name }}/"
     matomo_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     matomo_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
@@ -629,6 +630,7 @@
     name: phpmyadmin
   vars:
     phpmyadmin_user: "{{ user.key }}"
+    phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
     phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     phpmyadmin_db_user: "{{ user.key }}"
     phpmyadmin_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
@@ -656,6 +658,7 @@
     name: phpmyadmin
   vars:
     phpmyadmin_user: "{{ user.key }}"
+    phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
     phpmyadmin_db: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     phpmyadmin_db_user: "{{ user.key }}"
     phpmyadmin_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
