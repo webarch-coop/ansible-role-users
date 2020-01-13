@@ -46,7 +46,11 @@
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
   {%- if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
+    {%- if vhost_config.users_cms is defined and vhost_config.users_cms == "nextcloud" %}
+  IncludeOptional /etc/apache2/conf-available/robots-deny-nextcloud.conf
+    {%- else %}
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
+    {%- endif %}
   {%- endif %}
   {%- if vhost_config.users_apache_sts is defined %}
   <IfModule headers_module>
