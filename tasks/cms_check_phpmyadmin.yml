@@ -7,5 +7,5 @@
       - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
       - ( vhost.value.phpmyadmin_dbname is defined ) and ( vhost.value.phpmyadmin_dbname in user.value.users_mariadb_databases )
       - vhost.value.users_apache_sts is defined
-      - ( vhost.value.phpmyadmin_version is defined ) and ( phpmyadmin_version is regex('^[0-9][.][0-9][.][0-9]{1,2}[.]{0,1}[0-9]{0,2}$') )
+      - ( vhost.value.phpmyadmin_version is defined ) and ( phpmyadmin_version is regex("^[0-9][.][0-9][.][0-9]{1,2}[.]{0,1}[0-9]{0,2}$") )
 ...
