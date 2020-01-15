@@ -642,7 +642,7 @@
     phpmyadmin_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
     phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
     phpmyadmin_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    phpmyadmin_version: "{{ user.value.phpmyadmin_version }}"
+    phpmyadmin_version: "{{ vhost.value.phpmyadmin_version }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
