@@ -5,7 +5,7 @@
       - ( "phpfpm" in user.value.users_groups )
       - vhost.value.users_apache_type == "php"
       - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
-      - ( vhost.value.phpmyadmin_db is defined ) and ( vhost.value.phpmyadmin_db in user.value.users_mariadb_databases )
+      - ( vhost.value.phpmyadmin_dbname is defined ) and ( vhost.value.phpmyadmin_dbname in user.value.users_mariadb_databases )
       - vhost.value.users_apache_sts is defined
       - vhost.value.phpmyadmin_version is defined
 ...
