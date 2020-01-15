@@ -625,13 +625,13 @@
     - users-update
     - matomo
 
-- name: "Include phpMyAdmin role with no HTTP Authentication for {{ user.key }}"
+- name: "Include phpMyAdmin role for {{ user.key }}"
   include_role:
     name: phpmyadmin
   vars:
     phpmyadmin_user: "{{ user.key }}"
     phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
-    phpmyadmin_dbname: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    phpmyadmin_dbname: "{% if vhost.value.phpmyadmin_dbname is defined %}{{ vhost.value.phpmyadmin_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     phpmyadmin_dbuser: "{{ user.key }}"
     phpmyadmin_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
     phpmyadmin_dbhost: localhost
@@ -642,41 +642,12 @@
     phpmyadmin_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
     phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
     phpmyadmin_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    phpmyadmin_version: "{{ user.value.phpmyadmin_version }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" ) and ( vhost.value.users_apache_htauth_users is not defined )
-  tags:
-    - users-update
-    - phpmyadmin
-
-- name: "Include phpMyAdmin role with HTTP Authentication for {{ user.key }}"
-  include_role:
-    name: phpmyadmin
-  vars:
-    phpmyadmin_user: "{{ user.key }}"
-    phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
-    phpmyadmin_dbname: "{% if vhost.value.phpmyadmin_db is defined %}{{ vhost.value.phpmyadmin_db }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
-    phpmyadmin_dbuser: "{{ user.key }}"
-    phpmyadmin_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
-    phpmyadmin_dbhost: localhost
-    phpmyadmin_dbport: 3306
-    phpmyadmin_dbsocket: /var/run/mysqld/mysqld.sock
-    phpmyadmin_url: "https://{{ vhost.value.users_apache_server_name }}/"
-    phpmyadmin_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    phpmyadmin_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-    phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
-    phpmyadmin_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    phpmyadmin_htauth_user: "{{ vhost.value.users_apache_htauth_users[0].name }}"
-    phpmyadmin_htauth_pass: "{{ vhost.value.users_apache_htauth_users[0].password }}"
-  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-    label: "{{ vhost.key }}"
-  when:
-    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
-    - ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users[0].name is defined ) and ( vhost.value.users_apache_htauth_users[0].password is defined )
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
   tags:
     - users-update
     - phpmyadmin
