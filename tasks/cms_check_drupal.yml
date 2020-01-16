@@ -1,55 +1,52 @@
 ---
 - name: "Check Drupal variables for {{ user.key }}"
   block:
-    
+
     - name: "Check that required Drupal variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
           - ( vhost.value.drupal_dbname is defined ) and ( vhost.value.drupal_dbname in user.value.users_mariadb_databases )
-    
+
     - name: "Check the drupal_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
-    
+
         - name: "Check that the drupal_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - vhost.value.drupal_url is not regex("/$")
-    
+
         - name: Set a fact for the drupal_url without a protcol
           set_fact:
             drupal_url_domain: "{{ vhost.value.drupal_url | regex_replace('^https://') }}"
-    
+
         - name: "Check that drupal_url domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - ( drupal_url_domain == vhost.key )
           when: ( vhost.value.users_apache_server_aliases is not defined )
-    
+
         - name: "Check that drupal_url domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - ( drupal_url_domain == vhost.key ) or ( drupal_url_domain in vhost.value.users_apache_server_aliases )
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
-    
+
       when: vhost.value.drupal_url is defined
 
-    - fail:
-        msg: "Debug"
-    
     - name: "Check the drupal_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - vhost.value.drupal_title | length
       when: vhost.value.drupal_title is defined
-    
+
     # https://localize.drupal.org/
     - name: "Check that the drupal_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that: vhost.value.drupal_locale is regex("^[a-z]{2,4}[-]{0,1}[a-z]{0,1}[-]{0,1}[a-z]{0,8}$")
       when: vhost.value.drupal_locale is defined
-    
+
     - name: "Check that the drupal_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
@@ -57,7 +54,7 @@
           - vhost.value.drupal_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.drupal_dbprefix is regex("^.{1,6}$")
       when: vhost.value.drupal_dbprefix is defined
-    
+
     - name: "Check that the drupal_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
@@ -65,19 +62,19 @@
           - vhost.value.drupal_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.drupal_admin_user is regex("^.{2,12}$")
       when: vhost.value.drupal_admin_user is defined
-    
+
     - name: "Check that the drupal_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - vhost.value.drupal_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
       when: vhost.value.drupal_admin_email is defined
-    
+
     - name: "Check that drupal_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - ( vhost.value.drupal_autoupdate == True ) or ( vhost.value.wordpress_notify == False )
       when: vhost.value.drupal_autoupdate is defined
-    
+
     - name: "Check that drupal_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:

@@ -1,57 +1,46 @@
 ---
-- name: "PHP FPM secondary files for {{ user.key }} absent"
-  file:
-    path: "{{ file }}"
-    state: absent
-  loop:
-    - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
-    - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
-    - "/etc/apache2/localhost.d/{{ user.key }}.conf"
-    - "/etc/nginx/localhost.d/{{ user.key }}.conf"
-  loop_control:
-    loop_var: file
-    label: "{{ file }}"
-  tags:
-    - users
-    - users-update
-    - users-chroot
-    - phpfpm
-
-- name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf is present"
-  stat:
-    path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-  register: users_phpfpm_pool_file
-  tags:
-    - users
-    - users-update
-    - users-chroot
-    - phpfpm
-
-- name: "PHP FPM pool.d file for {{ user.key }} absent"
-  file:
-    path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-    state: absent
-  register: users_phpfpm_pool_absent
-  tags:
-    - users
-    - users-update
-    - users-chroot
-    - phpfpm
-
-- name: PHP FPM conditional restart
+- name: "PHP FPM config absent for {{ user.key }}"
   block:
 
-    - name: "PHP FPM pool.d configtest for {{ user.key }} absent"
-      command: "php-fpm{{ users_phpfpm_version }} --test"
-      register: users_phpfpm_pool_configtest
+    - name: "PHP FPM secondary files for {{ user.key }} absent"
+      file:
+        path: "{{ file }}"
+        state: absent
+      loop:
+        - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+        - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+        - "/etc/apache2/localhost.d/{{ user.key }}.conf"
+        - "/etc/nginx/localhost.d/{{ user.key }}.conf"
+      loop_control:
+        loop_var: file
+        label: "{{ file }}"
 
-    - name: "PHP FPM restarted for {{ user.key }} absent"
-      service:
-        name: "php{{ users_phpfpm_version }}-fpm"
-        state: restarted
-      when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
+    - name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf is present"
+      stat:
+        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+      register: users_phpfpm_pool_file
 
-  when: ( users_phpfpm_pool_file is defined ) and ( users_phpfpm_pool_file.stat.exists )
+    - name: "PHP FPM pool.d file for {{ user.key }} absent"
+      file:
+        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+        state: absent
+      register: users_phpfpm_pool_absent
+
+    - name: PHP FPM conditional restart
+      block:
+
+        - name: "PHP FPM pool.d configtest for {{ user.key }} absent"
+          command: "php-fpm{{ users_phpfpm_version }} --test"
+          register: users_phpfpm_pool_configtest
+
+        - name: "PHP FPM restarted for {{ user.key }} absent"
+          service:
+            name: "php{{ users_phpfpm_version }}-fpm"
+            state: restarted
+          when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
+
+      when: ( users_phpfpm_pool_file is defined ) and ( users_phpfpm_pool_file.stat.exists )
+
   tags:
     - users
     - users-update

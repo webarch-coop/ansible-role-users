@@ -49,8 +49,6 @@
             label: "{{ group }}"
     
       when: user.value.users_groups is defined
-      tags:
-        - users
     
     - name: "Check users that are members of the {{ user.key }} group"
       block:
@@ -71,8 +69,6 @@
             label: "{{ group }}"
     
       when: user.value.users_group_members is defined
-      tags:
-        - users
     
     - name: "Check that the home directory for {{ user.key }} starts with a slash"
       assert:
@@ -138,8 +134,6 @@
             label: "{{ url }}"
     
       when: user.value.users_ssh_public_keys is defined
-      tags:
-        - users
     
     - name: "Check that users_quota is a positive number for {{ user.key }}"
       assert:
@@ -214,8 +208,6 @@
             label: "{{ db }}"
     
       when: user.value.users_mariadb_databases is defined
-      tags:
-        - users
     
     - name: "Check MariaDB users_mariadb_database_privileges for {{ user.key }}"
       block:
@@ -238,8 +230,6 @@
             label: "{{ priv }}"
     
       when: user.value.users_mariadb_database_privileges is defined
-      tags:
-        - users
     
     # An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml)
     # is needed here because of this issue
@@ -247,8 +237,6 @@
     - name: "Include the loop for VirtualServer's for {{ user.key }}"
       include_tasks: user_check_vhosts.yml
       when: user.value.users_apache_virtual_hosts is defined
-      tags:
-        - users
     
     # https://www.php.net/manual/en/install.fpm.configuration.php
     - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"

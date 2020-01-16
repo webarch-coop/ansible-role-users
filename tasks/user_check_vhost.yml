@@ -205,8 +205,6 @@
     - name: "Drupal checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
       include_tasks: cms_check_drupal.yml
       when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "drupal" )
-      tags:
-        - users
  
     - name: "Kimai checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
       include_tasks: cms_check_kimai.yml

@@ -1,43 +1,49 @@
 ---
-- name: "Check that required Matomo variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert:
-    that:
-      - ( "phpfpm" in user.value.users_groups )
-      - vhost.value.users_apache_type == "php"
-      - ( vhost.value.matomo_dbname is defined ) and ( vhost.value.matomo_dbname in user.value.users_mariadb_databases )
-      - vhost.value.matomo_first_user is defined
-      - vhost.value.matomo_first_user_email is defined
-      - vhost.value.users_apache_sts is defined
+- name: "Check Matomo variables for {{ user.key }}"
+  block:
 
-- name: "Check the matomo_first_site_name for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert:
-    that:
-      - vhost.value.matomo_first_site_name | length
-  when: vhost.value.matomo_first_site_name is defined
+    - name: "Check that required Matomo variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( "phpfpm" in user.value.users_groups )
+          - vhost.value.users_apache_type == "php"
+          - ( vhost.value.matomo_dbname is defined ) and ( vhost.value.matomo_dbname in user.value.users_mariadb_databases )
+          - vhost.value.matomo_first_user is defined
+          - vhost.value.matomo_first_user_email is defined
+          - vhost.value.users_apache_sts is defined
 
-- name: "Check the matomo_first_site_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert:
-    that:
-      - vhost.value.matomo_first_site_url is regex("^http:\/\/.*$")
-  when: vhost.value.matomo_first_site_url is defined
+    - name: "Check the matomo_first_site_name for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.matomo_first_site_name | length
+      when: vhost.value.matomo_first_site_name is defined
 
-- name: "Check that the matomo_first_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert:
-    that:
-      - vhost.value.matomo_first_user | length
-      - vhost.value.matomo_first_user is regex("^[a-zA-Z0-9]*$")
-      - vhost.value.matomo_first_user is regex("^.{2,12}$")
-  when: vhost.value.matomo_first_user is defined
+    - name: "Check the matomo_first_site_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.matomo_first_site_url is regex("^http:\/\/.*$")
+      when: vhost.value.matomo_first_site_url is defined
 
-- name: "Check that the matomo_first_user_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert:
-    that:
-      - vhost.value.matomo_first_user_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-  when: vhost.value.matomo_first_user_email is defined
+    - name: "Check that the matomo_first_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.matomo_first_user | length
+          - vhost.value.matomo_first_user is regex("^[a-zA-Z0-9]*$")
+          - vhost.value.matomo_first_user is regex("^.{2,12}$")
+      when: vhost.value.matomo_first_user is defined
 
-- name: "Check that matomo_notify_passwd is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-  assert:
-    that:
-      - ( vhost.value.matomo_notify_passwd == True ) or ( vhost.value.wordpress_notify == False )
-  when: vhost.value.matomo_notify_passwd is defined
+    - name: "Check that the matomo_first_user_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.matomo_first_user_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+      when: vhost.value.matomo_first_user_email is defined
+
+    - name: "Check that matomo_notify_passwd is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( vhost.value.matomo_notify_passwd == True ) or ( vhost.value.wordpress_notify == False )
+      when: vhost.value.matomo_notify_passwd is defined
+
+  tags:
+    - users
 ...
