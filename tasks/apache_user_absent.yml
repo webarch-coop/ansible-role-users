@@ -4,6 +4,7 @@
     path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
   register: users_apache_site_enabled
   tags:
+    - users
     - users-update
     - apache
 
@@ -12,6 +13,7 @@
   register: users_apache_site_enabled_absent
   when: users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk
   tags:
+    - users
     - users-update
     - apache
 
@@ -23,22 +25,19 @@
       changed_when: '"Syntax OK" not in users_apache2ctl_configtest.stderr'
       check_mode: false
       register: users_apache2ctl_configtest
-      tags:
-        - apache
-        - users-update
-        - letsencrypt
 
     - name: Apache restart
       service:
         name: apache2
         state: restarted
       when: ( users_apachectl_configtest is defined ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
-      tags:
-        - users-update
-        - apache
-        - letsencrypt
 
   when: ( users_apache_site_enabled is defined ) and ( users_apache_site_enabled.stat.exists )
+  tags:
+    - users
+    - users-update
+    - apache
+    - letsencrypt
 
 - name: "Apache {{ user.key }} sites-available file(s) absent"
   file:
@@ -52,6 +51,7 @@
     loop_var: file
     label: "{{ file }}"
   tags:
+    - users
     - users-update
     - apache
 
@@ -61,6 +61,7 @@
     job: "ssl-cert-check -qac {{ le_dir }}/{{ user.key }}.{{ ansible_fqdn }}.cert.pem -e 'root@localhost'"
     state: absent
   tags:
+    - users
     - users-update
     - apache
     - letsencrypt
@@ -79,11 +80,12 @@
     loop_var: path
     label: "{{ path }}"
   tags:
+    - users
     - users-update
     - apache
     - letsencrypt
 
-# There is no Matomo site:delete command yet, when there is this should perhaps be added here
+# TODO There is no Matomo site:delete command yet, when there is this should perhaps be added here
 # https://github.com/digitalist-se/extratools/issues/7
 # See also matomo_user_absent.yml
 ...

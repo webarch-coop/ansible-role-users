@@ -1,123 +1,95 @@
 ---
-- name: "Remove {{ user.key }} from {{ chroot_dir | default('/chroot') }}/etc/passwd"
-  lineinfile:
-    path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
-    regexp: "^{{ user.key }}:"
-    state: absent
-  tags:
-    - users-update
-    - users-chroot
+- name: Remove chrooted user
+  block:
 
-- name: "Remove {{ user.key }} from {{ chroot_dir | default('/chroot') }}/etc/group"
-  lineinfile:
-    path: "{{ chroot_dir | default('/chroot') }}/etc/group"
-    regexp: "^{{ user.key }}:"
-    state: absent
-  tags:
-    - users-update
-    - users-chroot
+    - name: "Remove {{ user.key }} from {{ chroot_dir | default('/chroot') }}/etc/passwd"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
+        regexp: "^{{ user.key }}:"
+        state: absent
+    
+    - name: "Remove {{ user.key }} from {{ chroot_dir | default('/chroot') }}/etc/group"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/group"
+        regexp: "^{{ user.key }}:"
+        state: absent
+    
+    # /run/chroot
+    - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot is mounted"
+      shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot >/dev/null && echo PRESENT || echo ABSENT"
+      check_mode: false
+      register: users_chroot_run_chroot_mount
+      changed_when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
+    
+    - name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot unmounted"
+      command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot"
+      args:
+        warn: false
+      ignore_errors: true
+      register: users_chroot_run_chroot_mountpoint_umount
+      changed_when: '"not mounted" not in users_chroot_run_chroot_mountpoint_umount.stderr'
+      when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
+    
+    # /run/mysql
+    - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld is mounted"
+      shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
+      check_mode: false
+      register: users_chroot_mysqld_mount
+      changed_when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
+    
+    - name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld unmounted"
+      command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld"
+      args:
+        warn: false
+      ignore_errors: true
+      register: users_chroot_mysqld_mountpoint_umount
+      changed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
+      when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
+    
+    # /users/$USER/home/$USER
+    - name: "Check if {{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
+      shell: "findmnt {{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+      check_mode: false
+      register: users_chroot_users_home_mount
+      changed_when: '"PRESENT" in users_chroot_users_home_mount.stdout'
+    
+    - name: "{{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} unmounted"
+      command: "umount -l {{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+      args:
+        warn: false
+      ignore_errors: true
+      register: users_chroot_home_mountpoint_umount
+      changed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
+      when: '"PRESENT" in users_chroot_users_home_mount.stdout'
+    
+    # /users/$USER
+    - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }} is mounted"
+      shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}  >/dev/null && echo PRESENT || echo ABSENT"
+      check_mode: false
+      register: users_chroot_mount
+      changed_when: '"PRESENT" in users_chroot_mount.stdout'
+    
+    - name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }} unmounted"
+      command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ user.key }}"
+      args:
+        warn: false
+      ignore_errors: true
+      register: users_chroot_mountpoint_umount
+      changed_when: '"not mounted" in users_chroot_mountpoint_umount.stdout'
+      when: '"PRESENT" in users_chroot_mount.stdout'
+    
+    - name: "Directory {{ chroot_users_dir | default('/users') }}/{{ user.key }} absent"
+      file:
+        path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
+        state: absent
+    
+    - name: "Directory {{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} absent"
+      file:
+        path: "{{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        state: absent
 
-# /run/chroot
-- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot >/dev/null && echo PRESENT || echo ABSENT"
-  check_mode: false
-  register: users_chroot_run_chroot_mount
-  changed_when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
   tags:
-    - users-update
-    - users-chroot
-
-- name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot unmounted"
-  command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot"
-  args:
-    warn: false
-  ignore_errors: true
-  register: users_chroot_run_chroot_mountpoint_umount
-  changed_when: '"not mounted" not in users_chroot_run_chroot_mountpoint_umount.stderr'
-  when: '"PRESENT" in users_chroot_run_chroot_mount.stdout'
-  tags:
-    - users-update
-    - users-chroot
-
-# /run/mysql
-- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld >/dev/null && echo PRESENT || echo ABSENT"
-  check_mode: false
-  register: users_chroot_mysqld_mount
-  changed_when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
-  tags:
-    - users-update
-    - users-chroot
-
-- name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld unmounted"
-  command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld"
-  args:
-    warn: false
-  ignore_errors: true
-  register: users_chroot_mysqld_mountpoint_umount
-  changed_when: '"not mounted" not in users_chroot_mysqld_mountpoint_umount.stderr'
-  when: '"PRESENT" in users_chroot_mysqld_mount.stdout'
-  tags:
-    - users-update
-    - users-chroot
-
-# /users/$USER/home/$USER
-- name: "Check if {{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} >/dev/null && echo PRESENT || echo ABSENT"
-  check_mode: false
-  register: users_chroot_users_home_mount
-  changed_when: '"PRESENT" in users_chroot_users_home_mount.stdout'
-  tags:
-    - users-update
-    - users-chroot
-
-- name: "{{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} unmounted"
-  command: "umount -l {{ chroot_users_dir | default('/users') }}{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-  args:
-    warn: false
-  ignore_errors: true
-  register: users_chroot_home_mountpoint_umount
-  changed_when: '"not mounted" not in users_chroot_home_mountpoint_umount.stderr'
-  when: '"PRESENT" in users_chroot_users_home_mount.stdout'
-  tags:
-    - users-update
-    - users-chroot
-
-# /users/$USER
-- name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }} is mounted"
-  shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}  >/dev/null && echo PRESENT || echo ABSENT"
-  check_mode: false
-  register: users_chroot_mount
-  changed_when: '"PRESENT" in users_chroot_mount.stdout'
-  tags:
-    - users-update
-    - users-chroot
-
-- name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }} unmounted"
-  command: "umount -l {{ chroot_users_dir | default('/users') }}/{{ user.key }}"
-  args:
-    warn: false
-  ignore_errors: true
-  register: users_chroot_mountpoint_umount
-  changed_when: '"not mounted" in users_chroot_mountpoint_umount.stdout'
-  when: '"PRESENT" in users_chroot_mount.stdout'
-  tags:
-    - users-update
-    - users-chroot
-
-- name: "Directory {{ chroot_users_dir | default('/users') }}/{{ user.key }} absent"
-  file:
-    path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
-    state: absent
-  tags:
-    - users-update
-    - users-chroot
-
-- name: "Directory {{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} absent"
-  file:
-    path: "{{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    state: absent
-  tags:
+    - users
     - users-update
     - users-chroot
 ...

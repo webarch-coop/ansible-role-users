@@ -2,12 +2,14 @@
 - name: "Slay any processes running as user {{ user.key }}"
   command: "slay {{ user.key }}"
   tags:
+    - users
     - users-chroot
     - users-update
 
 - name: "Crontab absent for user {{ user.key }}"
   include_tasks: crontab_user_absent.yml
   tags:
+    - users
     - users-update
     - users-cron
     - users-scripts
@@ -18,12 +20,13 @@
     - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
       include_tasks: chroot_user_absent_fstab.yml
       when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
-      tags:
-        - users-chroot
-        - users-update
-        - users-fstab
 
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+  tags:
+    - users
+    - users-chroot
+    - users-update
+    - users-fstab
 
 - name: "Include Apache config tasks absent user for {{ user.key }}"
   include_tasks: apache_user_absent.yml
@@ -31,6 +34,7 @@
     - ( "apache2" in ansible_facts.packages )
     - ( users_apache is defined ) and ( users_apache == True )
   tags:
+    - users
     - users-update
     - apache
 
@@ -41,6 +45,7 @@
     - ( users_chroot is defined ) and ( users_chroot == True )
     - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
   tags:
+    - users
     - users-update
     - users-chroot
     - phpfpm
@@ -58,17 +63,19 @@
     - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
       include_tasks: chroot_user_absent.yml
       when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
-      tags:
-        - users-chroot
-        - users-update
 
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+  tags:
+    - users
+    - users-chroot
+    - users-update
 
-- name: "Absent user {{ user.key }} home directorie removed"
+- name: "Absent user {{ user.key }} home directory removed"
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: absent
   tags:
+    - users
     - users-update
 
 - name: "User account {{ user.key }} absent"
@@ -78,6 +85,7 @@
     remove: true
     force: true
   tags:
+    - users
     - users-update
 
 - name: "User {{ user.key }} groups absent"
@@ -85,5 +93,6 @@
     name: "{{ user.key }}"
     state: absent
   tags:
+    - users
     - users-update
 ...

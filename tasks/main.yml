@@ -17,11 +17,15 @@
 
 - name: System setup and checks
   include_tasks: system.yml
+  tags:
+    - users
 
 - name: Set an empty users_update array
   set_fact:
     users_update: []
   when: users_update is not defined
+  tags:
+    - users
 
 - name: Set users to update to all
   block:
@@ -40,6 +44,8 @@
 
   when:
     - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
+  tags:
+    - users
 
 - name: Check which users accounts are changed
   block:
@@ -53,6 +59,8 @@
 
   when:
     - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
+  tags:
+    - users
 
 - name: Print users to add or update
   debug:
@@ -78,6 +86,7 @@
     loop_var: user
     label: "{{ user.key }}"
   tags:
+    - users
     - apache
     - phpfpm
     - users-chroot
@@ -96,6 +105,8 @@
   loop_control:
     loop_var: user
     label: "{{ user.key }}"
+  tags:
+    - users
 
 - name: User present loop
   include_tasks: user_present.yml
