@@ -18,5 +18,5 @@
     loop_var: vhost
     label: "{{ vhost }}"
   tags:
-    - users 
+    - users
 ...

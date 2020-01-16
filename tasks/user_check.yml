@@ -10,35 +10,35 @@
         that:
           - user.key is regex("^[a-z0-9]*$")
         fail_msg: "The username {{ user.key }} contains characters other than lowercase ascii letters and numbers"
-    
+
     - name: "Check that the username {{ user.key }} is between 2 and 12 characters long"
       assert:
         that:
           - user.key is regex("^.{2,12}$")
         fail_msg: "The username {{ user.key }} needs to be between 2 and 12 characters long"
-    
+
     - name: "Check state for {{ user.key }}"
       assert:
         that:
           - user.value.users_state | length
           - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" )
       when: user.value.users_state is defined
-    
+
     - name: "Check that the group for {{ user.key }} contains only ascii letters and numbers"
       assert:
         that:
           - user.value.users_group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
       when: user.value.users_group is defined
-    
+
     - name: "Check the groups for {{ user.key }}"
       block:
-    
+
         - name: "Check that the groups for {{ user.key }} is a non-empty array"
           assert:
             that:
               - user.value.users_groups | length
               - user.value.users_groups[0] is defined
-    
+
         - name: "Check that the groups for {{ user.key }} contain only ascii letters and numbers"
           assert:
             that:
@@ -47,18 +47,18 @@
           loop_control:
             loop_var: group
             label: "{{ group }}"
-    
+
       when: user.value.users_groups is defined
-    
+
     - name: "Check users that are members of the {{ user.key }} group"
       block:
-    
+
         - name: "Check that the members of {{ user.key }} group is a non-empty array"
           assert:
             that:
               - user.value.users_group_members | length
               - user.value.users_group_members[0] is defined
-    
+
         - name: "Check that the groups for {{ user.key }} contain only ascii letters and numbers"
           assert:
             that:
@@ -67,59 +67,59 @@
           loop_control:
             loop_var: group
             label: "{{ group }}"
-    
+
       when: user.value.users_group_members is defined
-    
+
     - name: "Check that the home directory for {{ user.key }} starts with a slash"
       assert:
         that:
           - user.value.users_home is regex("^\/.*$")
       when: user.value.users_home is defined
-    
+
     - name: "Check that the shell for {{ user.key }} is valid"
       assert:
         that:
           - user.value.users_shell in users_shells
       when: user.value.users_shell is defined
-    
+
     - name: "Check users_skel is an existing path for {{ user.key }}"
       stat:
         path: "{{ user.value.users_skel }}"
       register: user_skel_path
       failed_when: user_skel_path.stat.isdir == False
       when: user.value.users_skel is defined
-    
+
     - name: "Check system for {{ user.key }} is true or false"
       assert:
         that:
           - ( user.value.users_system == True ) or ( user.value.users_system == False )
       when: user.value.users_system is defined
-    
+
     # TODO check users_home_owner
     # TODO users_home_mode
     # TODO check users_editor
-    
+
     - name: "Check generate_ssh_key for {{ user.key }} is true or false"
       assert:
         that:
           - ( user.value.users_generate_ssh_key == True ) or ( user.value.users_generate_ssh_key == False )
       when: user.value.users_generate_ssh_key is defined
-    
+
     - name: "Check email address for {{ user.key }}"
       assert:
         that:
           - user.value.users_email is regex("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
       when: user.value.users_email is defined
-    
+
     - name: SSH public key URL checks
       block:
-    
+
         - name: "Check users_ssh_public_keys is a non-empty array for {{ user.key }}"
           assert:
             that:
               - user.value.users_ssh_public_keys | length
               - user.value.users_ssh_public_keys[0] is defined
-    
+
         - name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }}"
           uri:
             url: "{{ url }}"
@@ -132,60 +132,60 @@
           loop_control:
             loop_var: url
             label: "{{ url }}"
-    
+
       when: user.value.users_ssh_public_keys is defined
-    
+
     - name: "Check that users_quota is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota | human_to_bytes | int > 0
       when: user.value.users_quota is defined
-    
+
     - name: "Check that users_quota_block_softlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_block_softlimit | human_to_bytes | int > 0
       when: user.value.users_quota_block_softlimit is defined
-    
+
     - name: "Check that users_quota_block_hardlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_block_hardlimit | human_to_bytes | int > 0
       when: user.value.users_quota_block_hardlimit is defined
-    
+
     - name: "Check that users_quota_inode_softlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_inode_softlimit | human_to_bytes | int > 0
       when: user.value.users_quota_inode_softlimit is defined
-    
+
     - name: "Check that users_quota_inode_hardlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_inode_hardlimit | human_to_bytes | int > 0
       when: user.value.users_quota_inode_hardlimit is defined
-    
+
     - name: "Check that users_notify_passwd for {{ user.key }} is true or false"
       assert:
         that:
           - ( user.value.users_notify_passwd == True ) or ( user.value.users_notify_passwd == False )
       when: user.value.users_notify_passwd is defined
-    
+
     - name: "Check that users_mariadb_notify_passwd for {{ user.key }} is true or false"
       assert:
         that:
           - ( user.value.users_mariadb_notify_passwd == True ) or ( user.value.users_mariadb_notify_passwd == False )
       when: user.value.users_mariadb_notify_passwd is defined
-    
+
     - name: "MariaDB users_mariadb_databases array checks for {{ user.key }}"
       block:
-    
+
         - name: "Check users_mariadb_databases is a non-empty array for {{ user.key }}"
           assert:
             that:
               - user.value.users_mariadb_databases | length
               - user.value.users_mariadb_databases[0] is defined
-    
+
         - name: "Check that the database names only contain lower case letters, numbers and underscores for {{ user.key }}"
           assert:
             that:
@@ -195,7 +195,7 @@
           loop_control:
             loop_var: db
             label: "{{ db }}"
-    
+
         # Max length is 64 characters https://dev.mysql.com/doc/refman/8.0/en/identifier-length.html
         - name: "Check that the database names for {{ user.key }} are not more that 25 characters each"
           assert:
@@ -206,18 +206,18 @@
           loop_control:
             loop_var: db
             label: "{{ db }}"
-    
+
       when: user.value.users_mariadb_databases is defined
-    
+
     - name: "Check MariaDB users_mariadb_database_privileges for {{ user.key }}"
       block:
-    
+
         - name: "Check users_mariadb_database_privileges is a non-empty array for {{ user.key }}"
           assert:
             that:
               - user.value.users_mariadb_database_privileges | length
               - user.value.users_mariadb_database_privileges[0] is defined
-    
+
         # https://mariadb.com/kb/en/library/grant/#table-privileges
         - name: "Check that the MariaDB database privileges are valid for {{ user.key }}"
           assert:
@@ -228,56 +228,56 @@
           loop_control:
             loop_var: priv
             label: "{{ priv }}"
-    
+
       when: user.value.users_mariadb_database_privileges is defined
-    
+
     # An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml)
     # is needed here because of this issue
     # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
     - name: "Include the loop for VirtualServer's for {{ user.key }}"
       include_tasks: user_check_vhosts.yml
       when: user.value.users_apache_virtual_hosts is defined
-    
+
     # https://www.php.net/manual/en/install.fpm.configuration.php
     - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"
       assert:
         that:
           - user.value.users_phpfpm_pm is regex("^static|ondemand|dynamic$")
       when: user.value.users_phpfpm_pm is defined
-    
+
     - name: "Check that PHP-FPM pm.max_children is greater than 1 for {{ user.key }} if defined"
       assert:
         that:
           - user.value.users_phpfpm_pm_max_children | int >= 1
       when: user.value.users_phpfpm_pm_max_children is defined
-    
+
     - name: "Check the PHP-FPM pm dynamic pool settings for {{ user.key }} if defined"
       block:
-    
+
         - name: "Check PHP-FPM pm.start_servers for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_start_servers | int >= 1
           when: user.value.users_phpfpm_pm_start_servers is defined
-    
+
         - name: "Check the PHP-FPM pm.min_spare_servers for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_min_spare_servers | int >= 1
           when: user.value.users_phpfpm_pm_min_spare_servers is defined
-    
+
         - name: "Check the PHP-FPM pm.max_spare_servers for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_max_spare_servers | int >= 1
           when: user.value.users_phpfpm_pm_max_spare_servers is defined
-    
+
         - name: "Check the PHP-FPM users_phpfpm_pm_max_children for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= 1
           when: user.value.users_phpfpm_pm_max_children is defined
-    
+
         - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.start_servers for {{ user.key }} if defined"
           assert:
             that:
@@ -285,7 +285,7 @@
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_start_servers is defined
-    
+
         - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.min_spare_servers for {{ user.key }} if defined"
           assert:
             that:
@@ -293,7 +293,7 @@
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
-    
+
         - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.max_spare_servers for {{ user.key }} if defined"
           assert:
             that:
@@ -301,7 +301,7 @@
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_max_spare_servers is defined
-    
+
         - name: "Check the PHP-FPM pm.start_servers is greater than pm.min_spare_servers for {{ user.key }} if defined"
           assert:
             that:
@@ -309,7 +309,7 @@
           when:
             - user.value.users_phpfpm_pm_start_servers is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
-    
+
         - name: "Check the PHP-FPM pm.start_servers must less than or equal to pm.max_spare_servers for {{ user.key }} if defined"
           assert:
             that:
@@ -317,7 +317,7 @@
           when:
             - user.value.users_phpfpm_pm_start_servers is defined
             - user.value.users_phpfpm_pm_max_spare_servers is defined
-    
+
         - name: "Check the PHP-FPM pm.max_spare_servers must be greater than pm.min_spare_servers for {{ user.key }} if defined"
           assert:
             that:
@@ -325,7 +325,7 @@
           when:
             - user.value.users_phpfpm_pm_max_spare_servers is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
-    
+
       when: ( user.value.users_phpfpm_pm is defined ) and ( user.value.users_phpfpm_pm == "dynamic" )
 
   tags:
