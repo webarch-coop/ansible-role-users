@@ -34,8 +34,9 @@
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
     
       when: vhost.value.drupal_url is defined
-      tags:
-        - users
+
+    - fail:
+        msg: "Debug"
     
     - name: "Check the drupal_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
