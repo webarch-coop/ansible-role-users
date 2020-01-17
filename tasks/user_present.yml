@@ -4,26 +4,25 @@
   when:
     - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
   tags:
-    - users-update
+    - users
 
 - name: "User group present for {{ user.key }}"
   group:
     name: "{{ user.key }}"
     state: present
   tags:
-    - users-update
+    - users
 
 - name: "Users group members present for {{ user.key }}"
   include: group_members.yml
   when: ( user.value.users_group_members is defined ) and ( user.value.users_group_members != [] )
   tags:
-    - users-update
+    - users
 
 - name: "User accounts present for {{ user.key }}"
   include_tasks: user.yml
   tags:
-    - users-ssh
-    - users-update
+    - users
 
 - name: "MariaDB accounts and databases created and passwords read or set for {{ user.key }}"
   include_tasks: mariadb_user_present.yml
@@ -31,22 +30,19 @@
     - ( users_mariadb is defined ) and ( users_mariadb == True )
     - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
   tags:
-    - users-update
-    - users-mariadb
-    - phpmyadmin
+    - users
 
 - name: "Quotas set for {{ user.key }}"
   include_tasks: quota.yml
   when: ( quota_dir is defined ) and ( user.value.users_quota is defined ) and ( user.value.users_quota != "" )
   tags:
-    - users-update
-    - users-quota
+    - users
 
 - name: "Set passwds and notify user {{ user.key }}"
   include_tasks: notify_passwd.yml
   when: ( user.value.users_notify_passwd is defined ) and ( user.value.users_notify_passwd == True ) and ( user.value.users_email is defined ) and ( user.value.users_email != "" )
   tags:
-    - users-update
+    - users
 
 - name: "Crontab present for user {{ user.key }}"
   include_tasks: crontab_user_present.yml
@@ -56,9 +52,7 @@
     - ( users_crontab is not defined ) or ( users_crontab == True )
     - ( users_cron is defined ) and ( users_cron == True )
   tags:
-    - users-update
-    - users-cron
-    - users-scripts
+    - users
 
 - name: "Create or remove a .forward file for {{ user.key }}"
   block:
@@ -69,7 +63,7 @@
         state: absent
       when: ( users_forward == False ) or ( user.value.users_email is not defined or user.value.users_email == "" )
       tags:
-        - users-update
+        - users
 
     - name: "Email address in .forward for {{ user.key }}"
       template:
@@ -79,7 +73,7 @@
         group: "{{ user.value.users_group | default(user.key) }}"
       when: ( users_forward == True ) and ( user.value.users_email is defined and user.value.users_email != "" )
       tags:
-        - users-update
+        - users
 
   when: users_forward is defined
 
@@ -94,7 +88,7 @@
   when:
     - ( users_muttrc is defined ) and ( users_muttrc == True )
   tags:
-    - users-update
+    - users
 
 - name: Chroot users
   block:
@@ -104,8 +98,7 @@
       when:
         - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
       tags:
-        - users-chroot
-        - users-update
+        - users
 
     - name: "Include the PHP FPM chroot user present tasks for {{ user.key }}"
       include_tasks: phpfpm_chroot_user_present.yml
@@ -113,9 +106,7 @@
         - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
       tags:
-        - phpfpm
-        - users-update
-        - users-chroot
+        - users
 
   when:
     - ( users_chroot is defined ) and ( users_chroot == True )
@@ -130,8 +121,7 @@
       register: user_matomo_user_check
       changed_when: '"no such user" in user_matomo_user_check.stderr'
       tags:
-        - matomo
-        - users-update
+        - users
 
     - name: "Matomo user login account tasks for {{ user.key }}"
       block:
@@ -142,15 +132,13 @@
           check_mode: false
           register: user_matomo_config
           tags:
-            - matomo
-            - users-update
+            - users
 
         - name: "Matomo accounts for user {{ user.key }} present"
           include_tasks: matomo_user_present.yml
           when: user_matomo_config.stat.exists
           tags:
-            - matomo
-            - users-update
+            - users
 
       when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
@@ -162,11 +150,5 @@
     - '"apache2" in ansible_facts.packages'
     - ( users_apache is defined ) and ( users_apache == True )
   tags:
-    - users-update
-    - apache
-    - letsencrypt
-    - users-scripts
-    - wordpress
-    - matomo
-    - phpmyadmin
+    - users
 ...

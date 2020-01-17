@@ -14,9 +14,7 @@
     label: "{{ vhost.key }}"
   when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
   tags:
-    - apache
-    - users-update
-    - letsencrypt
+    - users
 
 - name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
   block:
@@ -28,9 +26,7 @@
         reloadcmd: "service apache2 reload"
       check_mode: true
       tags:
-        - apache
-        - users-update
-        - letsencrypt
+        - users
 
     - name: "Set fact for subjectAltNames for {{ user.key }}"
       set_fact:
@@ -41,9 +37,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       tags:
-        - apache
-        - users-update
-        - letsencrypt
+        - users
 
     - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
       debug:
@@ -51,10 +45,6 @@
           - "subject_alt_names is set to: {{ subject_alt_names }}"
           - "common_name is set to: {{ common_name }}"
         verbosity: 1
-      tags:
-        - apache
-        - users-update
-        - letsencrypt
 
     - name: "Let's Encrypt cert role included for {{ user.key }}"
       include_role:
@@ -62,9 +52,7 @@
         tasks_from: letsencrypt
       when: ansible_check_mode == False
       tags:
-        - apache
-        - users-update
-        - letsencrypt
+        - users
 
   when: ( users_cert is defined ) and ( users_cert == 'user' )
 
@@ -77,8 +65,7 @@
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
@@ -93,8 +80,7 @@
     loop_var: vhost
     label: "{{ vhost }}"
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "HTTP Authentication htpasswd files present for {{ user.key }}"
   include_tasks: htauth.yml
@@ -104,9 +90,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   tags:
-    - apache
-    - users-update
-    - users-htauth
+    - users
 
 - name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present"
   file:
@@ -116,32 +100,28 @@
     group: "{{ user.key }}"
     mode: 0750
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
     path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
   register: users_apache_tls_cert_check
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
     path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
   register: users_apache_tls_key_check
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
     path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
   register: users_apache_tls_ca_check
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Apache {{ user.key }} sites-enabled symlink absent"
   file:
@@ -149,16 +129,14 @@
     state: absent
   when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
   stat:
     path: "/etc/apache2/sites-available/{{ user.key }}.conf"
   register: users_apache_conf_check
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Apache {{ user.key }} sites-available file copied"
   copy:
@@ -167,8 +145,7 @@
     remote_src: true
   when: users_apache_conf_check.stat.exists
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: "Apache {{ user.key }} sites-available file present"
   template:
@@ -178,8 +155,7 @@
     lstrip_blocks: true
   register: users_apache_conf
   tags:
-    - apache
-    - users-update
+    - users
 
 - name: Apache configtest
   block:
@@ -188,28 +164,18 @@
       command: "a2ensite {{ user.key }}"
       register: users_a2ensite
       changed_when: '"already enabled" not in users_a2ensite.stdout'
-      tags:
-        - apache
-        - users-update
 
     - name: "apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
       command: apache2ctl configtest
       check_mode: false
       register: users_apache2ctl_configtest
       changed_when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
-      tags:
-        - apache
-        - users-update
 
     - name: Apache restart
       service:
         name: apache2
         state: restarted
       when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" in users_apache2ctl_configtest.stderr )
-      tags:
-        - users-update
-        - apache
-        - letsencrypt
 
   rescue:
 
@@ -217,26 +183,19 @@
       debug:
         msg:
           - "apache2ctl configtest stdout: {{ users_apache2ctl_configtest.stdout }}"
-      tags:
-        - apache
-        - users-update
+        verbosity: 1
 
     - name: Standard error from apache2ctl configtest
       debug:
         msg:
           - "apache2ctl configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
-      tags:
-        - apache
-        - users-update
+        verbosity: 1
 
     - name: "apache2ctl configtest failed, saving failed config"
       copy:
         src: "/etc/apache2/sites-available/{{ user.key }}.conf"
         dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
         remote_src: true
-      tags:
-        - apache
-        - users-update
 
     - name: "apache2ctl configtest failed so reverting changes"
       copy:
@@ -244,9 +203,6 @@
         dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
         remote_src: true
       when: users_apache_conf_check.stat.exists == True
-      tags:
-        - apache
-        - users-update
 
     - name: "apache2ctl configtest failed so removing new config and symlink"
       file:
@@ -259,17 +215,11 @@
         loop_var: file
         label: "{{ file }}"
       when: users_apache_conf_check.stat.exists == False
-      tags:
-        - apache
-        - users-update
 
     - name: "Apache {{ user.key }} sites-enabled symlink absent"
       command: "a2dissite {{ user.key }}"
       register: users_a2dissite
       changed_when: '"already enabled" not in users_a2dissite.stdout'
-      tags:
-        - apache
-        - users-update
 
     - name: Fail as apache2ctl configtest failed
       fail:
@@ -277,13 +227,12 @@
           - "apache2ctl configtest failed for {{ user.key }} and as a result apache has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this VirtualHost."
           - "The broken config is available in /etc/apache2/sites-available/{{ user.key }}.conf.broken"
           - "The error was: {{ users_apache2ctl_configtest.stderr }}"
-      tags:
-        - apache
-        - users-update
 
   when:
     - ( users_apache_conf is defined )
     - ( users_apache_tls_cert_check.stat.exists ) and ( users_apache_tls_key_check.stat.exists ) and ( users_apache_tls_ca_check.stat.exists )
+  tags:
+    - users
 
 - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
   shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
@@ -292,7 +241,7 @@
   check_mode: false
   changed_when: false
   tags:
-    - users-update
+    - users
 
 - name: "Matomo site tasks for {{ user.key }}"
   block:
@@ -302,9 +251,6 @@
       check_mode: false
       register: user_matomo_user_check
       changed_when: '"no such user" in user_matomo_user_check.stderr'
-      tags:
-        - matomo
-        - users-update
 
     - name: "Matomo site tasks for {{ user.key }}"
       block:
@@ -314,9 +260,6 @@
             path: "{{ matomo_html }}/config/config.ini.php"
           check_mode: false
           register: user_matomo_config
-          tags:
-            - matomo
-            - users-update
 
         - name: If Matomo is installed
           block:
@@ -334,9 +277,6 @@
               loop_control:
                 loop_var: vhost
                 label: "{{ vhost.key }}"
-              tags:
-                - matomo
-                - users-update
 
             - name: "addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site for {{ user.key }}"
               include_role:
@@ -353,15 +293,14 @@
               loop_control:
                 loop_var: vhost
                 label: "{{ vhost.key }}"
-              tags:
-                - matomo
-                - users-update
 
           when: user_matomo_config.stat.exists
 
       when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
   when: ( matomo_user is defined ) and ( matomo_user != "" )
+  tags:
+    - users
 
 - name: "Include WordPress role for {{ user.key }}"
   include_role:
@@ -399,8 +338,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
   tags:
-    - users-update
-    - wordpress
+    - users
 
 - name: "Include Drupal role for {{ user.key }}"
   include_role:
@@ -435,8 +373,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "drupal" )
   tags:
-    - users-update
-    - drupal
+    - users
 
 - name: "Include Kimai role for {{ user.key }}"
   include_role:
@@ -469,8 +406,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "kimai" )
   tags:
-    - users-update
-    - kimai
+    - users
 
 - name: "Include Nextcloud role for {{ user.key }}"
   include_role:
@@ -506,8 +442,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
   tags:
-    - users-update
-    - nextcloud
+    - users
 
 - name: "Include Flarum role for {{ user.key }}"
   include_role:
@@ -546,8 +481,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "flarum" )
   tags:
-    - users-update
-    - flarum
+    - users
 
 - name: "Include MediaWiki role for {{ user.key }}"
   include_role:
@@ -587,8 +521,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "mediawiki" )
   tags:
-    - users-update
-    - mediawiki
+    - users
 
 - name: "Include Matomo role for {{ user.key }}"
   include_role:
@@ -622,8 +555,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
   tags:
-    - users-update
-    - matomo
+    - users
 
 - name: "Include phpMyAdmin role for {{ user.key }}"
   include_role:
@@ -650,8 +582,7 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
   tags:
-    - users-update
-    - phpmyadmin
+    - users
 
 - name: "Include daily scripts role for {{ user.key }}"
   include_tasks: user_daily_scripts.yml
@@ -661,6 +592,5 @@
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
   tags:
-    - users-update
-    - users-scripts
+    - users
 ...

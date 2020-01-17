@@ -5,8 +5,6 @@
   register: users_apache_site_enabled
   tags:
     - users
-    - users-update
-    - apache
 
 - name: "Apache {{ user.key }} sites-enabled symlink absent"
   command: "a2dissite {{ user.key }}"
@@ -14,8 +12,6 @@
   when: users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk
   tags:
     - users
-    - users-update
-    - apache
 
 - name: Conditional Apache restart
   block:
@@ -35,9 +31,6 @@
   when: ( users_apache_site_enabled is defined ) and ( users_apache_site_enabled.stat.exists )
   tags:
     - users
-    - users-update
-    - apache
-    - letsencrypt
 
 - name: "Apache {{ user.key }} sites-available file(s) absent"
   file:
@@ -52,8 +45,6 @@
     label: "{{ file }}"
   tags:
     - users
-    - users-update
-    - apache
 
 - name: "Certcheck crontab for {{ user.key }} absent"
   cron:
@@ -62,9 +53,6 @@
     state: absent
   tags:
     - users
-    - users-update
-    - apache
-    - letsencrypt
 
 - name: "Keys and certs for {{ user.key }}.{{ ansible_fqdn }} absent"
   file:
@@ -81,9 +69,6 @@
     label: "{{ path }}"
   tags:
     - users
-    - users-update
-    - apache
-    - letsencrypt
 
 # TODO There is no Matomo site:delete command yet, when there is this should perhaps be added here
 # https://github.com/digitalist-se/extratools/issues/7
