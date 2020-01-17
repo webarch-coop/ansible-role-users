@@ -3,23 +3,31 @@
   set_fact:
     users_current_state: ""
     users_proposed_state: ""
+  tags:
+    - users
 
 - name: "Check current state file for {{ user.key }}"
   stat:
     path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     checksum_algorithm: sha256
   register: users_current_state
+  tags:
+    - users
 
 - name: "{{ user.key }} needs adding"
   set_fact:
     users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
   when: users_current_state.stat.exists == False
+  tags:
+    - users
 
 - name: "Check the proposed state file for {{ user.key }}"
   stat:
     path: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
     checksum_algorithm: sha256
   register: users_proposed_state
+  tags:
+    - users
 
 - name: "{{ user.key }} needs updating"
   set_fact:
@@ -27,6 +35,8 @@
   when:
     - users_current_state.stat.exists
     - users_current_state.stat.checksum != users_proposed_state.stat.checksum
+  tags:
+    - users
 
 # - name: "Debug current state checksum for {{ user.key }}"
 #   debug:

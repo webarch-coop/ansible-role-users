@@ -3,6 +3,8 @@
   stat:
     path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
   register: users_current_state_file
+  tags:
+    - users
 
 - name: "Current state file moved to the previous directory for {{ user.key }}"
   copy:
@@ -10,10 +12,14 @@
     dest: "{{ users_state_dir }}/previous/{{ user.key }}.yml"
     remote_src: true
   when: ( users_current_state_file is defined ) and ( users_current_state_file.stat.exists )
+  tags:
+    - users
 
 - name: "Proposed users state file moved to the current directory for {{ user.key }}"
   copy:
     src: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
     dest: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     remote_src: true
+  tags:
+    - users
 ...

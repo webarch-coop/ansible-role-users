@@ -8,26 +8,18 @@
       - netfilter-persistent
       - python3-pyinotify
     state: present
-  tags:
-    - users-firewall
 
 - name: IPv4 iptables rules in place
   template:
     src: templates/rules.v4.j2
     dest: /etc/iptables/rules.v4
     backup: true
-  tags:
-    - users-firewall
 
 - name: IPv4 iptables rules restored
   shell: "iptables-restore < /etc/iptables/rules.v4"
-  tags:
-    - users-firewall
 
 - name: fail2ban restarted
   service:
     name: fail2ban
     state: restarted
-  tags:
-    - users-firewall
 ...

@@ -20,6 +20,8 @@
   loop_control:
     loop_var: user
     label: "{{ user.key }}"
+  tags:
+    - users
 
 # The following will list the user state files that have changed
 # however if the tasks were not full completed then just using
@@ -48,6 +50,8 @@
 - name: Set an empty users_update arrays
   set_fact:
     users_update: []
+  tags:
+    - users
 
 - name: Check users current state files
   include_tasks: user_state.yml
@@ -55,6 +59,8 @@
   loop_control:
     loop_var: user
     label: "{{ user.key }}"
+  tags:
+    - users
 
 - name: Print the users to update
   debug:

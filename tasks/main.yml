@@ -158,6 +158,8 @@
     label: "{{ user.key }}"
   when: user.key in users_update
   include_tasks: user_updated.yml
+  tags:
+    - users
 
 - name: Firewall tasks included
   include_tasks: firewall.yml
