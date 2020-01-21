@@ -47,17 +47,7 @@
     - users
     - apache
     - letsencrypt
-    - logrotate
     - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
 
 - name: Load package information as facts
   package_facts:
@@ -66,17 +56,7 @@
     - users
     - apache
     - letsencrypt
-    - logrotate
     - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
 
 - name: Fail if ansible_facts.packages is not defined or empty
   fail:
@@ -86,24 +66,12 @@
     - users
     - apache
     - letsencrypt
-    - logrotate
     - phpfpm
-    - users-update
-    - users-cron
-    - users-mariadb
-    - users-scripts
-    - users-quota
-    - users-fstab
-    - wordpress
-    - matomo
-    - phpmyadmin
 
 - name: PHP-FPM chroot tasks
   include_tasks: phpfpm_chroot.yml
   tags:
     - phpfpm
-    - logrotate
-    - users-chroot
 
 - name: PHP FPM checks
   block:
@@ -127,9 +95,7 @@
   when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
   tags:
     - users
-    - logrotate
     - phpfpm
-    - users-update
 
 - name: Check if a chroot exists
   stat:
@@ -138,12 +104,7 @@
   when: ( users_chroot is defined ) and ( users_chroot == True )
   tags:
     - users
-    - logrotate
     - phpfpm
-    - users-update
-    - users-chroot
-    - users-cron
-    - users-fstab
 
 - name: Quota tasks
   block:
@@ -177,12 +138,13 @@
   when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
   tags:
     - users
-    - users-update
-    - users-quota
 
 - name: Include Apache tasks
   include_tasks: apache.yml
   when:
     - '"apache2" in ansible_facts.packages'
     - ( users_apache is defined ) and ( users_apache == True )
+  tags:
+    - users
+    - apache
 ...

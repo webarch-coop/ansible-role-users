@@ -15,7 +15,10 @@
   when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
   tags:
     - users
+    - apache
+    - letsencrypt
 
+# One cert per user
 - name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
   block:
 
@@ -25,8 +28,6 @@
         subject_alt_names: []
         reloadcmd: "service apache2 reload"
       check_mode: true
-      tags:
-        - users
 
     - name: "Set fact for subjectAltNames for {{ user.key }}"
       set_fact:
@@ -36,8 +37,6 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
-      tags:
-        - users
 
     - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
       debug:
@@ -51,10 +50,12 @@
         name: acmesh
         tasks_from: letsencrypt
       when: ansible_check_mode == False
-      tags:
-        - users
 
   when: ( users_cert is defined ) and ( users_cert == 'user' )
+  tags:
+    - users
+    - apache
+    - letsencrypt
 
 - name: "Apache {{ user.key }}/{{ users_sites_dir }} directory present"
   file:
@@ -66,6 +67,7 @@
     mode: 0750
   tags:
     - users
+    - apache
 
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
@@ -81,6 +83,7 @@
     label: "{{ vhost }}"
   tags:
     - users
+    - apache
 
 - name: "HTTP Authentication htpasswd files present for {{ user.key }}"
   include_tasks: htauth.yml
@@ -91,6 +94,7 @@
   when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   tags:
     - users
+    - apache
 
 - name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present"
   file:
@@ -101,6 +105,7 @@
     mode: 0750
   tags:
     - users
+    - apache
 
 - name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
@@ -108,6 +113,7 @@
   register: users_apache_tls_cert_check
   tags:
     - users
+    - apache
 
 - name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
@@ -115,6 +121,7 @@
   register: users_apache_tls_key_check
   tags:
     - users
+    - apache
 
 - name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
   stat:
@@ -122,6 +129,7 @@
   register: users_apache_tls_ca_check
   tags:
     - users
+    - apache
 
 - name: "Apache {{ user.key }} sites-enabled symlink absent"
   file:
@@ -130,6 +138,7 @@
   when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
   tags:
     - users
+    - apache
 
 - name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
   stat:
@@ -137,6 +146,7 @@
   register: users_apache_conf_check
   tags:
     - users
+    - apache
 
 - name: "Apache {{ user.key }} sites-available file copied"
   copy:
@@ -146,6 +156,7 @@
   when: users_apache_conf_check.stat.exists
   tags:
     - users
+    - apache
 
 - name: "Apache {{ user.key }} sites-available file present"
   template:
@@ -156,6 +167,7 @@
   register: users_apache_conf
   tags:
     - users
+    - apache
 
 - name: Apache configtest
   block:
@@ -233,6 +245,7 @@
     - ( users_apache_tls_cert_check.stat.exists ) and ( users_apache_tls_key_check.stat.exists ) and ( users_apache_tls_ca_check.stat.exists )
   tags:
     - users
+    - apache
 
 - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
   shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"

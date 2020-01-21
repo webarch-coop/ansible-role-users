@@ -8,8 +8,6 @@
     mode: 0644
   tags:
     - phpfpm
-    - logrotate
-    - users-chroot
 
 - name: /etc/apache2/localhost.d present
   file:
@@ -17,9 +15,7 @@
     state: directory
   when: '"apache2" in ansible_facts.packages'
   tags:
-    - users-update
-    - users-chroot
-    - phpfpm
+    - apache
 
 - name: /etc/nginx/localhost.d present
   file:
@@ -27,7 +23,5 @@
     state: directory
   when: '"nginx" in ansible_facts.packages'
   tags:
-    - users-update
-    - users-chroot
-    - phpfpm
+    - nginx
 ...

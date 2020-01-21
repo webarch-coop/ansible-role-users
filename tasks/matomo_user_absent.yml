@@ -8,5 +8,4 @@
     matomo_login: "{{ user.key }}"
   tags:
     - users
-    - users-update
 ...

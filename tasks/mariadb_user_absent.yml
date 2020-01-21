@@ -27,6 +27,5 @@
 
   tags:
     - users
-    - users-update
-    - users-mariadb
+    - mariadb
 ...

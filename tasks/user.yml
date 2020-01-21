@@ -92,14 +92,12 @@
     loop_var: dir
     label: "{{ dir }}"
   tags:
-    - users-ssh
     - users
 
 - name: "SSH public keys present for {{ user.key }}"
   include_tasks: ssh.yml
   when: ( user.value.users_ssh_public_keys is defined ) and ( user.value.users_ssh_public_keys != [] )
   tags:
-    - users-ssh
     - users
 
 - name: "Generate SSH ECDSA keypair for {{ user.key }}"
@@ -110,7 +108,6 @@
   become_user: "{{ user.key }}"
   when: ( user.value.users_generate_ssh_key is defined ) and ( user.value.users_generate_ssh_key == True )
   tags:
-    - users-ssh
     - users
 
 - name: "Set default editor for {{ user.key }}"
@@ -134,12 +131,6 @@
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: 0644
-      tags:
-        - users
-
-    - debug:
-        msg: "bashrc: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
-        verbosity: 1
 
     - name: "vim set to be default editor for {{ user.key }}"
       lineinfile:
@@ -147,10 +138,10 @@
         line: 'export EDITOR="vim"'
         state: present
         create: true
-      tags:
-        - users
 
   when: user.value.users_editor is defined and user.value.users_editor == 'vim'
+  tags:
+    - users
 
 - name: ".gitconfig in place for {{ user.key }}"
   template:

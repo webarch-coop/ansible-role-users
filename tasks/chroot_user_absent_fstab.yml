@@ -13,7 +13,4 @@
     loop_var: mount
   tags:
     - users
-    - users-update
-    - users-chroot
-    - users-fstab
 ...

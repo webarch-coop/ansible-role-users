@@ -87,11 +87,6 @@
     - users
     - apache
     - phpfpm
-    - users-chroot
-    - users-cron
-    - users-fstab
-    - users-scripts
-    - users-update
 
 - name: Check variables for users to update
   include_tasks: user_check.yml
@@ -117,13 +112,9 @@
     loop_var: user
     label: "{{ user.key }}"
   tags:
+    - users
     - apache
     - phpfpm
-    - users-chroot
-    - users-cron
-    - users-fstab
-    - users-scripts
-    - users-update
 
 - name: Users quota CSV file updated
   block:
@@ -134,8 +125,7 @@
       check_mode: false
       changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
       tags:
-        - users-update
-        - users-quota
+        - users
 
     - name: Updated users quotas fetched
       fetch:
@@ -144,8 +134,7 @@
       check_mode: false
       when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
       tags:
-        - users-update
-        - users-quota
+        - users
 
   when: quota_dir is defined
 
@@ -162,6 +151,4 @@
 - name: Firewall tasks included
   include_tasks: firewall.yml
   when: ( users_firewall is defined ) and ( users_firewall == True )
-  tags:
-    - users-firewall
 ...

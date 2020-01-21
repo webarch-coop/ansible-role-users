@@ -19,4 +19,5 @@
     label: "{{ vhost }}"
   tags:
     - users
+    - apache
 ...

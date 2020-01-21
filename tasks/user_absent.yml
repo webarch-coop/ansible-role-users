@@ -3,16 +3,11 @@
   command: "slay {{ user.key }}"
   tags:
     - users
-    - users-chroot
-    - users-update
 
 - name: "Crontab absent for user {{ user.key }}"
   include_tasks: crontab_user_absent.yml
   tags:
     - users
-    - users-update
-    - users-cron
-    - users-scripts
 
 - name: "Chroot user {{ user.key }} absent from /etc/fstab"
   block:
@@ -24,9 +19,6 @@
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
   tags:
     - users
-    - users-chroot
-    - users-update
-    - users-fstab
 
 - name: "Include Apache config tasks absent user for {{ user.key }}"
   include_tasks: apache_user_absent.yml
@@ -35,7 +27,6 @@
     - ( users_apache is defined ) and ( users_apache == True )
   tags:
     - users
-    - users-update
     - apache
 
 - name: "Include PHP FPM chroot user absent tasks for {{ user.key }}"
@@ -46,16 +37,14 @@
     - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
   tags:
     - users
-    - users-update
-    - users-chroot
     - phpfpm
 
 - name: "Absent user {{ user.key }} MariaDB account and databases absent"
   include_tasks: mariadb_user_absent.yml
   when: ( users_mariadb is defined ) and ( users_mariadb == True )
   tags:
-    - users-update
-    - users-mariadb
+    - users
+    - mariadb
 
 - name: Chroot users mounts absent
   block:
@@ -67,8 +56,6 @@
   when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
   tags:
     - users
-    - users-chroot
-    - users-update
 
 - name: "Absent user {{ user.key }} home directory removed"
   file:
@@ -76,7 +63,6 @@
     state: absent
   tags:
     - users
-    - users-update
 
 - name: "User account {{ user.key }} absent"
   user:
@@ -86,7 +72,6 @@
     force: true
   tags:
     - users
-    - users-update
 
 - name: "User {{ user.key }} groups absent"
   group:
@@ -94,5 +79,4 @@
     state: absent
   tags:
     - users
-    - users-update
 ...

@@ -7,5 +7,5 @@
     loop_var: member
     label: "{{ member }}"
   tags:
-    - users-update
+    - users
 ...

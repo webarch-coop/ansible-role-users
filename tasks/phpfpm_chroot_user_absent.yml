@@ -43,7 +43,5 @@
 
   tags:
     - users
-    - users-update
-    - users-chroot
     - phpfpm
 ...

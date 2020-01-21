@@ -8,7 +8,6 @@
     mode: 0644
   tags:
     - apache
-    - logrotate
 
 - name: Cron job to delete Apache logs when older than 30 days
   cron:

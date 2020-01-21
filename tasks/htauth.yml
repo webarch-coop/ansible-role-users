@@ -6,10 +6,6 @@
       - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
     verbosity: 1
-  tags:
-    - apache
-    - users-update
-    - users-htauth
 
 - name: Debug users_apache_htauth_users loop
   debug:
@@ -22,10 +18,6 @@
   loop_control:
     loop_var: htauth
     label: "{{ htauth.name }}"
-  tags:
-    - apache
-    - users-update
-    - users-htauth
 
 - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd directory present"
   file:
@@ -36,8 +28,7 @@
     mode: "0750"
   tags:
     - apache
-    - users-update
-    - users-htauth
+    - users
 
 - name: "HTTP Authentication usernames and passwords for {{ vhost.value.users_apache_server_name }}"
   htpasswd:
@@ -55,6 +46,5 @@
     label: "{{ htauth.name }}"
   tags:
     - apache
-    - users-update
-    - users-htauth
+    - users
 ...

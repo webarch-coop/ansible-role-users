@@ -1,5 +1,5 @@
 ---
-- name: PHP FPM users present
+- name: "PHP FPM config present for {{ user.key }}"
   block:
 
     - name: Users PHP FPM log directory present
@@ -9,10 +9,6 @@
         owner: root
         group: "{{ user.key }}"
         mode: 0750
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: Users PHP FPM mail log touched
       file:
@@ -21,10 +17,6 @@
         owner: "{{ user.key }}"
         group: "{{ user.key }}"
         mode: 0640
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: Users PHP FPM slow log touched
       file:
@@ -33,10 +25,6 @@
         owner: root
         group: "{{ user.key }}"
         mode: 0640
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: Users PHP FPM access log touched
       file:
@@ -45,10 +33,6 @@
         owner: root
         group: "{{ user.key }}"
         mode: 0640
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: Users PHP FPM error log touched
       file:
@@ -57,10 +41,6 @@
         owner: root
         group: "{{ user.key }}"
         mode: 0640
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: Check the PHP FPM pm variables
       include_role:
@@ -72,19 +52,11 @@
         phpfpm_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') }}"
         phpfpm_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}"
         phpfpm_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf exists"
       stat:
         path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       register: users_phpfpm_pool_conf_check
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: "Copy /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       copy:
@@ -92,20 +64,12 @@
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
         remote_src: true
       when: users_phpfpm_pool_conf_check.stat.exists
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: "PHP FPM pool.d file present for {{ user.key }}"
       template:
         src: templates/phpfpm_chroot_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       register: users_phpfpm_pool_conf
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: "PHP FPM pool.d configtest for {{ user.key }}"
       block:
@@ -113,20 +77,12 @@
         - name: "PHP FPM pool.d configtest for {{ user.key }}"
           command: "php-fpm{{ users_phpfpm_version }} --test"
           register: users_phpfpm_pool_configtest
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
 
         - name: "PHP FPM restarted for changes for {{ user.key }}"
           service:
             name: "php{{ users_phpfpm_version }}-fpm"
             state: restarted
           when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
 
       rescue:
 
@@ -135,10 +91,6 @@
             src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
             remote_src: true
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so reverting changes"
           copy:
@@ -146,20 +98,12 @@
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             remote_src: true
           when: users_phpfpm_pool_conf_check.stat.exists == True
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
           file:
             path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             state: absent
           when: users_phpfpm_pool_conf_check.stat.exists == False
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
 
         - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
           fail:
@@ -167,10 +111,6 @@
               - "php-fpm{{ users_phpfpm_version }} --test failed for {{ user.key }} and as a result php-fpm has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this user."
               - "The broken config is available in /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
               - "The error was: {{ users_phpfpm_pool_configtest.stderr }}"
-          tags:
-            - users-update
-            - users-chroot
-            - phpfpm
 
       when: users_phpfpm_pool_conf.changed
 
@@ -180,10 +120,6 @@
         dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
       when:
         - '"apache2" in ansible_facts.packages'
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
     - name: Users Nginx PHP FPM localhost.d file present
       template:
@@ -191,10 +127,9 @@
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
       when:
         - '"nginx" in ansible_facts.packages'
-      tags:
-        - users-update
-        - users-chroot
-        - phpfpm
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
+  tags:
+    - users
+    - phpfpm
 ...

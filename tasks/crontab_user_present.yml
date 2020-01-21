@@ -1,182 +1,140 @@
 ---
-- name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md in place"
-  copy:
-    src: files/CRON_README.md
-    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md"
-  tags:
-    - users-update
-    - users-cron
-
-- name: "Check if {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min exists"
-  stat:
-    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-  register: users_cron_min_file
-  tags:
-    - users-update
-    - users-cron
-
-- name: "Generate {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-  shell: "echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-  when: ( users_cron_min_file.stat is not defined ) or ( users_cron_min_file.stat.exists == False )
-  tags:
-    - users-update
-    - users-cron
-
-- name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-  slurp:
-    src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-  register: users_cron_min_b64encoded
-  tags:
-    - users-update
-    - users-cron
-
-- name: Set a variable for the users crontab minute
-  set_fact:
-    users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
-  tags:
-    - users-update
-    - users-cron
-
-- name: Generate files to be run by root in /etc/cron.d for chrooted users
+- name: "Cron jobs for {{ user.key }}"
   block:
 
-    - name: "Daily cron jobs for {{ user.key }}"
+    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md in place"
+      copy:
+        src: files/CRON_README.md
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md"
+
+    - name: "Check if {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min exists"
+      stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      register: users_cron_min_file
+
+    - name: "Generate {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      shell: "echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      when: ( users_cron_min_file.stat is not defined ) or ( users_cron_min_file.stat.exists == False )
+
+    - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      slurp:
+        src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      register: users_cron_min_b64encoded
+
+    - name: Set a variable for the users crontab minute
+      set_fact:
+        users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
+
+    - name: Generate files to be run by root in /etc/cron.d for chrooted users
+      block:
+
+        - name: "Daily cron jobs for {{ user.key }}"
+          cron:
+            name: "Daily cron jobs"
+            cron_file: "chroot_cron_daily_{{ user.key }}"
+            user: root
+            job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ]; then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }} PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ user.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi"
+            minute: "{{ users_cron_min }}"
+            hour: "{{ users_cron_daily_hour | default('05') }}"
+
+        - name: "Hourly cron jobs for {{ user.key }}"
+          cron:
+            name: "Hourly cron jobs"
+            cron_file: "chroot_cron_hourly_{{ user.key }}"
+            user: root
+            job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ]; then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }} PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ user.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi"
+            minute: "{{ users_cron_min }}"
+            hour: "*"
+
+      when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists ) and ( "chroot" in user.value.users_groups )
+
+    - name: Crontabs present for non-chrooted users
+      block:
+
+        - name: "Daily cron jobs for {{ user.key }}"
+          cron:
+            name: "Daily cron jobs"
+            user: "{{ user.key }}"
+            job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ]; then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh; fi"
+            minute: "{{ users_cron_min }}"
+            hour: "{{ users_cron_daily_hour | default('05') }}"
+
+        - name: "Hourly cron jobs for {{ user.key }}"
+          cron:
+            name: "Hourly cron jobs"
+            user: "{{ user.key }}"
+            job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ]; then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh; fi"
+            minute: "{{ users_cron_min }}"
+            hour: "*"
+
+      when: '"chroot" not in user.value.users_groups'
+
+    - name: "USER env var added to {{ user.key }} crontab"
       cron:
-        name: "Daily cron jobs"
-        cron_file: "chroot_cron_daily_{{ user.key }}"
-        user: root
-        job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ]; then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }} PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ user.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi"
-        minute: "{{ users_cron_min }}"
-        hour: "{{ users_cron_daily_hour | default('05') }}"
-      tags:
-        - users-update
-        - users-cron
-
-    - name: "Hourly cron jobs for {{ user.key }}"
-      cron:
-        name: "Hourly cron jobs"
-        cron_file: "chroot_cron_hourly_{{ user.key }}"
-        user: root
-        job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ]; then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }} PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh 2>&1 | mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ user.key }} account on {{ inventory_hostname }}' -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi"
-        minute: "{{ users_cron_min }}"
-        hour: "*"
-      tags:
-        - users-update
-        - users-cron
-
-  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists ) and ( "chroot" in user.value.users_groups )
-
-- name: Crontabs present for non-chrooted users
-  block:
-
-    - name: "Daily cron jobs for {{ user.key }}"
-      cron:
-        name: "Daily cron jobs"
+        env: true
+        name: USER
+        value: "{{ user.key }}"
         user: "{{ user.key }}"
-        job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ]; then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh; fi"
-        minute: "{{ users_cron_min }}"
-        hour: "{{ users_cron_daily_hour | default('05') }}"
-      tags:
-        - users-update
-        - users-cron
 
-    - name: "Hourly cron jobs for {{ user.key }}"
+    - name: "TMPDIR env var added to {{ user.key }} crontab"
       cron:
-        name: "Hourly cron jobs"
+        env: true
+        name: TMPDIR
+        value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
         user: "{{ user.key }}"
-        job: "if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ]; then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh; fi"
+        insertafter: USER
+
+    - name: "PATH env var added to {{ user.key }} crontab"
+      cron:
+        env: true
+        name: PATH
+        value: "/usr/local/bin:/usr/bin:/bin"
+        user: "{{ user.key }}"
+        insertafter: TMPDIR
+
+    - name: "MAILTO env var added to {{ user.key }} crontab"
+      cron:
+        env: true
+        name: MAILTO
+        value: "{{ user.value.users_email }}"
+        user: "{{ user.key }}"
+        insertafter: PATH
+      when: user.value.users_email is defined and user.value.users_email != ""
+
+    - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
+      cron:
+        name: "Daily deletion of TMPDIR files for {{ user.key }}"
+        job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
+        state: present
+        user: "{{ user.key }}"
         minute: "{{ users_cron_min }}"
-        hour: "*"
-      tags:
-        - users-update
-        - users-cron
+        hour: "{{ users_cron_tmpdir_hour }}"
+      when:
+        - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+        - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean == True )
 
-  when: '"chroot" not in user.value.users_groups'
+    - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
+      cron:
+        name: "Daily deletion of TMPDIR files for {{ user.key }}"
+        state: absent
+        user: "{{ user.key }}"
+        minute: "{{ users_cron_min }}"
+        hour: "{{ users_cron_tmpdir_hour }}"
+      when:
+        - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+        - ( user.value.users_cron_tmpdir_clean is defined ) and ( user.value.users_cron_tmpdir_clean == False )
 
-- name: "USER env var added to {{ user.key }} crontab"
-  cron:
-    env: true
-    name: USER
-    value: "{{ user.key }}"
-    user: "{{ user.key }}"
+    - name: "Daily MariaDB dump cron job in place for users with databases"
+      cron:
+        name: "Nightly MySQL database backup for {{ user.key }}"
+        job: "/usr/local/bin/mysql-backup-user {{ user.key }}"
+        user: "{{ user.key }}"
+        minute: "{{ users_cron_min }}"
+        hour: "{{ users_cron_mysqldump_hour | default('04') }}"
+      when:
+        - ( users_mariadb is defined ) and ( users_mariadb == True )
+        - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+
   tags:
-    - users-update
-    - users-cron
-
-- name: "TMPDIR env var added to {{ user.key }} crontab"
-  cron:
-    env: true
-    name: TMPDIR
-    value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-    user: "{{ user.key }}"
-    insertafter: USER
-  tags:
-    - users-update
-    - users-cron
-
-- name: "PATH env var added to {{ user.key }} crontab"
-  cron:
-    env: true
-    name: PATH
-    value: "/usr/local/bin:/usr/bin:/bin"
-    user: "{{ user.key }}"
-    insertafter: TMPDIR
-  tags:
-    - users-update
-    - users-cron
-
-- name: "MAILTO env var added to {{ user.key }} crontab"
-  cron:
-    env: true
-    name: MAILTO
-    value: "{{ user.value.users_email }}"
-    user: "{{ user.key }}"
-    insertafter: PATH
-  when: user.value.users_email is defined and user.value.users_email != ""
-  tags:
-    - users-update
-    - users-cron
-
-- name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
-  cron:
-    name: "Daily deletion of TMPDIR files for {{ user.key }}"
-    job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
-    state: present
-    user: "{{ user.key }}"
-    minute: "{{ users_cron_min }}"
-    hour: "{{ users_cron_tmpdir_hour }}"
-  when:
-    - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-    - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean == True )
-  tags:
-    - users-update
-    - users-cron
-
-- name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
-  cron:
-    name: "Daily deletion of TMPDIR files for {{ user.key }}"
-    state: absent
-    user: "{{ user.key }}"
-    minute: "{{ users_cron_min }}"
-    hour: "{{ users_cron_tmpdir_hour }}"
-  when:
-    - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-    - ( user.value.users_cron_tmpdir_clean is defined ) and ( user.value.users_cron_tmpdir_clean == False )
-  tags:
-    - users-update
-    - users-cron
-
-- name: "Daily MariaDB dump cron job in place for users with databases"
-  cron:
-    name: "Nightly MySQL database backup for {{ user.key }}"
-    job: "/usr/local/bin/mysql-backup-user {{ user.key }}"
-    user: "{{ user.key }}"
-    minute: "{{ users_cron_min }}"
-    hour: "{{ users_cron_mysqldump_hour | default('04') }}"
-  when:
-    - ( users_mariadb is defined ) and ( users_mariadb == True )
-    - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
-  tags:
-    - users-update
-    - users-cron
+    - users
 ...
