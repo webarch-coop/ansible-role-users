@@ -1,7 +1,7 @@
 ---
 - name: "Chrooted user {{ user.key }} present"
   block:
-     
+
     - name: "Read {{ user.key }} entry from /etc/passwd"
       command: "grep ^{{ user.key }}: /etc/passwd"
       check_mode: false

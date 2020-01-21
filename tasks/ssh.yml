@@ -1,6 +1,6 @@
 ---
-# Use ~/.ssh/authorized_keys.d/authorized_keys_* files to assemble 
-# ~/.ssh/authorized_keys and leave a ~/.ssh/README.md to explain 
+# Use ~/.ssh/authorized_keys.d/authorized_keys_* files to assemble
+# ~/.ssh/authorized_keys and leave a ~/.ssh/README.md to explain
 # what happened
 
 - name: "SSH keys in place for {{ user.key }}"
