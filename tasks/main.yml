@@ -122,7 +122,7 @@
 
         - name: Set a fact for the users who are present and in the phpfpm and chroot groups
           set_fact:
-            users_in_phpfpm_and_chroot_group: "{{ munin_phpfpm_users | default('') }} {{ user.key }}"
+            users_in_phpfpm_and_chroot_group: "{{ users_in_phpfpm_and_chroot_group | default('') }} {{ user.key }}"
           when:
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
             - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
