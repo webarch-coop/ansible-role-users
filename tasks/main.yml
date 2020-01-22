@@ -27,6 +27,9 @@
   when: users_update is not defined
   tags:
     - users
+    - apache
+    - phpfpm
+    - letsencrypt
 
 - name: Set users to update to all
   block:
@@ -47,6 +50,9 @@
     - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
   tags:
     - users
+    - apache
+    - phpfpm
+    - letsencrypt
 
 - name: Check which users accounts are changed
   block:
@@ -62,6 +68,9 @@
     - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
   tags:
     - users
+    - apache
+    - phpfpm
+    - letsencrypt
 
 - name: Print users to add or update
   debug:
@@ -90,6 +99,7 @@
     - users
     - apache
     - phpfpm
+    - letsencrypt
 
 - name: Check variables for users to update
   include_tasks: user_check.yml
@@ -103,6 +113,9 @@
     label: "{{ user.key }}"
   tags:
     - users
+    - apache
+    - phpfpm
+    - letsencrypt
 
 - name: User present loop
   include_tasks: user_present.yml
@@ -118,6 +131,7 @@
     - users
     - apache
     - phpfpm
+    - letsencrypt
 
 - name: Users quota CSV file updated
   block:
@@ -127,8 +141,6 @@
       register: users_repquota_md5sum_after
       check_mode: false
       changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
-      tags:
-        - users
 
     - name: Updated users quotas fetched
       fetch:
@@ -136,10 +148,10 @@
         dest: /tmp/
       check_mode: false
       when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
-      tags:
-        - users
 
   when: quota_dir is defined
+  tags:
+    - users
 
 - name: Users state files updated
   loop: "{{ users | dict2items }}"
@@ -150,6 +162,9 @@
   include_tasks: user_updated.yml
   tags:
     - users
+    - apache
+    - phpfpm
+    - letsencrypt
 
 - name: Firewall tasks included
   include_tasks: firewall.yml
