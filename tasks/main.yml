@@ -17,6 +17,9 @@
   include_tasks: system.yml
   tags:
     - users
+    - apache
+    - phpfpm
+    - letsencrypt
 
 - name: Set an empty users_update array
   set_fact:
