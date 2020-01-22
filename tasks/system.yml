@@ -24,6 +24,7 @@
     split: ':'
   tags:
     - users
+    - phpfpm
 
 - debug:
     var: getent_group
@@ -35,6 +36,7 @@
     split: ':'
   tags:
     - users
+    - phpfpm
 
 - debug:
     var: getent_passwd
