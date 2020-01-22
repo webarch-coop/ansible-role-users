@@ -86,7 +86,7 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
-    
+
     - name: User absent loop
       include_tasks: user_absent.yml
       when:
@@ -96,7 +96,7 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
-    
+
     - name: Check variables for users to update
       include_tasks: user_check.yml
       when:
@@ -106,7 +106,7 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
-    
+
     - name: User present loop
       include_tasks: user_present.yml
       when:
@@ -136,7 +136,7 @@
           debug:
             msg: "Users in the phpfpm and chroot groups: {{ users_in_phpfpm_and_chroot_group }}"
             verbosity: 1
-    
+
         - name: Include the munin-node phpfpm-multi tasks
           include_role:
             name: munin-node
