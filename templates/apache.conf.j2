@@ -57,6 +57,11 @@
     Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
   </IfModule>
   {%- endif %}
+  {%- if vhost_config.users_apache_remoteip is defined %}
+    {%- if vhost_config.users_apache_remoteip == "cloudflare" %}
+  IncludeOptional /etc/apache2/conf-available/cloudflare.conf
+    {%- endif %}
+  {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
