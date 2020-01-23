@@ -56,7 +56,7 @@
     - name: "Check that users_apache_remoteip for {{ vhost.key }} VirtualHost for {{ user.key }} is set to cloudflare if it is defined"
       assert:
         that:
-          - vhost.value.users_apache_remoteip is regex("cloudflare"")
+          - vhost.value.users_apache_remoteip is regex("cloudflare")
       when: vhost.value.users_apache_remoteip is defined
 
     - name: "Check that users_apache_expires is set to medium or strict for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
