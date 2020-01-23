@@ -5,11 +5,11 @@
 - name: "Check the variables for {{ user.key }}"
   block:
 
-    - name: "Check that the username {{ user.key }} contains only lowercase ascii letters and numbers"
+    - name: "Check that the username {{ user.key }} contains only lowercase ascii letters, numbers and dashes"
       assert:
         that:
-          - user.key is regex("^[a-z0-9]*$")
-        fail_msg: "The username {{ user.key }} contains characters other than lowercase ascii letters and numbers"
+          - user.key is regex("^[a-z0-9-]*$")
+        fail_msg: "The username {{ user.key }} contains characters other than lowercase ascii letters, numbers and dashes"
 
     - name: "Check that the username {{ user.key }} is between 2 and 12 characters long"
       assert:
