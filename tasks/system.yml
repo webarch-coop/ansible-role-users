@@ -9,7 +9,7 @@
 
 - name: Array set for shells
   set_fact:
-    users_shells: "{{ users_shells_check.stdout_lines | list }}"
+    users_shells: "/usr/sbin/nologin + [ '{{ users_shells_check.stdout_lines | list }}' ]"
   tags:
     - users
 
