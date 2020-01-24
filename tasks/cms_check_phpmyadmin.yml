@@ -2,12 +2,20 @@
 - name: "Check that required phpMyAdmin variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
   assert:
     that:
-      - ( "phpfpm" in user.value.users_groups )
       - vhost.value.users_apache_type == "php"
       - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
       - ( vhost.value.phpmyadmin_dbname is defined ) and ( vhost.value.phpmyadmin_dbname in user.value.users_mariadb_databases )
       - vhost.value.users_apache_sts is defined
       - ( vhost.value.phpmyadmin_version is defined ) and ( vhost.value.phpmyadmin_version is regex("^[0-9][.][0-9][.][0-9]{1,2}[.]{0,1}[0-9]{0,2}$") )
+  tags:
+    - users
+
+- name: "Check that {{ user.key }} is in the phpfpm and chroot groups they are present"
+  assert:
+    that:
+      - ( "phpfpm" in user.value.users_groups )
+      - ( "chroot" in user.value.users_groups )
+  when: ( "phpfpm" in getent_group ) and ( "chroot" in getent_group )
   tags:
     - users
 ...

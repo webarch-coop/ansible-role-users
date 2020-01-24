@@ -5,13 +5,19 @@
     - name: "Check that required Kimai variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
           - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
           - ( vhost.value.kimai_dbname is defined ) and ( vhost.value.kimai_dbname in user.value.users_mariadb_databases )
           - vhost.value.kimai_version is defined
           - ( vhost.value.kimai_admin_user is defined ) and ( vhost.value.kimai_admin_user is regex("^[a-z0-9_-]*$") )
           - vhost.value.users_apache_sts is defined
+
+    - name: "Check that {{ user.key }} is in the phpfpm and chroot groups they are present"
+      assert:
+        that:
+          - ( "phpfpm" in user.value.users_groups )
+          - ( "chroot" in user.value.users_groups )
+      when: ( "phpfpm" in getent_group ) and ( "chroot" in getent_group )
 
     - name: "Check the kimai_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:

@@ -5,14 +5,19 @@
     - name: "Check that required Nextcloud variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( "phpfpm" in user.value.users_groups )
-          - vhost.value.users_apache_type == "php"
           - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
           - ( vhost.value.nextcloud_dbname is defined ) and ( vhost.value.nextcloud_dbname in user.value.users_mariadb_databases )
           - ( vhost.value.nextcloud_admin_user is defined ) and ( vhost.value.nextcloud_admin_user is regex("^[a-z0-9_-]*$") )
           - ( vhost.value.nextcloud_version is defined ) and ( vhost.value.nextcloud_version is regex("^[0-9]{2}.[0-9]{1,2}.[0-9]{1,2}$") )
           - ( vhost.value.users_apache_options is defined ) and ( "+MultiViews" in vhost.value.users_apache_options ) and ( "+SymLinksIfOwnerMatch" in vhost.value.users_apache_options )
           - vhost.value.users_apache_sts is defined
+
+    - name: "Check that {{ user.key }} is in the phpfpm and chroot groups they are present"
+      assert:
+        that:
+          - ( "phpfpm" in user.value.users_groups )
+          - ( "chroot" in user.value.users_groups )
+      when: ( "phpfpm" in getent_group ) and ( "chroot" in getent_group )
 
     - name: "Check that {{ user.key }} is in the phpfpm and chroot groups they are present"
       assert:

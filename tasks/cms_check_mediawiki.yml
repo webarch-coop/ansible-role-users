@@ -5,12 +5,18 @@
     - name: "Check that required MediaWiki variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( "phpfpm" in user.value.users_groups )
           - vhost.value.users_apache_type == "php"
           - ( vhost.value.mediawiki_dbname is defined ) and ( vhost.value.mediawiki_dbname in user.value.users_mariadb_databases )
           - ( vhost.value.mediawiki_wikiname is defined ) and ( vhost.value.mediawiki_wikiname is regex("^[a-zA-Z0-9]*$") )
           - ( vhost.value.mediawiki_version is defined ) and ( vhost.value.mediawiki_version is version('1.31', '>=') )
           - ( vhost.value.mediawiki_version_patch is defined ) and ( vhost.value.mediawiki_version_patch is version('0', '>=') )
+
+    - name: "Check that {{ user.key }} is in the phpfpm and chroot groups they are present"
+      assert:
+        that:
+          - ( "phpfpm" in user.value.users_groups )
+          - ( "chroot" in user.value.users_groups )
+      when: ( "phpfpm" in getent_group ) and ( "chroot" in getent_group )
 
     - name: "Check that mediawiki_password_sender is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
