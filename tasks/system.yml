@@ -6,12 +6,18 @@
   register: users_shells_check
   tags:
     - users
+    - apache
+    - letsencrypt
+    - phpfpm
 
 - name: Array set for shells
   set_fact:
     users_shells: "/usr/sbin/nologin + [ '{{ users_shells_check.stdout_lines | list }}' ]"
   tags:
     - users
+    - apache
+    - letsencrypt
+    - phpfpm
 
 - name: Print available shells
   debug:
@@ -24,6 +30,8 @@
     split: ':'
   tags:
     - users
+    - apache
+    - letsencrypt
     - phpfpm
 
 - debug:
@@ -36,6 +44,8 @@
     split: ':'
   tags:
     - users
+    - apache
+    - letsencrypt
     - phpfpm
 
 - debug:
