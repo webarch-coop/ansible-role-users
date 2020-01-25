@@ -76,6 +76,13 @@
           - user.value.users_home is regex("^\/.*$")
       when: user.value.users_home is defined
 
+    - name: Debug users_shells
+      debug:
+        msg:
+          - "users_shells: {{ users_shells }}"
+          - "user.value.users_shell: {{ user.value.users_shell }}"
+        verbosity: 1
+
     - name: "Check that the shell for {{ user.key }} is valid"
       assert:
         that:
