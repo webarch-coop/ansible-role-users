@@ -107,33 +107,9 @@
     - users
     - apache
 
-- name: "Let's Encrypt one cert per user checks for {{ user.key }}"
-  block:
-    
-    - name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
-      stat:
-        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
-      register: users_apache_tls_cert_check
-    
-    - name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
-      stat:
-        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
-      register: users_apache_tls_key_check
-    
-    - name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
-      stat:
-        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
-      register: users_apache_tls_ca_check
-
-  when: ( users_cert is defined ) and ( users_cert == 'user' )
-  tags:
-    - users
-    - apache
-    - letsencrypt
-
-- name: "Let's Encrypt one cert per VirtualHost checks for {{ user.key }}"
-
-  when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
+- name: "Check that the SSL certs for {{ user.key }} are present"
+  include_tasks: apache_cert_check.yml
+  when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$'] )
   tags:
     - users
     - apache
@@ -250,7 +226,7 @@
 
   when:
     - ( users_apache_conf is defined )
-    - ( users_apache_tls_cert_check.stat.exists ) and ( users_apache_tls_key_check.stat.exists ) and ( users_apache_tls_ca_check.stat.exists )
+    - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
   tags:
     - users
     - apache

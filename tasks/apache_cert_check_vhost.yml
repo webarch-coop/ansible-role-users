@@ -19,9 +19,9 @@
 
     - name: Set a fact for the results
       set_fact:
-        users_apache_vhost_check: true
+        users_apache_certs_present: true
       when:
-        - users_apache_vhost_check != False
+        - users_apache_certs_present != False
         - users_apache_tls_cert_check.stat.exists
         - users_apache_tls_key_check.stat.exists
         - users_apache_tls_ca_check.stat.exists
