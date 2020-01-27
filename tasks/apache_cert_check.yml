@@ -1,0 +1,57 @@
+---
+- name: "Let's Encrypt one cert per VirtualHost checks for {{ user.key }}"
+
+    - name: "Check that the SSL certs for {{ user.key }} are present"
+      include_tasks: apache_vhost_cert_checks.yml
+      register: apache_vhost_cert_check_vhosts
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+
+    - name: Debug results
+      debug:
+        var: apache_vhost_cert_check_vhosts.results
+
+    - name: Debug fail
+      fail:
+        msg: Debug 
+
+  when: users_cert == "vhost"
+  tags:
+    - users
+    - apache
+    - letsencrypt
+
+- name: "Let's Encrypt one cert per user checks for {{ user.key }}"
+  block:
+
+    - name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
+      register: users_apache_tls_cert_check
+
+    - name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
+      register: users_apache_tls_key_check
+
+    - name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
+      register: users_apache_tls_ca_check
+
+    - name: Set a variable to indicate that all cert files are present
+      set_fact:
+        users_apache_certs_present: true
+      when:
+        - users_apache_tls_cert_check.stat.exists
+        - users_apache_tls_key_check.stat.exists
+        - users_apache_tls_ca_check.stat.exists
+
+  when: users_cert == "user"
+  tags:
+    - users
+    - apache
+    - letsencrypt
+...

@@ -1,0 +1,34 @@
+---
+- name: "Let's Encrypt one cert per VirtualHost checks for {{ vhost.item.server_name }}"
+  block:
+
+    - name: "Check that the SSL cert for {{ vhost.item.server_name }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ vhost.item.server_name }}.cert.pem"
+      register: users_apache_tls_cert_check
+
+    - name: "Check that the SSL key for {{ vhost.item.server_name }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ vhost.item.server_name }}.key.pem"
+      register: users_apache_tls_key_check
+
+    - name: "Check that the SSL ca file for {{ vhost.item.server_name }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ vhost.item.server_name }}.ca.pem"
+      register: users_apache_tls_ca_check
+
+    - name: Set a fact for the results
+      set_fact:
+        users_apache_vhost_check: true
+      when:
+        - users_apache_vhost_check != False
+        - users_apache_tls_cert_check.stat.exists
+        - users_apache_tls_key_check.stat.exists
+        - users_apache_tls_ca_check.stat.exists
+
+  when: ( users_cert is defined ) and ( users_cert == 'user' )
+  tags:
+    - users
+    - apache
+    - letsencrypt
+...
