@@ -118,6 +118,39 @@
   DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
   {%- endif %}
+  {%- if vhost_config.users_apache_options is defined %}
+    Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
+  {%- elif users_apache_options is defined %}
+    Options {% for option in users_apache_options %} {{ option }}{% endfor %}
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
+  {%- else %}
+    Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+  {%- endif %}
+  {%- if vhost_config.users_apache_index is defined %}
+    DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
+  {%- elif users_apache_index is defined %}
+    DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    DirectoryIndex index.php index.html index.htm index.shtml
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    DirectoryIndex index.cgi index.pl index.html index.htm index.shtml
+  {%- else %}
+    DirectoryIndex index.html index.htm index.shtml
+  {%- endif %}
+  {%- if vhost_config.users_apache_override is defined %}
+    AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
+  {%- elif users_apache_override is defined %}
+    AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
+  {%- else %}
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
+  {%- endif %}
   </Directory>
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
     {%- for dir in vhost_config.users_apache_nophp_dirs %}
