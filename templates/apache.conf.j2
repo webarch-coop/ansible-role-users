@@ -161,8 +161,10 @@
         <If "-f %{REQUEST_FILENAME}">
     {%- if user.value.users_groups is defined and "chroot" in user.value.users_groups %}
           SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
-    {%- else %}
+    {%- elif users_phpfpm_version is defined %}
           SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost"
+    {%- else -%}
+          # You probably need to set: users_phpfpm_version == true
     {%- endif %}
         </If>
       </FilesMatch>
