@@ -119,7 +119,7 @@
   file:
     path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
     state: absent
-  when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
+  when: users_apache_certs_present == False
   tags:
     - users
     - apache
