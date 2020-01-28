@@ -40,10 +40,11 @@
         - users_apache_tls_key_check.stat.exists
         - users_apache_tls_ca_check.stat.exists
 
-     - name: Debug users_apache_certs_present
-       debug:
-         var: users_apache_certs_present
-         verbosity: 1
+    - name: Debug users_apache_certs_present
+      debug:
+        var: users_apache_certs_present
+        verbosity: 1
+      when: users_apache_certs_present is defined
 
   tags:
     - users
