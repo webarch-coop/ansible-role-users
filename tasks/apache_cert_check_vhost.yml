@@ -1,20 +1,20 @@
 ---
-- name: "Let's Encrypt one cert per VirtualHost checks for {{ vhost.item.server_name }}"
+- name: "Let's Encrypt one cert per VirtualHost checks for {{ vhost.value.server_name }}"
   block:
 
-    - name: "Check that the SSL cert for {{ vhost.item.server_name }} is present"
+    - name: "Check that the SSL cert for {{ vhost.value.server_name }} is present"
       stat:
-        path: "{{ le_dir }}/{{ vhost.item.server_name }}.cert.pem"
+        path: "{{ le_dir }}/{{ vhost.value.server_name }}.cert.pem"
       register: users_apache_tls_cert_check
 
-    - name: "Check that the SSL key for {{ vhost.item.server_name }} is present"
+    - name: "Check that the SSL key for {{ vhost.value.server_name }} is present"
       stat:
-        path: "{{ le_dir }}/{{ vhost.item.server_name }}.key.pem"
+        path: "{{ le_dir }}/{{ vhost.value.server_name }}.key.pem"
       register: users_apache_tls_key_check
 
-    - name: "Check that the SSL ca file for {{ vhost.item.server_name }} is present"
+    - name: "Check that the SSL ca file for {{ vhost.value.server_name }} is present"
       stat:
-        path: "{{ le_dir }}/{{ vhost.item.server_name }}.ca.pem"
+        path: "{{ le_dir }}/{{ vhost.value.server_name }}.ca.pem"
       register: users_apache_tls_ca_check
 
     - name: Set a fact for the results
