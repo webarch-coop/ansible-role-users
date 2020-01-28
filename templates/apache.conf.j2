@@ -119,8 +119,6 @@
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
   {%- endif %}
   </Directory>
-    {%- endfor %}
-  {%- endif %}
   CustomLog /var/log/apache2/{{ user.key }}_access.log bandwidth
   LogLevel error
   ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
