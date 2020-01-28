@@ -148,6 +148,8 @@
       - "users_sites_dir: {{ users_sites_dir }}"
       - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
+      - "vhost.value.users_apache_vhost_docroot: {% if vhost.value.users_apache_vhost_docroot is defined %}{{ vhost.value.users_apache_vhost_docroot }}{% endif %}"
+      - "vhost.value.users_apache_server_aliases: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }}{% endif %}"
     verbosity: 2
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
