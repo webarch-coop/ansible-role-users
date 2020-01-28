@@ -162,6 +162,8 @@
     - users
     - apache
 
+# TODO Loop through the VirtualHosts generating one config file per VirtualHost for www-data
+
 - name: "Apache {{ user.key }} sites-available file present"
   template:
     src: templates/apache.conf.j2
@@ -169,6 +171,7 @@
     trim_blocks: false
     lstrip_blocks: true
   register: users_apache_conf
+  when: user.key != "www-data"
   tags:
     - users
     - apache
