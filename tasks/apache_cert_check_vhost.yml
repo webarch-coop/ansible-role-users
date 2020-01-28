@@ -31,7 +31,7 @@
         - users_apache_tls_key_check.stat.exists
         - users_apache_tls_ca_check.stat.exists
 
-    - name: Set a fact for the results if a cert exists users_apache_certs_present is not false
+    - name: Set a fact for the results if a cert exists and users_apache_certs_present is not false
       set_fact:
         users_apache_certs_present: true
       when:
@@ -50,4 +50,8 @@
     - users
     - apache
     - letsencrypt
+    - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
+      set_fact:
+        users_apache_certs_present: true
+      when:
 ...
