@@ -10,9 +10,16 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
 
-    - name: Debug results
+    - name: Debug SSL cert check results
       debug:
         var: apache_vhost_cert_check_vhosts.results
+        verbosity: 2
+
+    - name: Debug users_apache_certs_present
+      debug:
+        var: users_apache_certs_present
+        verbosity: 1
+      when: users_apache_certs_present is defined
 
     - name: Debug fail
       fail:
