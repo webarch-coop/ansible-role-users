@@ -10,37 +10,23 @@
         group: "{{ user.key }}"
         mode: 0750
 
-    - name: Users PHP FPM mail log touched
+    - name: Users PHP FPM logs touched
       file:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/{{ log }}"
         state: touch
+        access_time: preserve
+        modification_time: preserve
         owner: "{{ user.key }}"
         group: "{{ user.key }}"
         mode: 0640
-
-    - name: Users PHP FPM slow log touched
-      file:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
-        state: touch
-        owner: root
-        group: "{{ user.key }}"
-        mode: 0640
-
-    - name: Users PHP FPM access log touched
-      file:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
-        state: touch
-        owner: root
-        group: "{{ user.key }}"
-        mode: 0640
-
-    - name: Users PHP FPM error log touched
-      file:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.error.log"
-        state: touch
-        owner: root
-        group: "{{ user.key }}"
-        mode: 0640
+      loop:
+        - php-fpm.mail.log
+        - php-fpm.slow.log
+        - php-fpm.access.log
+        - php-fpm.error.log
+      loop_control:
+        loop_var: log
+        label: "{{ log }}"
 
     - name: Check the PHP FPM pm variables
       include_role:

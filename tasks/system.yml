@@ -126,6 +126,7 @@
         path: "{{ quota_dir }}/quota_user.csv"
         state: touch
         access_time: preserve
+        modification_time: preserve
       check_mode: false
 
     - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
