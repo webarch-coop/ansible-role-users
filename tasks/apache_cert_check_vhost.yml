@@ -26,7 +26,6 @@
         - users_apache_tls_key_check.stat.exists
         - users_apache_tls_ca_check.stat.exists
 
-  when: ( users_cert is defined ) and ( users_cert == 'user' )
   tags:
     - users
     - apache
