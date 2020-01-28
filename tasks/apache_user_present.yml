@@ -145,8 +145,8 @@
 - name: Debug the apache.conf.j2 template variables
   debug:
     msg:
-      - "vhost.key: {{ vhost.key }}"
       - "users_sites_dir: {{ users_sites_dir }}"
+      - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
     verbosity: 2
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
