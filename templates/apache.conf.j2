@@ -53,6 +53,78 @@
   {%- if user.value.users_email is defined and user.value.users_email != "" %}
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
+  {%- if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
+    {%- if vhost_config.users_cms is defined and vhost_config.users_cms == "nextcloud" %}
+  IncludeOptional /etc/apache2/conf-available/robots-deny-nextcloud.conf
+    {%- else %}
+  IncludeOptional /etc/apache2/conf-available/robots-deny.conf
+    {%- endif %}
+  {%- endif %}
+  {%- if vhost_config.users_apache_sts is defined %}
+  <IfModule headers_module>
+    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
+  </IfModule>
+  {%- endif %}
+  {%- if vhost_config.users_apache_remoteip is defined %}
+    {%- if vhost_config.users_apache_remoteip == "cloudflare" %}
+  IncludeOptional /etc/apache2/conf-available/cloudflare.conf
+    {%- endif %}
+  {%- endif %}
+  {%- if vhost_config.users_apache_locations is defined -%}
+    {%- for loc in vhost_config.users_apache_locations %}
+  <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
+      {%- if loc.authtype is defined and loc.authtype == "None" %}
+    # No AuthUserFile for this Location as AuthType is None
+      {%- elif loc.authtype is not defined and loc.redirect is defined %}
+    # Redirect Location so no AuthUserFile
+      {%- else %}
+    AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      {%- endif %}
+      {%- if loc.redirect is not defined %}
+    AuthName "{% if loc.authname is defined %}{{ loc.authname }}{% else %}Authorised Users{% endif %}"
+    AuthType {% if loc.authtype is defined %}{{ loc.authtype }}{% else %}Basic{% endif %}
+        {%- if loc.require is defined %}{% for req in loc.require %}
+    Require {{ req }}
+          {%- endfor %}{% else %}     
+    Require valid-user
+        {%- endif %}
+      {%- else %}
+    Redirect "{{ loc.redirect }}"
+      {%- endif %}
+  </Location>
+    {%- endfor %}
+    {% if apache_conf_enabled is defined %}
+      {%- if "webarch" in apache_conf_enabled %}
+  <Location "/wsh">
+    AuthType None
+    Require all granted
+  </Location>
+      {%- elif "mc3" in apache_conf_enabled %}
+  <Location "/mc3">
+    AuthType None
+    Require all granted
+  </Location>
+      {%- endif %}
+    {%- endif %}
+  <Location "/.well-known/acme-challenge">
+    AuthType None
+    Require all granted
+  </Location>
+  {%- endif %}
+  {%- if user.value.users_apache_vhost_docroot is defined %}
+  DocumentRoot "{{ user.value.users_apache_vhost_docroot }}" 
+  <Directory "{{ user.value.users_apache_vhost_docroot }}">
+  {%- else %}
+  DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+  <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
+  {%- endif %}
+  </Directory>
+    {%- endfor %}
+  {%- endif %}
+  CustomLog /var/log/apache2/{{ user.key }}_access.log bandwidth
+  LogLevel error
+  ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
+  CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combinedio
 </VirtualHost>
 {%- endfor %}
 
