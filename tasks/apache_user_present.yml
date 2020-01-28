@@ -109,7 +109,7 @@
 
 - name: "Check that the SSL certs for {{ user.key }} are present"
   include_tasks: apache_cert_check.yml
-  when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$'] )
+  when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
   tags:
     - users
     - apache
