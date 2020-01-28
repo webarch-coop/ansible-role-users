@@ -50,8 +50,4 @@
     - users
     - apache
     - letsencrypt
-    - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
-      set_fact:
-        users_apache_certs_present: true
-      when:
 ...
