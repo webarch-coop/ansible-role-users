@@ -17,7 +17,7 @@
         path: "{{ le_dir }}/{{ vhost.value.users_apache_server_name }}.ca.pem"
       register: users_apache_tls_ca_check
 
-    - name: Set a fact for the results if any cert is missing 
+    - name: Set a fact for the results if any cert is missing
       set_fact:
         users_apache_certs_present: false
       when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
