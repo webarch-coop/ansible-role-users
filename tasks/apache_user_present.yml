@@ -142,6 +142,21 @@
     - users
     - apache
 
+- name: Debug the apache.conf.j2 template variables
+  debug:
+    msg:
+      - "vhost.key: {{ vhost.key }}"
+      - "users_sites_dir: {{ users_sites_dir }}"
+      - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
+    verbosity: 2
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  tags:
+    - users
+    - apache
+
 - name: "Apache {{ user.key }} sites-available file present"
   template:
     src: templates/apache.conf.j2
