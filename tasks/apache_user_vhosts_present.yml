@@ -1,0 +1,88 @@
+---
+- name: "Apache {{ user.key }} sites-available file present"
+  template:
+    src: templates/apache.conf.j2
+    dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
+    trim_blocks: false
+    lstrip_blocks: true
+  register: users_apache_conf
+  when: user.key != "www-data"
+  tags:
+    - users
+    - apache
+
+- name: Apache configtest
+  block:
+
+    - name: "Apache {{ user.key }} sites-enabled symlink present"
+      command: "a2ensite {{ user.key }}"
+      register: users_a2ensite
+      changed_when: '"already enabled" not in users_a2ensite.stdout'
+
+    - name: "apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
+      command: apache2ctl configtest
+      check_mode: false
+      register: users_apache2ctl_configtest
+      changed_when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
+
+    - name: Apache restart
+      service:
+        name: apache2
+        state: restarted
+      when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" in users_apache2ctl_configtest.stderr )
+
+  rescue:
+
+    - name: Standard out from apache2ctl configtest
+      debug:
+        msg:
+          - "apache2ctl configtest stdout: {{ users_apache2ctl_configtest.stdout }}"
+        verbosity: 1
+
+    - name: Standard error from apache2ctl configtest
+      debug:
+        msg:
+          - "apache2ctl configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
+        verbosity: 1
+
+    - name: "apache2ctl configtest failed, saving failed config"
+      copy:
+        src: "/etc/apache2/sites-available/{{ user.key }}.conf"
+        dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
+        remote_src: true
+
+    - name: "apache2ctl configtest failed so reverting changes"
+      copy:
+        src: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+        dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
+        remote_src: true
+      when: users_apache_conf_check.stat.exists == True
+
+    - name: "apache2ctl configtest failed so removing new config and symlink"
+      file:
+        path: "{{ file }}"
+        state: absent
+      loop:
+        - "/etc/apache2/sites-available/{{ user.key }}.conf"
+        - "/etc/apache2/sites-enabled/{{ user.key }}.conf"
+      loop_control:
+        loop_var: file
+        label: "{{ file }}"
+      when: users_apache_conf_check.stat.exists == False
+
+    - name: "Apache {{ user.key }} sites-enabled symlink absent"
+      command: "a2dissite {{ user.key }}"
+      register: users_a2dissite
+      changed_when: '"already enabled" not in users_a2dissite.stdout'
+
+    - name: Fail as apache2ctl configtest failed
+      fail:
+        msg:
+          - "apache2ctl configtest failed for {{ user.key }} and as a result apache has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this VirtualHost."
+          - "The broken config is available in /etc/apache2/sites-available/{{ user.key }}.conf.broken"
+          - "The error was: {{ users_apache2ctl_configtest.stderr }}"
+
+  tags:
+    - users
+    - apache
+...
