@@ -21,10 +21,6 @@
         verbosity: 1
       when: users_apache_certs_present is defined
 
-    - name: Debug fail
-      fail:
-        msg: Debug
-
   when: users_cert == "vhost"
   tags:
     - users
