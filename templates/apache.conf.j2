@@ -155,11 +155,11 @@
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
     {%- for dir in vhost_config.users_apache_nophp_dirs %}
   # No PHP allowed in this directory
-  {%- if user.value.users_apache_vhost_docroot is defined %}
-  <Directory "{{ user.value.users_apache_vhost_docroot }}">
-  {%- else %}
+      {%- if user.value.users_apache_vhost_docroot is defined %}
+  <Directory "{{ user.value.users_apache_vhost_docroot }}{{ dir }}">
+      {%- else %}
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-  {%- endif %}
+      {%- endif %}
     <FilesMatch "\.php$">
       <If "-f %{REQUEST_FILENAME}">
         Require all denied
