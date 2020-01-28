@@ -146,7 +146,7 @@
   debug:
     msg:
       - "user.key: {{ user.key }}"
-      - "user.value.users_groups: {{ user.value.users_groups }}"
+      - "user.value.users_groups: {% if user.value.users_groups is defined %}{{ user.value.users_groups }}{% endif %}"
       - "users_sites_dir: {{ users_sites_dir }}"
       - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
