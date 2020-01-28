@@ -140,17 +140,6 @@
   {%- else %}
     DirectoryIndex index.html index.htm index.shtml
   {%- endif %}
-  {%- if vhost_config.users_apache_override is defined %}
-    AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
-  {%- elif users_apache_override is defined %}
-    AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-    AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-  {%- else %}
-    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-  {%- endif %}
   </Directory>
     {%- endfor %}
   {%- endif %}
