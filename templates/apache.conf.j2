@@ -129,17 +129,6 @@
   {%- else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
   {%- endif %}
-  {%- if vhost_config.users_apache_index is defined %}
-    DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
-  {%- elif users_apache_index is defined %}
-    DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-    DirectoryIndex index.php index.html index.htm index.shtml
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-    DirectoryIndex index.cgi index.pl index.html index.htm index.shtml
-  {%- else %}
-    DirectoryIndex index.html index.htm index.shtml
-  {%- endif %}
   </Directory>
     {%- endfor %}
   {%- endif %}
