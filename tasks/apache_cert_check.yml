@@ -45,11 +45,25 @@
         path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
       register: users_apache_tls_ca_check
 
-    - name: Set a variable to indicate that all cert files are present
+    - name: Set a fact for the results if any cert is missing
+      set_fact:
+        users_apache_certs_present: false
+      when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
+
+    - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
       set_fact:
         users_apache_certs_present: true
       when:
-        - users_apache_certs_present != False
+        - users_apache_certs_present is not defined
+        - users_apache_tls_cert_check.stat.exists
+        - users_apache_tls_key_check.stat.exists
+        - users_apache_tls_ca_check.stat.exists
+
+    - name: Set a fact for the results if a cert exists and users_apache_certs_present is not false
+      set_fact:
+        users_apache_certs_present: true
+      when:
+        - ( users_apache_certs_present is defined ) and ( users_apache_certs_present != False )
         - users_apache_tls_cert_check.stat.exists
         - users_apache_tls_key_check.stat.exists
         - users_apache_tls_ca_check.stat.exists
