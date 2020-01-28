@@ -151,6 +151,34 @@
   {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
   {%- endif %}
+  {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
+    <IfModule proxy_fcgi_module>
+      <IfModule setenvif_module>
+        SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+      </IfModule>
+      <FilesMatch "\.php$">
+        <If "-f %{REQUEST_FILENAME}">
+    {%- if "chroot" in user.value.users_groups %}
+          SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
+    {%- else %}
+          SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost"
+    {%- endif %}
+        </If>
+      </FilesMatch>
+    </IfModule>
+  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    <IfModule fcgid_module>
+      <IfModule mime_module>
+        <FilesMatch "[^.]+\.cgi$">
+          SetHandler fcgid-script
+        </FilesMatch>
+        <FilesMatch "[^.]+\.pl$">
+          SetHandler fcgid-script
+        </FilesMatch>
+      </IfModule>
+    </IfModule>
+  {%- endif %}
     Require all granted
   {%- if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
@@ -162,7 +190,7 @@
     {%- for dir in vhost_config.users_apache_nophp_dirs %}
   # No PHP allowed in this directory
       {%- if user.value.users_apache_vhost_docroot is defined %}
-  <Directory "{{ user.value.users_apache_vhost_docroot }}{{ dir }}">
+  <Directory "{{ user.value.users_apache_vhost_docroot }}/{{ dir }}">
       {%- else %}
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
       {%- endif %}
