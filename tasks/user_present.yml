@@ -164,7 +164,7 @@
         msg:
           - "ansible_facts.packages: {{ ansible_facts.packages }}"
           - "users_apache: {{ users_apache }}"
-          - "users.users_apache_virtual_hosts: {{ users.users_apache_virtual_hosts }}"
+          - "user.value.users_apache_virtual_hosts: {{ user.value.users_apache_virtual_hosts }}"
         verbosity: 2
       tags:
         - apache
@@ -174,7 +174,7 @@
       when:
         - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache == True )
-        - ( users.users_apache_virtual_hosts is defined ) and ( users_apache_virtual_hosts[0] is defined )
+        - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts[0] is defined )
       tags:
         - apache
 
