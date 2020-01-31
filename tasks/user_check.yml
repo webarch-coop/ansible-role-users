@@ -5,11 +5,11 @@
 - name: "Check the variables for {{ user.key }}"
   block:
 
-    - name: "Check that the username {{ user.key }} contains only lowercase ascii letters, numbers and dashes"
+    - name: "Check that the username {{ user.key }} contains only ascii letters, numbers and dashes"
       assert:
         that:
-          - user.key is regex("^[a-z0-9-]*$")
-        fail_msg: "The username {{ user.key }} contains characters other than lowercase ascii letters, numbers and dashes"
+          - user.key is regex("^[a-zA-Z0-9-]*$")
+        fail_msg: "The username {{ user.key }} contains characters other than ascii letters, numbers and dashes"
 
     - name: "Check that the username {{ user.key }} is between 2 and 12 characters long"
       assert:
@@ -24,10 +24,10 @@
           - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" )
       when: user.value.users_state is defined
 
-    - name: "Check that the group for {{ user.key }} contains only ascii letters and numbers"
+    - name: "Check that the group for {{ user.key }} contains only ascii letters, numbers and dashes"
       assert:
         that:
-          - user.value.users_group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+          - user.value.users_group is regex("^[a-zA-Z0-9-]*$")
       when: user.value.users_group is defined
 
     - name: "Check the groups for {{ user.key }}"
@@ -39,10 +39,10 @@
               - user.value.users_groups | length
               - user.value.users_groups[0] is defined
 
-        - name: "Check that the groups for {{ user.key }} contain only ascii letters and numbers"
+        - name: "Check that the groups for {{ user.key }} contain only ascii letters, numbers and dashes"
           assert:
             that:
-              - group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+              - group is regex("^[a-zA-Z0-9-]*$")
           loop: "{{ user.value.users_groups }}"
           loop_control:
             loop_var: group
