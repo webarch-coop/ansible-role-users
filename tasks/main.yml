@@ -159,7 +159,7 @@
 - name: Users quota CSV file updated
   block:
 
-    - name: "Updated users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+    - name: Updated users quotas written and md5sum printed
       shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
       register: users_repquota_md5sum_after
       check_mode: false
