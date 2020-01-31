@@ -30,6 +30,7 @@
     - name: "MariaDB accounts and databases created and passwords read or set for {{ user.key }}"
       include_tasks: mariadb_user_present.yml
       when:
+        - user.key != "root"
         - ( users_mariadb is defined ) and ( users_mariadb == True )
         - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
       tags:
@@ -37,13 +38,22 @@
 
     - name: "Quotas set for {{ user.key }}"
       include_tasks: quota.yml
-      when: ( quota_dir is defined ) and ( user.value.users_quota is defined ) and ( user.value.users_quota != "" )
+      when:
+        - user.key != "root"
+        - quota_dir is defined
+        - user.value.users_quota is defined
+        - user.value.users_quota != ""
       tags:
         - users
 
     - name: "Set passwds and notify user {{ user.key }}"
       include_tasks: notify_passwd.yml
-      when: ( user.value.users_notify_passwd is defined ) and ( user.value.users_notify_passwd == True ) and ( user.value.users_email is defined ) and ( user.value.users_email != "" )
+      when: 
+        - user.key != "root"
+        - user.value.users_notify_passwd is defined
+        - user.value.users_notify_passwd == True
+        - user.value.users_email is defined
+        - user.value.users_email != ""
       tags:
         - users
 
@@ -113,6 +123,7 @@
             - phpfpm
 
       when:
+        - ( user.key != "root" )
         - ( users_chroot is defined ) and ( users_chroot == True )
         - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
 
@@ -146,12 +157,12 @@
 
           when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
-      when: ( matomo_user is defined ) and ( matomo_user != "" )
+      when: ( user.key != "root" ) and ( matomo_user is defined ) and ( matomo_user != "" )
 
     - name: "Include Apache config tasks present for user {{ user.key }}"
       include_tasks: apache_user_present.yml
       when:
-        - '"apache2" in ansible_facts.packages'
+        - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache == True )
       tags:
         - apache

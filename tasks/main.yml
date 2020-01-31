@@ -127,6 +127,7 @@
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
             - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
             - ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
+            - user.key != "root"
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
