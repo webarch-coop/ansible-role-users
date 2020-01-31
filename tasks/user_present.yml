@@ -164,6 +164,7 @@
       when:
         - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache == True )
+        - ( users.users_apache_virtual_hosts is defined ) and ( users_apache_virtual_hosts[0] is defined )
       tags:
         - apache
 
