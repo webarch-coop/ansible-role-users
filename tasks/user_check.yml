@@ -59,10 +59,10 @@
               - user.value.users_group_members | length
               - user.value.users_group_members[0] is defined
 
-        - name: "Check that the groups for {{ user.key }} contain only ascii letters and numbers"
+        - name: "Check that the groups for {{ user.key }} contain only ascii letters, numbers and dashes"
           assert:
             that:
-              - group is regex("^\d*[a-zA-Z][a-zA-Z\d]*$")
+              - group is regex("^[a-zA-Z0-9-]*$")
           loop: "{{ user.value.users_groups }}"
           loop_control:
             loop_var: group
