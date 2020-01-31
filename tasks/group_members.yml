@@ -1,7 +1,7 @@
 ---
 # Ideally this would check if the command needs to be run before running it
 - name: "Users that have membership of {{ user.value.users_group | default(user.key) }} group"
-  command: "usermod -a -G {{ user.value.users_group | default(user.key) }} {{ member }}"
+  include_tasks: group_member.yml
   loop: "{{ user.value.users_group_members }}"
   loop_control:
     loop_var: member
