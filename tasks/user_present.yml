@@ -171,8 +171,10 @@
     - name: Debug Apache related variables
       debug:
         msg:
+          - "user.key: {{ user.key }}"
           - "users_apache: {{ users_apache }}"
           - "user.value.users_apache_virtual_hosts: {{ user.value.users_apache_virtual_hosts }}"
+          - "user.value.users_apache_virtual_hosts[0]: {{ user.value.users_apache_virtual_hosts[0] }}"
         verbosity: 2
       tags:
         - apache
