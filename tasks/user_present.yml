@@ -163,6 +163,14 @@
       debug:
         msg:
           - "ansible_facts.packages: {{ ansible_facts.packages }}"
+        verbosity: 2
+      when: ( "apache2" in ansible_facts.packages )
+      tags:
+        - apache
+
+    - name: Debug Apache related variables
+      debug:
+        msg:
           - "users_apache: {{ users_apache }}"
           - "user.value.users_apache_virtual_hosts: {{ user.value.users_apache_virtual_hosts }}"
         verbosity: 2
