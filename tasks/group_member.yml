@@ -1,25 +1,22 @@
 ---
 # This is included from group_members.yml
 
-- name: "Check that the {{ member }} group exists and create it if it doesn't"
+- name: "Check that the {{ member }} user exists"
   block:
 
-    - name: "Check that the group {{ member }} exists"
-      command: "getent group {{ member }}"
-      register: users_group_check
+    - name: "Check that the user {{ member }} exists"
+      command: "getent passwd {{ member }}"
+      register: users_user_check
+
+    - name: "Users that have membership of {{ user.value.users_group | default(user.key) }} group"
+      command: "usermod -a -G {{ user.value.users_group | default(user.key) }} {{ member }}"
 
   rescue:
 
-    - name: "Create {{ member }} group"
-      group:
-        name: "{{ member }}"
-        state: present
+    - name: Don't fail, print a warning, this role might need to be run again
+      debug:
+        msg: "The {{ member }} user hasn't yet been created so skipping"
 
-  tags:
-    - users
-
-- name: "Users that have membership of {{ user.value.users_group | default(user.key) }} group"
-  command: "usermod -a -G {{ user.value.users_group | default(user.key) }} {{ member }}"
   tags:
     - users
 ...
