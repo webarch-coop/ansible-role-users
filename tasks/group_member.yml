@@ -8,7 +8,7 @@
       command: "getent group {{ member }}"
       register: users_group_check
 
-  failure:
+  rescue:
 
     - name: "Create {{ member }} group"
       group:
