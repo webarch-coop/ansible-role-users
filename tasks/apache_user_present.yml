@@ -144,7 +144,9 @@
 
 - name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
   include_tasks: apache_user_www_data_vhosts_present.yml
-  when: user.key == "www-data"
+  when:
+    - user.key == "www-data"
+    - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
   tags:
     - users
     - apache
@@ -153,8 +155,8 @@
   include_tasks: apache_user_vhosts_present.yml
   when:
     - ( user.key != "www-data" )
-    - ( users_apache_conf is defined )
     - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
+    # - ( users_apache_conf is defined )
   tags:
     - users
     - apache
