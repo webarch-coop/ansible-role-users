@@ -39,6 +39,11 @@
               - user.value.users_groups | length
               - user.value.users_groups[0] is defined
 
+        - name: "Debug users groups for {{ user.key }}"
+          debug:
+            var: user.value.users_groups
+            verbosity: 2
+
         - name: "Check that the groups for {{ user.key }} contain only ascii letters, numbers and dashes"
           assert:
             that:
