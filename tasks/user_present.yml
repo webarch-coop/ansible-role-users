@@ -159,25 +159,6 @@
 
       when: ( user.key != "root" ) and ( matomo_user is defined ) and ( matomo_user != "" )
 
-    - name: Debug Apache related variables
-      debug:
-        msg:
-          - "ansible_facts.packages: {{ ansible_facts.packages }}"
-        verbosity: 2
-      when: ( "apache2" in ansible_facts.packages )
-      tags:
-        - apache
-
-    - name: Debug Apache related variables
-      debug:
-        msg:
-          - "user.key: {{ user.key }}"
-          - "users_apache: {{ users_apache }}"
-          - "user.value.users_apache_virtual_hosts: {{ user.value.users_apache_virtual_hosts }}"
-        verbosity: 2
-      tags:
-        - apache
-
     - name: "Include Apache config tasks present for user {{ user.key }}"
       include_tasks: apache_user_present.yml
       when:
@@ -186,10 +167,6 @@
         - ( user.value.users_apache_virtual_hosts is defined )
       tags:
         - apache
-
-    - name: Debug fail
-      fail:
-        msg: Debug
 
   tags:
     - users
