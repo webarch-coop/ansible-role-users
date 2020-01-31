@@ -64,16 +64,16 @@
               - user.value.users_group_members | length
               - user.value.users_group_members[0] is defined
 
-        - name: "Debug groups for {{ user.key }}"
+        - name: "Debug group members for {{ user.key }}"
           debug:
-            var: user.value.users_groups
+            var: user.value.users_group_members
             verbosity: 2
 
-        - name: "Check that the groups for {{ user.key }} contain only ascii letters, numbers and dashes"
+        - name: "Check that the group members for {{ user.key }} contain only ascii letters, numbers and dashes"
           assert:
             that:
               - group is regex("^[a-zA-Z0-9-]*$")
-          loop: "{{ user.value.users_groups }}"
+          loop: "{{ user.value.users_group_members }}"
           loop_control:
             loop_var: group
             label: "{{ group }}"
