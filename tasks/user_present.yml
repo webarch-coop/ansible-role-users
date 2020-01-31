@@ -48,7 +48,7 @@
 
     - name: "Set passwds and notify user {{ user.key }}"
       include_tasks: notify_passwd.yml
-      when: 
+      when:
         - user.key != "root"
         - user.value.users_notify_passwd is defined
         - user.value.users_notify_passwd == True
