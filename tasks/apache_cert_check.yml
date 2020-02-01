@@ -1,0 +1,76 @@
+---
+- name: "Let's Encrypt one cert per VirtualHost checks for {{ user.key }}"
+  block:
+
+    - name: "Check that the SSL certs for {{ user.key }} are present"
+      include_tasks: apache_cert_check_vhost.yml
+      register: apache_vhost_cert_check_vhosts
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+
+    - name: Debug SSL cert check results
+      debug:
+        var: apache_vhost_cert_check_vhosts.results
+        verbosity: 2
+
+    - name: Debug users_apache_certs_present
+      debug:
+        var: users_apache_certs_present
+        verbosity: 1
+      when: users_apache_certs_present is defined
+
+  when: users_cert == "vhost"
+  tags:
+    - users
+    - apache
+    - letsencrypt
+
+- name: "Let's Encrypt one cert per user checks for {{ user.key }}"
+  block:
+
+    - name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
+      register: users_apache_tls_cert_check
+
+    - name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
+      register: users_apache_tls_key_check
+
+    - name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
+      stat:
+        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
+      register: users_apache_tls_ca_check
+
+    - name: Set a fact for the results if any cert is missing
+      set_fact:
+        users_apache_certs_present: false
+      when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
+
+    - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
+      set_fact:
+        users_apache_certs_present: true
+      when:
+        - users_apache_certs_present is not defined
+        - users_apache_tls_cert_check.stat.exists
+        - users_apache_tls_key_check.stat.exists
+        - users_apache_tls_ca_check.stat.exists
+
+    - name: Set a fact for the results if a cert exists and users_apache_certs_present is not false
+      set_fact:
+        users_apache_certs_present: true
+      when:
+        - ( users_apache_certs_present is defined ) and ( users_apache_certs_present != False )
+        - users_apache_tls_cert_check.stat.exists
+        - users_apache_tls_key_check.stat.exists
+        - users_apache_tls_ca_check.stat.exists
+
+  when: users_cert == "user"
+  tags:
+    - users
+    - apache
+    - letsencrypt
+...

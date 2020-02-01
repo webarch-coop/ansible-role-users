@@ -4,7 +4,7 @@
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd"
   register: users_notify_passwd_file
   tags:
-    - users-update
+    - users
 
 - block:
 
@@ -12,22 +12,16 @@
       command: pwgen -n 20 1
       no_log: true
       register: users_passwd
-      tags:
-        - users-update
 
     - name: "SHA 512 hash of passwd generated"
       command: "mkpasswd --method=sha-512 {{ users_passwd.stdout }}"
       no_log: true
       register: users_passwd_hash
-      tags:
-        - users-update
 
     - name: "Password set for {{ user.key }}"
       user:
         name: "{{ user.key }}"
         password: "{{ users_passwd_hash.stdout }}"
-      tags:
-        - users-update
 
     - name: "Password notification email sent to {{ user.value.users_email }}"
       mail:
@@ -41,8 +35,6 @@
         port: 25
         secure: never
       when: user.value.users_email is defined and user.value.users_email != ""
-      tags:
-        - users-update
 
     - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd file"
       lineinfile:
@@ -54,8 +46,8 @@
         owner: root
         group: "{{ user.key }}"
         mode: 0640
-      tags:
-        - users-update
 
   when: users_notify_passwd_file.stat.exists == False
+  tags:
+    - users
 ...

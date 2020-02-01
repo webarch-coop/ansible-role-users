@@ -1,32 +1,31 @@
 ---
-- name: "The databases that {{ user.key }} has access to"
-  command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
-  register: users_mariadb_list
-  tags:
-    - users-update
-    - users-mariadb
+- name: "MariaDB databases and account absent for {{ user.key }}"
+  block:
 
-- name: "Databases absent for {{ user.key }}"
-  mysql_db:
-    name: "{{ db }}"
-    state: absent
-    login_user: root
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-  loop: "{{ users_mariadb_list.stdout_lines }}"
-  when: ( users_mariadb_list.stdout_lines is defined ) and ( users_mariadb_list.stdout_lines != [] )
-  loop_control:
-    loop_var: db
-  tags:
-    - users-update
-    - users-mariadb
+    - name: "The databases that {{ user.key }} has access to"
+      command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
+      register: users_mariadb_list
 
-- name: "MariaDB user {{ user.key }} absent"
-  mysql_user:
-    name: "{{ user.key }}"
-    state: absent
-    login_user: root
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    - name: "Databases absent for {{ user.key }}"
+      mysql_db:
+        name: "{{ db }}"
+        state: absent
+        login_user: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      loop: "{{ users_mariadb_list.stdout_lines }}"
+      when: ( users_mariadb_list.stdout_lines is defined ) and ( users_mariadb_list.stdout_lines != [] )
+      loop_control:
+        loop_var: db
+        label: "{{ db }}"
+
+    - name: "MariaDB user {{ user.key }} absent"
+      mysql_user:
+        name: "{{ user.key }}"
+        state: absent
+        login_user: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
   tags:
-    - users-update
-    - users-mariadb
+    - users
+    - mariadb
 ...

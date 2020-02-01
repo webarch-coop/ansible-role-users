@@ -6,7 +6,7 @@
     loop_var: group
     label: "{{ group }}"
   tags:
-    - users-update
+    - users
 
 - name: Add group
   group:
@@ -17,5 +17,5 @@
     loop_var: group
     label: "{{ group }}"
   tags:
-    - users-update
+    - users
 ...

@@ -1,0 +1,121 @@
+---
+- name: "PHP FPM config present for {{ user.key }}"
+  block:
+
+    - name: Users PHP FPM log directory present
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
+        state: directory
+        owner: root
+        group: "{{ user.key }}"
+        mode: 0750
+
+    - name: Users PHP FPM logs touched
+      file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/{{ log }}"
+        state: touch
+        access_time: preserve
+        modification_time: preserve
+        owner: "{{ user.key }}"
+        group: "{{ user.key }}"
+        mode: 0640
+      loop:
+        - php-fpm.mail.log
+        - php-fpm.slow.log
+        - php-fpm.access.log
+        - php-fpm.error.log
+      loop_control:
+        loop_var: log
+        label: "{{ log }}"
+
+    - name: Check the PHP FPM pm variables
+      include_role:
+        name: php-fpm
+        tasks_from: pool_check.yml
+      vars:
+        phpfpm_pm: "{{ user.value.users_phpfpm_pm | default('dynamic') }}"
+        phpfpm_pm_max_children: "{{ user.value.users_phpfpm_max_children | default('2') }}"
+        phpfpm_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') }}"
+        phpfpm_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}"
+        phpfpm_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
+
+    - name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf exists"
+      stat:
+        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+      register: users_phpfpm_pool_conf_check
+
+    - name: "Copy /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+      copy:
+        src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+        dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+        remote_src: true
+      when: users_phpfpm_pool_conf_check.stat.exists
+
+    - name: "PHP FPM pool.d file present for {{ user.key }}"
+      template:
+        src: templates/phpfpm_chroot_user.conf.j2
+        dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+      register: users_phpfpm_pool_conf
+
+    - name: "PHP FPM pool.d configtest for {{ user.key }}"
+      block:
+
+        - name: "PHP FPM pool.d configtest for {{ user.key }}"
+          command: "php-fpm{{ users_phpfpm_version }} --test"
+          register: users_phpfpm_pool_configtest
+
+        - name: "PHP FPM restarted for changes for {{ user.key }}"
+          service:
+            name: "php{{ users_phpfpm_version }}-fpm"
+            state: restarted
+          when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
+
+      rescue:
+
+        - name: "php-fpm{{ users_phpfpm_version }} --test failed, saving failed config"
+          copy:
+            src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+            dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+            remote_src: true
+
+        - name: "php-fpm{{ users_phpfpm_version }} --test failed, so reverting changes"
+          copy:
+            src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+            dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+            remote_src: true
+          when: users_phpfpm_pool_conf_check.stat.exists == True
+
+        - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
+          file:
+            path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+            state: absent
+          when: users_phpfpm_pool_conf_check.stat.exists == False
+
+        - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
+          fail:
+            msg:
+              - "php-fpm{{ users_phpfpm_version }} --test failed for {{ user.key }} and as a result php-fpm has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this user."
+              - "The broken config is available in /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+              - "The error was: {{ users_phpfpm_pool_configtest.stderr }}"
+
+      when: users_phpfpm_pool_conf.changed
+
+    - name: Users Apache PHP FPM localhost.d file present
+      template:
+        src: apache_localhost.conf.j2
+        dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+      when:
+        - '"apache2" in ansible_facts.packages'
+
+    - name: Users Nginx PHP FPM localhost.d file present
+      template:
+        src: nginx_localhost.conf.j2
+        dest: "/etc/nginx/localhost.d/{{ item }}.conf"
+      when:
+        - '"nginx" in ansible_facts.packages'
+
+  when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
+  tags:
+    - users
+    - phpfpm
+...

@@ -1,0 +1,78 @@
+---
+- name: "Chrooted user {{ user.key }} present"
+  block:
+
+    - name: "Read {{ user.key }} entry from /etc/passwd"
+      command: "grep ^{{ user.key }}: /etc/passwd"
+      check_mode: false
+      register: users_etc_passwd
+      changed_when: false
+
+    - name: "{{ user.key }} present in {{ chroot_dir | default('/chroot') }}/etc/passwd"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
+        line: "{{ users_etc_passwd.stdout }}"
+        state: present
+
+    - name: "Read {{ user.key }} entry from /etc/group"
+      command: "grep ^{{ user.key }}: /etc/group"
+      check_mode: false
+      register: users_etc_group
+      changed_when: false
+
+    - name: "{{ user.key }} present in {{ chroot_dir | default('/chroot') }}/etc/group"
+      lineinfile:
+        path: "{{ chroot_dir | default('/chroot') }}/etc/group"
+        line: "{{ users_etc_group.stdout }}"
+        state: present
+
+    - name: "Mount point {{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
+      file:
+        path: "{{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        owner: root
+        group: "{{ user.value.users_home_group | default(user.key) }}"
+        mode: "0750"
+        state: directory
+
+    - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
+      shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+      check_mode: false
+      register: users_chroot_users_home_mount
+      changed_when: '"ABSENT" in users_chroot_users_home_mount.stdout'
+
+    - name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
+      file:
+        path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
+        owner: root
+        group: root
+        mode: "0750"
+        state: directory
+      when: '"ABSENT" in users_chroot_users_home_mount.stdout'
+
+    - name: "Chroot directories mounted for {{ user.key }}"
+      mount:
+        src: "{{ mnt.src }}"
+        path: "{{ mnt.path }}"
+        opts: "{{ mnt.opts }}"
+        fstype: ext4
+        state: mounted
+      loop:
+        - src: "{{ chroot_dir | default('/chroot') }}"
+          path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
+          opts: ro,nosuid,bind,private
+        - src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+          path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+          opts: rw,nodev,nosuid,bind,private
+        - src: /run/mysqld
+          path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld"
+          opts: ro,nodev,nosuid,noexec,bind,private
+        - src: "/run/chroot"
+          path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot"
+          opts: ro,nodev,nosuid,noexec,bind,private
+      loop_control:
+        loop_var: mnt
+        label: "{{ mnt.path }}"
+
+  tags:
+    - users
+...

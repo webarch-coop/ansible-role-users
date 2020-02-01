@@ -1,0 +1,32 @@
+---
+- name: Users Apache logrotation config in place
+  template:
+    src: templates/apache_users_logrotate.j2
+    dest: /etc/logrotate.d/apache_users_logrotate
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - apache
+
+- name: Cron job to delete Apache logs when older than 30 days
+  cron:
+    name: Delete Apache log files
+    hour: 0
+    minute: 0
+    day: 1
+    job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
+  tags:
+    - apache
+
+- name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
+  cron:
+    name: "Email monthly Apache bandwidth"
+    hour: 1
+    minute: 0
+    day: 1
+    job: "/usr/local/bin/apache_data_usage_by_user {{ users_apache_bandwidth_email }}"
+  when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email != "" )
+  tags:
+    - apache
+...

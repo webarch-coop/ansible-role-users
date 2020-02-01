@@ -1,0 +1,90 @@
+---
+- name: "Check Kimai variables for {{ user.key }}"
+  block:
+
+    - name: "Check that required Kimai variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.users_apache_type == "php"
+          - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
+          - ( vhost.value.kimai_dbname is defined ) and ( vhost.value.kimai_dbname in user.value.users_mariadb_databases )
+          - vhost.value.kimai_version is defined
+          - ( vhost.value.kimai_admin_user is defined ) and ( vhost.value.kimai_admin_user is regex("^[a-z0-9_-]*$") )
+          - vhost.value.users_apache_sts is defined
+
+    - name: "Check that {{ user.key }} is in the phpfpm and chroot groups they are present"
+      assert:
+        that:
+          - ( "phpfpm" in user.value.users_groups )
+          - ( "chroot" in user.value.users_groups )
+      when: ( "phpfpm" in getent_group ) and ( "chroot" in getent_group )
+
+    - name: "Check the kimai_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      block:
+
+        - name: "Check that the kimai_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - vhost.value.kimai_url is not regex("/$")
+
+        - name: Set a fact for the kimai_url without a protcol
+          set_fact:
+            kimai_url_domain: "{{ vhost.value.kimai_url | regex_replace('^https://') }}"
+
+        - name: "Check that kimai_url domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - ( kimai_url_domain == vhost.key )
+          when: ( vhost.value.users_apache_server_aliases is not defined )
+
+        - name: "Check that kimai_url domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - ( kimai_url_domain == vhost.key ) or ( kimai_url_domain in vhost.value.users_apache_server_aliases )
+          when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
+
+      when: vhost.value.kimai_url is defined
+
+    - name: "Check the kimai_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.kimai_title | length
+      when: vhost.value.kimai_title is defined
+
+    # https://github.com/kevinpapst/kimai2/tree/master/translations
+    - name: "Check that the kimai_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that: vhost.value.kimai_locale is regex("^^[a-z]{2,3}[_]{0.1}[A-Z]{0,2}$")
+      when: vhost.value.kimai_locale is defined
+
+    - name: "Check that the kimai_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.kimai_dbprefix | length
+          - vhost.value.kimai_dbprefix is regex("^[a-zA-Z0-9_]*$")
+          - vhost.value.kimai_dbprefix is regex("^.{1,6}$")
+      when: vhost.value.kimai_dbprefix is defined
+
+    - name: "Check that the kimai_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.kimai_admin_user | length
+          - vhost.value.kimai_admin_user is regex("^[a-zA-Z0-9]*$")
+          - vhost.value.kimai_admin_user is regex("^.{2,12}$")
+      when: vhost.value.kimai_admin_user is defined
+
+    - name: "Check that the kimai_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.kimai_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+      when: vhost.value.kimai_admin_email is defined
+
+    - name: "Check that kimai_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( vhost.value.kimai_notify == True ) or ( vhost.value.kimai_notify == False )
+      when: vhost.value.kimai_notify is defined
+
+  tags:
+    - users
+...

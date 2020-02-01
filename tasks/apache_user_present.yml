@@ -1,0 +1,523 @@
+---
+# One cert per VirtualHost
+- name: "Let's Encrypt cert per vhost role included for {{ user.key }}"
+  include_role:
+    name: acmesh
+    tasks_from: letsencrypt
+  vars:
+    common_name: "{{ vhost.value.users_apache_server_name }}"
+    subject_alt_names: "{{ vhost.value.users_apache_server_aliases }}"
+    reloadcmd: "service apache2 reload"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
+  tags:
+    - users
+    - apache
+    - letsencrypt
+
+# One cert per user
+- name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
+  block:
+
+    - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
+      set_fact:
+        common_name: "{{ user.key }}.{{ inventory_hostname }}"
+        subject_alt_names: []
+        reloadcmd: "service apache2 reload"
+      check_mode: true
+
+    - name: "Set fact for subjectAltNames for {{ user.key }}"
+      set_fact:
+        subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
+      check_mode: true
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+
+    - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
+      debug:
+        msg:
+          - "subject_alt_names is set to: {{ subject_alt_names }}"
+          - "common_name is set to: {{ common_name }}"
+        verbosity: 1
+
+    - name: "Let's Encrypt cert role included for {{ user.key }}"
+      include_role:
+        name: acmesh
+        tasks_from: letsencrypt
+      when: ansible_check_mode == False
+
+  when: ( users_cert is defined ) and ( users_cert == 'user' )
+  tags:
+    - users
+    - apache
+    - letsencrypt
+
+- name: "Apache {{ user.key }}/{{ users_sites_dir }} directory present"
+  file:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}"
+    state: directory
+    owner: "{{ user.key }}"
+    # group: "{{ apache_user | default('www-data') }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
+    mode: 0750
+  tags:
+    - users
+    - apache
+
+- name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
+  file:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+    state: directory
+    owner: "{{ user.key }}"
+    # group: "{{ apache_user | default('www-data') }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
+    mode: 0750
+  loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost }}"
+  tags:
+    - users
+    - apache
+
+- name: "HTTP Authentication htpasswd files present for {{ user.key }}"
+  include_tasks: htauth.yml
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
+  tags:
+    - users
+    - apache
+
+- name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present"
+  file:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
+    state: directory
+    owner: root
+    group: "{{ user.key }}"
+    mode: 0750
+  tags:
+    - users
+    - apache
+
+- name: "Check that the SSL certs for {{ user.key }} are present"
+  include_tasks: apache_cert_check.yml
+  when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
+  tags:
+    - users
+    - apache
+    - letsencrypt
+
+- name: "Apache {{ user.key }} sites-enabled symlink absent"
+  file:
+    path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
+    state: absent
+  when: users_apache_certs_present == False
+  tags:
+    - users
+    - apache
+
+- name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
+  stat:
+    path: "/etc/apache2/sites-available/{{ user.key }}.conf"
+  register: users_apache_conf_check
+  tags:
+    - users
+    - apache
+
+- name: "Apache {{ user.key }} sites-available file copied"
+  copy:
+    src: "/etc/apache2/sites-available/{{ user.key }}.conf"
+    dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+    remote_src: true
+  when: users_apache_conf_check.stat.exists
+  tags:
+    - users
+    - apache
+
+- name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
+  include_tasks: apache_user_www_data_vhosts_present.yml
+  when:
+    - user.key == "www-data"
+    - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
+  tags:
+    - users
+    - apache
+
+- name: "Generate and enable Apache VirtualHosts for {{ user.key }}"
+  include_tasks: apache_user_vhosts_present.yml
+  when:
+    - ( user.key != "www-data" )
+    - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
+    # - ( users_apache_conf is defined )
+  tags:
+    - users
+    - apache
+
+- name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
+  shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
+  no_log: true
+  register: users_mariadb_password_read
+  check_mode: false
+  changed_when: false
+  tags:
+    - users
+
+- name: "Matomo site tasks for {{ user.key }}"
+  block:
+
+    - name: "Check if the Matomo {{ matomo_user }} system user account exists"
+      shell: "id {{ matomo_user }} && echo true || echo false"
+      check_mode: false
+      register: user_matomo_user_check
+      changed_when: '"no such user" in user_matomo_user_check.stderr'
+
+    - name: "Matomo site tasks for {{ user.key }}"
+      block:
+
+        - name: Check if Matomo config file exists
+          stat:
+            path: "{{ matomo_html }}/config/config.ini.php"
+          check_mode: false
+          register: user_matomo_config
+
+        - name: If Matomo is installed
+          block:
+
+            - name: "Debug matomo addsite for {{ user.key }}"
+              debug:
+                msg:
+                  - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
+                  - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
+                  - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
+                  - "matomo_site_admin: {{ user.key }}"
+                verbosity: 1
+              when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
+              loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+              loop_control:
+                loop_var: vhost
+                label: "{{ vhost.key }}"
+
+            - name: "addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site for {{ user.key }}"
+              include_role:
+                name: matomo
+                tasks_from: addsite.yml
+              vars:
+                matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+                matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
+                # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
+                matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
+                matomo_site_admin: "{{ user.key }}"
+              when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
+              loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+              loop_control:
+                loop_var: vhost
+                label: "{{ vhost.key }}"
+
+          when: user_matomo_config.stat.exists
+
+      when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
+
+  when: ( matomo_user is defined ) and ( matomo_user != "" )
+  tags:
+    - users
+
+- name: "Include WordPress role for {{ user.key }}"
+  include_role:
+    name: wordpress
+  vars:
+    wordpress_user: "{{ user.key }}"
+    wordpress_group: "{{ user.value.users_group | default(user.key) }}"
+    wordpress_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    wordpress_docroot_mode: "0750"
+    wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    wordpress_dbuser: "{{ vhost.value.wordpress_dbuser | default(user.key) }}"
+    wordpress_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    wordpress_dbprefix: "{{ vhost.value.wordpress_dbprefix | default('wp_') }}"
+    wordpress_locale: "{{ vhost.value.wordpress_locale | default('en_GB') }}"
+    wordpress_url: "{{ vhost.value.wordpress_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    wordpress_title: "{{ vhost.value.wordpress_title | default(vhost.value.users_apache_server_name) }}"
+    wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(user.key) }}"
+    wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(user.value.users_email) }}"
+    wordpress_notify: "{{ vhost.value.wordpress_notify | default(true) }}"
+    wordpress_notify_from: "{{ users_notify_from }}"
+    wordpress_notify_reply_to: "{{ users_notify_reply_to }}"
+    wordpress_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    wordpress_notify_headers: "{{ users_notify_headers }}"
+    wordpress_notify_signature: "{{ users_notify_signature }}"
+    wordpress_matomo_user: "{{ matomo_user }}"
+    wordpress_matomo_url: "{{ matomo_url }}"
+    wordpress_matomo_home: "{{ matomo_home }}"
+    wordpress_matomo_html: "{{ matomo_html }}"
+    wordpress_matomo_login: "{{ user.key }}"
+    wordpress_matomo_login_email: "{{ vhost.value.matomo_login_email | default(user.value.users_email) }}"
+    wordpress_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
+  tags:
+    - users
+
+- name: "Include Drupal role for {{ user.key }}"
+  include_role:
+    name: drupal
+  vars:
+    drupal_user: "{{ user.key }}"
+    drupal_group: "{{ user.value.users_group | default(user.key) }}"
+    drupal_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    drupal_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    drupal_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    drupal_docroot_mode: "0750"
+    drupal_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    drupal_url: "{{ vhost.value.drupal_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    drupal_title: "{{ vhost.value.drupal_title | default(vhost.value.users_apache_server_name) }}"
+    drupal_locale: "{{ vhost.value.drupal_locale | default('en') }}"
+    drupal_dbname: "{% if vhost.value.drupal_dbname is defined %}{{ vhost.value.drupal_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    drupal_dbuser: "{{ vhost.value.drupal_dbuser | default(user.key) }}"
+    drupal_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    drupal_dbprefix: "{{ vhost.value.drupal_dbprefix | default('') }}"
+    drupal_admin_user: "{{ vhost.value.drupal_admin_user | default(user.key) }}"
+    drupal_admin_email: "{{ vhost.value.drupal_admin_email | default(user.value.users_email) }}"
+    drupal_autoupdate: "{{ vhost.value.drupal_autoupdate | default(false) }}"
+    drupal_notify: "{{ vhost.value.drupal_notify | default(true) }}"
+    drupal_notify_from: "{{ users_notify_from }}"
+    drupal_notify_reply_to: "{{ users_notify_reply_to }}"
+    drupal_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    drupal_notify_headers: "{{ users_notify_headers }}"
+    drupal_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "drupal" )
+  tags:
+    - users
+
+- name: "Include Kimai role for {{ user.key }}"
+  include_role:
+    name: kimai
+  vars:
+    kimai_user: "{{ user.key }}"
+    kimai_group: "{{ user.value.users_group | default(user.key) }}"
+    kimai_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    kimai_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    kimai_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    kimai_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    kimai_docroot_mode: "0750"
+    kimai_version: "{{ vhost.value.kimai_version }}"
+    kimai_url: "{{ vhost.value.kimai_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    kimai_locale: "{{ vhost.value.kimai_locale | default('en') }}"
+    kimai_dbname: "{% if vhost.value.kimai_dbname is defined %}{{ vhost.value.kimai_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    kimai_dbuser: "{{ vhost.value.kimai_dbuser | default(user.key) }}"
+    kimai_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    kimai_admin_user: "{{ vhost.value.kimai_admin_user | default(user.key) }}"
+    kimai_admin_email: "{{ vhost.value.kimai_admin_email | default(user.value.users_email) }}"
+    kimai_notify: "{{ vhost.value.kimai_notify | default(true) }}"
+    kimai_notify_from: "{{ user.key }}@{{ inventory_hostname }}"
+    kimai_notify_reply_to: "{{ users_notify_reply_to }}"
+    kimai_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    kimai_notify_headers: "{{ users_notify_headers }}"
+    kimai_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "kimai" )
+  tags:
+    - users
+
+- name: "Include Nextcloud role for {{ user.key }}"
+  include_role:
+    name: nextcloud
+  vars:
+    nextcloud_user: "{{ user.key }}"
+    nextcloud_group: "{{ user.value.users_group | default(user.key) }}"
+    nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    nextcloud_version: "{{ vhost.value.nextcloud_version }}"
+    nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    nextcloud_url: "{{ vhost.value.nextcloud_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
+    nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
+    nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
+    nextcloud_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
+    nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
+    nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
+    nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) }}"
+    nextcloud_sendmail: "{{ vhost.value.nextcloud_sendmail | default(true) }}"
+    nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) }}"
+    nextcloud_notify_from: "{{ users_notify_from }}"
+    nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
+    nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    nextcloud_notify_headers: "{{ users_notify_headers }}"
+    nextcloud_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
+  tags:
+    - users
+
+- name: "Include Flarum role for {{ user.key }}"
+  include_role:
+    name: flarum
+  vars:
+    flarum_user: "{{ user.key }}"
+    flarum_group: "{{ user.value.users_group | default(user.key) }}"
+    flarum_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    flarum_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    flarum_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    flarum_version: "{{ vhost.value.flarum_version }}"
+    flarum_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    flarum_url: "{{ vhost.value.flarum_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    flarum_title: "{{ vhost.value.flarum_title | default(vhost.value.users_apache_server_name) }}"
+    flarum_description: "{{ vhost.value.flarum_description | default('A web based discussion board') }}"
+    flarum_welcome_title: "{{ vhost.value.flarum_welcome_title | default('Flarum discussion board') }}"
+    flarum_welcome_message: "{{ vhost.value.flarum_welcome_message | default('A forum hosted by Webarchitects Co-operative') }}"
+    flarum_locale: "{{ vhost.value.flarum_locale | default('en') }}"
+    flarum_dbname: "{% if vhost.value.flarum_dbname is defined %}{{ vhost.value.flarum_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    flarum_dbuser: "{{ vhost.value.flarum_dbuser | default(user.key) }}"
+    flarum_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    flarum_dbprefix: "{{ vhost.value.flarum_dbprefix | default('') }}"
+    flarum_admin_user: "{{ vhost.value.flarum_admin_user | default(user.key) }}"
+    flarum_admin_email: "{{ vhost.value.flarum_admin_email | default(user.value.users_email) }}"
+    flarum_autoupdate: "{{ vhost.value.flarum_autoupdate | default(false) }}"
+    flarum_mail_from: "{{ vhost.value.flarum_mail_from | default(user.key + '@' + inventory_hostname) }}"
+    flarum_notify: "{{ vhost.value.flarum_notify | default(true) }}"
+    flarum_notify_from: "{{ users_notify_from }}"
+    flarum_notify_reply_to: "{{ users_notify_reply_to }}"
+    flarum_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    flarum_notify_headers: "{{ users_notify_headers }}"
+    flarum_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "flarum" )
+  tags:
+    - users
+
+- name: "Include MediaWiki role for {{ user.key }}"
+  include_role:
+    name: mediawiki
+  vars:
+    mediawiki_user: "{{ user.key }}"
+    mediawiki_group: "{{ user.value.users_group | default(user.key) }}"
+    mediawiki_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    mediawiki_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    mediawiki_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    mediawiki_version: "{{ vhost.value.mediawiki_version }}"
+    mediawiki_version_patch: "{{ vhost.value.mediawiki_version_patch }}"
+    mediawiki_url: "{{ vhost.value.mediawiki_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    mediawiki_wikiname: "{{ vhost.value.mediawiki_wikiname | default(MediaWiki) }}"
+    mediawiki_domain: "{{ vhost.value.mediawiki_domain | default(vhost.value.users_apache_server_name) }}"
+    mediawiki_locale: "{{ vhost.value.mediawiki_locale | default('en') }}"
+    mediawiki_dbname: "{% if vhost.value.mediawiki_dbname is defined %}{{ vhost.value.mediawiki_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    mediawiki_dbuser: "{{ vhost.value.mediawiki_dbuser | default(user.key) }}"
+    mediawiki_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    mediawiki_dbprefix: "{{ vhost.value.mediawiki_dbprefix | default('') }}"
+    mediawiki_admin_user: "{{ vhost.value.mediawiki_admin_user | default(user.key) }}"
+    mediawiki_admin_email: "{{ vhost.value.mediawiki_admin_email | default(user.value.users_email) }}"
+    mediawiki_password_sender: "{{ vhost.value.mediawiki_password_sender | default(user.key + '@' + inventory_hostname) }}"
+    mediawiki_notify: "{{ vhost.value.mediawiki_notify | default(true) }}"
+    mediawiki_notify_from: "{{ users_notify_from }}"
+    mediawiki_notify_reply_to: "{{ users_notify_reply_to }}"
+    mediawiki_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    mediawiki_notify_headers: "{{ users_notify_headers }}"
+    mediawiki_notify_signature: "{{ users_notify_signature }}"
+    mediawiki_matomo_domain: "{{ matomo_domain }}"
+    mediawiki_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+    mediawiki_matomo_html: "{{ matomo_html }}"
+    mediawiki_matomo_user: "{{ matomo_user }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "mediawiki" )
+  tags:
+    - users
+
+- name: "Include Matomo role for {{ user.key }}"
+  include_role:
+    name: matomo
+  vars:
+    matomo_user: "{{ user.key }}"
+    matomo_group: "{{ user.value.users_group | default(user.key) }}"
+    matomo_url: "https://{{ vhost.value.users_apache_server_name }}/"
+    matomo_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    matomo_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    matomo_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    matomo_bin: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
+    matomo_logs: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    matomo_db_username: "{{ user.key }}"
+    matomo_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    matomo_db_host: localhost
+    matomo_dbname: "{% if vhost.value.matomo_dbname is defined %}{{ vhost.value.matomo_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    matomo_first_site_name: "{{ vhost.value.matomo_first_site_name | default(inventory_hostname) }}"
+    matomo_first_site_url: "{{ vhost.value.matomo_first_site_url | default('http://' + inventory_hostname + '/') }}"
+    matomo_first_user: "{{ vhost.value.matomo_first_user | default(user.key) }}"
+    matomo_first_user_email: "{{ user.value.users_email | default('root@' + inventory_hostname) }}"
+    matomo_notify_from: "{{ users_notify_from }}"
+    matomo_notify_reply_to: "{{ users_notify_reply_to }}"
+    matomo_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    matomo_notify_headers: "{{ users_notify_headers }}"
+    matomo_notify_passwd: "{{ vhost.value.matomo_notify_passwd | default(true) }}"
+    matomo_email_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
+  tags:
+    - users
+
+- name: "Include phpMyAdmin role for {{ user.key }}"
+  include_role:
+    name: phpmyadmin
+  vars:
+    phpmyadmin_user: "{{ user.key }}"
+    phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
+    phpmyadmin_dbname: "{% if vhost.value.phpmyadmin_dbname is defined %}{{ vhost.value.phpmyadmin_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    phpmyadmin_dbuser: "{{ user.key }}"
+    phpmyadmin_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    phpmyadmin_dbhost: localhost
+    phpmyadmin_dbport: 3306
+    phpmyadmin_dbsocket: /var/run/mysqld/mysqld.sock
+    phpmyadmin_url: "https://{{ vhost.value.users_apache_server_name }}/"
+    phpmyadmin_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    phpmyadmin_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+    phpmyadmin_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    phpmyadmin_version: "{{ vhost.value.phpmyadmin_version }}"
+    phpmyadmin_lang: "{{ vhost.value.phpmyadmin_lang | default('en') }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
+  tags:
+    - users
+
+- name: "Include daily scripts role for {{ user.key }}"
+  include_tasks: user_daily_scripts.yml
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
+  tags:
+    - users
+...

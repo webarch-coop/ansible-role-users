@@ -1,0 +1,173 @@
+---
+- name: "User present tasks for {{ user.key }}"
+  block:
+
+    - name: "User groups present for {{ user.key }}"
+      include_tasks: groups.yml
+      when:
+        - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
+      tags:
+        - users
+
+    - name: "User group present for {{ user.key }}"
+      group:
+        name: "{{ user.key }}"
+        state: present
+      tags:
+        - users
+
+    - name: "Users group members present for {{ user.key }}"
+      include: group_members.yml
+      when: ( user.value.users_group_members is defined ) and ( user.value.users_group_members != [] )
+      tags:
+        - users
+
+    - name: "User accounts present for {{ user.key }}"
+      include_tasks: user.yml
+      tags:
+        - users
+
+    - name: "MariaDB accounts and databases created and passwords read or set for {{ user.key }}"
+      include_tasks: mariadb_user_present.yml
+      when:
+        - user.key != "root"
+        - ( users_mariadb is defined ) and ( users_mariadb == True )
+        - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+      tags:
+        - users
+
+    - name: "Quotas set for {{ user.key }}"
+      include_tasks: quota.yml
+      when:
+        - user.key != "root"
+        - quota_dir is defined
+        - user.value.users_quota is defined
+        - user.value.users_quota != ""
+      tags:
+        - users
+
+    - name: "Set passwds and notify user {{ user.key }}"
+      include_tasks: notify_passwd.yml
+      when:
+        - user.key != "root"
+        - user.value.users_notify_passwd is defined
+        - user.value.users_notify_passwd == True
+        - user.value.users_email is defined
+        - user.value.users_email != ""
+      tags:
+        - users
+
+    - name: "Crontab present for user {{ user.key }}"
+      include_tasks: crontab_user_present.yml
+      when:
+        - user.key != "root"
+        - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
+        - ( users_crontab is not defined ) or ( users_crontab == True )
+        - ( users_cron is defined ) and ( users_cron == True )
+      tags:
+        - users
+
+    - name: "Create or remove a .forward file for {{ user.key }}"
+      block:
+
+        - name: "Email address for user absent so no .forward for {{ user.key }}"
+          file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
+            state: absent
+          when: ( users_forward == False ) or ( user.value.users_email is not defined or user.value.users_email == "" )
+          tags:
+            - users
+
+        - name: "Email address in .forward for {{ user.key }}"
+          template:
+            src: templates/forward.j2
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+          when: ( users_forward == True ) and ( user.value.users_email is defined and user.value.users_email != "" )
+          tags:
+            - users
+
+      when: users_forward is defined
+
+    - name: "Create a .muttrc for {{ user.key }} user if it doesn't exist"
+      template:
+        src: templates/muttrc.j2
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.muttrc"
+        force: false
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: 0644
+      when:
+        - ( users_muttrc is defined ) and ( users_muttrc == True )
+      tags:
+        - users
+
+    - name: Chroot users
+      block:
+
+        - name: "Include the chroot present users tasks for {{ user.key }}"
+          include_tasks: chroot_user_present.yml
+          when:
+            - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
+          tags:
+            - users
+
+        - name: "Include the PHP FPM chroot user present tasks for {{ user.key }}"
+          include_tasks: phpfpm_chroot_user_present.yml
+          when:
+            - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
+          tags:
+            - users
+            - phpfpm
+
+      when:
+        - ( user.key != "root" )
+        - ( users_chroot is defined ) and ( users_chroot == True )
+        - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+
+    - name: "Matomo login account tasks for {{ user.key }}"
+      block:
+
+        - name: "Check if the Matomo {{ matomo_user }} system user account exists"
+          shell: "id {{ matomo_user }} && echo true || echo false"
+          check_mode: false
+          register: user_matomo_user_check
+          changed_when: '"no such user" in user_matomo_user_check.stderr'
+          tags:
+            - users
+
+        - name: "Matomo user login account tasks for {{ user.key }}"
+          block:
+
+            - name: Check if Matomo config file exists
+              stat:
+                path: "{{ matomo_html }}/config/config.ini.php"
+              check_mode: false
+              register: user_matomo_config
+              tags:
+                - users
+
+            - name: "Matomo accounts for user {{ user.key }} present"
+              include_tasks: matomo_user_present.yml
+              when: user_matomo_config.stat.exists
+              tags:
+                - users
+
+          when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
+
+      when: ( user.key != "root" ) and ( matomo_user is defined ) and ( matomo_user != "" )
+
+    - name: "Include Apache config tasks present for user {{ user.key }}"
+      include_tasks: apache_user_present.yml
+      when:
+        - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
+        - ( users_apache is defined ) and ( users_apache == True )
+        - ( user.value.users_apache_virtual_hosts is defined )
+      tags:
+        - apache
+
+  tags:
+    - users
+...

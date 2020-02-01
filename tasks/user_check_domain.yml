@@ -3,17 +3,25 @@
 - name: Variable users_domain_dig set to empty
   set_fact:
     users_domain_dig: ""
+  tags:
+    - users
 
 - name: Set a fact for the domain we are testing
   set_fact:
     users_domain_dig: "{{ query('dig', '{{ users_domain }}') | ipv4 }}"
+  tags:
+    - users
 
 - name: Print the IP address
   debug:
     msg: "{{ users_domain }} resolves to {{ users_domain_dig }}"
+  tags:
+    - users
 
 - name: "Fail if {{ users_domain_dig }} is not a IPv4 address"
   fail:
     msg: "{{ users_domain }} appears not to resolve to a IP address"
   when: users_domain_dig == False
+  tags:
+    - users
 ...

@@ -1,0 +1,36 @@
+---
+- name: Debug the apache.conf.j2 template variables
+  debug:
+    msg:
+      - "user.key: {{ user.key }}"
+      - "user.value.users_groups: {% if user.value.users_groups is defined %}{{ user.value.users_groups }}{% endif %}"
+      - "users_sites_dir: {{ users_sites_dir }}"
+      - "users_phpfpm_version: {% if users_phpfpm_version is defined %}{{ users_phpfpm_version }}{% endif %}"
+      - "vhost.key: {{ vhost.key }}"
+      - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
+      - "vhost.value.users_apache_vhost_docroot: {% if vhost.value.users_apache_vhost_docroot is defined %}{{ vhost.value.users_apache_vhost_docroot }}{% endif %}"
+      - "vhost.value.users_apache_server_aliases: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }}{% endif %}"
+      - "vhost.value.users_apache_type: {% if vhost.value.users_apache_type is defined %}{{ vhost.value.users_apache_type }}{% endif %}"
+    verbosity: 2
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  tags:
+    - users
+    - apache
+
+- name: VirtualHosts files present for www-data
+  template:
+    src: templates/apache.conf.j2
+    dest: "/etc/apache2/sites-available/{{ vhost.key }}.conf"
+    trim_blocks: false
+    lstrip_blocks: true
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  tags:
+    - users
+    - apache
+...

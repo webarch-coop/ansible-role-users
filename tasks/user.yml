@@ -4,7 +4,7 @@
     users_own_group:
       - "{{ user.key }}"
   tags:
-    - users-update
+    - users
 
 - name: "Set a fact for the {{ user.key }} users groups which includes the users own group, as a list"
   set_fact:
@@ -12,7 +12,7 @@
       - "{{ user.value.users_groups | default(omit) + users_own_group }}"
   when: ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
   tags:
-    - users-update
+    - users
 
 - name: "Print debugging info for {{ user.key }}"
   debug:
@@ -45,7 +45,7 @@
     generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
     system: "{{ user.value.users_system | default('no', false) }}"
   tags:
-    - users-update
+    - users
 
 - name: "Chown user home directory owner to {{ user.value.users_home_owner | default(user.key) }}"
   file:
@@ -53,7 +53,7 @@
     state: directory
     owner: "{{ user.value.users_home_owner | default(user.key) }}"
   tags:
-    - users-update
+    - users
 
 - name: "Chown user home directory group to {{ user.value.users_home_group | default(user.key) }}"
   file:
@@ -61,7 +61,7 @@
     state: directory
     group: "{{ user.value.users_home_group | default(user.key) }}"
   tags:
-    - users-update
+    - users
 
 - name: "Chmod users home directory {{ user.value.users_home_mode | default('0750') }}"
   file:
@@ -69,7 +69,7 @@
     state: directory
     mode: "{{ user.value.users_home_mode | default('0750') }}"
   tags:
-    - users-update
+    - users
 
 - debug:
     msg: "name: {{ user.key }} | ssh dir: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh"
@@ -92,15 +92,13 @@
     loop_var: dir
     label: "{{ dir }}"
   tags:
-    - users-ssh
-    - users-update
+    - users
 
 - name: "SSH public keys present for {{ user.key }}"
   include_tasks: ssh.yml
   when: ( user.value.users_ssh_public_keys is defined ) and ( user.value.users_ssh_public_keys != [] )
   tags:
-    - users-ssh
-    - users-update
+    - users
 
 - name: "Generate SSH ECDSA keypair for {{ user.key }}"
   command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "root@{{ ansible_fqdn }}"
@@ -110,8 +108,7 @@
   become_user: "{{ user.key }}"
   when: ( user.value.users_generate_ssh_key is defined ) and ( user.value.users_generate_ssh_key == True )
   tags:
-    - users-ssh
-    - users-update
+    - users
 
 - name: "Set default editor for {{ user.key }}"
   copy:
@@ -122,7 +119,7 @@
     mode: 0644
   when: ( user.value.users_editor is defined ) and ( user.value.users_editor != "" )
   tags:
-    - users-update
+    - users
 
 - name: Vim tasks
   block:
@@ -134,12 +131,6 @@
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: 0644
-      tags:
-        - users-update
-
-    - debug:
-        msg: "bashrc: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
-        verbosity: 1
 
     - name: "vim set to be default editor for {{ user.key }}"
       lineinfile:
@@ -147,10 +138,10 @@
         line: 'export EDITOR="vim"'
         state: present
         create: true
-      tags:
-        - users-update
 
   when: user.value.users_editor is defined and user.value.users_editor == 'vim'
+  tags:
+    - users
 
 - name: ".gitconfig in place for {{ user.key }}"
   template:
@@ -163,5 +154,5 @@
     - ( user.value.users_name is defined and user.value.users_name != "" )
     - ( user.value.users_email is defined and user.value.users_email != "" )
   tags:
-    - users-update
+    - users
 ...

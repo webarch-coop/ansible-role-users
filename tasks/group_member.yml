@@ -1,0 +1,22 @@
+---
+# This is included from group_members.yml
+
+- name: "Check that the {{ member }} user exists"
+  block:
+
+    - name: "Check that the user {{ member }} exists"
+      command: "getent passwd {{ member }}"
+      register: users_user_check
+
+    - name: "Users that have membership of {{ user.value.users_group | default(user.key) }} group"
+      command: "usermod -a -G {{ user.value.users_group | default(user.key) }} {{ member }}"
+
+  rescue:
+
+    - name: Don't fail, print a warning, this role might need to be run again
+      debug:
+        msg: "The {{ member }} user hasn't yet been created so skipping"
+
+  tags:
+    - users
+...

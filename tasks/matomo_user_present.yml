@@ -15,6 +15,6 @@
     matomo_notify_headers: "{{ users_notify_headers }}"
     matomo_notify_signature: "{{ users_notify_signature }}"
   tags:
+    - users
     - matomo
-    - users-update
 ...

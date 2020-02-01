@@ -10,6 +10,25 @@ users_chroot: false
 # Define users_mariadb to true for this role to create MariaDB user and
 # databases
 users_mariadb: false
+# MySQL user privileges copied from
+# https://www.a2hosting.com/kb/developer-corner/mysql/mysql-user-privileges-on-shared-servers
+users_mariadb_database_privileges:
+  - ALTER
+  - CREATE
+  - CREATE ROUTINE
+  - CREATE TEMPORARY TABLES
+  - CREATE VIEW
+  - DELETE
+  - DROP
+  - EXECUTE
+  - INDEX
+  - INSERT
+  - LOCK TABLES
+  - REFERENCES
+  - SELECT
+  - SHOW VIEW
+  - TRIGGER
+  - UPDATE
 # Define users_phpfpm to true for this role to generate PHP FPM pools
 users_phpfpm: false
 # Define users_cron to true for this role to generate cron tasks

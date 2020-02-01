@@ -1,191 +1,250 @@
 ---
-- name: "Check the DocumentRoot for the {{ vhost.key }} VirtualHost for {{ user.key }} contains valid characters"
-  assert:
-    that:
-      - vhost.key is regex("^[a-zA-Z0-9/_-]*$")
-    fail_msg: "Only letters, numbers, underscores, dashes and forward slashes can be present in the DocumentRoot path"
-
-- name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
-  assert:
-    that:
-      - vhost.value.users_apache_server_name is defined
-      - vhost.value.users_apache_server_name | length
-
-- name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName that resolves to a IPv4 address"
-  include_tasks: user_check_domain.yml
-  vars:
-    users_domain: "{{ vhost.value.users_apache_server_name }}"
-
-- name: "Check ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }}"
+- name: "Apache VirtualHosts variables checks for {{ user.key }}"
   block:
 
-    - name: "Check that the ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
+    - name: "Check the DocumentRoot for the {{ vhost.key }} VirtualHost for {{ user.key }} contains valid characters"
       assert:
         that:
-          - vhost.value.users_apache_server_aliases | length
-          - vhost.value.users_apache_server_aliases[0] is defined
+          - vhost.key is regex("^[a-zA-Z0-9/_-]*$")
+        fail_msg: "Only letters, numbers, underscores, dashes and forward slashes can be present in the DocumentRoot path"
 
-    - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has ServerAlias' that resolve to IPv4 addresses"
+    - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
+      assert:
+        that:
+          - vhost.value.users_apache_server_name is defined
+          - vhost.value.users_apache_server_name | length
+
+    - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName that resolves to a IPv4 address"
       include_tasks: user_check_domain.yml
       vars:
-        users_domain: "{{ domain }}"
-      loop: "{{ vhost.value.users_apache_server_aliases }}"
-      loop_control:
-        loop_var: domain
-        label: "{{ domain }}"
+        users_domain: "{{ vhost.value.users_apache_server_name }}"
 
-  when: vhost.value.users_apache_server_aliases is defined
+    - name: "Check ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      block:
 
-- name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
-  assert:
-    that:
-      # - ( vhost.value.users_apache_type == "php" ) or ( vhost.value.users_apache_type == "cgi" ) or ( vhost.value.users_apache_type == "static" )
-      - vhost.value.users_apache_type is regex("php|cgi|static")
-  when: vhost.value.users_apache_type is defined
+        - name: "Check that the ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
+          assert:
+            that:
+              - vhost.value.users_apache_server_aliases | length
+              - vhost.value.users_apache_server_aliases[0] is defined
 
-- name: "Check that users_apache_robots is set to deny is defined for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-  assert:
-    that:
-      - vhost.value.users_apache_robots == "deny"
-  when: vhost.value.users_apache_robots is defined
+        - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has ServerAlias' that resolve to IPv4 addresses"
+          include_tasks: user_check_domain.yml
+          vars:
+            users_domain: "{{ domain }}"
+          loop: "{{ vhost.value.users_apache_server_aliases }}"
+          loop_control:
+            loop_var: domain
+            label: "{{ domain }}"
 
-- name: "Check that users_apache_expires is set to medium or strict for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-  assert:
-    that:
-      - ( vhost.value.users_apache_expires == "medium" ) or ( vhost.value.users_apache_expires == "strict" )
-  when: vhost.value.users_apache_expires is defined
+      when: vhost.value.users_apache_server_aliases is defined
+      tags:
+        - users
 
-- name: "Check that users_cms is set to wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-  assert:
-    that:
-      # - ( vhost.value.users_cms == "wordpress" ) or ( vhost.value.users_cms == "matomo" ) or ( vhost.value.users_cms == "phpmyadmin" )
-      - vhost.value.users_cms is regex("wordpress|matomo|phpmyadmin")
-  when: vhost.value.users_cms is defined
+    - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
+      assert:
+        that:
+          - vhost.value.users_apache_type is regex("php|cgi|static")
+      when: vhost.value.users_apache_type is defined
 
-- name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+    - name: "Check that users_apache_robots is set to deny is defined for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+      assert:
+        that:
+          - vhost.value.users_apache_robots == "deny"
+      when: vhost.value.users_apache_robots is defined
+
+    - name: "Check that users_apache_remoteip for {{ vhost.key }} VirtualHost for {{ user.key }} is set to cloudflare if it is defined"
+      assert:
+        that:
+          - vhost.value.users_apache_remoteip is regex("cloudflare")
+      when: vhost.value.users_apache_remoteip is defined
+
+    - name: "Check that users_apache_expires is set to medium or strict for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+      assert:
+        that:
+          - ( vhost.value.users_apache_expires == "medium" ) or ( vhost.value.users_apache_expires == "strict" )
+      when: vhost.value.users_apache_expires is defined
+
+    - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
+
+        - name: "Check the users_apache_htauth_users names for {{ vhost.key }} VirtualHost for {{ user.key }} are valid if defined"
+          assert:
+            that:
+              - htuser.name is defined
+              - htuser.name is regex("^[a-zA-Z0-9_-]*$")
+          loop: "{{ vhost.value.users_apache_htauth_users }}"
+          loop_control:
+            loop_var: htuser
+            label: "{{ htuser.name }}"
+
+        - name: "Check that the users_apache_htauth_users passwords for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+          assert:
+            that:
+              - htuser.password is defined
+          when: ( htuser.state is not defined ) or ( htuser.state == "present" )
+          loop: "{{ vhost.value.users_apache_htauth_users }}"
+          loop_control:
+            loop_var: htuser
+            label: "{{ htuser.name }}"
+
+        - name: "Check that users_apache_htauth_users state is set to present or absent for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+          assert:
+            that:
+              - htuser.state is regex("present|absent")
+          when: htuser.state is defined
+          loop: "{{ vhost.value.users_apache_htauth_users }}"
+          loop_control:
+            loop_var: htuser
+            label: "{{ htuser.name }}"
+
+      when: vhost.value.users_apache_htauth_users is defined
+      tags:
+        - users
+
+    - name: "Check the locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
+
+        - name: "Check that the locations for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
+          assert:
+            that:
+              - vhost.value.users_apache_locations | length
+              - vhost.value.users_apache_locations[0] is defined
+
+        - name: "Loop through the users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+          include_tasks: user_check_vhost_location.yml
+          loop: "{{ vhost.value.users_apache_locations }}"
+          loop_control:
+            loop_var: loc
+            label: "{{ loc }}"
+
+      when: vhost.value.users_apache_locations is defined
+      tags:
+        - users
+
+    - name: "Check that only valid Options are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
+
+        - name: "Check that the Options for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
+          assert:
+            that:
+              - vhost.value.users_apache_options | length
+              - vhost.value.users_apache_options[0] is defined
+
+        - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - option is regex("^[+-](?i)All|ExecCGI|FollowSymLinks!Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$")
+          loop: "{{ vhost.value.users_apache_options }}"
+          loop_control:
+            loop_var: option
+            label: "{{ option }}"
+
+      when: vhost.value.users_apache_options is defined
+      tags:
+        - users
+
+    - name: "Check that only valid AllowOverride directives are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
+
+        - name: "Check that the AllowOverride directives for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
+          assert:
+            that:
+              - vhost.value.users_apache_override | length
+              - vhost.value.users_apache_override[0] is defined
+
+        - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
+          loop: "{{ vhost.value.users_apache_override }}"
+          loop_control:
+            loop_var: override
+            label: "{{ override }}"
+
+      when: vhost.value.users_apache_override is defined
+      tags:
+        - users
+
+    - name: "Check that file names are listed for the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
+      block:
+
+        - name: "Check that the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
+          assert:
+            that:
+              - vhost.value.users_apache_index | length
+              - vhost.value.users_apache_index[0] is defined
+
+        - name: "Check that each DirectoryIndex appears to be a filename for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - index is regex("^\w+\.\w+$")
+          loop: "{{ vhost.value.users_apache_index }}"
+          loop_control:
+            loop_var: index
+            label: "{{ index }}"
+
+      when: vhost.value.users_apache_index is defined
+
+    - name: "Check that the users_daily_scripts array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
+      assert:
+        that:
+          - vhost.value.users_daily_scripts | length
+          - vhost.value.users_daily_scripts[0] is defined
+      when: vhost.value.users_daily_scripts is defined
+
+    - name: "Check that the users_apache_nophp_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
+      assert:
+        that:
+          - vhost.value.users_apache_nophp_dirs | length
+          - vhost.value.users_apache_nophp_dirs[0] is defined
+      when: vhost.value.users_apache_nophp_dirs is defined
+
+  tags:
+    - users
+    - apache
+
+- name: "CMS checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:
 
-    - name: "Check the users_apache_htauth_users names for {{ vhost.key }} VirtualHost for {{ user.key }} are valid if defined"
+    - name: "Check that users_cms is set to mediawiki, flarum, nextcloud, kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
       assert:
         that:
-          - htuser.name is defined
-          - htuser.name is regex("^[a-zA-Z0-9_-]*$")
-      loop: "{{ vhost.value.users_apache_htauth_users }}"
-      loop_control:
-        loop_var: htuser
-        label: "{{ htuser }}"
+          - vhost.value.users_cms is regex("mediawiki|flarum|nextcloud|kimai|drupal|wordpress|matomo|phpmyadmin")
+      when: vhost.value.users_cms is defined
 
-    - name: "Check that the users_apache_htauth_users passwords for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
-      assert:
-        that:
-          - htuser.password is defined
-      when: ( htuser.state is not defined ) or ( htuser.state == "present" )
-      loop: "{{ vhost.value.users_apache_htauth_users }}"
-      loop_control:
-        loop_var: htuser
-        label: "{{ htuser }}"
+    - name: "Drupal checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_drupal.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "drupal" )
 
-    - name: "Check that users_apache_htauth_users state is set to present or absent for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      assert:
-        that:
-          - htuser.state is regex("present|absent")
-      when: htuser.state is defined
-      loop: "{{ vhost.value.users_apache_htauth_users }}"
-      loop_control:
-        loop_var: htuser
-        label: "{{ htuser }}"
+    - name: "Kimai checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_kimai.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "kimai" )
 
-  when: vhost.value.users_apache_htauth_users is defined
+    - name: "Matomo checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_matomo.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "matomo" )
 
-- name: "Check the locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-  block:
+    - name: "Nextcloud checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_nextcloud.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
 
-    - name: "Check that the locations for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
-      assert:
-        that:
-          - vhost.value.users_apache_locations | length
-          - vhost.value.users_apache_locations[0] is defined
+    - name: "phpMyAdmin checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_phpmyadmin.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "phpmyadmin" )
 
-    - name: "Loop through the users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      include_tasks: user_check_vhost_location.yml
-      loop: "{{ vhost.value.users_apache_locations }}"
-      loop_control:
-        loop_var: loc
-        label: "{{ loc }}"
+    - name: "WordPress checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_wordpress.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
 
-  when: vhost.value.users_apache_locations is defined
+    - name: "MediaWiki checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_mediawiki.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "mediawiki" )
 
-- name: "Check that only valid Options are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-  block:
+    - name: "Flarum checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_flarum.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "flarum" )
 
-    - name: "Check that the Options for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
-      assert:
-        that:
-          - vhost.value.users_apache_options | length
-          - vhost.value.users_apache_options[0] is defined
-
-    - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - option is regex("^[+-](?i)All|ExecCGI|FollowSymLinks!Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$")
-      loop: "{{ vhost.value.users_apache_options }}"
-      loop_control:
-        loop_var: option
-        label: "{{ option }}"
-
-  when: vhost.value.users_apache_options is defined
-
-- name: "Check that only valid AllowOverride directives are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-  block:
-
-    - name: "Check that the AllowOverride directives for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
-      assert:
-        that:
-          - vhost.value.users_apache_override | length
-          - vhost.value.users_apache_override[0] is defined
-
-    - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
-      loop: "{{ vhost.value.users_apache_override }}"
-      loop_control:
-        loop_var: override
-        label: "{{ override }}"
-
-  when: vhost.value.users_apache_override is defined
-
-- name: "Check that file names are listed for the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
-  block:
-
-    - name: "Check that the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
-      assert:
-        that:
-          - vhost.value.users_apache_index | length
-          - vhost.value.users_apache_index[0] is defined
-
-    - name: "Check that each DirectoryIndex appears to be a filename for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - index is regex("^\w+\.\w+$")
-      loop: "{{ vhost.value.users_apache_index }}"
-      loop_control:
-        loop_var: index
-        label: "{{ index }}"
-
-  when: vhost.value.users_apache_index is defined
-
-- name: "Check that the users_daily_scripts array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
-  assert:
-    that:
-      - vhost.value.users_daily_scripts | length
-      - vhost.value.users_daily_scripts[0] is defined
-  when: vhost.value.users_daily_scripts is defined
-
-- name: "Check that the users_apache_nophp_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
-  assert:
-    that:
-      - vhost.value.users_apache_nophp_dirs | length
-      - vhost.value.users_apache_nophp_dirs[0] is defined
-  when: vhost.value.users_apache_nophp_dirs is defined
+  tags:
+    - users
 ...
