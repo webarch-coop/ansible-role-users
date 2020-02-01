@@ -82,6 +82,7 @@
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0700
+  when: ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
   loop: "{{ users_private_dirs }}"
   loop_control:
     loop_var: dir
