@@ -91,7 +91,7 @@
     - name: Check that php-fpm is installed
       assert:
         that:
-          - '"php-fpm" in ansible_facts.packages'
+          - ( "php-fpm" in ansible_facts.packages )
 
     - name: Run phpquery -V
       command: phpquery -V
