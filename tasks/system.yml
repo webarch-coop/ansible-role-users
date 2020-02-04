@@ -102,7 +102,12 @@
     - name: Set a fact for the PHP-FPM version
       set_fact:
         users_phpfpm_version: "{{ users_phpquery.stdout | trim }}"
-      when: ( users_phpquery is defined ) and ( users_phpquery.stdout != "" )
+
+    - name: Fail if users_phpfpm_version is not defined
+      assert:
+        that:
+          - users_phpfpm_version is defined
+          - users_phpfpm_version is regex('^[1-9][.][1-9]$')
 
   when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
   tags:
