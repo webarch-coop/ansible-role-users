@@ -168,6 +168,14 @@
       tags:
         - apache
 
+    - name: Users state files updated
+      include_tasks: user_updated.yml
+      tags:
+        - users
+        - apache
+        - phpfpm
+        - letsencrypt
+
   tags:
     - users
 ...

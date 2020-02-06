@@ -9,7 +9,7 @@
     - phpfpm
     - letsencrypt
 
-- name: "Current state file moved to the previous directory for {{ user.key }}"
+- name: "Current state file copied to the previous directory for {{ user.key }}"
   copy:
     src: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     dest: "{{ users_state_dir }}/previous/{{ user.key }}.yml"
@@ -21,7 +21,7 @@
     - phpfpm
     - letsencrypt
 
-- name: "Proposed users state file moved to the current directory for {{ user.key }}"
+- name: "Proposed users state file copied to the current directory for {{ user.key }}"
   copy:
     src: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
     dest: "{{ users_state_dir }}/current/{{ user.key }}.yml"

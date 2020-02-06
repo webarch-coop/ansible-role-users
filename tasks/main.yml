@@ -176,20 +176,31 @@
   tags:
     - users
 
-- name: Users state files updated
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-  when: user.key in users_update
-  include_tasks: user_updated.yml
+# This has been moved so the users state files are updated one at a time
+# rather than all at the end.
+# - name: Users state files updated
+#   include_tasks: user_updated.yml
+#   when: user.key in users_update
+#   loop: "{{ users | dict2items }}"
+#   loop_control:
+#     loop_var: user
+#     label: "{{ user.key }}"
+#   tags:
+#     - users
+#     - apache
+#     - phpfpm
+#     - letsencrypt
+
+- name: Firewall tasks included
+  include_tasks: firewall.yml
+  when: ( users_firewall is defined ) and ( users_firewall == True )
+
+- name: List the updated users
+  debug:
+    msg: "Users updated: {{ users_update }}"
   tags:
     - users
     - apache
     - phpfpm
     - letsencrypt
-
-- name: Firewall tasks included
-  include_tasks: firewall.yml
-  when: ( users_firewall is defined ) and ( users_firewall == True )
 ...
