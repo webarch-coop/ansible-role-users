@@ -42,9 +42,9 @@
   when:
     - users_domain_dig == False
     - users_domain_check != "strict"
-    - users_reverse_proxy != "cloudflare" 
-  tags:     
-    - users   
+    - users_reverse_proxy != "cloudflare"
+  tags:
+    - users
 
 - name: "Fail if {{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
   fail:
@@ -53,6 +53,6 @@
     - users_domain_dig == False
     - users_domain_check == "strict"
     - users_reverse_proxy != "cloudflare"
-  tags:     
-    - users   
+  tags:
+    - users
 ...

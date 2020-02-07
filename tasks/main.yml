@@ -83,8 +83,8 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
-    
-    - name: End as checks completed 
+
+    - name: End as checks completed
       meta: end_play
 
   when:
@@ -115,7 +115,7 @@
       when:
         - ( user.key is defined ) and ( user.key in users_update )
         - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
-        - ( users_update_check is not defined ) or ( users_update_check != True ) 
+        - ( users_update_check is not defined ) or ( users_update_check != True )
       loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
@@ -136,7 +136,7 @@
       when:
         - ( user.key is defined ) and ( user.key in users_update )
         - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-        - ( users_update_check is not defined ) or ( users_update_check != True ) 
+        - ( users_update_check is not defined ) or ( users_update_check != True )
       loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
@@ -175,7 +175,7 @@
 
   when:
     - ( users_update is defined ) and ( users_update != [] )
-    - ( users_update_check is not defined ) or ( users_update_check != True ) 
+    - ( users_update_check is not defined ) or ( users_update_check != True )
   tags:
     - users
     - apache
@@ -200,7 +200,7 @@
 
   when:
     - quota_dir is defined
-    - ( users_update_check is not defined ) or ( users_update_check != True ) 
+    - ( users_update_check is not defined ) or ( users_update_check != True )
   tags:
     - users
 
@@ -223,7 +223,7 @@
   include_tasks: firewall.yml
   when:
     - ( users_firewall is defined ) and ( users_firewall == True )
-    - ( users_update_check is not defined ) or ( users_update_check != True ) 
+    - ( users_update_check is not defined ) or ( users_update_check != True )
 
 - name: List the updated users
   debug:
