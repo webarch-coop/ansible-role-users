@@ -72,21 +72,28 @@
     - phpfpm
     - letsencrypt
 
-- name: Run checks on users
-  include_tasks: user_check.yml
-  when:
-    - ( users_update_check is defined ) and ( users_update_check == True )
-    - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
+- name: Check config only
+  block:
 
-- name: Debug fail
-  fail:
-    msg: Debug
+    - name: Run checks on users
+      include_tasks: user_check.yml
+      when:
+        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+    
+    - name: End as checks completed 
+      meta: end_host
+
   when:
     - ( users_update_check is defined ) and ( users_update_check == True )
+  tags:
+    - users
+    - apache
+    - phpfpm
+    - letsencrypt
 
 - name: Update users tasks
   block:
