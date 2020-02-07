@@ -127,6 +127,12 @@ Then it can be run as follows:
 ansible-playbook users.yml 
 ```
 
+## Debugging
+
+If `users_update_check` is set to true, for example on the command line using `--extra-vars "users_update_check=true"` then no changes will be made other than to generate `/root/users/proposed/*.yml` state files.
+
+If `users_domain_check` is set to `strict` then if a domain name doesn't resolve to the servers IP address then the tasks will stop rather than just warn.
+
 ## SSH Public Keys
 
 The `users_ssh_public_keys` array should be set to a list of one or more URL's for public keys (eg from GitHub).
