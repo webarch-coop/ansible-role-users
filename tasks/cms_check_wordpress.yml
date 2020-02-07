@@ -68,12 +68,12 @@
           - vhost.value.wordpress_title | length
       when: vhost.value.wordpress_title is defined
 
-    - name: "Check that the wordpress_admin_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that the wordpress_admin_user contains only ascii letters and numbers and is between 2 and 14 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - vhost.value.wordpress_admin_user | length
           - vhost.value.wordpress_admin_user is regex("^[a-zA-Z0-9]*$")
-          - vhost.value.wordpress_admin_user is regex("^.{2,12}$")
+          - vhost.value.wordpress_admin_user is regex("^.{2,14}$")
       when: vhost.value.wordpress_admin_user is defined
 
     - name: "Check that the wordpress_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"

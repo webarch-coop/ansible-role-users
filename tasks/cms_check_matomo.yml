@@ -30,12 +30,12 @@
           - vhost.value.matomo_first_site_url is regex("^http:\/\/.*$")
       when: vhost.value.matomo_first_site_url is defined
 
-    - name: "Check that the matomo_first_user contains only ascii letters and numbers and is between 2 and 12 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that the matomo_first_user contains only ascii letters and numbers and is between 2 and 14 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - vhost.value.matomo_first_user | length
           - vhost.value.matomo_first_user is regex("^[a-zA-Z0-9]*$")
-          - vhost.value.matomo_first_user is regex("^.{2,12}$")
+          - vhost.value.matomo_first_user is regex("^.{2,14}$")
       when: vhost.value.matomo_first_user is defined
 
     - name: "Check that the matomo_first_user_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
