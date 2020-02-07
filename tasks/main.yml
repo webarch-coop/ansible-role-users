@@ -82,6 +82,11 @@
     loop_var: user
     label: "{{ user.key }}"
 
+- name: Debug fail
+  fail:
+    msg: Debug
+    - ( users_update_check is defined ) and ( users_update_check == True )
+
 - name: Update users tasks
   block:
 

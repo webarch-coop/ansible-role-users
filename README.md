@@ -137,7 +137,7 @@ So, for example:
 
 ```bash
 ansible-galaxy install -r requirements.yml --force && \
-  ansible-playbook users.yml -t users --extra-vars "users_update_check=true,users_domain_check=strict,users_update_strategy=all"
+  ansible-playbook users.yml --extra-vars "users_update_check=true,users_domain_check=strict,users_update_strategy=all"
 ```
 
 ## SSH Public Keys
