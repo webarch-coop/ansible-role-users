@@ -85,7 +85,7 @@
         label: "{{ user.key }}"
     
     - name: End as checks completed 
-      meta: end_host
+      meta: end_play
 
   when:
     - ( users_update_check is defined ) and ( users_update_check == True )
