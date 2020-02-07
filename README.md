@@ -133,6 +133,13 @@ If `users_update_check` is set to true, for example on the command line using `-
 
 If `users_domain_check` is set to `strict` then if a domain name doesn't resolve to the servers IP address then the tasks will stop rather than just warn.
 
+So, for example:
+
+```bash
+ansible-galaxy install -r requirements.yml --force && \
+  ansible-playbook users.yml -t users --extra-vars "users_update_check=true,users_domain_check=strict,users_update_strategy=all"
+```
+
 ## SSH Public Keys
 
 The `users_ssh_public_keys` array should be set to a list of one or more URL's for public keys (eg from GitHub).
