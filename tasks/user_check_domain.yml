@@ -18,10 +18,41 @@
   tags:
     - users
 
+- name: "Warn if {{ users_domain_dig }} is not a IPv4 address"
+  debug:
+    msg: "{{ users_domain }} appears not to resolve to a IP address"
+  when:
+    - users_domain_dig == False
+    - users_domain_check != "strict"
+  tags:
+    - users
+
 - name: "Fail if {{ users_domain_dig }} is not a IPv4 address"
   fail:
     msg: "{{ users_domain }} appears not to resolve to a IP address"
-  when: users_domain_dig == False
+  when:
+    - users_domain_dig == False
+    - users_domain_check == "strict"
+  tags:
+    - users
+
+- name: "Warn if {{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+  debug:
+    msg: "{{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+  when:
+    - users_domain_dig == False
+    - users_domain_check != "strict"
+    - users_reverse_proxy != "cloudflare"
+  tags:
+    - users
+
+- name: "Fail if {{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+  fail:
+    msg: "{{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+  when:
+    - users_domain_dig == False
+    - users_domain_check == "strict"
+    - users_reverse_proxy != "cloudflare"
   tags:
     - users
 ...

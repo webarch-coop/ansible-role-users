@@ -72,6 +72,29 @@
     - phpfpm
     - letsencrypt
 
+- name: Check config only
+  block:
+
+    - name: Run checks on users
+      include_tasks: user_check.yml
+      when:
+        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: End as checks completed
+      meta: end_play
+
+  when:
+    - ( users_update_check is defined ) and ( users_update_check == True )
+  tags:
+    - users
+    - apache
+    - phpfpm
+    - letsencrypt
+
 - name: Update users tasks
   block:
 
@@ -92,6 +115,7 @@
       when:
         - ( user.key is defined ) and ( user.key in users_update )
         - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
+        - ( users_update_check is not defined ) or ( users_update_check != True )
       loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
@@ -112,6 +136,7 @@
       when:
         - ( user.key is defined ) and ( user.key in users_update )
         - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+        - ( users_update_check is not defined ) or ( users_update_check != True )
       loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
@@ -150,6 +175,7 @@
 
   when:
     - ( users_update is defined ) and ( users_update != [] )
+    - ( users_update_check is not defined ) or ( users_update_check != True )
   tags:
     - users
     - apache
@@ -172,24 +198,39 @@
       check_mode: false
       when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
 
-  when: quota_dir is defined
+  when:
+    - quota_dir is defined
+    - ( users_update_check is not defined ) or ( users_update_check != True )
   tags:
     - users
 
-- name: Users state files updated
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-  when: user.key in users_update
-  include_tasks: user_updated.yml
+# This has been moved so the users state files are updated one at a time
+# rather than all at the end.
+# - name: Users state files updated
+#   include_tasks: user_updated.yml
+#   when: user.key in users_update
+#   loop: "{{ users | dict2items }}"
+#   loop_control:
+#     loop_var: user
+#     label: "{{ user.key }}"
+#   tags:
+#     - users
+#     - apache
+#     - phpfpm
+#     - letsencrypt
+
+- name: Firewall tasks included
+  include_tasks: firewall.yml
+  when:
+    - ( users_firewall is defined ) and ( users_firewall == True )
+    - ( users_update_check is not defined ) or ( users_update_check != True )
+
+- name: List the updated users
+  debug:
+    msg: "Users updated: {{ users_update }}"
   tags:
     - users
     - apache
     - phpfpm
     - letsencrypt
-
-- name: Firewall tasks included
-  include_tasks: firewall.yml
-  when: ( users_firewall is defined ) and ( users_firewall == True )
 ...

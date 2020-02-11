@@ -79,4 +79,12 @@
     state: absent
   tags:
     - users
+
+- name: Users state files updated
+  include_tasks: user_updated.yml
+  tags:
+    - users
+    - apache
+    - phpfpm
+    - letsencrypt
 ...

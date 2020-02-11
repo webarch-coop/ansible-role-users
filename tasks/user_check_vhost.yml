@@ -18,6 +18,7 @@
       include_tasks: user_check_domain.yml
       vars:
         users_domain: "{{ vhost.value.users_apache_server_name }}"
+        users_reverse_proxy: "{% if vhost.value.users_apache_remoteip is defined %}{{ vhost.value.users_apache_remoteip }}{% endif %}"
 
     - name: "Check ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
@@ -32,6 +33,7 @@
           include_tasks: user_check_domain.yml
           vars:
             users_domain: "{{ domain }}"
+            users_reverse_proxy: "{% if vhost.value.users_apache_remoteip is defined %}{{ vhost.value.users_apache_remoteip }}{% endif %}"
           loop: "{{ vhost.value.users_apache_server_aliases }}"
           loop_control:
             loop_var: domain
