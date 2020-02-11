@@ -12,9 +12,16 @@
   tags:
     - users
 
-- name: Print the IP address
+- name: Debug domain name and IP address
   debug:
-    msg: "{{ users_domain }} resolves to {{ users_domain_dig[0] }}"
+    msg:
+      - "users_domain: {{ users_domain }}"
+      - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
+      - "users_domain_dig: {{ users_domain_dig }}"
+      - "users_domain_check: {{ users_domain_check }}"
+      - "users_reverse_proxy: {{ users_reverse_proxy }}"
+    verbosity: 1
+  when: ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
   tags:
     - users
 
@@ -27,6 +34,7 @@
       - "users_domain_check: {{ users_domain_check }}"
       - "users_reverse_proxy: {{ users_reverse_proxy }}"
     verbosity: 1
+  when: ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
   tags:
     - users
 
@@ -52,6 +60,7 @@
   debug:
     msg: "{{ users_domain_dig[0] }} doesn't equal {{ ansible_default_ipv4.address }}"
   when:
+    - users_domain_dig[0] is defined
     - users_domain_dig[0] != ansible_default_ipv4.address
     - users_domain_check != "strict"
     - users_reverse_proxy != "cloudflare"
@@ -62,6 +71,7 @@
   fail:
     msg: "{{ users_domain_dig[0] }} doesn't equal {{ ansible_default_ipv4.address }}"
   when:
+    - users_domain_dig[0] is defined
     - users_domain_dig[0] != ansible_default_ipv4.address
     - users_domain_check == "strict"
     - users_reverse_proxy != "cloudflare"
