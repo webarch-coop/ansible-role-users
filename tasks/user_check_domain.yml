@@ -12,12 +12,6 @@
   tags:
     - users
 
-- name: Print the IP address
-  debug:
-    msg: "{{ users_domain }} resolves to {{ users_domain_dig }}"
-  tags:
-    - users
-
 - name: Debug domain name and IP address
   debug:
     msg:
@@ -27,6 +21,20 @@
       - "users_domain_check: {{ users_domain_check }}"
       - "users_reverse_proxy: {{ users_reverse_proxy }}"
     verbosity: 1
+  when: ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
+  tags:
+    - users
+
+- name: Debug domain name and IP address
+  debug:
+    msg:
+      - "users_domain: {{ users_domain }}"
+      - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
+      - "users_domain_dig[0]: {{ users_domain_dig[0] }}"
+      - "users_domain_check: {{ users_domain_check }}"
+      - "users_reverse_proxy: {{ users_reverse_proxy }}"
+    verbosity: 1
+  when: ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
   tags:
     - users
 
@@ -48,21 +56,23 @@
   tags:
     - users
 
-- name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+- name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't equal {{ ansible_default_ipv4.address }}"
   debug:
-    msg: "{{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+    msg: "{{ users_domain_dig[0] }} doesn't equal {{ ansible_default_ipv4.address }}"
   when:
-    - users_domain_dig != ansible_default_ipv4.address
+    - users_domain_dig[0] is defined
+    - users_domain_dig[0] != ansible_default_ipv4.address
     - users_domain_check != "strict"
     - users_reverse_proxy != "cloudflare"
   tags:
     - users
 
-- name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+- name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't equal {{ ansible_default_ipv4.address }}"
   fail:
-    msg: "{{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
+    msg: "{{ users_domain_dig[0] }} doesn't equal {{ ansible_default_ipv4.address }}"
   when:
-    - users_domain_dig != ansible_default_ipv4.address
+    - users_domain_dig[0] is defined
+    - users_domain_dig[0] != ansible_default_ipv4.address
     - users_domain_check == "strict"
     - users_reverse_proxy != "cloudflare"
   tags:
