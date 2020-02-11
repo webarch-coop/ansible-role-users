@@ -18,6 +18,16 @@
   tags:
     - users
 
+- name: Debug domain name and IP address
+  debug:
+    msg:
+      - "users_domain_dig: {{ users_domain_dig }}"
+      - "users_domain_check: {{ users_domain_check }}"
+      - "users_reverse_proxy: {{ users_reverse_proxy }}"
+    verbosity: 1
+  tags:
+    - users
+
 - name: "Warn if {{ users_domain_dig }} is not a IPv4 address"
   debug:
     msg: "{{ users_domain }} appears not to resolve to a IP address"
