@@ -21,6 +21,7 @@
 - name: Debug domain name and IP address
   debug:
     msg:
+      - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
       - "users_domain_dig: {{ users_domain_dig }}"
       - "users_domain_check: {{ users_domain_check }}"
       - "users_reverse_proxy: {{ users_reverse_proxy }}"
@@ -50,7 +51,7 @@
   debug:
     msg: "{{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
   when:
-    - users_domain_dig == False
+    - users_domain_dig != ansible_default_ipv4.address
     - users_domain_check != "strict"
     - users_reverse_proxy != "cloudflare"
   tags:
@@ -60,7 +61,7 @@
   fail:
     msg: "{{ users_domain_dig }} doesn't equal {{ ansible_default_ipv4.address }}"
   when:
-    - users_domain_dig == False
+    - users_domain_dig != ansible_default_ipv4.address
     - users_domain_check == "strict"
     - users_reverse_proxy != "cloudflare"
   tags:
