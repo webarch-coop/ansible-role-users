@@ -19,9 +19,10 @@
       - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
       - "users_domain_dig: {{ users_domain_dig }}"
       - "users_domain_check: {{ users_domain_check }}"
-      - "users_reverse_proxy: {{ users_reverse_proxy }}"
     verbosity: 1
-  when: ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
+  when:
+    - ( users_domain_check is defined )
+    - ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
   tags:
     - users
 
@@ -32,9 +33,10 @@
       - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
       - "users_domain_dig[0]: {{ users_domain_dig[0] }}"
       - "users_domain_check: {{ users_domain_check }}"
-      - "users_reverse_proxy: {{ users_reverse_proxy }}"
     verbosity: 1
-  when: ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
+  when: 
+    - ( users_domain_check is defined )
+    - ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
   tags:
     - users
 
@@ -62,8 +64,8 @@
   when:
     - users_domain_dig[0] is defined
     - users_domain_dig[0] != ansible_default_ipv4.address
-    - users_domain_check != "strict"
-    - users_reverse_proxy != "cloudflare"
+    - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check != "strict" )
+    - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
   tags:
     - users
 
@@ -73,8 +75,8 @@
   when:
     - users_domain_dig[0] is defined
     - users_domain_dig[0] != ansible_default_ipv4.address
-    - users_domain_check == "strict"
-    - users_reverse_proxy != "cloudflare"
+    - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check == "strict" )
+    - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
   tags:
     - users
 ...
