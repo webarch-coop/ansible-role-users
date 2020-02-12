@@ -34,7 +34,7 @@
       - "users_domain_dig[0]: {{ users_domain_dig[0] }}"
       - "users_domain_check: {{ users_domain_check }}"
     verbosity: 1
-  when: 
+  when:
     - ( users_domain_check is defined )
     - ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
   tags:
