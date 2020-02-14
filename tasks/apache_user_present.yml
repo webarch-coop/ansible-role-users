@@ -300,7 +300,7 @@
     label: "{{ vhost.key }}"
   when:
     - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
-    - ( users_matomo is not defined ) or ( users_matomo == False ) 
+    - ( users_matomo is not defined ) or ( users_matomo == False )
   tags:
     - users
 
