@@ -229,7 +229,7 @@
   tags:
     - users
 
-- name: "Include WordPress role for {{ user.key }}"
+- name: "Include WordPress role for {{ user.key }} with Matomo"
   include_role:
     name: wordpress
   vars:
@@ -263,7 +263,44 @@
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
+  when:
+    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
+    - ( users_matomo is defined ) and ( users_matomo == True )
+    - ( matomo_user is defined ) and ( matomo_url is defined )
+    - ( matomo_home is defined ) and ( matomo_html is defined )
+  tags:
+    - users
+
+- name: "Include WordPress role for {{ user.key }} with Matomo"
+  include_role:
+    name: wordpress
+  vars:
+    wordpress_user: "{{ user.key }}"
+    wordpress_group: "{{ user.value.users_group | default(user.key) }}"
+    wordpress_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    wordpress_docroot_mode: "0750"
+    wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    wordpress_dbuser: "{{ vhost.value.wordpress_dbuser | default(user.key) }}"
+    wordpress_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    wordpress_dbprefix: "{{ vhost.value.wordpress_dbprefix | default('wp_') }}"
+    wordpress_locale: "{{ vhost.value.wordpress_locale | default('en_GB') }}"
+    wordpress_url: "{{ vhost.value.wordpress_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    wordpress_title: "{{ vhost.value.wordpress_title | default(vhost.value.users_apache_server_name) }}"
+    wordpress_admin_user: "{{ vhost.value.wordpress_admin_user | default(user.key) }}"
+    wordpress_admin_email: "{{ vhost.value.wordpress_admin_email | default(user.value.users_email) }}"
+    wordpress_notify: "{{ vhost.value.wordpress_notify | default(true) }}"
+    wordpress_notify_from: "{{ users_notify_from }}"
+    wordpress_notify_reply_to: "{{ users_notify_reply_to }}"
+    wordpress_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    wordpress_notify_headers: "{{ users_notify_headers }}"
+    wordpress_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when:
+    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
+    - ( users_matomo is not defined ) or ( users_matomo == False ) 
   tags:
     - users
 
