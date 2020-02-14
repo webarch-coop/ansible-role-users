@@ -7,6 +7,9 @@ users_update_strategy: changed
 users_apache: false
 # Define users_chroot to true for members of the chroot group to be chrooted
 users_chroot: false
+# Define users_matomo to true for servers with Matomo and automatic Matomo account
+# provisioning for users
+users_matomo: false
 # Define users_mariadb to true for this role to create MariaDB user and
 # databases
 users_mariadb: false

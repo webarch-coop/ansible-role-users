@@ -22,7 +22,7 @@
       tags:
         - users
 
-    - name: "User accounts present for {{ user.key }}"
+    - name: "User account present for {{ user.key }}"
       include_tasks: user.yml
       tags:
         - users
