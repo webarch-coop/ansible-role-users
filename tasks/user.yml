@@ -97,8 +97,8 @@
     - users
 
 - name: "Generate SSH ECDSA keypair for {{ user.key }}"
-  command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "ansible-generated on {{ hostname }}"
-  args:
+  command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "ansible-generated on {{ ansible_hostname }}"
+  Args:
     creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
   become: true
   become_user: "{{ user.key }}"
