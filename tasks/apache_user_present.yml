@@ -69,20 +69,21 @@
     - users
     - apache
 
-- name: Debug users_apache_docroot_group
-  debug:
-    msg: "vhost.users_apache_docroot_group: {{ vhost.vhost.users_apache_docroot_group }}"
-  when: vhost.value.users_apache_docroot_group is defined
-  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-    label: "{{ vhost.key }}"
-  tags:
-    - users
-    - apache
-
-- fail:
-    msg: Debug
+# Something needs to be worked out for sites that need to be writable by www-data
+# - name: Debug users_apache_docroot_group
+#   debug:
+#     msg: "vhost.users_apache_docroot_group: {{ vhost.vhost.users_apache_docroot_group }}"
+#   when: vhost.value.users_apache_docroot_group is defined
+#   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+#   loop_control:
+#     loop_var: vhost
+#     label: "{{ vhost.key }}"
+#   tags:
+#     - users
+#     - apache
+# 
+# - fail:
+#     msg: Debug
 
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
