@@ -75,7 +75,7 @@
   when: vhost.value.users_apache_docroot_group is defined
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
-    loop_var: vhost.key
+    loop_var: vhost
     label: "{{ vhost.key }}"
   tags:
     - users
