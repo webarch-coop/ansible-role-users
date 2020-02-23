@@ -69,6 +69,18 @@
     - users
     - apache
 
+- name: Debug users_apache_docroot_group
+  debug:
+    msg: "vhost.users_apache_docroot_group: {{ vhost.vhost.users_apache_docroot_group }}"
+  when: vhost.users_apache_docroot_group is defined
+  loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost }}"
+  tags:
+    - users
+    - apache
+
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
