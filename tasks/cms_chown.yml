@@ -1,0 +1,11 @@
+---
+- name: "Chown {{ vhost.key }} for {{ user.key }}"
+  file:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    state: directory
+    owner: "{{ vhost.value.users_cms_owner }}"
+    group: "{{ vhost.value.users_cms_group }}"
+    recurse: true
+  tags:
+    - users
+...

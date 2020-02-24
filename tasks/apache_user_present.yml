@@ -69,28 +69,11 @@
     - users
     - apache
 
-# Something needs to be worked out for sites that need to be writable by www-data
-# - name: Debug users_apache_docroot_group
-#   debug:
-#     msg: "vhost.users_apache_docroot_group: {{ vhost.vhost.users_apache_docroot_group }}"
-#   when: vhost.value.users_apache_docroot_group is defined
-#   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-#   loop_control:
-#     loop_var: vhost
-#     label: "{{ vhost.key }}"
-#   tags:
-#     - users
-#     - apache
-# 
-# - fail:
-#     msg: Debug
-
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
     state: directory
     owner: "{{ user.key }}"
-    # group: "{{ apache_user | default('www-data') }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
   loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
@@ -571,6 +554,16 @@
     loop_var: vhost
     label: "{{ vhost.key }}"
   when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
+  tags:
+    - users
+
+- name: "Chown CMS for {{ user.key }}"
+  include_role: cms_chown.yml
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when: ( vhost.value.users_cms_owner is defined ) and ( vhost.value.users_cms_group is defined )
   tags:
     - users
 ...
