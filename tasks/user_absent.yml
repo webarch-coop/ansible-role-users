@@ -9,17 +9,6 @@
   tags:
     - users
 
-- name: "Chroot user {{ user.key }} absent from /etc/fstab"
-  block:
-
-    - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
-      include_tasks: chroot_user_absent_fstab.yml
-      when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
-
-  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
-  tags:
-    - users
-
 - name: "Include Apache config tasks absent user for {{ user.key }}"
   include_tasks: apache_user_absent.yml
   when:
@@ -29,16 +18,6 @@
     - users
     - apache
 
-- name: "Include PHP FPM chroot user absent tasks for {{ user.key }}"
-  include_tasks: phpfpm_chroot_user_absent.yml
-  when:
-    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
-    - ( users_chroot is defined ) and ( users_chroot == True )
-    - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
-  tags:
-    - users
-    - phpfpm
-
 - name: "Absent user {{ user.key }} MariaDB account and databases absent"
   include_tasks: mariadb_user_absent.yml
   when: ( users_mariadb is defined ) and ( users_mariadb == True )
@@ -46,14 +25,32 @@
     - users
     - mariadb
 
-- name: Chroot users mounts absent
+- name: Chroot user absent tasks
   block:
 
-    - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
-      include_tasks: chroot_user_absent.yml
-      when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
+    - name: "Chroot user {{ user.key }} absent"
+      block:
 
-  when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+        - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
+          include_tasks: chroot_user_absent_fstab.yml
+          when:
+            - ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
+
+        - name: "Include PHP FPM chroot user absent tasks for {{ user.key }}"
+          include_tasks: phpfpm_chroot_user_absent.yml
+          when:
+            - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+            - ( users_chroot is defined ) and ( users_chroot == True )
+          tags:
+            - phpfpm
+
+        - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
+          include_tasks: chroot_user_absent.yml
+          when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
+
+      when: ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+
+  when: ( users_chroot is defined ) and ( users_chroot )
   tags:
     - users
 
