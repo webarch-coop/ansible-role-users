@@ -558,7 +558,7 @@
     - users
 
 - name: "Chown CMS for {{ user.key }}"
-  include_role: cms_chown.yml
+  include_tasks: cms_chown.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
