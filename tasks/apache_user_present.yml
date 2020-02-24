@@ -375,8 +375,8 @@
   include_role:
     name: nextcloud
   vars:
-    nextcloud_user: "{{ user.key }}"
-    nextcloud_group: "{{ user.value.users_group | default(user.key) }}"
+    nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+    nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
     nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
     nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
@@ -557,7 +557,7 @@
   tags:
     - users
 
-- name: "Chown CMS for {{ user.key }}"
+- name: "Chown CMS DocumentRoot for {{ user.key }}"
   include_tasks: cms_chown.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
