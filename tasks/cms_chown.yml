@@ -10,13 +10,13 @@
     - users
 
 - name: "Chmod {{ vhost.key }} files for {{ user.key }}"
-  command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }} -type f -exec chmod -c {{ vhost.value.users_cms_file_mode }} {} \;"
+  command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }} -type f -exec chmod -c {{ vhost.value.users_cms_file_mode }} {} \\;"
   when: vhost.value.users_cms_file_mode is defined
   tags:
     - users
 
 - name: "Chmod {{ vhost.key }} directories for {{ user.key }}"
-  command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }} -type d -exec chmod -c {{ vhost.value.users_cms_directory_mode }} {} \;"
+  command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }} -type d -exec chmod -c {{ vhost.value.users_cms_directory_mode }} {} \\;"
   when: vhost.value.users_cms_directory_mode is defined
   tags:
     - users
