@@ -557,7 +557,7 @@
   tags:
     - users
 
-- name: "Chown CMS DocumentRoot for {{ user.key }}"
+- name: "Chown and potentially chmod CMS DocumentRoot for {{ user.key }}"
   include_tasks: cms_chown.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
