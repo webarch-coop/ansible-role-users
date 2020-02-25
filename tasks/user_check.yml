@@ -249,11 +249,12 @@
       when: user.value.users_apache_virtual_hosts is defined
 
     # https://www.php.net/manual/en/install.fpm.configuration.php
-    - name: "Check that PHP-FPM pm is set to static, ondemand or dynamic for {{ user.key }} if defined"
+    - name: "Check that users_phpfpm_pm is defined if {{ user.key }} is in the phpfpm group"
       assert:
         that:
+          - user.value.users_phpfpm_pm is defined
           - user.value.users_phpfpm_pm is regex("^static|ondemand|dynamic$")
-      when: user.value.users_phpfpm_pm is defined
+      when: ( "phpfpm" in user.value.users_groups ) 
 
     - name: "Check that PHP-FPM pm.max_children is greater than 1 for {{ user.key }} if defined"
       assert:
