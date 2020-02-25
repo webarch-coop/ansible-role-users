@@ -159,10 +159,12 @@
       </IfModule>
       <FilesMatch "\.php$">
         <If "-f %{REQUEST_FILENAME}">
-    {%- if user.value.users_groups is defined and and "phpfpm" in user.value.users_groups and "chroot" in user.value.users_groups %}
+    {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
+      {%- if "chroot" in user.value.users_groups %}
           SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
-    {%- elif user.value.users_groups is defined and and "phpfpm" in user.value.users_groups and "chroot" not in user.value.users_groups %}
+      {%- else %}
           SetHandler "proxy:unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
+      {%- endif %}
     {%- elif users_phpfpm_version is defined %}
           SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost"
     {%- else -%}
