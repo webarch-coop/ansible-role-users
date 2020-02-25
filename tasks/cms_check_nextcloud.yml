@@ -116,6 +116,17 @@
           - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.wordpress_autoupdate == False )
       when: vhost.value.nextcloud_autoupdate is defined
 
+    - name: "Check that the Nextcloud app install, enabled and disabled arrays are all defined if any are"
+      assert:
+        that:
+              - vhost.value.nextcloud_app_install | length
+              - vhost.value.nextcloud_app_install[0] is defined
+              - vhost.value.nextcloud_app_disable | length
+              - vhost.value.nextcloud_app_disable[0] is defined
+              - vhost.value.nextcloud_app_enable | length
+              - vhost.value.nextcloud_app_enable[0] is defined
+      when: ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
+
   tags:
     - users
 ...

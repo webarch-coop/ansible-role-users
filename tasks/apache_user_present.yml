@@ -371,7 +371,7 @@
   tags:
     - users
 
-- name: "Include Nextcloud role for {{ user.key }}"
+- name: "Include Nextcloud role for {{ user.key }} with default apps"
   include_role:
     name: nextcloud
   vars:
@@ -392,9 +392,6 @@
     nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
     nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
     nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
-    nextcloud_app_install: "{% if vhost.value.nextcloud_app_install is defined %}{{ vhost.value.nextcloud_app_install }}{% else %}}{{ nextcloud_app_install }}{% endif %}"
-    nextcloud_app_disable: "{% if vhost.value.nextcloud_app_disable is defined %}{{ vhost.value.nextcloud_app_disable }}{% else %}{{ nextcloud_app_disable }}{% endif %}"
-    nextcloud_app_enable: "{% if nextcloud_app_enable is defined %}{{ vhost.value.nextcloud_app_enable }}{% else %}{{ nextcloud_app_enable }}{% endif %}"
     nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
     nextcloud_notify_from: "{{ users_notify_from }}"
     nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
@@ -405,7 +402,53 @@
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
+  when:
+    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
+    - ( vhost.value.nextcloud_app_install is not defined )
+    - ( vhost.value.nextcloud_app_disable is not defined )
+    - ( vhost.value.nextcloud_app_enable is not defined )
+  tags:
+    - users
+
+- name: "Include Nextcloud role for {{ user.key }} with custom apps"
+  include_role:
+    name: nextcloud
+  vars:
+    nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+    nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
+    nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+    nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+    nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+    nextcloud_version: "{{ vhost.value.nextcloud_version }}"
+    nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+    nextcloud_url: "{{ vhost.value.nextcloud_url | default('https://' + vhost.value.users_apache_server_name) }}"
+    nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
+    nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
+    nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+    nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
+    nextcloud_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
+    nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
+    nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
+    nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
+    nextcloud_app_install: "{{ vhost.value.nextcloud_app_install }}"
+    nextcloud_app_disable: "{{ vhost.value.nextcloud_app_disable }}"
+    nextcloud_app_enable: "{{ vhost.value.nextcloud_app_enable }}"
+    nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
+    nextcloud_notify_from: "{{ users_notify_from }}"
+    nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
+    nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+    nextcloud_notify_headers: "{{ users_notify_headers }}"
+    nextcloud_notify_signature: "{{ users_notify_signature }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+  loop_control:
+    loop_var: vhost
+    label: "{{ vhost.key }}"
+  when:
+    - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "nextcloud" )
+    - ( vhost.value.nextcloud_app_install is defined )
+    - ( vhost.value.nextcloud_app_disable is defined )
+    - ( vhost.value.nextcloud_app_enable is defined )
   tags:
     - users
 
