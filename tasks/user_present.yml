@@ -103,7 +103,7 @@
       tags:
         - users
 
-    - name: Chroot users
+    - name: Chrooted users
       block:
 
         - name: "Include the chroot present users tasks for {{ user.key }}"
@@ -126,6 +126,23 @@
         - ( user.key != "root" )
         - ( users_chroot is defined ) and ( users_chroot == True )
         - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+
+    - name: Non-chrooted PHP-FPM users 
+      block:
+
+        - name: "Include the PHP FPM user present tasks for {{ user.key }}"
+          include_tasks: phpfpm_user_present.yml
+          when:
+            - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups ) and ( "chroot" not in user.value.users_groups )
+          tags:
+            - users
+            - phpfpm
+
+      when:
+        - ( user.key != "root" )
+        - ( users_chroot is not defined ) or ( users_chroot == False )
+        - ( users_chroot_dir is not defined ) or ( users_chroot_dir.stat.exists == False )
 
     - name: "Matomo login account tasks for {{ user.key }}"
       block:

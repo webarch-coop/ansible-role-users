@@ -1,11 +1,19 @@
 ; Ansible provisioned
 [{{ user.key }}]
-;prefix = {{ chroot_users_dir | default('/users') }}/{{ user.key }}
 user = {{ user.key }} 
 group = {{ user.value.users_group | default(user.key) }}
+{% if users_chroot is defined and users_chroot == True and users_chroot_dir is defined and users_chroot_dir.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
 chroot = {{ chroot_users_dir | default('/users') }}/{{ user.key }}
 listen = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-;listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+access.log = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
+slowlog = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
+php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/fpm-php.error.log
+{% else %}
+listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+access.log = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
+slowlog = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
+php_admin_value[error_log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/fpm-php.error.log
+{% endif %}
 listen.owner = root
 listen.group = {{ user.key }}
 listen.mode = 0660
@@ -41,10 +49,7 @@ pm.max_requests = 1000
 pm.status_path = /phpfpm-{{ user.key }}-status
 ;ping.path = /ping
 
-php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/fpm-php.error.log
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-access.log = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
-slowlog = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
 request_slowlog_timeout = 30
 request_terminate_timeout = 60 
 

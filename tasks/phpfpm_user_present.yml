@@ -53,7 +53,7 @@
 
     - name: "PHP FPM pool.d file present for {{ user.key }}"
       template:
-        src: templates/phpfpm_chroot_user.conf.j2
+        src: templates/phpfpm_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       register: users_phpfpm_pool_conf
 
@@ -114,7 +114,7 @@
       when:
         - '"nginx" in ansible_facts.packages'
 
-  when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
+  when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
     - users
     - phpfpm
