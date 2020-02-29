@@ -120,10 +120,11 @@
 - name: Vim tasks
   block:
 
-    - name: ".vimrc in place for {{ user.key }}"
+    - name: "~/.vimrc present for {{ user.key }}"
       copy:
         src: "files/vim/vimrc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.vimrc"
+        force: false
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: 0644
@@ -131,25 +132,36 @@
     - name: "vim set to be default editor for {{ user.key }}"
       lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        regexp: '^export EDITOR'
         line: 'export EDITOR="vim"'
         state: present
         create: true
+      when: user.value.users_editor is defined and user.value.users_editor == 'vim'
 
-  when: user.value.users_editor is defined and user.value.users_editor == 'vim'
   tags:
     - users
 
 - name: Nano tasks
   block:
 
+    - name: "~/.nanorc present for {{ user.key }}"
+      copy:
+        src: "files/nano/nanorc"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.nanorc"
+        force: false
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: 0644
+
     - name: "nano set to be default editor for {{ user.key }}"
       lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        regexp: '^export EDITOR'
         line: 'export EDITOR="nano"'
         state: present
         create: true
+      when: user.value.users_editor is defined and user.value.users_editor == 'nano'
 
-  when: user.value.users_editor is defined and user.value.users_editor == 'nano'
   tags:
     - users
 
