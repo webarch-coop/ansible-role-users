@@ -116,16 +116,71 @@
           - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.wordpress_autoupdate == False )
       when: vhost.value.nextcloud_autoupdate is defined
 
-    - name: "Check that the Nextcloud app install, enabled and disabled arrays are all defined if any are"
+    - name: "Check that any apps listed in nextcloud_app_remove are not in nextcloud_app_install for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-              - vhost.value.nextcloud_app_install | length
-              - vhost.value.nextcloud_app_install[0] is defined
-              - vhost.value.nextcloud_app_disable | length
-              - vhost.value.nextcloud_app_disable[0] is defined
-              - vhost.value.nextcloud_app_enable | length
-              - vhost.value.nextcloud_app_enable[0] is defined
-      when: ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
+          - app not in vhost.value.nextcloud_app_install
+      loop: "{{ vhost.value.nextcloud_app_remove }}"
+      loop_control:
+        loop_var: app
+      when:
+        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
+        - ( vhost.value.nextcloud_app_install is defined ) and ( vhost.value.nextcloud_app_install != [] )
+
+    - name: "Check that any apps listed in nextcloud_app_remove are not in nextcloud_app_enable for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - app not in vhost.value.nextcloud_app_enable
+      loop: "{{ vhost.value.nextcloud_app_remove }}"
+      loop_control:
+        loop_var: app
+      when:
+        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
+        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
+
+    - name: "Check that any apps listed in nextcloud_app_install are not in nextcloud_app_remove for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - app not in vhost.value.nextcloud_app_remove
+      loop: "{{ vhost.value.nextcloud_app_install }}"
+      loop_control:
+        loop_var: app
+      when:
+        - ( vhost.value.nextcloud_app_install is defined ) and ( vhost.value.nextcloud_app_install != [] )
+        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
+
+    - name: "Check that any apps listed in nextcloud_app_disable are not in nextcloud_app_enable for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - app not in vhost.value.nextcloud_app_enable
+      loop: "{{ vhost.value.nextcloud_app_disable }}"
+      loop_control:
+        loop_var: app
+      when:
+        - ( vhost.value.nextcloud_app_disable is defined ) and ( vhost.value.nextcloud_app_disable != [] )
+        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
+
+    - name: "Check that any apps listed in nextcloud_app_enable are not listed in nextcloud_app_remove for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - app not in vhost.value.nextcloud_app_remove
+      loop: "{{ vhost.value.nextcloud_app_enable }}"
+      loop_control:
+        loop_var: app
+      when:
+        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
+        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
+
+    - name: "Check that any apps listed in nextcloud_app_enable are not listed in nextcloud_app_disable for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - app not in vhost.value.nextcloud_app_disable
+      loop: "{{ vhost.value.nextcloud_app_enable }}"
+      loop_control:
+        loop_var: app
+      when:
+        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
+        - ( vhost.value.nextcloud_app_disable is defined ) and ( vhost.value.nextcloud_app_disable != [] )
 
   tags:
     - users
