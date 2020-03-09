@@ -95,7 +95,7 @@
     - name: "Check that nextcloud_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.wordpress_notify == False )
+          - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.nextcloud_notify == False )
       when: vhost.value.nextcloud_autoupdate is defined
 
     - name: "Check that nextcloud_smtpmode is smtp or sendmail if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -107,13 +107,13 @@
     - name: "Check that nextcloud_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.nextcloud_notify == True ) or ( vhost.value.wordpress_notify == False )
+          - ( vhost.value.nextcloud_notify == True ) or ( vhost.value.nextcloud_notify == False )
       when: vhost.value.nextcloud_notify is defined
 
     - name: "Check that nextcloud_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.wordpress_autoupdate == False )
+          - ( vhost.value.nextcloud_autoupdate == True ) or ( vhost.value.nextcloud_autoupdate == False )
       when: vhost.value.nextcloud_autoupdate is defined
 
     - name: "Check that any apps listed in nextcloud_app_remove are not in nextcloud_app_install for {{ vhost.key }} VirtualHost for {{ user.key }}"
