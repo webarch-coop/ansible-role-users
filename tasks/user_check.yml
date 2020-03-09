@@ -255,7 +255,7 @@
           - user.value.users_phpfpm_pm is defined
           - user.value.users_phpfpm_pm is regex("^static|ondemand|dynamic$")
       when:
-        - ( getent_group is defined ) and ( "phpfpm" is getent_group )
+        - ( "phpfpm" in getent_group )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
 
     - name: "Check that PHP-FPM pm.max_children is greater than 1 for {{ user.key }} if defined"
