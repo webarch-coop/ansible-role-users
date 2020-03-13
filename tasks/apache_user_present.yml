@@ -399,6 +399,7 @@
     nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     nextcloud_notify_headers: "{{ users_notify_headers }}"
     nextcloud_notify_signature: "{{ users_notify_signature }}"
+    onlyoffice_docker: "{{ vhost.value.onlyoffice_docker | default(false) | bool }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
@@ -445,6 +446,7 @@
     nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     nextcloud_notify_headers: "{{ users_notify_headers }}"
     nextcloud_notify_signature: "{{ users_notify_signature }}"
+    onlyoffice_docker: "{{ vhost.value.onlyoffice_docker | default(false) | bool }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
