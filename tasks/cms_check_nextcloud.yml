@@ -7,7 +7,6 @@
         that:
           - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
           - ( vhost.value.nextcloud_dbname is defined ) and ( vhost.value.nextcloud_dbname in user.value.users_mariadb_databases )
-          - ( vhost.value.nextcloud_admin_user is defined ) and ( vhost.value.nextcloud_admin_user is regex("^[a-z0-9_-]*$") )
           - ( vhost.value.nextcloud_version is defined ) and ( vhost.value.nextcloud_version is regex("^[0-9]{2}.[0-9]{1,2}.[0-9]{1,2}$") )
           - ( vhost.value.users_apache_options is defined ) and ( "+MultiViews" in vhost.value.users_apache_options ) and ( "+SymLinksIfOwnerMatch" in vhost.value.users_apache_options )
           - vhost.value.users_apache_sts is defined
