@@ -1,4 +1,10 @@
 ---
+- debug:
+    var: users_phpfpm_version
+
+- debug:
+    var: getent_group
+
 - name: "PHP FPM config present for {{ user.key }}"
   block:
 
