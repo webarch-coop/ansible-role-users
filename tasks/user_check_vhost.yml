@@ -5,7 +5,7 @@
     - name: "Check the DocumentRoot for the {{ vhost.key }} VirtualHost for {{ user.key }} contains valid characters"
       assert:
         that:
-          - vhost.key is regex("^[a-zA-Z0-9/_-]*$")
+          - vhost.key is regex("^[a-zA-Z0-9/_.-]*$")
         fail_msg: "Only letters, numbers, underscores, dashes and forward slashes can be present in the DocumentRoot path"
 
     - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
