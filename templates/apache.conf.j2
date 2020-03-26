@@ -13,7 +13,12 @@
   {%- if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
   {%- endif %}
-  RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
+  # RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
+  <IfModule rewrite_module>
+    RewriteEngine On
+    RewriteCond  %{REQUEST_URI} !^/.well-known/acme-challenge [NC]
+    RewriteRule (.*) https://%{SERVER_NAME}/$1 [R,L]
+  </IfModule>
 </VirtualHost>
 # {{ vhost_config.users_apache_server_name }}
 {%- if user.value.users_apache_vhost_docroot is defined %}
