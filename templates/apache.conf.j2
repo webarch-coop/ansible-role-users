@@ -218,7 +218,7 @@
   CustomLog /var/log/apache2/{{ user.key }}_access.log bandwidth
   LogLevel error
   ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
-  CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combinedio
+  CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combined
 </VirtualHost>
 {%- endfor %}
 
