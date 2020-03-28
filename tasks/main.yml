@@ -57,7 +57,7 @@
 - name: Set users to update by group
   block:
 
-    - name: Loop through the users with additional groups 
+    - name: Loop through the users with additional groups
       include_tasks: users_groups.yml
       when:
         - ( user.users_groups is defined ) and ( user.users_groups != [] )
