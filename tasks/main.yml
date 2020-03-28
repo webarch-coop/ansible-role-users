@@ -54,6 +54,32 @@
     - phpfpm
     - letsencrypt
 
+- name: Set users to update by group
+  block:
+
+    - name: Loop through the users with additional groups 
+      include_tasks: users_groups.yml
+      when:
+        - ( user.users_groups is defined ) and ( user.users_groups != [] )
+        - ( user.key not in users_update )
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: Print the users in the groups to update
+      debug:
+        msg: "User to update: {{ users_update }}"
+
+  when:
+    - ( users_update_strategy is defined ) or ( users_update_strategy == "groups" )
+    - ( users_update_groups is defined ) and ( users_update_groups != [] )
+  tags:
+    - users
+    - apache
+    - phpfpm
+    - letsencrypt
+
 - name: Check which users accounts are changed
   block:
 

@@ -1,0 +1,11 @@
+---
+- name: Add user to users_update array if they are in a group in the users_update_groups array
+  set_fact:
+    users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
+  when:
+    - users_update_group in user.value.users_groups
+    - user.key not in users_update
+  loop: "{{ users_update_groups }}"
+  loop_control:
+    loop_var: users_update_group
+...
