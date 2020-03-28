@@ -52,12 +52,11 @@
         - user.value.users_email is defined
         - user.value.users_email != ""
 
-    - name: "Crontab present for user {{ user.key }}"
+    - name: "Crontab present for non-root and non-sudo user {{ user.key }}"
       include_tasks: crontab_user_present.yml
       when:
-        - user.key != "root"
+        - ( user.key != "root" )
         - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
-        - ( users_crontab is not defined ) or ( users_crontab == True )
         - ( users_cron is defined ) and ( users_cron == True )
 
     - name: "Create or remove a .forward file for {{ user.key }}"
