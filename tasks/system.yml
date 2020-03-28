@@ -82,7 +82,9 @@
 
 - name: PHP-FPM chroot tasks
   include_tasks: phpfpm_chroot.yml
-  when: ( users_update_check is not defined ) or ( users_update_check != True )
+  when:
+    - ( users_phpfpm is defined ) and ( users_phpfpm )
+    - ( users_update_check is not defined ) or ( users_update_check != True )
   tags:
     - phpfpm
 
