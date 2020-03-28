@@ -17,7 +17,7 @@
   <IfModule rewrite_module>
     RewriteEngine On
     RewriteCond  %{REQUEST_URI} !^/.well-known/acme-challenge [NC]
-    RewriteRule (.*) https://%{SERVER_NAME}/$1 [R,L]
+    RewriteRule (.*) https://%{SERVER_NAME}$1 [R,L]
   </IfModule>
 </VirtualHost>
 # {{ vhost_config.users_apache_server_name }}
