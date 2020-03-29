@@ -116,11 +116,11 @@
     Require all granted
   </Location>
   {%- endif %}
-  {%- if vhost_config.users_apache_alias is defined %} # if vhost_config.users_apache_alias is defined
-    {%- for alias in vhost_config.users_apache_alias %} # for alias in vhost_config.users_apache_alias
-      {%- if alias.url is defined and alias.path is defined %} # if alias.url is defined and alias.path is defined
+  {%- if vhost_config.users_apache_alias is defined %}
+    {%- for alias in vhost_config.users_apache_alias %}
+      {%- if alias.url is defined and alias.path is defined %}
   Alias "{{ alias.url }}" "{{ alias.path }}"
-      {%- elif alias.regex_url is defined and alias.regex_path is defined %} # elif alias.regex_url is defined and alias.regex_path is defined
+      {%- elif alias.regex_url is defined and alias.regex_path is defined %}
   AliasMatch "{{ alias.regex_url }}" "{{ alias.regex_path }}"
       {%- endif %}
     {%- endfor %}
