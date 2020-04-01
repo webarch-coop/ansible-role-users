@@ -12,6 +12,11 @@
   ServerName {{ vhost_config.users_apache_server_name }}
   {%- if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
+  {%- for alias in vhost_config.users_apache_server_aliases %}
+  <If "%{HTTP_HOST} == '{{ alias }}'">
+    RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ alias }}$0
+  </If>
+  {%- endfor %}
   {%- endif %}
   RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
 </VirtualHost>
