@@ -18,7 +18,9 @@
   </If>
   {%- endfor %}
   {%- endif %}
-  RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
+  <If "%{HTTP_HOST} == '{{ vhost_config.users_apache_server_name }}'">
+    RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
+  </If>
 </VirtualHost>
 # {{ vhost_config.users_apache_server_name }}
 {%- if user.value.users_apache_vhost_docroot is defined %}
