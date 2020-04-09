@@ -1,7 +1,7 @@
 ---
 image: registry.git.coop/webarch/containers/images/ansible:0.3
 
-lint:
+yamllint:
   script:
     - yamllint .
 ...
