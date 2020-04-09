@@ -23,6 +23,8 @@
   loop_control:
     loop_var: result
     label: "{{ result.user.key }}"
+  tags:
+    - users
 
 - name: Set an empty users_update arrays
   set_fact:

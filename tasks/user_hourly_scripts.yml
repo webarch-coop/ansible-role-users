@@ -1,0 +1,37 @@
+---
+- name: "Check if {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh exists"
+  stat:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
+  register: users_bin_cron_hourly
+  tags:
+    - users
+
+- name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh in place"
+  template:
+    src: templates/cron_hourly.sh.j2
+    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
+    mode: "0750"
+  when: users_bin_cron_hourly.stat.exists == False
+  tags:
+    - users
+
+- name: "Daily scripts in place for {{ user.key }}"
+  lineinfile:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
+    line: "{{ command }}"
+    state: present
+    insertbefore: "^# END ANSIBLE SCRIPTS"
+    firstmatch: true
+    create: false
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_group | default(user.key) }}"
+    mode: "0750"
+  loop: "{{ vhost.value.users_hourly_scripts }}"
+  loop_control:
+    loop_var: command
+    label: "{{ command }}"
+  tags:
+    - users
+...

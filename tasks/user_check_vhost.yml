@@ -195,6 +195,13 @@
           - vhost.value.users_daily_scripts[0] is defined
       when: vhost.value.users_daily_scripts is defined
 
+    - name: "Check that the users_hourly_scripts array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
+      assert:
+        that:
+          - vhost.value.users_hourly_scripts | length
+          - vhost.value.users_hourly_scripts[0] is defined
+      when: vhost.value.users_hourly_scripts is defined
+
     - name: "Check that the users_apache_nophp_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
       assert:
         that:
