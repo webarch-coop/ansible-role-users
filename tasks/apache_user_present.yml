@@ -228,9 +228,6 @@
   tags:
     - users
 
-- fail:
-    msg: debug
-
 - name: "Include WordPress role for {{ user.key }} with Matomo"
   include_role:
     name: wordpress
