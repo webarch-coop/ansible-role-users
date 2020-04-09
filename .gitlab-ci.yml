@@ -1,7 +1,7 @@
 ---
-image: registry.git.coop/webarch/containers/images/ansible:0.2
+image: registry.git.coop/webarch/containers/images/ansible:0.3
 
-ansible-lint:
+lint:
   script:
-    - molecule lint
+    - yamllint .
 ...
