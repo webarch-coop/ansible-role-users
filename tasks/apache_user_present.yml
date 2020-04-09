@@ -172,7 +172,7 @@
 - name: "Matomo site tasks for {{ user.key }}"
   block:
 
-    - name: "Check if the Matomo {{ matomo_user }} system user account exists"
+    - name: "Check if the Matomo {{ matomo_user }} system user account exists for {{ user.key }}"
       shell: "id {{ matomo_user }} && echo true || echo false"
       check_mode: false
       register: user_matomo_user_check
