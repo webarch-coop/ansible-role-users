@@ -77,6 +77,11 @@
   IncludeOptional /etc/apache2/conf-available/cloudflare.conf
     {%- endif %}
   {%- endif %}
+  {%- if vhost_config.users_apache_include_optional is defined -%}
+    {%- for inc in vhost_config.users_apache_include_optional %}
+  IncludeOptional {{ inc }}
+    {%- endfor %}
+  {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
