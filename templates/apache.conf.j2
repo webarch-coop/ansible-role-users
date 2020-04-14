@@ -105,7 +105,7 @@
       {%- endif %}
   </Location>
     {%- endfor %}
-    {% if apache_conf_enabled is defined %}
+    {%- if apache_conf_enabled is defined %}
       {%- if "webarch" in apache_conf_enabled %}
   <Location "/wsh">
     AuthType None
