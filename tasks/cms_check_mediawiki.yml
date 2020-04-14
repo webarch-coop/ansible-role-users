@@ -11,12 +11,11 @@
           - ( vhost.value.mediawiki_version is defined ) and ( vhost.value.mediawiki_version is version('1.31', '>=') )
           - ( vhost.value.mediawiki_version_patch is defined ) and ( vhost.value.mediawiki_version_patch is version('0', '>=') )
 
-    - name: "Check that {{ user.key }} is in the phpfpm and chroot groups they are present"
+    - name: "Check that {{ user.key }} is in the phpfpm group if it is present"
       assert:
         that:
           - ( "phpfpm" in user.value.users_groups )
-          - ( "chroot" in user.value.users_groups )
-      when: ( "phpfpm" in getent_group ) and ( "chroot" in getent_group )
+      when: ( "phpfpm" in getent_group )
 
     - name: "Check that mediawiki_password_sender is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
