@@ -565,6 +565,8 @@
     matomo_notify_headers: "{{ users_notify_headers }}"
     matomo_notify_passwd: "{{ vhost.value.matomo_notify_passwd | default(true) | bool }}"
     matomo_email_signature: "{{ users_notify_signature }}"
+    matomo_version: "{{ vhost.value.matomo_version | default('') }}" 
+    matomo_update_strategy: "{{ vhost.value.matomo_update_strategy | default('latest') }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
