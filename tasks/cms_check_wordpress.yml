@@ -47,16 +47,16 @@
           set_fact:
             wordpress_url_domain: "{{ vhost.value.wordpress_url | regex_replace('^https://') }}"
 
-        - name: "Check that wordpress_url domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that wordpress_url domain (protocol removed) equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - ( wordpress_url_domain == vhost.key )
+              - ( wordpress_url_domain == vhost.value.users_apache_server_name )
           when: ( vhost.value.users_apache_server_aliases is not defined )
 
-        - name: "Check that wordpress_url domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that wordpress_url domain (protocol removed) contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - ( wordpress_url_domain == vhost.key ) or ( wordpress_url_domain in vhost.value.users_apache_server_aliases )
+              - ( wordpress_url_domain == vhost.value.users_apache_server_name ) or ( wordpress_url_domain in vhost.value.users_apache_server_aliases )
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
       when: vhost.value.wordpress_url is defined
