@@ -184,9 +184,9 @@
       assert:
         that:
           - vhost.value.nextcloud_onlyoffice_documentserver is regex("^[a-z0-9.]{3,60}$")
-        when:
-          - ( vhost.value.nextcloud_onlyoffice_documentserver is defined )
-          - ( vhost.value.nextcloud_onlyoffice_documentserver | length > 0 )
+      when:
+        - ( vhost.value.nextcloud_onlyoffice_documentserver is defined )
+        - ( vhost.value.nextcloud_onlyoffice_documentserver | length > 0 )
 
   tags:
     - users
