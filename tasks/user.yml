@@ -167,7 +167,7 @@
 
 - name: ".gitconfig in place for {{ user.key }}"
   template:
-    src: templates/gitconfig.j2
+    src: gitconfig.j2
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.gitconfig"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"

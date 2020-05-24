@@ -1,7 +1,7 @@
 ---
 - name: Users Apache logrotation config in place
   template:
-    src: templates/apache_users_logrotate.j2
+    src: apache_users_logrotate.j2
     dest: /etc/logrotate.d/apache_users_logrotate
     owner: root
     group: root

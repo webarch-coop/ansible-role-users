@@ -8,7 +8,7 @@
 
 - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh in place"
   template:
-    src: templates/cron_hourly.sh.j2
+    src: cron_hourly.sh.j2
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
