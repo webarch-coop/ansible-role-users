@@ -70,7 +70,7 @@
 
         - name: "Email address in .forward for {{ user.key }}"
           template:
-            src: templates/forward.j2
+            src: forward.j2
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
@@ -80,7 +80,7 @@
 
     - name: "Create a .muttrc for {{ user.key }} user if it doesn't exist"
       template:
-        src: templates/muttrc.j2
+        src: muttrc.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.muttrc"
         force: false
         owner: "{{ user.key }}"

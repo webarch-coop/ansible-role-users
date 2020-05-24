@@ -22,7 +22,7 @@
 
 - name: VirtualHosts files present for www-data
   template:
-    src: templates/apache.conf.j2
+    src: apache.conf.j2
     dest: "/etc/apache2/sites-available/{{ vhost.key }}.conf"
     trim_blocks: false
     lstrip_blocks: true

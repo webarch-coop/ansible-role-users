@@ -46,7 +46,7 @@
 
     - name: "mariadb_password written to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
       template:
-        src: templates/my.cnf.j2
+        src: my.cnf.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
@@ -94,7 +94,7 @@
 
     - name: "Set a variable for mysql_user db priv for {{ user.key }} when they have privileges defined"
       set_fact:
-        users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in user.value.users_mariadb_database_privileges %}{{ p}}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
+        users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in user.value.users_mariadb_database_privileges %}{{ p }}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
       when: ( user.value.users_mariadb_database_privileges is defined ) and ( user.value.users_mariadb_database_privileges != [] )
 
     - name: "Print db priv for {{ user.key }}"
@@ -136,7 +136,7 @@
         - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
           lineinfile:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd"
-            line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')}} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
+            line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
             create: true
             state: present
             insertafter: EOF

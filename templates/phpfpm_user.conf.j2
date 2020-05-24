@@ -7,7 +7,7 @@ chroot = {{ chroot_users_dir | default('/users') }}/{{ user.key }}
 listen = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 access.log = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
 slowlog = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
-php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/fpm-php.error.log
+php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
 {% else %}
 listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 access.log = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log

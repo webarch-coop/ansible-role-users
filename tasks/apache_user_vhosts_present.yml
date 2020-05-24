@@ -1,7 +1,7 @@
 ---
 - name: "Apache {{ user.key }} sites-available file present"
   template:
-    src: templates/apache.conf.j2
+    src: apache.conf.j2
     dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
     trim_blocks: false
     lstrip_blocks: true

@@ -59,7 +59,7 @@
 
     - name: "PHP FPM pool.d file present for {{ user.key }}"
       template:
-        src: templates/phpfpm_user.conf.j2
+        src: phpfpm_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       register: users_phpfpm_pool_conf
 
