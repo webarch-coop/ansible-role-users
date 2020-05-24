@@ -20,7 +20,7 @@
       - "name: {{ user.key }}"
       - "group: {{ user.value.users_group | default(user.key) }}"
       - "groups: {{ user.value.users_groups | default([]) | join(',') or \ omit }}"
-      - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit}}"
+      - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit }}"
       - "home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       - "shell: {{ user.value.users_shell | default('/bin/bash', true) }}"
       - "skeleton: {{ user.value.users_skel | default(omit) }}"

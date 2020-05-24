@@ -181,10 +181,13 @@
         - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
         - ( vhost.value.nextcloud_app_disable is defined ) and ( vhost.value.nextcloud_app_disable != [] )
 
-     - name: "Check that nextcloud_onlyoffice_documentserver is set to an ascii domain name if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-       assert:
+    - name: "Check that nextcloud_onlyoffice_documentserver is set to an ascii domain name if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
         that:
           - vhost.value.nextcloud_onlyoffice_documentserver is regex("^[a-z0-9.]{3,60}$")
+        when:
+          - ( vhost.value.nextcloud_onlyoffice_documentserver is defined )
+          - ( vhost.value.nextcloud_onlyoffice_documentserver | length > 0 )
 
   tags:
     - users
