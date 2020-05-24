@@ -12,7 +12,7 @@ php_admin_value[error_log] = {{ chroot_users_dir | default('/users') }}/{{ user.
 listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 access.log = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
 slowlog = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
-php_admin_value[error_log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/fpm-php.error.log
+php_admin_value[error_log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
 {% endif %}
 listen.owner = root
 listen.group = {{ user.key }}
@@ -20,6 +20,8 @@ listen.mode = 0660
 ;listen.acl_users =
 ;listen.acl_groups =
 listen.allowed_clients = 127.0.0.1
+; Error log level. Possible values: alert, error, warning, notice, debug. Default value: notice. 
+php_admin_value[log_level] = {{ user.value.users_phpfpm_log_level | default('notice') }} 
 
 env[TMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 env[TMPDIR] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
