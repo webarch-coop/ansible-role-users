@@ -172,7 +172,7 @@
 - name: "Matomo site tasks for {{ user.key }}"
   block:
 
-    - name: "Check if the Matomo {{ matomo_user }} system user account exists"
+    - name: "Check if the Matomo {{ matomo_user }} system user account exists for {{ user.key }}"
       shell: "id {{ matomo_user }} && echo true || echo false"
       check_mode: false
       register: user_matomo_user_check
@@ -565,6 +565,8 @@
     matomo_notify_headers: "{{ users_notify_headers }}"
     matomo_notify_passwd: "{{ vhost.value.matomo_notify_passwd | default(true) | bool }}"
     matomo_email_signature: "{{ users_notify_signature }}"
+    matomo_version: "{{ vhost.value.matomo_version | default('') }}"
+    matomo_autoupdate: "{{ vhost.value.matomo_autoupdate | default(true) | bool }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost

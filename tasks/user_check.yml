@@ -10,24 +10,28 @@
         that:
           - user.key is regex("^[a-zA-Z0-9-]*$")
         fail_msg: "The username {{ user.key }} contains characters other than ascii letters, numbers and dashes"
+        quiet: true
 
     - name: "Check that the username {{ user.key }} is between 2 and 14 characters long"
       assert:
         that:
           - user.key is regex("^.{2,14}$")
         fail_msg: "The username {{ user.key }} needs to be between 2 and 14 characters long"
+        quiet: true
 
     - name: "Check state for {{ user.key }}"
       assert:
         that:
           - user.value.users_state | length
           - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" )
+        quiet: true
       when: user.value.users_state is defined
 
     - name: "Check that the group for {{ user.key }} contains only ascii letters, numbers and dashes"
       assert:
         that:
           - user.value.users_group is regex("^[a-zA-Z0-9-]*$")
+        quiet: true
       when: user.value.users_group is defined
 
     - name: "Check the groups for {{ user.key }}"
@@ -38,6 +42,7 @@
             that:
               - user.value.users_groups | length
               - user.value.users_groups[0] is defined
+            quiet: true
 
         - name: "Debug users groups for {{ user.key }}"
           debug:
@@ -48,6 +53,7 @@
           assert:
             that:
               - group is regex("^[a-zA-Z0-9-]*$")
+            quiet: true
           loop: "{{ user.value.users_groups }}"
           loop_control:
             loop_var: group
@@ -63,6 +69,7 @@
             that:
               - user.value.users_group_members | length
               - user.value.users_group_members[0] is defined
+            quiet: true
 
         - name: "Debug group members for {{ user.key }}"
           debug:
@@ -73,6 +80,7 @@
           assert:
             that:
               - group is regex("^[a-zA-Z0-9-]*$")
+            quiet: true
           loop: "{{ user.value.users_group_members }}"
           loop_control:
             loop_var: group
@@ -84,12 +92,14 @@
       assert:
         that:
           - user.value.users_home is regex("^\/.*$")
+        quiet: true
       when: user.value.users_home is defined
 
     - name: "Check that the shell for {{ user.key }} is valid"
       assert:
         that:
           - user.value.users_shell in users_shells
+        quiet: true
       when: ( users_shells is defined ) and ( user.value.users_shell is defined )
 
     - name: "Check users_skel is an existing path for {{ user.key }}"
@@ -103,6 +113,7 @@
       assert:
         that:
           - ( user.value.users_system == True ) or ( user.value.users_system == False )
+        quiet: true
       when: user.value.users_system is defined
 
     # TODO check users_home_owner
@@ -113,12 +124,14 @@
       assert:
         that:
           - ( user.value.users_generate_ssh_key == True ) or ( user.value.users_generate_ssh_key == False )
+        quiet: true
       when: user.value.users_generate_ssh_key is defined
 
     - name: "Check email address for {{ user.key }}"
       assert:
         that:
           - user.value.users_email is regex("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+        quiet: true
       when: user.value.users_email is defined
 
     - name: SSH public key URL checks
@@ -129,6 +142,7 @@
             that:
               - user.value.users_ssh_public_keys | length
               - user.value.users_ssh_public_keys[0] is defined
+            quiet: true
 
         - name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }}"
           uri:
@@ -149,42 +163,49 @@
       assert:
         that:
           - user.value.users_quota | human_to_bytes | int > 0
+        quiet: true
       when: user.value.users_quota is defined
 
     - name: "Check that users_quota_block_softlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_block_softlimit | human_to_bytes | int > 0
+        quiet: true
       when: user.value.users_quota_block_softlimit is defined
 
     - name: "Check that users_quota_block_hardlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_block_hardlimit | human_to_bytes | int > 0
+        quiet: true
       when: user.value.users_quota_block_hardlimit is defined
 
     - name: "Check that users_quota_inode_softlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_inode_softlimit | human_to_bytes | int > 0
+        quiet: true
       when: user.value.users_quota_inode_softlimit is defined
 
     - name: "Check that users_quota_inode_hardlimit is a positive number for {{ user.key }}"
       assert:
         that:
           - user.value.users_quota_inode_hardlimit | human_to_bytes | int > 0
+        quiet: true
       when: user.value.users_quota_inode_hardlimit is defined
 
     - name: "Check that users_notify_passwd for {{ user.key }} is true or false"
       assert:
         that:
           - ( user.value.users_notify_passwd == True ) or ( user.value.users_notify_passwd == False )
+        quiet: true
       when: user.value.users_notify_passwd is defined
 
     - name: "Check that users_mariadb_notify_passwd for {{ user.key }} is true or false"
       assert:
         that:
           - ( user.value.users_mariadb_notify_passwd == True ) or ( user.value.users_mariadb_notify_passwd == False )
+        quiet: true
       when: user.value.users_mariadb_notify_passwd is defined
 
     - name: "MariaDB users_mariadb_databases array checks for {{ user.key }}"
@@ -195,12 +216,14 @@
             that:
               - user.value.users_mariadb_databases | length
               - user.value.users_mariadb_databases[0] is defined
+            quiet: true
 
         - name: "Check that the database names only contain lower case letters, numbers and underscores for {{ user.key }}"
           assert:
             that:
               - db is regex("^[a-z0-9_]*$")
             fail_msg: "The database name, {{ db }} must only contain lower case letters, numbers and underscores"
+            quiet: true
           loop: "{{ user.value.users_mariadb_databases }}"
           loop_control:
             loop_var: db
@@ -212,6 +235,7 @@
             that:
               - db is regex("^.{2,25}$")
             fail_msg: "The database name, {{ db }} must be more than 2 but less than or equal to 25 characters long"
+            quiet: true
           loop: "{{ user.value.users_mariadb_databases }}"
           loop_control:
             loop_var: db
@@ -227,6 +251,7 @@
             that:
               - user.value.users_mariadb_database_privileges | length
               - user.value.users_mariadb_database_privileges[0] is defined
+            quiet: true
 
         # https://mariadb.com/kb/en/library/grant/#table-privileges
         - name: "Check that the MariaDB database privileges are valid for {{ user.key }}"
@@ -234,6 +259,7 @@
             that:
               - priv is regex("^ALL|ALTER|CREATE|CREATEVIEW|DELETE|DELETEHISTORY|DROP|GRANTOPTION|INDEX|INSERT|REFERENCES|SELECT|SHOWVIEW|TRIGGER|UPDATE$")
             fail_msg: "Privilege, {{ priv }} is not valid"
+            quiet: true
           loop: "{{ user.value.users_mariadb_database_privileges }}"
           loop_control:
             loop_var: priv
@@ -254,6 +280,7 @@
         that:
           - user.value.users_phpfpm_pm is defined
           - user.value.users_phpfpm_pm is regex("^static|ondemand|dynamic$")
+        quiet: true
       when:
         - ( "phpfpm" in getent_group )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
@@ -262,6 +289,7 @@
       assert:
         that:
           - user.value.users_phpfpm_pm_max_children | int >= 1
+        quiet: true
       when: user.value.users_phpfpm_pm_max_children is defined
 
     - name: "Check the PHP-FPM pm dynamic pool settings for {{ user.key }} if defined"
@@ -271,30 +299,35 @@
           assert:
             that:
               - user.value.users_phpfpm_pm_start_servers | int >= 1
+            quiet: true
           when: user.value.users_phpfpm_pm_start_servers is defined
 
         - name: "Check the PHP-FPM pm.min_spare_servers for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_min_spare_servers | int >= 1
+            quiet: true
           when: user.value.users_phpfpm_pm_min_spare_servers is defined
 
         - name: "Check the PHP-FPM pm.max_spare_servers for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_max_spare_servers | int >= 1
+            quiet: true
           when: user.value.users_phpfpm_pm_max_spare_servers is defined
 
         - name: "Check the PHP-FPM users_phpfpm_pm_max_children for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= 1
+            quiet: true
           when: user.value.users_phpfpm_pm_max_children is defined
 
         - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.start_servers for {{ user.key }} if defined"
           assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_start_servers | int
+            quiet: true
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_start_servers is defined
@@ -303,6 +336,7 @@
           assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+            quiet: true
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
@@ -311,6 +345,7 @@
           assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_max_spare_servers | int
+            quiet: true
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_max_spare_servers is defined
@@ -319,6 +354,7 @@
           assert:
             that:
               - user.value.users_phpfpm_pm_start_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+            quiet: true
           when:
             - user.value.users_phpfpm_pm_start_servers is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
@@ -327,6 +363,7 @@
           assert:
             that:
               - user.value.users_phpfpm_pm_start_servers | int <= user.value.users_phpfpm_pm_max_spare_servers | int
+            quiet: true
           when:
             - user.value.users_phpfpm_pm_start_servers is defined
             - user.value.users_phpfpm_pm_max_spare_servers is defined
@@ -335,6 +372,7 @@
           assert:
             that:
               - user.value.users_phpfpm_pm_max_spare_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+            quiet: true
           when:
             - user.value.users_phpfpm_pm_max_spare_servers is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined

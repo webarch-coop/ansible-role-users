@@ -60,6 +60,15 @@
   {%- if user.value.users_email is defined and user.value.users_email != "" %}
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
+  {%- if vhost_config.users_apache_sts is defined %}
+  <IfModule headers_module>
+    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
+  </IfModule>
+  {%- endif %}
+  <Location "/.well-known/acme-challenge">
+    AuthType None
+    Require all granted
+  </Location>
   {%- if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
     {%- if vhost_config.users_cms is defined and vhost_config.users_cms == "nextcloud" %}
   IncludeOptional /etc/apache2/conf-available/robots-deny-nextcloud.conf
@@ -67,14 +76,22 @@
   IncludeOptional /etc/apache2/conf-available/robots-deny.conf
     {%- endif %}
   {%- endif %}
-  {%- if vhost_config.users_apache_sts is defined %}
-  <IfModule headers_module>
-    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
-  </IfModule>
-  {%- endif %}
   {%- if vhost_config.users_apache_remoteip is defined %}
     {%- if vhost_config.users_apache_remoteip == "cloudflare" %}
   IncludeOptional /etc/apache2/conf-available/cloudflare.conf
+    {%- endif %}
+  {%- endif %}
+  {%- if apache_conf_enabled is defined %}
+    {%- if "webarch" in apache_conf_enabled %}
+  <Location "/wsh">
+    AuthType None
+    Require all granted
+  </Location>
+    {%- elif "mc3" in apache_conf_enabled %}
+  <Location "/mc3">
+    AuthType None
+    Require all granted
+  </Location>
     {%- endif %}
   {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
@@ -100,23 +117,11 @@
       {%- endif %}
   </Location>
     {%- endfor %}
-    {% if apache_conf_enabled is defined %}
-      {%- if "webarch" in apache_conf_enabled %}
-  <Location "/wsh">
-    AuthType None
-    Require all granted
-  </Location>
-      {%- elif "mc3" in apache_conf_enabled %}
-  <Location "/mc3">
-    AuthType None
-    Require all granted
-  </Location>
-      {%- endif %}
-    {%- endif %}
-  <Location "/.well-known/acme-challenge">
-    AuthType None
-    Require all granted
-  </Location>
+  {%- endif %}
+  {%- if vhost_config.users_apache_include_optional is defined -%}
+    {%- for inc in vhost_config.users_apache_include_optional %}
+  IncludeOptional {{ inc }}
+    {%- endfor %}
   {%- endif %}
   {%- if vhost_config.users_apache_alias is defined %}
     {%- for alias in vhost_config.users_apache_alias %}
