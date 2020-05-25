@@ -285,6 +285,15 @@
         - ( "phpfpm" in getent_group )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
 
+    - name: "Check that users_phpfpm_log_level is set to a valid value if defined if {{ user.key }} is in the phpfpm group"
+      assert:
+        that:
+          - user.value.users_phpfpm_log_level is regex("^alert|error|warning|notice|debug$")
+      when:
+        - ( "phpfpm" in getent_group )
+        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
+        - ( user.value.users_phpfpm_log_level is defined )
+
     - name: "Check that PHP-FPM pm.max_children is greater than 1 for {{ user.key }} if defined"
       assert:
         that:
