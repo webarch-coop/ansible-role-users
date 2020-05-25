@@ -106,10 +106,6 @@
 
       when: users_phpfpm_pool_conf.changed
 
-    - name: Debug fail
-      fail:
-        msg: debug
-
     - name: Users Apache PHP FPM localhost.d file present
       template:
         src: apache_localhost.conf.j2
