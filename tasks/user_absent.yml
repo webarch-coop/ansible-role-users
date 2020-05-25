@@ -25,6 +25,14 @@
     - users
     - mariadb
 
+- name: "Include PHP FPM user absent tasks for {{ user.key }}"
+  include_tasks: phpfpm_user_absent.yml
+  when:
+    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+  tags:
+    - users
+    - phpfpm
+
 - name: Chroot user absent tasks
   block:
 
@@ -35,14 +43,6 @@
           include_tasks: chroot_user_absent_fstab.yml
           when:
             - ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
-
-        - name: "Include PHP FPM chroot user absent tasks for {{ user.key }}"
-          include_tasks: phpfpm_chroot_user_absent.yml
-          when:
-            - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
-            - ( users_chroot is defined ) and ( users_chroot == True )
-          tags:
-            - phpfpm
 
         - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
           include_tasks: chroot_user_absent.yml
