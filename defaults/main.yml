@@ -107,4 +107,5 @@ users_cron_tmpdir_max_age_days: 2
 # Matomo user accounts will only be deleted when user accounts are deleted if
 # users_matomo_delete_users is set to true
 users_matomo_delete_users: false
+users_ssh_authorized_keys_file_name: authorized_key
 ...

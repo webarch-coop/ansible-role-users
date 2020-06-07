@@ -28,10 +28,10 @@
         index_var: key_idex
         label: "{{ key_url }}"
 
-    - name: Assemble all the ~/authorized_keys_d/authorized_keys_* public keys to ~/.ssh/authorized_keys
+    - name: "Assemble all the ~/authorized_keys_d/authorized_keys_* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
       assemble:
         src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
         remote_src: true
         validate: ssh-keygen -lf %s
 

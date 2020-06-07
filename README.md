@@ -150,7 +150,7 @@ All the files at the URL's will be downloaded to files named:
 * `~/.ssh/authorized_keys.d/authorized_keys_1`
 * `~/.ssh/authorized_keys.d/authorized_keys_2`
 
-Then the `~/.ssh/authorized_keys.d/authorized_keys_*` files are assembled to `~/.ssh/authorized_keys`, this means if you want to add additional keys then you can simply add them to this directory, with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`. 
+Then the `~/.ssh/authorized_keys.d/authorized_keys_*` files are assembled to `~/.ssh/authorized_keys`, (inless this file name is overridden from the default, see the users_ssh_authorized_keys_file_name variable) this means if you want to add additional keys then you can simply add them to this directory, with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`. 
 
 ## Apache
 
