@@ -98,7 +98,7 @@ users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 #
 users_cron_daily_hour: "05"
-users_cron_mysqldump_hour: "04"
+users_cron_mysqldump_hour: "00"
 # Set users_cron_tmpdir_hour to false to disable deletion of users TMPDIR
 # files and directories which are older than a week for the whole server
 users_cron_tmpdir_hour: "00"
