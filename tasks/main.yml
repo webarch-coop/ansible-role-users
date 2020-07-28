@@ -3,6 +3,7 @@
   apt:
     pkg:
       - bc
+      - bsd-mailx
       - mutt
       - python-dns
       - python-dnspython
