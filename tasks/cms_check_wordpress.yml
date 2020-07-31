@@ -21,12 +21,12 @@
           - vhost.value.wordpress_dbuser == user.key
       when: vhost.value.wordpress_dbuser is defined
 
-    - name: "Check that the wordpress_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that the wordpress_dbprefix is less than 8 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - vhost.value.wordpress_dbprefix | length
           - vhost.value.wordpress_dbprefix is regex("^[a-zA-Z0-9_]*$")
-          - vhost.value.wordpress_dbprefix is regex("^.{1,6}$")
+          - vhost.value.wordpress_dbprefix is regex("^.{1,8}$")
       when: vhost.value.wordpress_dbprefix is defined
 
     # https://wpastra.com/docs/complete-list-wordpress-locale-codes/
