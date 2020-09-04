@@ -243,6 +243,10 @@
       include_tasks: cms_check_flarum.yml
       when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "flarum" )
 
+    - name: "Moodle checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      include_tasks: cms_check_moodle.yml
+      when: ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "moodle" )
+
   tags:
     - users
 ...
