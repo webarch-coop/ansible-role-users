@@ -121,7 +121,7 @@
     - name: Include Apache tasks
       include_tasks: apache.yml
       when:
-        - '"apache2" in ansible_facts.packages'
+        - ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache == True )
         - ( users_update_check is not defined ) or ( users_update_check != True )
 
