@@ -7,21 +7,21 @@
     group: root
     mode: 0644
   tags:
-    - phpfpm
+    - users
 
 - name: /etc/apache2/localhost.d present
   file:
     path: /etc/apache2/localhost.d
     state: directory
-  when: '"apache2" in ansible_facts.packages'
+  when: ( "apache2" in ansible_facts.packages )
   tags:
-    - apache
+    - users
 
 - name: /etc/nginx/localhost.d present
   file:
     path: /etc/nginx/localhost.d
     state: directory
-  when: '"nginx" in ansible_facts.packages'
+  when: ( "nginx" in ansible_facts.packages )
   tags:
-    - nginx
+    - users
 ...

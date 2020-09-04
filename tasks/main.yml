@@ -13,14 +13,33 @@
       - vim
       - whois
     state: present
+  tags:
+    - users
 
 - name: System setup and checks
   include_tasks: system.yml
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
+
+- name: Check config only
+  block:
+
+    - name: Run checks on users
+      include_tasks: user_check.yml
+      when:
+        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: End as checks completed
+      meta: end_play
+
+  when:
+    - ( users_update_check is defined ) and ( users_update_check == True )
+  tags:
+    - users
 
 - name: Set an empty users_update array
   set_fact:
@@ -28,9 +47,6 @@
   when: users_update is not defined
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 
 - name: Set users to update to all
   block:
@@ -51,9 +67,6 @@
     - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 
 - name: Set users to update by group
   block:
@@ -77,9 +90,6 @@
     - ( users_update_groups is defined ) and ( users_update_groups != [] )
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 
 - name: Check which users accounts are changed
   block:
@@ -95,32 +105,6 @@
     - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
-
-- name: Check config only
-  block:
-
-    - name: Run checks on users
-      include_tasks: user_check.yml
-      when:
-        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: End as checks completed
-      meta: end_play
-
-  when:
-    - ( users_update_check is defined ) and ( users_update_check == True )
-  tags:
-    - users
-    - apache
-    - phpfpm
-    - letsencrypt
 
 - name: Update users tasks
   block:
@@ -205,9 +189,6 @@
     - ( users_update_check is not defined ) or ( users_update_check != True )
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 
 - name: Users quota CSV file updated
   block:
@@ -257,7 +238,4 @@
     msg: "Users updated: {{ users_update }}"
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 ...

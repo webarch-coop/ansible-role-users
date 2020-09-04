@@ -1,12 +1,16 @@
 ---
-- debug:
-    var: users_phpfpm_version
-
-- debug:
-    var: getent_group
-
 - name: "PHP FPM config present for {{ user.key }}"
   block:
+
+    - name: Debug users_phpfpm_version
+      debug:
+        var: users_phpfpm_version
+        verbosity: 2
+
+    - name: Debug getent_group
+      debug:
+        var: getent_group
+        verbosity: 2
 
     - name: Users PHP FPM log directory present
       file:
@@ -123,5 +127,4 @@
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
     - users
-    - phpfpm
 ...

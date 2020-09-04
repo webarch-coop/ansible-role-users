@@ -1,199 +1,152 @@
 ---
-- name: Check which shells are present
-  shell: cat /etc/shells | grep -v ^#
-  check_mode: false
-  changed_when: false
-  register: users_shells_check
-  tags:
-    - users
-    - apache
-    - letsencrypt
-    - phpfpm
-
-- name: Array set for shells
-  set_fact:
-    users_shells: "/usr/sbin/nologin + [ '{{ users_shells_check.stdout_lines | list }}' ]"
-  tags:
-    - users
-    - apache
-    - letsencrypt
-    - phpfpm
-
-- name: Print available shells
-  debug:
-    msg: "Available shells: {{ users_shells }}"
-    verbosity: 2
-
-- name: Get all groups
-  getent:
-    database: group
-    split: ':'
-  tags:
-    - users
-    - apache
-    - letsencrypt
-    - phpfpm
-
-- debug:
-    var: getent_group
-    verbosity: 2
-
-- name: Get all users
-  getent:
-    database: passwd
-    split: ':'
-  tags:
-    - users
-    - apache
-    - letsencrypt
-    - phpfpm
-
-- debug:
-    var: getent_passwd
-    verbosity: 2
-
-- name: Set a fact for the Debian version
-  set_fact:
-    users_debian_version: "{{ ansible_distribution_release }}"
-  tags:
-    - users
-    - apache
-    - letsencrypt
-    - phpfpm
-
-- name: Load package information as facts
-  package_facts:
-    manager: apt
-  tags:
-    - users
-    - apache
-    - letsencrypt
-    - phpfpm
-
-- name: Fail if ansible_facts.packages is not defined or empty
-  fail:
-    msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
-  when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
-  tags:
-    - users
-    - apache
-    - letsencrypt
-    - phpfpm
-
-- name: PHP-FPM chroot tasks
-  include_tasks: phpfpm_chroot.yml
-  when:
-    - ( users_phpfpm is defined ) and ( users_phpfpm )
-    - ( users_update_check is not defined ) or ( users_update_check != True )
-  tags:
-    - phpfpm
-
-- name: PHP FPM checks
+- name: System checks
   block:
 
-    - name: Check that php-fpm is installed
-      assert:
-        that:
-          - ( "php-fpm" in ansible_facts.packages )
-
-    - name: Run phpquery -V
-      command: phpquery -V
-      register: users_phpquery
+    - name: Check which shells are present
+      shell: cat /etc/shells | grep -v ^#
       check_mode: false
       changed_when: false
+      register: users_shells_check
 
-    - name: Set a fact for the PHP-FPM version
+    - name: Array set for shells
       set_fact:
-        users_phpfpm_version: "{{ users_phpquery.stdout | trim }}"
+        users_shells: "/usr/sbin/nologin + [ '{{ users_shells_check.stdout_lines | list }}' ]"
 
-    - name: Fail if users_phpfpm_version is not defined
-      assert:
-        that:
-          - users_phpfpm_version is defined
-          - users_phpfpm_version is regex('^[1-9][.][1-9]$')
+    - name: Print available shells
+      debug:
+        msg: "Available shells: {{ users_shells }}"
+        verbosity: 2
 
-  when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
-  tags:
-    - users
-    - phpfpm
+    - name: Get all groups
+      getent:
+        database: group
+        split: ':'
 
-- name: Check if a chroot exists
-  stat:
-    path: "{{ chroot_dir | default('/chroot') }}"
-  register: users_chroot_dir
-  when: ( users_chroot is defined ) and ( users_chroot == True )
-  tags:
-    - users
-    - phpfpm
+    - debug:
+        var: getent_group
+        verbosity: 2
 
-- name: Quota tasks
-  block:
+    - name: Get all users
+      getent:
+        database: passwd
+        split: ':'
 
-    - name: "Touch {{ quota_dir }}/quota_user.csv"
+    - debug:
+        var: getent_passwd
+        verbosity: 2
+
+    - name: Set a fact for the Debian version
+      set_fact:
+        users_debian_version: "{{ ansible_distribution_release }}"
+
+    - name: Load package information as facts
+      package_facts:
+        manager: apt
+
+    - name: Fail if ansible_facts.packages is not defined or empty
+      fail:
+        msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
+      when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
+
+    - name: PHP-FPM chroot tasks
+      include_tasks: phpfpm_chroot.yml
+      when:
+        - ( users_phpfpm is defined ) and ( users_phpfpm )
+        - ( users_update_check is not defined ) or ( users_update_check != True )
+
+    - name: PHP FPM checks
+      block:
+
+        - name: Check that php-fpm is installed
+          assert:
+            that:
+              - ( "php-fpm" in ansible_facts.packages )
+
+        - name: Run phpquery -V
+          command: phpquery -V
+          register: users_phpquery
+          check_mode: false
+          changed_when: false
+
+        - name: Set a fact for the PHP-FPM version
+          set_fact:
+            users_phpfpm_version: "{{ users_phpquery.stdout | trim }}"
+
+        - name: Fail if users_phpfpm_version is not defined
+          assert:
+            that:
+              - users_phpfpm_version is defined
+              - users_phpfpm_version is regex('^[1-9][.][1-9]$')
+
+      when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
+
+    - name: Check if a chroot exists
+      stat:
+        path: "{{ chroot_dir | default('/chroot') }}"
+      register: users_chroot_dir
+      when: ( users_chroot is defined ) and ( users_chroot == True )
+
+    - name: Quota tasks
+      block:
+
+        - name: "Touch {{ quota_dir }}/quota_user.csv"
+          file:
+            path: "{{ quota_dir }}/quota_user.csv"
+            state: touch
+            access_time: preserve
+            modification_time: preserve
+          check_mode: false
+
+        - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
+          command: "md5sum {{ quota_dir }}/quota_user.csv"
+          register: users_repquota_md5sum_before
+          check_mode: false
+          changed_when: false
+          when: quota_dir is defined
+
+        - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+          shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+          register: users_repquota_md5sum_after
+          check_mode: false
+          changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+
+        - name: Users quotas fetched
+          fetch:
+            src: "{{ quota_dir }}/quota_user.csv"
+            dest: /tmp/
+          check_mode: false
+
+      when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
+
+    - name: Include Apache tasks
+      include_tasks: apache.yml
+      when:
+        - '"apache2" in ansible_facts.packages'
+        - ( users_apache is defined ) and ( users_apache == True )
+        - ( users_update_check is not defined ) or ( users_update_check != True )
+
+    - name: Directories for users state files present
       file:
-        path: "{{ quota_dir }}/quota_user.csv"
-        state: touch
-        access_time: preserve
-        modification_time: preserve
+        path: "{{ users_state_dir }}/{{ dir }}"
+        state: directory
+      loop:
+        - current
+        - previous
+        - proposed
+      loop_control:
+        loop_var: dir
+
+    - name: Proposed users state files present
+      template:
+        src: user_state.yml.j2
+        dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
       check_mode: false
+      register: users_state_file
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
 
-    - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
-      command: "md5sum {{ quota_dir }}/quota_user.csv"
-      register: users_repquota_md5sum_before
-      check_mode: false
-      changed_when: false
-      when: quota_dir is defined
-
-    - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
-      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
-      register: users_repquota_md5sum_after
-      check_mode: false
-      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
-
-    - name: Users quotas fetched
-      fetch:
-        src: "{{ quota_dir }}/quota_user.csv"
-        dest: /tmp/
-      check_mode: false
-
-  when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
   tags:
-    - users
-
-- name: Include Apache tasks
-  include_tasks: apache.yml
-  when:
-    - '"apache2" in ansible_facts.packages'
-    - ( users_apache is defined ) and ( users_apache == True )
-    - ( users_update_check is not defined ) or ( users_update_check != True )
-  tags:
-    - users
-    - apache
-
-- name: Directories for users state files present
-  file:
-    path: "{{ users_state_dir }}/{{ dir }}"
-    state: directory
-  loop:
-    - current
-    - previous
-    - proposed
-  loop_control:
-    loop_var: dir
-  tags:
-    - users
-
-- name: Proposed users state files present
-  template:
-    src: user_state.yml.j2
-    dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
-  check_mode: false
-  register: users_state_file
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-  tags:
-    - apache
     - users
 ...

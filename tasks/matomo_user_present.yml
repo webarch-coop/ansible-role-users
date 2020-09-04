@@ -16,5 +16,4 @@
     matomo_notify_signature: "{{ users_notify_signature }}"
   tags:
     - users
-    - matomo
 ...

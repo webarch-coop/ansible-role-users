@@ -24,8 +24,6 @@
   when: users_cert == "vhost"
   tags:
     - users
-    - apache
-    - letsencrypt
 
 - name: "Let's Encrypt one cert per user checks for {{ user.key }}"
   block:
@@ -71,6 +69,4 @@
   when: users_cert == "user"
   tags:
     - users
-    - apache
-    - letsencrypt
 ...

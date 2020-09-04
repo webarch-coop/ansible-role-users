@@ -20,10 +20,6 @@
       getent:
         database: group
         split: ':'
-      tags:
-        - apache
-        - letsencrypt
-        - phpfpm
 
     - name: "User account present for {{ user.key }}"
       include_tasks: user.yml
@@ -103,8 +99,6 @@
         - ( user.key != "root" )
         - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-      tags:
-        - phpfpm
 
     - name: "Matomo login account tasks for {{ user.key }}"
       block:
@@ -138,15 +132,9 @@
         - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache == True )
         - ( user.value.users_apache_virtual_hosts is defined )
-      tags:
-        - apache
 
     - name: Users state files updated
       include_tasks: user_updated.yml
-      tags:
-        - apache
-        - phpfpm
-        - letsencrypt
 
   tags:
     - users

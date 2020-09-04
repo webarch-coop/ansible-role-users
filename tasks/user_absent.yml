@@ -16,14 +16,12 @@
     - ( users_apache is defined ) and ( users_apache == True )
   tags:
     - users
-    - apache
 
 - name: "Absent user {{ user.key }} MariaDB account and databases absent"
   include_tasks: mariadb_user_absent.yml
   when: ( users_mariadb is defined ) and ( users_mariadb == True )
   tags:
     - users
-    - mariadb
 
 - name: "Include PHP FPM user absent tasks for {{ user.key }}"
   include_tasks: phpfpm_user_absent.yml
@@ -31,7 +29,6 @@
     - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
   tags:
     - users
-    - phpfpm
 
 - name: Chroot user absent tasks
   block:
@@ -81,7 +78,4 @@
   include_tasks: user_updated.yml
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 ...

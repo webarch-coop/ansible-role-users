@@ -7,7 +7,7 @@
     group: root
     mode: 0644
   tags:
-    - apache
+    - users
 
 - name: Cron job to delete Apache logs when older than 30 days
   cron:
@@ -17,7 +17,7 @@
     day: 1
     job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
   tags:
-    - apache
+    - users
 
 - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
   cron:
@@ -28,5 +28,5 @@
     job: "/usr/local/bin/apache_data_usage_by_user {{ users_apache_bandwidth_email }}"
   when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email != "" )
   tags:
-    - apache
+    - users
 ...

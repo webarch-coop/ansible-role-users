@@ -15,8 +15,6 @@
   when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
   tags:
     - users
-    - apache
-    - letsencrypt
 
 # One cert per user
 - name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
@@ -54,8 +52,6 @@
   when: ( users_cert is defined ) and ( users_cert == 'user' )
   tags:
     - users
-    - apache
-    - letsencrypt
 
 - name: "Apache {{ user.key }}/{{ users_sites_dir }} directory present"
   file:
@@ -67,7 +63,6 @@
     mode: 0750
   tags:
     - users
-    - apache
 
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
@@ -82,7 +77,6 @@
     label: "{{ vhost }}"
   tags:
     - users
-    - apache
 
 - name: "HTTP Authentication htpasswd files present for {{ user.key }}"
   include_tasks: htauth.yml
@@ -93,7 +87,6 @@
   when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   tags:
     - users
-    - apache
 
 - name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present"
   file:
@@ -104,15 +97,12 @@
     mode: 0750
   tags:
     - users
-    - apache
 
 - name: "Check that the SSL certs for {{ user.key }} are present"
   include_tasks: apache_cert_check.yml
   when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
   tags:
     - users
-    - apache
-    - letsencrypt
 
 - name: "Apache {{ user.key }} sites-enabled symlink absent"
   file:
@@ -121,7 +111,6 @@
   when: users_apache_certs_present == False
   tags:
     - users
-    - apache
 
 - name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
   stat:
@@ -129,7 +118,6 @@
   register: users_apache_conf_check
   tags:
     - users
-    - apache
 
 - name: "Apache {{ user.key }} sites-available file copied"
   copy:
@@ -139,7 +127,6 @@
   when: users_apache_conf_check.stat.exists
   tags:
     - users
-    - apache
 
 - name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
   include_tasks: apache_user_www_data_vhosts_present.yml
@@ -148,7 +135,6 @@
     - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
   tags:
     - users
-    - apache
 
 - name: "Generate and enable Apache VirtualHosts for {{ user.key }}"
   include_tasks: apache_user_vhosts_present.yml
@@ -158,7 +144,6 @@
     # - ( users_apache_conf is defined )
   tags:
     - users
-    - apache
 
 - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
   shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"

@@ -5,7 +5,9 @@
       - "user.value.users.home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
-    verbosity: 1
+    verbosity: 2
+  tags:
+    - users
 
 - name: Debug users_apache_htauth_users loop
   debug:
@@ -13,11 +15,13 @@
       - "htauth.name: {{ htauth.name }}"
       - "htauth.password: {{ htauth.password | default(omit) }}"
       - "htauth.state: {{ htauth.state | default('present') }}"
-    verbosity: 1
+    verbosity: 2
   loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth
     label: "{{ htauth.name }}"
+  tags:
+    - users
 
 - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd directory present"
   file:
@@ -27,7 +31,6 @@
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0750"
   tags:
-    - apache
     - users
 
 - name: "HTTP Authentication usernames and passwords for {{ vhost.value.users_apache_server_name }}"
@@ -45,6 +48,5 @@
     loop_var: htauth
     label: "{{ htauth.name }}"
   tags:
-    - apache
     - users
 ...

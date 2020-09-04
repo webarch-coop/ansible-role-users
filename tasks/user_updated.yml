@@ -5,9 +5,6 @@
   register: users_current_state_file
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 
 - name: "Current state file copied to the previous directory for {{ user.key }}"
   copy:
@@ -17,9 +14,6 @@
   when: ( users_current_state_file is defined ) and ( users_current_state_file.stat.exists )
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 
 - name: "Proposed users state file copied to the current directory for {{ user.key }}"
   copy:
@@ -28,7 +22,4 @@
     remote_src: true
   tags:
     - users
-    - apache
-    - phpfpm
-    - letsencrypt
 ...
