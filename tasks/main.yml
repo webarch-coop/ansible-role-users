@@ -16,7 +16,7 @@
   tags:
     - users
 
-- name: Check that usernames are sane
+- name: Check that usernames are between 2 and 14 ascii letters, numbers and dashes
   assert:
     that:
       - user.key is regex("^[a-zA-Z0-9-]*$")
