@@ -19,10 +19,10 @@
 - name: Check that usernames are sane
   assert:
     that:
-      # only ascii letters, numbers and dashes
       - user.key is regex("^[a-zA-Z0-9-]*$")
-      # between 2 and 14 characters long
       - user.key is regex("^.{2,14}$")
+    quite: true
+    fail_msg: "Usernames can only be between 2 and 14 ascii letters, numbers and dashes"
   loop: "{{ users | dict2items }}"
   loop_control:
     loop_var: user
