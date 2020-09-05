@@ -365,7 +365,7 @@
     moodle_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
     moodle_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     moodle_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-    moodle_data: "{{ vhost.value.moodle_data | default(users_basedir + '/' + user.key) }}/private/{{ vhost.value.users_apache_server_name }}/data"
+    moodle_data: "{{ vhost.value.moodle_data | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}-data"
     moodle_version: "{{ vhost.value.moodle_version }}"
     moodle_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
     moodle_domain: "{{ vhost.value.moodle_domain | default(vhost.value.users_apache_server_name) }}"
