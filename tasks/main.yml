@@ -48,6 +48,12 @@
   tags:
     - users
 
+- name: Print the users_update_strategy
+  debug:
+    var: users_update_strategy
+  tags:
+    - users
+
 - name: Set users to update to all
   block:
 
