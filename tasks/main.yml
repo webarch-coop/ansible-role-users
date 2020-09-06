@@ -81,6 +81,8 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
+      when:
+        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
 
     - name: Include PHP-FPM user config tasks
       include_tasks: phpfpm_user_present.yml
