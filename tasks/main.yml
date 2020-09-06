@@ -1,4 +1,10 @@
 ---
+- name: Print the users_update_strategy
+  debug:
+    var: users_update_strategy
+  tags:
+    - users
+
 - name: Packages present
   apt:
     pkg:
