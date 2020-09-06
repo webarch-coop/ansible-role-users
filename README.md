@@ -129,7 +129,7 @@ ansible-playbook users.yml
 
 ## Debugging
 
-If `users_update_check` is set to true, for example on the command line using `--extra-vars "users_update_check=true"` then no changes will be made other than to generate `/root/users/proposed/*.yml` state files.
+If `users_update_strategy: check`, for example on the command line using `--extra-vars "users_update_strategy=true"` then no changes will be made other than to generate `/root/users/proposed/*.yml` state files.
 
 If `users_domain_check` is set to `strict` then if a domain name doesn't resolve to the servers IP address then the tasks will stop rather than just warn.
 
@@ -137,7 +137,7 @@ So, for example:
 
 ```bash
 ansible-galaxy install -r requirements.yml --force && \
-  ansible-playbook users.yml --extra-vars "users_update_check=true,users_domain_check=strict,users_update_strategy=all"
+  ansible-playbook users.yml --extra-vars "users_domain_check=strict,users_update_strategy=check"
 ```
 
 ## SSH Public Keys
