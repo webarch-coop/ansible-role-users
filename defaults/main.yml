@@ -6,7 +6,7 @@
 # config updated. If it is set to "phpfpm" then present users in the phpfpm group
 # will have their PHP-FPM pool config file updated. If it is set to "groups" and
 # the users_update_groups array is defined then only users in these groups will
-# be updated.
+# be updated. If it is set to "check" then the users: YAML is checked only.
 users_update_strategy: changed
 # Define users_apache to true for this role to manage the Apache VirtualHosts
 users_apache: false
