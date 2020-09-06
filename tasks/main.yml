@@ -48,12 +48,6 @@
   tags:
     - users
 
-- name: Print the users_update_strategy
-  debug:
-    var: users_update_strategy
-  tags:
-    - users
-
 - name: Set users to update to all
   block:
 
@@ -154,6 +148,9 @@
     - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
   tags:
     - users
+
+- fail:
+    msg: "Debug"
 
 - name: Check config only
   block:
