@@ -100,6 +100,46 @@
   tags:
     - users
 
+- name: Update Apache config for users present
+  block:
+
+    - name: Include Apache user tasks
+      include_tasks: apache_user_vhosts_present.yml
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
+        - ( user.value.users_apache_virtual_hosts is defined )
+        - ( user.value.state is defined ) and ( user.value.state == "present" )
+
+  when:
+    - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
+    - ( users_apache is defined ) and ( users_apache == True )
+  tags:
+    - users
+
+- name: Update PHP-FPM config for users present
+  block:
+
+    - name: Include PHP-FPM user config tasks
+      include_tasks: phpfpm_user_present.yml
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( user.key != "root" )
+        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
+        - ( user.value.state is defined ) and ( user.value.state == "present" )
+
+  when:
+    - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
+    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+  tags:
+    - users
+
 - name: Check config only
   block:
 
@@ -225,21 +265,6 @@
     - ( users_update_check is not defined ) or ( users_update_check != True )
   tags:
     - users
-
-# This has been moved so the users state files are updated one at a time
-# rather than all at the end.
-# - name: Users state files updated
-#   include_tasks: user_updated.yml
-#   when: user.key in users_update
-#   loop: "{{ users | dict2items }}"
-#   loop_control:
-#     loop_var: user
-#     label: "{{ user.key }}"
-#   tags:
-#     - users
-#     - apache
-#     - phpfpm
-#     - letsencrypt
 
 - name: Firewall tasks included
   include_tasks: firewall.yml

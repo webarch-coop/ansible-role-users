@@ -48,13 +48,7 @@
         msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
       when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
 
-    - name: PHP-FPM chroot tasks
-      include_tasks: phpfpm_chroot.yml
-      when:
-        - ( users_phpfpm is defined ) and ( users_phpfpm )
-        - ( users_update_check is not defined ) or ( users_update_check != True )
-
-    - name: PHP FPM checks
+    - name: PHP FPM checks and tasks
       block:
 
         - name: Check that php-fpm is installed
@@ -77,6 +71,9 @@
             that:
               - users_phpfpm_version is defined
               - users_phpfpm_version is regex('^[1-9][.][1-9]$')
+
+        - name: PHP-FPM tasks
+          include_tasks: phpfpm.yml
 
       when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
 
