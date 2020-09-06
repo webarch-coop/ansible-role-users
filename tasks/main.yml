@@ -1,24 +1,4 @@
 ---
-- name: Check config only
-  block:
-
-    - name: Run checks on users
-      include_tasks: user_check.yml
-      when:
-        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: End as checks completed
-      meta: end_play
-
-  when:
-    - ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
-  tags:
-    - users
-
 - name: Packages present
   apt:
     pkg:
@@ -52,6 +32,26 @@
 
 - name: System setup and checks
   include_tasks: system.yml
+  tags:
+    - users
+
+- name: Check config only
+  block:
+
+    - name: Run checks on users
+      include_tasks: user_check.yml
+      when:
+        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: End as checks completed
+      meta: end_play
+
+  when:
+    - ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
   tags:
     - users
 
