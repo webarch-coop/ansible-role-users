@@ -48,6 +48,52 @@
   tags:
     - users
 
+- name: Update Apache config for users present
+  block:
+
+    - name: Include Apache user tasks
+      include_tasks: apache_user_vhosts_present.yml
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
+        - ( user.value.users_apache_virtual_hosts is defined )
+        - ( user.value.state is defined ) and ( user.value.state == "present" )
+
+  when:
+    - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
+    - ( users_apache is defined ) and ( users_apache == True )
+  tags:
+    - users
+
+- name: Update PHP-FPM config for users present
+  block:
+
+    - name: Include PHP-FPM user config tasks
+      include_tasks: phpfpm_user_present.yml
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - ( user.key != "root" )
+        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
+        - ( user.value.state is defined ) and ( user.value.state == "present" )
+
+    - name: End as PHP-FPM config updates are completed
+      meta: end_play
+
+  when:
+    - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
+    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+  tags:
+    - users
+
+- fail:
+    msg: "Debug"
+
 - name: Set users to update to all
   block:
 
@@ -105,52 +151,6 @@
     - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
   tags:
     - users
-
-- name: Update Apache config for users present
-  block:
-
-    - name: Include Apache user tasks
-      include_tasks: apache_user_vhosts_present.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
-        - ( user.value.users_apache_virtual_hosts is defined )
-        - ( user.value.state is defined ) and ( user.value.state == "present" )
-
-  when:
-    - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
-    - ( users_apache is defined ) and ( users_apache == True )
-  tags:
-    - users
-
-- name: Update PHP-FPM config for users present
-  block:
-
-    - name: Include PHP-FPM user config tasks
-      include_tasks: phpfpm_user_present.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( user.key != "root" )
-        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-        - ( user.value.state is defined ) and ( user.value.state == "present" )
-
-    - name: End as PHP-FPM config updates are completed
-      meta: end_play
-
-  when:
-    - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
-    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
-  tags:
-    - users
-
-- fail:
-    msg: "Debug"
 
 - name: Check config only
   block:
