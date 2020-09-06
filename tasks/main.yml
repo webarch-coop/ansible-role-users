@@ -60,7 +60,7 @@
       when:
         - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
         - ( user.value.users_apache_virtual_hosts is defined )
-        - ( user.value.state is defined ) and ( user.value.state == "present" )
+        - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
 
   when:
     - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
@@ -87,9 +87,6 @@
     - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
   tags:
     - users
-
-- fail:
-    msg: "Debug"
 
 - name: Set users to update to all
   block:

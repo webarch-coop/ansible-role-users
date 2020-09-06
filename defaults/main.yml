@@ -2,10 +2,10 @@
 # If users_update_strategy is set to "all" then all users will be configured
 # everytime the tasks in this role are run, it it is set to "changed" than only
 # user accounts that have changes will be updated. If it is set to "apache" then
-# present users with users_apache_virtual_hosts defined will have their Apache 
+# present users with users_apache_virtual_hosts defined will have their Apache
 # config updated. If it is set to "phpfpm" then present users in the phpfpm group
-# will have their PHP-FPM pool config file updated. If it is set to "groups" and 
-# the users_update_groups array is defined then only users in these groups will 
+# will have their PHP-FPM pool config file updated. If it is set to "groups" and
+# the users_update_groups array is defined then only users in these groups will
 # be updated.
 users_update_strategy: changed
 # Define users_apache to true for this role to manage the Apache VirtualHosts
