@@ -71,21 +71,6 @@
 - name: Update PHP-FPM config for users present
   block:
 
-    - debug:
-        msg:
-          - "users_update_strategy: {{ users_update_strategy }}"
-          - "users_phpfpm_version: {{ users_phpfpm_version }}"
-          - "user.value.users_groups: {{ user.value.users_groups }}"
-          - "user.value.state: {{ user.value.state }}"
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( user.key != "root" )
-        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-        - ( user.value.state is defined ) and ( user.value.state == "present" )
-
     - name: Include PHP-FPM user config tasks
       include_tasks: phpfpm_user_present.yml
       loop: "{{ users | dict2items }}"
@@ -95,10 +80,7 @@
       when:
         - ( user.key != "root" )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-        - ( user.value.state is defined ) and ( user.value.state == "present" )
-
-    - name: End as PHP-FPM config updates are completed
-      meta: end_play
+        - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
 
   when:
     - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
