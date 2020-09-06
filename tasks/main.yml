@@ -134,6 +134,9 @@
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
         - ( user.value.state is defined ) and ( user.value.state == "present" )
 
+    - name: End as PHP-FPM config updates are completed
+      meta: end_play
+
   when:
     - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
     - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
