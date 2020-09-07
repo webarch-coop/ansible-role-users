@@ -1,275 +1,256 @@
 ---
-- name: Packages present
-  apt:
-    pkg:
-      - bc
-      - bsd-mailx
-      - mutt
-      - python-dns
-      - python-dnspython
-      - python3-dnspython
-      - python-passlib
-      - slay
-      - vim
-      - whois
-    state: present
-  tags:
-    - users
-
-- name: Check that usernames are between 2 and 14 ascii letters, numbers and dashes
-  assert:
-    that:
-      - user.key is regex("^[a-zA-Z0-9-]*$")
-      - user.key is regex("^.{2,14}$")
-    quiet: true
-    fail_msg: "Usernames can only be between 2 and 14 ascii letters, numbers and dashes"
-  loop: "{{ users | dict2items }}"
-  loop_control:
-    loop_var: user
-    label: "{{ user.key }}"
-  tags:
-    - users
-
-- name: System setup and checks
-  include_tasks: system.yml
-  tags:
-    - users
-
-- name: Check config only
+- name: The users dictionary needs to be defined for this role
   block:
 
-    - name: Run checks on users
-      include_tasks: user_check.yml
-      when:
-        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+    - name: Packages present
+      apt:
+        pkg:
+          - bc
+          - bsd-mailx
+          - mutt
+          - python-dns
+          - python-dnspython
+          - python3-dnspython
+          - python-passlib
+          - slay
+          - vim
+          - whois
+        state: present
+
+    - name: Check that usernames are between 2 and 14 ascii letters, numbers and dashes
+      assert:
+        that:
+          - user.key is regex("^[a-zA-Z0-9-]*$")
+          - user.key is regex("^.{2,14}$")
+        quiet: true
+        fail_msg: "Usernames can only be between 2 and 14 ascii letters, numbers and dashes"
       loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
 
-    - name: End as checks completed
-      meta: end_play
+    - name: System setup and checks
+      include_tasks: system.yml
 
-  when:
-    - ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
-  tags:
-    - users
-
-- name: Set an empty users_update array
-  set_fact:
-    users_update: []
-  when: users_update is not defined
-  tags:
-    - users
-
-- name: Update Apache config for users present
-  block:
-
-    - name: Include Apache user tasks
-      include_tasks: apache_user_vhosts_present.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
-        - ( user.value.users_apache_virtual_hosts is defined )
-        - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
-
-  when:
-    - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
-    - ( users_apache is defined ) and ( users_apache == True )
-  tags:
-    - users
-
-- name: Update PHP-FPM config for users present
-  block:
-
-    - name: Include PHP-FPM user config tasks
-      include_tasks: phpfpm_user_present.yml
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-      when:
-        - ( user.key != "root" )
-        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-        - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
-
-  when:
-    - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
-    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
-  tags:
-    - users
-
-- name: Set users to update to all
-  block:
-
-    - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
-      set_fact:
-        users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: Print the users to update if users_update_strategy is not set or set to all
-      debug:
-        msg: "User to update: {{ users_update }}"
-
-  when:
-    - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
-  tags:
-    - users
-
-- name: Set users to update by group
-  block:
-
-    - name: Loop through the users with additional groups
-      include_tasks: users_groups.yml
-      when:
-        - ( user.value.users_groups is defined and user.value.users_groups != [] ) or ( user.key in users_update_groups )
-        - ( user.key not in users_update )
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: Print the users in the groups to update
-      debug:
-        msg: "User to update: {{ users_update }}"
-
-  when:
-    - ( users_update_strategy is defined ) or ( users_update_strategy == "groups" )
-    - ( users_update_groups is defined ) and ( users_update_groups != [] )
-  tags:
-    - users
-
-- name: Check which users accounts are changed
-  block:
-
-    - name: Check users changed
-      include_tasks: users_changed.yml
-
-    - name: Print the changed users to update
-      debug:
-        msg: "User to update: {{ users_update }}"
-
-  when:
-    - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
-  tags:
-    - users
-
-- name: Update users tasks
-  block:
-
-    - name: Print users to add or update
-      debug:
-        msg: "User to update: {{ user }}"
-        verbosity: 1
-      when:
-        - ( user.key is defined ) and ( user.key in users_update )
-        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: User absent loop
-      include_tasks: user_absent.yml
-      when:
-        - ( user.key is defined ) and ( user.key in users_update )
-        - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: Check variables for users to update
-      include_tasks: user_check.yml
-      when:
-        - ( user.key is defined ) and ( user.key in users_update )
-        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: User present loop
-      include_tasks: user_present.yml
-      when:
-        - ( user.key is defined ) and ( user.key in users_update )
-        - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-      loop: "{{ users | dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
-
-    - name: Munin tasks for servers with a chroot and php-fpm
+    - name: Check config only
       block:
 
-        - name: Set a fact for the users who are present and in the phpfpm and chroot groups
-          set_fact:
-            users_in_phpfpm_and_chroot_group: "{{ users_in_phpfpm_and_chroot_group | default('') }} {{ user.key }}"
+        - name: Run checks on users
+          include_tasks: user_check.yml
           when:
-            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-            - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
-            - ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
-            - user.key != "root"
+            - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
 
-        - name: Debug the users who are present and in the phpfpm and chroot groups
+        - name: End as checks completed
+          meta: end_play
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
+
+    - name: Set an empty users_update array
+      set_fact:
+        users_update: []
+      when: users_update is not defined
+
+    - name: Update Apache config for users present
+      block:
+
+        - name: Include Apache user tasks
+          include_tasks: apache_user_vhosts_present.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
+            - ( user.value.users_apache_virtual_hosts is defined )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
+        - ( users_apache is defined ) and ( users_apache == True )
+
+    - name: Update PHP-FPM config for users present
+      block:
+
+        - name: Include PHP-FPM user config tasks
+          include_tasks: phpfpm_user_present.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key != "root" )
+            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
+        - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+
+    - name: Set users to update to all
+      block:
+
+        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
+          set_fact:
+            users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+        - name: Print the users to update if users_update_strategy is not set or set to all
           debug:
-            msg: "Users in the phpfpm and chroot groups: {{ users_in_phpfpm_and_chroot_group }}"
+            msg: "User to update: {{ users_update }}"
+
+      when:
+        - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
+
+    - name: Set users to update by group
+      block:
+
+        - name: Loop through the users with additional groups
+          include_tasks: users_groups.yml
+          when:
+            - ( user.value.users_groups is defined and user.value.users_groups != [] ) or ( user.key in users_update_groups )
+            - ( user.key not in users_update )
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+        - name: Print the users in the groups to update
+          debug:
+            msg: "User to update: {{ users_update }}"
+
+      when:
+        - ( users_update_strategy is defined ) or ( users_update_strategy == "groups" )
+        - ( users_update_groups is defined ) and ( users_update_groups != [] )
+
+    - name: Check which users accounts are changed
+      block:
+
+        - name: Check users changed
+          include_tasks: users_changed.yml
+
+        - name: Print the changed users to update
+          debug:
+            msg: "User to update: {{ users_update }}"
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
+
+    - name: Update users tasks
+      block:
+
+        - name: Print users to add or update
+          debug:
+            msg: "User to update: {{ user }}"
             verbosity: 1
+          when:
+            - ( user.key is defined ) and ( user.key in users_update )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
 
-        - name: Include the munin-node phpfpm-multi tasks
-          include_role:
-            name: munin-node
-            tasks_from: phpfpm_multi.yml
-          vars:
-            munin_phpfpm_users: "{{ users_in_phpfpm_and_chroot_group }}"
-          when: ( users_in_phpfpm_and_chroot_group is defined ) and ( users_in_phpfpm_and_chroot_group != [] )
+        - name: User absent loop
+          include_tasks: user_absent.yml
+          when:
+            - ( user.key is defined ) and ( user.key in users_update )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
 
-      when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
+        - name: Check variables for users to update
+          include_tasks: user_check.yml
+          when:
+            - ( user.key is defined ) and ( user.key in users_update )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" )
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
 
-  when:
-    - ( users_update is defined ) and ( users_update != [] )
-  tags:
-    - users
+        - name: User present loop
+          include_tasks: user_present.yml
+          when:
+            - ( user.key is defined ) and ( user.key in users_update )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
 
-- name: Users quota CSV file updated
-  block:
+        - name: Munin tasks for servers with a chroot and php-fpm
+          block:
 
-    - name: Updated users quotas written and md5sum printed
-      shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
-      register: users_repquota_md5sum_after
-      check_mode: false
-      changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+            - name: Set a fact for the users who are present and in the phpfpm and chroot groups
+              set_fact:
+                users_in_phpfpm_and_chroot_group: "{{ users_in_phpfpm_and_chroot_group | default('') }} {{ user.key }}"
+              when:
+                - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+                - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
+                - ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
+                - user.key != "root"
+              loop: "{{ users | dict2items }}"
+              loop_control:
+                loop_var: user
+                label: "{{ user.key }}"
 
-    - name: Updated users quotas fetched
-      fetch:
-        src: "{{ quota_dir }}/quota_user.csv"
-        dest: /tmp/
-      check_mode: false
-      when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+            - name: Debug the users who are present and in the phpfpm and chroot groups
+              debug:
+                msg: "Users in the phpfpm and chroot groups: {{ users_in_phpfpm_and_chroot_group }}"
+                verbosity: 1
 
-  when:
-    - quota_dir is defined
-  tags:
-    - users
+            - name: Include the munin-node phpfpm-multi tasks
+              include_role:
+                name: munin-node
+                tasks_from: phpfpm_multi.yml
+              vars:
+                munin_phpfpm_users: "{{ users_in_phpfpm_and_chroot_group }}"
+              when: ( users_in_phpfpm_and_chroot_group is defined ) and ( users_in_phpfpm_and_chroot_group != [] )
 
-- name: Firewall tasks included
-  include_tasks: firewall.yml
-  when:
-    - ( users_firewall is defined ) and ( users_firewall == True )
+          when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
 
-- name: List the updated users
-  debug:
-    msg: "Users updated: {{ users_update }}"
+      when:
+        - ( users_update is defined ) and ( users_update != [] )
+
+    - name: Users quota CSV file updated
+      block:
+
+        - name: Updated users quotas written and md5sum printed
+          shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+          register: users_repquota_md5sum_after
+          check_mode: false
+          changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+
+        - name: Updated users quotas fetched
+          fetch:
+            src: "{{ quota_dir }}/quota_user.csv"
+            dest: /tmp/
+          check_mode: false
+          when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+
+      when:
+        - quota_dir is defined
+
+    - name: Firewall tasks included
+      include_tasks: firewall.yml
+      when:
+        - ( users_firewall is defined ) and ( users_firewall == True )
+
+    - name: List the updated users
+      debug:
+        msg: "Users updated: {{ users_update }}"
+
+  when: ( users is defined ) and ( users | length > 0 )
   tags:
     - users
 ...
