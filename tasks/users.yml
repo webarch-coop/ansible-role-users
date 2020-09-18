@@ -12,6 +12,7 @@
           - python-dnspython
           - python3-dnspython
           - python-passlib
+          - pwgen
           - slay
           - vim
           - whois
