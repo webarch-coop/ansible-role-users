@@ -95,13 +95,31 @@ users_cert: user
 #   - Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC
 #   - Nonfatal=Override
 #
-# https://www.php.net/manual/en/install.fpm.configuration.php#pm
+# https://www.php.net/manual/en/install.fpm.configuration.php
 users_phpfpm_pm: dynamic
 users_phpfpm_pm_max_children: 3
 users_phpfpm_pm_start_servers: 2
 users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_phpfpm_request_terminate_timeout: 360
+# These are appended, they do not overwrite previously defined php.ini values:
+users_phpfpm_disable_functions:
+  - dl
+  - exec
+  - fsockopen
+  - passthru
+  - popen
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
 #
 users_cron_daily_hour: "05"
 users_cron_mysqldump_hour: "00"
