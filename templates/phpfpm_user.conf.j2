@@ -29,6 +29,20 @@ env[TEMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }
 
 chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
 ; https://www.php.net/install.fpm.configuration
+; PHP settings passed with php_value or php_flag will overwrite their previous value.
+; Please note that defining disable_functions or disable_classes will not overwrite
+; previously defined php.ini values, but will append the new value instead. 
+{% if user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions != [] %} 
+; disable_functions set from user.value.users_phpfpm_disable_functions
+php_admin_value[disable_functions] = "{% for func in user.value.users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
+{% elif users_phpfpm_disable_functions is defined and users_phpfpm_disable_functions != [] %}
+; disable_functions set from users_phpfpm_disable_functions
+php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
+{% else %}
+; disable_functions not set as neither user.value.users_phpfpm_disable_functions or
+; users_phpfpm_disable_functions are set
+php_admin_value[disable_functions] = 
+{% endif %}
 php_admin_value[open_basedir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/:/usr/share/php"
 php_admin_value[session.save_path] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[upload_tmp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
