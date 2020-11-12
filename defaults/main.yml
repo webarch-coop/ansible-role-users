@@ -53,6 +53,7 @@ users_sites_dir: sites
 users_private_dirs:
   - backups
   - bin
+  - .gnupg
   - private
   - tmp
   - .ssh
