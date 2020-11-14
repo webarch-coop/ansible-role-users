@@ -111,8 +111,6 @@ users_phpfpm_disable_functions:
   # curl_multi_exec is used by the MediaWiki VisualEditor and perhaps other things?
   # - curl_multi_exec
   - dl
-  # escapeshellarg is used by MediaWiki
-  - escapeshellcmd
   - exec
   - fsockopen
   - passthru
