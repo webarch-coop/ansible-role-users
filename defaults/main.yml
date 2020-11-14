@@ -108,7 +108,8 @@ users_phpfpm_disable_functions:
   - chgrp
   - chmod
   - chown
-  - curl_multi_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor and perhaps other things?
+  # - curl_multi_exec
   - dl
   - escapeshellarg
   - escapeshellcmd
