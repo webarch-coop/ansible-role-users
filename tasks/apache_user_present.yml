@@ -551,10 +551,14 @@
     mediawiki_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     mediawiki_notify_headers: "{{ users_notify_headers }}"
     mediawiki_notify_signature: "{{ users_notify_signature }}"
-    mediawiki_matomo_domain: "{{ matomo_domain }}"
-    mediawiki_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
-    mediawiki_matomo_html: "{{ matomo_html }}"
-    mediawiki_matomo_user: "{{ matomo_user }}"
+    mediawiki_matomo_domain: "{{ vhost.value.matomo_domain | default(vhost.value) }}"
+    mediawiki_matomo_idsite: "{{ vhost.value.matomo_idsite | default(matomo_idsite) }}"
+#      mediawiki_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+#      mediawiki_matomo_html: "{{ matomo_html }}"
+#      mediawiki_matomo_user: "{{ matomo_user }}"
+    mediawiki_logo: "{{ vhost.value.mediawiki_logo | default('$wgResourceBasePath/resources/assets/mediawiki.png') }}"
+    mediawiki_favicon: "{{ vhost.value.mediawiki_favicon | default('/favicon.ico') }}"
+    mediawiki_apple_touch_icon: "{{ vhost.value.mediawiki_apple_touch_icon | default('/apple-touch.png') }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
