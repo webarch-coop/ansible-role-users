@@ -551,7 +551,7 @@
     mediawiki_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     mediawiki_notify_headers: "{{ users_notify_headers }}"
     mediawiki_notify_signature: "{{ users_notify_signature }}"
-    mediawiki_matomo_domain: "{{ vhost.value.matomo_domain | default(vhost.value) }}"
+    mediawiki_matomo_domain: "{{ vhost.value.matomo_domain | default(matomo_domain) }}"
     mediawiki_matomo_idsite: "{{ vhost.value.matomo_idsite | default(matomo_idsite) }}"
 #      mediawiki_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
 #      mediawiki_matomo_html: "{{ matomo_html }}"
