@@ -9,6 +9,14 @@
 -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
 -A INPUT -p udp -m udp --dport 323 -j ACCEPT
+{% if coturn_listening_port is defined %}
+-A INPUT -p tcp -m tcp --dport {{ coturn_listening_port }} -j ACCEPT
+-A INPUT -p udp -m udp --dport {{ coturn_listening_port }} -j ACCEPT
+{% endif %}
+{% if coturn_tls_listening_port is defined %}
+-A INPUT -p tcp -m tcp --dport {{ coturn_tls_listening_port }} -j ACCEPT
+-A INPUT -p udp -m udp --dport {{ coturn_tls_listening_port }} -j ACCEPT
+{% endif %}
 {% if munin_servers is defined %}{% for hosts in munin_servers %}{% for host in hosts %}
 -A INPUT -m state --state NEW -m tcp -p tcp -s {{ hostvars[host].ipv4_addr }} --dport 4949 -j ACCEPT
 {% endfor %}{% endfor %}{% endif %}
