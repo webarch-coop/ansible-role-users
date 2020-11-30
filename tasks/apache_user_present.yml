@@ -179,6 +179,7 @@
           register: user_matomo_config_database
           become: true
           become_user: "{{ matomo_user }}"
+          when: user_matomo_config.stat.exists
 
         - name: If Matomo is installed
           block:
