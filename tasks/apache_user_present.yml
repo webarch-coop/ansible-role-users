@@ -172,6 +172,14 @@
           check_mode: false
           register: user_matomo_config
 
+        - name: Check if Matomo is installed
+          command: php console config:get -s database --no-ansi -n
+          args:
+            chdir: "{{ matomo_html }}"
+          register: user_matomo_requirements
+          become: true
+          become_user: "{{ matomo_user }}"
+
         - name: If Matomo is installed
           block:
 
@@ -205,11 +213,13 @@
                 loop_var: vhost
                 label: "{{ vhost.key }}"
 
-          when: user_matomo_config.stat.exists
+          when:
+            - ( user_matomo_config.stat.exists )
+            - ( "Looks like section database does not exist" not in user_matomo_requirements.stdout_lines )
 
       when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
-  when: ( matomo_user is defined ) and ( matomo_user != "" )
+  when: ( matomo_user is defined ) and ( matomo_user | length > 0 )
   tags:
     - users
 
