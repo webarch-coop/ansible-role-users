@@ -46,7 +46,11 @@ php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functi
 ; users_phpfpm_disable_functions are set
 php_admin_value[disable_functions] = 
 {% endif %}
+{% if user.value.open_basedir is defined %}
+php_admin_value[open_basedir] = "{% for dir in user.value.open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
+{% else %}
 php_admin_value[open_basedir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/:/usr/share/php"
+{% endif %}
 php_admin_value[session.save_path] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[upload_tmp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[sys_temp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
