@@ -15,6 +15,7 @@
           - python3-passlib
           - pwgen
           - slay
+          - texlive
           - vim
           - whois
         state: present
