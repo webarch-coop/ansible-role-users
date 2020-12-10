@@ -23,7 +23,7 @@
       - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit }}"
       - "home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       - "shell: {{ user.value.users_shell | default('/bin/bash', true) }}"
-      - "skeleton: {{ user.value.users_skel | default(omit) }}"
+      - "skeleton: {{ user.value.users_skel | default('') }}"
       - "system: {{ user.value.users_system | default('no', false) }}"
       - "editor: {{ user.value.users_editor | default('vim', true) }}"
       - "home owner: {{ user.value.users_home_owner | default(user.key) }}"
@@ -41,7 +41,7 @@
     home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     create_home: true
     shell: "{{ user.value.users_shell | default('/bin/bash', true) }}"
-    skeleton: "{{ user.value.users_skel | default(omit) }}"
+    skeleton: "{{ user.value.users_skel | default('') }}"
     generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
     system: "{{ user.value.users_system | default('no', false) }}"
   tags:
@@ -82,7 +82,9 @@
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0700
-  when: ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
+  when:
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and user.value.users_system )
+    - ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
   loop: "{{ users_private_dirs }}"
   loop_control:
     loop_var: dir
@@ -173,6 +175,7 @@
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0644
   when:
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and user.value.users_system )
     - ( user.value.users_name is defined and user.value.users_name != "" )
     - ( user.value.users_email is defined and user.value.users_email != "" )
   tags:
