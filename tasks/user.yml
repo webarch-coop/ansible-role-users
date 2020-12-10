@@ -142,6 +142,8 @@
       when:
         - ( user.value.users_editor is defined ) and ( user.value.users_editor == "vim" )
 
+  when:
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
   tags:
     - users
 
@@ -167,6 +169,8 @@
       when:
         - ( user.value.users_editor is defined ) and ( user.value.users_editor == "nano" )
 
+  when:
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
   tags:
     - users
 
