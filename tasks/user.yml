@@ -83,7 +83,7 @@
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0700
   when:
-    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and user.value.users_system )
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
   loop: "{{ users_private_dirs }}"
   loop_control:
@@ -104,7 +104,7 @@
     creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
   become: true
   become_user: "{{ user.key }}"
-  when: ( user.value.users_generate_ssh_key is defined ) and ( user.value.users_generate_ssh_key == True )
+  when: ( user.value.users_generate_ssh_key is defined ) and ( user.value.users_generate_ssh_key )
   tags:
     - users
 
@@ -115,7 +115,8 @@
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0644
-  when: ( user.value.users_editor is defined ) and ( user.value.users_editor != "" )
+  when:
+    - ( user.value.users_editor is defined ) and ( user.value.users_editor | length > 0 )
   tags:
     - users
 
@@ -138,7 +139,8 @@
         line: 'export EDITOR="vim"'
         state: present
         create: true
-      when: user.value.users_editor is defined and user.value.users_editor == 'vim'
+      when:
+        - ( user.value.users_editor is defined ) and ( user.value.users_editor == "vim" )
 
   tags:
     - users
@@ -162,7 +164,8 @@
         line: 'export EDITOR="nano"'
         state: present
         create: true
-      when: user.value.users_editor is defined and user.value.users_editor == 'nano'
+      when:
+        - ( user.value.users_editor is defined ) and ( user.value.users_editor == "nano" )
 
   tags:
     - users
@@ -175,7 +178,7 @@
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0644
   when:
-    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and user.value.users_system )
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( user.value.users_name is defined and user.value.users_name != "" )
     - ( user.value.users_email is defined and user.value.users_email != "" )
   tags:
