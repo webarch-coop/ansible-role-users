@@ -119,14 +119,20 @@
               check_mode: false
               register: user_matomo_config
 
-            - name: Check if Matomo is installed
+            - name: Include Matomo version check tasks
+              include_role:
+                name: matomo
+                tasks_from: version_check.yml
+              when: user_matomo_config.stat.exists
+
+            - name: Check if Matomo is installed using ExtraTools
               command: php console config:get -s database --no-ansi -n
               args:
                 chdir: "{{ matomo_html }}"
               register: user_matomo_config_database
               become: true
               become_user: "{{ matomo_user }}"
-              when: user_matomo_config.stat.exists
+              when: ( user_matomo_config.stat.exists ) and ( matomo_extratools_enabled )
 
             - name: "Matomo accounts for user {{ user.key }} present"
               include_tasks: matomo_user_present.yml
