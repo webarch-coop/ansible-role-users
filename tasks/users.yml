@@ -94,6 +94,22 @@
         - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
         - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
 
+    - name: Update SSH keys for users present
+      block:
+
+        - name: Include SSH keys tasks
+          include_tasks: ssh.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+            - ( user.value.users_ssh_public_keys is defined ) and ( user.value.users_ssh_public_keys != [] )
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "sshkeys" )
+
     - name: Set users to update to all
       block:
 
