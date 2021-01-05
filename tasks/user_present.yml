@@ -129,7 +129,7 @@
               include_tasks: matomo_user_present.yml
               when:
                 - ( user_matomo_config.stat.exists )
-                - ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') 
+                - ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') ) 
 
           when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
