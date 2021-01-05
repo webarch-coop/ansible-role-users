@@ -6,7 +6,7 @@
 - name: "SSH keys in place for {{ user.key }}"
   block:
 
-    - name: ~/.ssh/authorized_keys.d directory present
+    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d directory present"
       file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
         state: directory
@@ -14,7 +14,7 @@
         group: "{{ user.value.users_home_group | default(user.key) }}"
         mode: 0700
 
-    - name: SSH public keys downloaded
+    - name: "SSH public keys downloaded for {{ user.key }}"
       get_url:
         url: "{{ key_url }}"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
@@ -35,7 +35,7 @@
         remote_src: true
         validate: ssh-keygen -lf %s
 
-    - name: SSH README.md in place
+    - name: "SSH README.md in place for {{ user.key }}"
       template:
         src: SSH_README.md.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
