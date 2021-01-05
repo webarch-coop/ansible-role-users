@@ -122,7 +122,7 @@
             - name: Include Matomo version check tasks
               include_role:
                 name: matomo
-                tasks_from: version_check.yml
+                tasks_from: check_version.yml
               when: user_matomo_config.stat.exists
 
             - name: Check if Matomo is installed using ExtraTools
