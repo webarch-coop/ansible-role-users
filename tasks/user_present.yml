@@ -132,7 +132,25 @@
               register: user_matomo_config_database
               become: true
               become_user: "{{ matomo_user }}"
-              when: ( user_matomo_config.stat.exists ) and ( matomo_extratools_enabled )
+              when:
+                - ( user_matomo_config.stat.exists ) and ( matomo_extratools_enabled )
+                - ( not matomo_token_auth is defined ) or ( matomo_token_auth | length == 0 )
+
+            - name: Check if Matomo is installed using the API
+              uri:
+                url: "{{ matomo_url }}"
+                method: POST
+                body_format: form-urlencoded
+                body:
+                  module: API
+                  format: JSON
+                  token_auth: "{{ matomo_token_auth }}"
+                  method: API.getMatomoVersion
+                return_content: true
+              register: users_matomo_get_matomo_version
+              when:
+                - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
+                - ( not user_matomo_config.stat.exists ) or ( not matomo_extratools_enabled )
 
             - name: "Matomo accounts for user {{ user.key }} present"
               include_tasks: matomo_user_present.yml
