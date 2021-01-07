@@ -139,7 +139,11 @@
 
           when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
-      when: ( user.key != "root" ) and ( matomo_user is defined ) and ( matomo_user != "" )
+      when:
+        - ( user.key != "root" )
+        - ( matomo_user is defined ) and ( matomo_user | length > 0 )
+        - ( matomo_password is defined ) and ( matomo_password | length > 0 )
+        - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
 
     - name: "Include Apache config tasks present for user {{ user.key }}"
       include_tasks: apache_user_present.yml
