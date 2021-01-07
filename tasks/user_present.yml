@@ -125,6 +125,12 @@
                 tasks_from: check_version.yml
               when: user_matomo_config.stat.exists
 
+            - name: Include admin user authentication checks
+              include_role:
+                name: matomo
+                tasks_from: check_auth.yml
+              when: user_matomo_config.stat.exists
+
             - name: "Matomo accounts for user {{ user.key }} present"
               include_tasks: matomo_user_present.yml
               when:
