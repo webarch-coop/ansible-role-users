@@ -127,14 +127,20 @@
                     name: matomo
                     tasks_from: check_version.yml
 
-                - name: Include admin user authentication checks
-                  include_role:
-                    name: matomo
-                    tasks_from: check_auth.yml
+                - name: Check the Matomo superuser access
+                  block:
 
-                - name: "Matomo accounts for user {{ user.key }} present"
-                  include_tasks: matomo_user_present.yml
+                    - name: Include admin user authentication checks
+                      include_role:
+                        name: matomo
+                        tasks_from: check_auth.yml
+
+                    - name: "Matomo accounts for user {{ user.key }} present"
+                      include_tasks: matomo_user_present.yml
+                      when: ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
+
                   when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') ) 
+                    
 
               when: user_matomo_config.stat.exists
 
@@ -142,6 +148,7 @@
 
       when:
         - ( user.key != "root" )
+        - ( user.value.users_email is defined )
         - ( matomo_user is defined ) and ( matomo_user | length > 0 )
         - ( matomo_password is defined ) and ( matomo_password | length > 0 )
         - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
