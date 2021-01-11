@@ -110,32 +110,33 @@
           register: user_matomo_user_check
           changed_when: '"no such user" in user_matomo_user_check.stderr'
 
-        - name: "Matomo user login account tasks for {{ user.key }}"
+        - name: "Check if a Matomo config file exists"
           block:
 
-            - name: Check if Matomo config file exists
+            - name: "Stat {{ matomo_html }}/config/config.ini.php"
               stat:
                 path: "{{ matomo_html }}/config/config.ini.php"
               check_mode: false
               register: user_matomo_config
 
-            - name: Include Matomo version check tasks
-              include_role:
-                name: matomo
-                tasks_from: check_version.yml
-              when: user_matomo_config.stat.exists
+            - name: "Matomo user login account tasks for {{ user.key }}"
+              block:
 
-            - name: Include admin user authentication checks
-              include_role:
-                name: matomo
-                tasks_from: check_auth.yml
-              when: user_matomo_config.stat.exists
+                - name: Include Matomo version check tasks
+                  include_role:
+                    name: matomo
+                    tasks_from: check_version.yml
 
-            - name: "Matomo accounts for user {{ user.key }} present"
-              include_tasks: matomo_user_present.yml
-              when:
-                - ( user_matomo_config.stat.exists )
-                - ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') ) 
+                - name: Include admin user authentication checks
+                  include_role:
+                    name: matomo
+                    tasks_from: check_auth.yml
+
+                - name: "Matomo accounts for user {{ user.key }} present"
+                  include_tasks: matomo_user_present.yml
+                  when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') ) 
+
+              when: user_matomo_config.stat.exists
 
           when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
