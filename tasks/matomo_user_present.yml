@@ -1,9 +1,10 @@
 ---
 # https://github.com/digitalist-se/userconsole#usercreate
-- name: Include adduser tasks from Matomo role
+- name: Include user_present tasks from Matomo role
   include_role:
     name: matomo
-    tasks_from: adduser.yml
+    tasks_from: user_present.yml
+    # tasks_from: adduser.yml
   vars:
     matomo_login: "{{ user.key }}"
     matomo_login_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
