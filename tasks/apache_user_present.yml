@@ -190,7 +190,7 @@
 
                 - name: Add Matomo site
                   block:
-    
+
                     - name: "Debug matomo addsite for {{ user.key }}"
                       debug:
                         msg:
@@ -204,7 +204,7 @@
                       loop_control:
                         loop_var: vhost
                         label: "{{ vhost.key }}"
-        
+
                     - name: "addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site for {{ user.key }}"
                       include_role:
                         name: matomo

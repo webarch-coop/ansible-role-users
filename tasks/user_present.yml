@@ -139,8 +139,8 @@
                       include_tasks: matomo_user_present.yml
                       when: ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
 
-                  when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') ) 
-                    
+                  when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
+
 
               when: user_matomo_config.stat.exists
 
