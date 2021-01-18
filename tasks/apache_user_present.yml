@@ -157,9 +157,10 @@
 - name: "Matomo site tasks for {{ user.key }}"
   block:
 
-    - name: "Check if Matomo sites exist for {{ user.key }}"
+    - name: "Matomo sites present for {{ user.key }}"
       include_tasks: matomo_site_present.yml
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms != "matomo" ) or ( vhost.value.users_cms != "phpmyadmin" ) or ( vhost.value.users_cms != "nextcloud" ) or ( vhost.value.users_cms != "kimai" )
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"

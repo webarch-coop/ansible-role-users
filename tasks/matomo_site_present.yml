@@ -21,6 +21,14 @@
         var: users_matomo_get_sites_id_from_siteurl
         verbosity: 2
 
+    # - name: If [] returned then include site_present.yml tasks from Matomo role
+
+    # - name: If id(s) returned then get corresponding URLs using SitesManager.getSiteUrlsFromId
+
+    # - name: If URLs returned match then nothing needs doing
+
+    # - name: If URLs don't match include site_present.yml tasks from Matomo role
+
   tags:
     - users
 ...
