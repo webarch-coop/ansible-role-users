@@ -206,7 +206,9 @@
                         label: "{{ vhost.key }}"
 
                     - name: "Matomo sites present for {{ user.key }}"
-                      include_tasks: site_present.yml
+                      include_role:
+                        name: matomo
+                        tasks_from: site_present.yml
                       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
                       loop_control:
                         loop_var: vhost
