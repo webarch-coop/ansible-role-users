@@ -1,5 +1,5 @@
 ---
-- name: Ensite that a Matomo site is present and correct
+- name: Ensure that a Matomo site is present and correct
   block:
 
     - name: "Check if a Matomo ID exists for {{ vhost.value.users_apache_server_name }}"
@@ -21,13 +21,23 @@
         var: users_matomo_get_sites_id_from_siteurl
         verbosity: 2
 
-    # - name: If [] returned then include site_present.yml tasks from Matomo role
+    - name: If id(s) returned then get corresponding URLs using SitesManager.getSiteUrlsFromId
+      block:
 
-    # - name: If id(s) returned then get corresponding URLs using SitesManager.getSiteUrlsFromId
+        - name: Set users_matomo_existing_urls to an ampty array
+          set_fact:
+            users_matomo_existing_urls: []
 
+        - 
     # - name: If URLs returned match then nothing needs doing
 
     # - name: If URLs don't match include site_present.yml tasks from Matomo role
+
+      when:
+        - ( users_matomo_get_sites_id_from_siteurl.json is defined )
+        - ( users_matomo_get_sites_id_from_siteurl.json != [] )
+
+    # - name: If [] returned then include site_present.yml tasks from Matomo role
 
   tags:
     - users
