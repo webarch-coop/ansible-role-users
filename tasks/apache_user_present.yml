@@ -221,7 +221,7 @@
                         # This should use users.value_users_email since Matomo uses email addresses to make logins unique
                         matomo_site_admin: "{{ user.key }}"
                       when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms != "matomo" ) or ( vhost.value.users_cms != "phpmyadmin" ) or ( vhost.value.users_cms != "nextcloud" ) or ( vhost.value.users_cms != "kimai" )
-        
+
                     - name: Debug fail
                       fail:
                         msh: Debug

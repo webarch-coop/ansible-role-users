@@ -28,7 +28,6 @@
           set_fact:
             users_matomo_existing_urls: []
 
-        - 
     # - name: If URLs returned match then nothing needs doing
 
     # - name: If URLs don't match include site_present.yml tasks from Matomo role
