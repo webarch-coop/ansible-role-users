@@ -141,7 +141,6 @@
 
                   when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
 
-
               when: user_matomo_config.stat.exists
 
           when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
