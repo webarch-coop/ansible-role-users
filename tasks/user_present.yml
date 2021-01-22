@@ -105,6 +105,14 @@
       debug:
         var: user.value.users_matomo_account
 
+    - name: Debug user.value.users_matomo_account
+      debug:
+        var: user.value.users_matomo_account
+
+    - name: Debug user.value.users_email
+      debug:
+        var: user.value.users_email
+
     - name: "Matomo login account tasks for {{ user.key }}"
       block:
 
