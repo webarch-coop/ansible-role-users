@@ -157,6 +157,10 @@
         - ( matomo_password is defined ) and ( matomo_password | length > 0 )
         - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
 
+    - name: Debug fail
+      fail:
+        msg: debug
+
     - name: "Include Apache config tasks present for user {{ user.key }}"
       include_tasks: apache_user_present.yml
       when:
