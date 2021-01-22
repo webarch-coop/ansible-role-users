@@ -197,9 +197,13 @@
                           - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
                           - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
                           - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
-                          - "matomo_site_admin: {{ user.key }}"
+                          - "matomo_login: {{ user.key }}"
+                          - "matomo_login_email: {{ user.value.users_email }}"
                           - "users_cms: {{ vhost.value.users_cms | default('') }}"
                         verbosity: 1
+                      when:
+                        - ( vhost.value.users_matomo_site is not defined ) or ( vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site )
+                        - ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms != "matomo" ) or ( vhost.value.users_cms != "phpmyadmin" ) or ( vhost.value.users_cms != "nextcloud" ) or ( vhost.value.users_cms != "kimai" )
                       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
                       loop_control:
                         loop_var: vhost
@@ -209,7 +213,9 @@
                       include_role:
                         name: matomo
                         tasks_from: site_present.yml
-                      when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms != "matomo" ) or ( vhost.value.users_cms != "phpmyadmin" ) or ( vhost.value.users_cms != "nextcloud" ) or ( vhost.value.users_cms != "kimai" )
+                      when:
+                        - ( vhost.value.users_matomo_site is not defined ) or ( vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site )
+                        - ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms != "matomo" ) or ( vhost.value.users_cms != "phpmyadmin" ) or ( vhost.value.users_cms != "nextcloud" ) or ( vhost.value.users_cms != "kimai" )
                       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
                       loop_control:
                         loop_var: vhost
@@ -220,28 +226,8 @@
                         # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
                         matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
                         # This should use users.value_users_email since Matomo uses email addresses to make logins unique
-                        matomo_site_admin: "{{ user.key }}"
-
-                    # - name: Debug fail
-                    #   fail:
-                    #     msg: Debug
-
-                    # - name: "addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site for {{ user.key }}"
-                    #   include_role:
-                    #     name: matomo
-                    #     tasks_from: addsite.yml
-                    #   vars:
-                    #     matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
-                    #     matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
-                    #     # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
-                    #     matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
-                    #     # This should use users.value_users_email since Matomo uses email addresses to make logins unique
-                    #     matomo_site_admin: "{{ user.key }}"
-                    #   when: ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is defined and vhost.value.users_cms != "matomo" )
-                    #   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-                    #   loop_control:
-                    #     loop_var: vhost
-                    #     label: "{{ vhost.key }}"
+                        matomo_login: "{{ user.key }}"
+                        matomo_login_email: "{{ user.value.users_email }}"
 
                   when: ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
 
@@ -252,7 +238,11 @@
       when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
 
   when:
+    - ( user.key != "root" )
+    - ( user.value.users_matomo_account is defined ) and ( users_matomo_account )
+    - ( user.value.users_email is defined )
     - ( matomo_user is defined ) and ( matomo_user | length > 0 )
+    - ( matomo_password is defined ) and ( matomo_password | length > 0 )
     - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
   tags:
     - users
