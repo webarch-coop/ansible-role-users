@@ -222,9 +222,9 @@
                         # This should use users.value_users_email since Matomo uses email addresses to make logins unique
                         matomo_site_admin: "{{ user.key }}"
 
-                    - name: Debug fail
-                      fail:
-                        msh: Debug
+                    # - name: Debug fail
+                    #   fail:
+                    #     msg: Debug
 
                     # - name: "addsite.yml tasks from Matomo role included for each vhost which isn't hosting a Matomo site for {{ user.key }}"
                     #   include_role:
