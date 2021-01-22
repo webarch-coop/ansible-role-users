@@ -101,6 +101,10 @@
         - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
 
+    - name: Debug user.value.users_matomo_account
+      debug:
+        var: user.value.users_matomo_account
+
     - name: "Matomo login account tasks for {{ user.key }}"
       block:
 
