@@ -46,7 +46,6 @@ php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functi
 ; users_phpfpm_disable_functions are set
 php_admin_value[disable_functions] = 
 {% endif %}
-{% endif %}
 
 {% if users_phpfpm_enable_open_basedir is defined and users_phpfpm_enable_open_basedir %}
 {% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir != [] %}
