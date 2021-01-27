@@ -105,9 +105,8 @@ users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_phpfpm_request_terminate_timeout: 360
 users_phpfpm_enable_open_basedir: false
-users_phpfpm_enable_disable_functions: false
 # users_phpfpm_disable_functions values are appended, they do not overwrite
-# previously defined php.ini values:
+# previously defined php.ini values, set to [] to disable
 users_phpfpm_disable_functions:
   - chgrp
   - chown
