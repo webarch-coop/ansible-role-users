@@ -172,12 +172,6 @@
           check_mode: false
           register: user_matomo_config
 
-        - name: Include Matomo version check tasks
-          include_role:
-            name: matomo
-            tasks_from: check_version.yml
-          when: user_matomo_config.stat.exists
-
         - name: Include admin user authentication checks
           include_role:
             name: matomo
