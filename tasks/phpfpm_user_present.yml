@@ -68,6 +68,9 @@
       template:
         src: phpfpm_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
+        mode: 0644
+        owner: root
+        group: root
       register: users_phpfpm_pool_conf
 
     - name: "PHP FPM pool.d configtest for {{ user.key }}"

@@ -61,6 +61,9 @@
         src: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
         dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
         remote_src: true
+        mode: 0644
+        owner: root
+        group: root
       when: users_apache_conf_check.stat.exists == True
 
     - name: "apache2ctl configtest failed so removing new config and symlink"
