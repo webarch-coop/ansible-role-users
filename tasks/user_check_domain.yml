@@ -8,7 +8,7 @@
 
 - name: Set a fact for the domain we are testing
   set_fact:
-    users_domain_dig: "{{ query('dig', '{{ users_domain }}') | ipv4 }}"
+    users_domain_dig: "{{ query('dig', users_domain) | ipv4 }}"
   tags:
     - users
 
