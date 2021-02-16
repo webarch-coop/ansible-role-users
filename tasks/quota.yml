@@ -66,12 +66,20 @@
         verbosity: 2
       check_mode: false
 
+    - name: Set facts for lookups on the existing limits
+      set_fact:
+        users_quota_existing_block_softlimit_lookup: "{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=4"
+        users_quota_existing_block_hardlimit_lookup: "{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=5"
+        users_quota_existing_inode_softlimit_lookup: "{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=8"
+        users_quota_existing_inode_hardlimit_lookup: "{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=9"
+      check_mode: false
+
     - name: Set facts for the existing limits
       set_fact:
-        users_quota_existing_block_softlimit: "{{ lookup('csvfile', '{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=4') }}"
-        users_quota_existing_block_hardlimit: "{{ lookup('csvfile', '{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=5') }}"
-        users_quota_existing_inode_softlimit: "{{ lookup('csvfile', '{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=8') }}"
-        users_quota_existing_inode_hardlimit: "{{ lookup('csvfile', '{{ user.key }} file=/tmp/{{ inventory_hostname }}/{{ quota_dir }}/quota_user.csv delimiter=, col=9') }}"
+        users_quota_existing_block_softlimit: "{{ lookup('csvfile', users_quota_existing_block_softlimit_lookup) }}"
+        users_quota_existing_block_hardlimit: "{{ lookup('csvfile', users_quota_existing_block_hardlimit_lookup) }}"
+        users_quota_existing_inode_softlimit: "{{ lookup('csvfile', users_quota_existing_inode_softlimit_lookup) }}"
+        users_quota_existing_inode_hardlimit: "{{ lookup('csvfile', users_quota_existing_inode_hardlimit_lookup) }}"
       check_mode: false
 
     - name: "The set quota command which is about to be run for {{ user.key }}"
