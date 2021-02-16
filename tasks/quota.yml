@@ -88,10 +88,6 @@
           - "setquota {{ user.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"
         verbosity: 2
 
-    - name: Debug fail
-      fail:
-        msg: Debug
-
     - name: "Setquota for {{ user.key }}"
       command: "setquota {{ user.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"
       changed_when: ( users_quota_existing_block_softlimit != users_quota_block_softlimit ) or ( users_quota_existing_block_hardlimit != users_quota_block_hardlimit ) or ( users_quota_existing_inode_softlimit != users_quota_inode_softlimit ) or ( users_quota_existing_inode_hardlimit != users_quota_inode_hardlimit )
