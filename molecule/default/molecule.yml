@@ -10,6 +10,6 @@ provisioner:
 lint: |
  set -e
   yamllint -c .yamllint .
-  ansible-lint -c .ansible-lint .
+  ansible-lint -c .ansible-lint --force-color .
 # vim: syntax=yaml
 ...
