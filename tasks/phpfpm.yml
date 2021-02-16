@@ -3,9 +3,9 @@
   template:
     src: phpfpm_users_logrotate.j2
     dest: /etc/logrotate.d/phpfpm_users_logrotate
+    mode: 0644
     owner: root
     group: root
-    mode: 0644
   tags:
     - users
 
@@ -13,6 +13,9 @@
   file:
     path: /etc/apache2/localhost.d
     state: directory
+    mode: 0755
+    owner: root
+    group: root
   when: ( "apache2" in ansible_facts.packages )
   tags:
     - users
@@ -21,6 +24,9 @@
   file:
     path: /etc/nginx/localhost.d
     state: directory
+    mode: 0755
+    owner: root
+    group: root
   when: ( "nginx" in ansible_facts.packages )
   tags:
     - users

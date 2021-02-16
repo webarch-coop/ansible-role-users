@@ -125,6 +125,9 @@
       file:
         path: "{{ users_state_dir }}/{{ dir }}"
         state: directory
+        mode: 0700
+        owner: root
+        group: root
       loop:
         - current
         - previous
@@ -136,6 +139,9 @@
       template:
         src: user_state.yml.j2
         dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
+        mode: 0600
+        owner: root
+        group: root
       check_mode: false
       register: users_state_file
       loop: "{{ users | dict2items }}"

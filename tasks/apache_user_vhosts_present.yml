@@ -5,6 +5,9 @@
     dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
     trim_blocks: false
     lstrip_blocks: true
+    mode: 0644
+    owner: root
+    group: root
   register: users_apache_conf
   when: user.key != "www-data"
   tags:
@@ -49,6 +52,9 @@
         src: "/etc/apache2/sites-available/{{ user.key }}.conf"
         dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
         remote_src: true
+        mode: 0644
+        owner: root
+        group: root
 
     - name: "apache2ctl configtest failed so reverting changes"
       copy:

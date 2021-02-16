@@ -47,27 +47,13 @@
   tags:
     - users
 
-- name: "Chown user home directory owner to {{ user.value.users_home_owner | default(user.key) }}"
-  file:
-    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    state: directory
-    owner: "{{ user.value.users_home_owner | default(user.key) }}"
-  tags:
-    - users
-
-- name: "Chown user home directory group to {{ user.value.users_home_group | default(user.key) }}"
-  file:
-    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    state: directory
-    group: "{{ user.value.users_home_group | default(user.key) }}"
-  tags:
-    - users
-
-- name: "Chmod users home directory {{ user.value.users_home_mode | default('0750') }}"
+- name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: directory
     mode: "{{ user.value.users_home_mode | default('0750') }}"
+    owner: "{{ user.value.users_home_owner | default(user.key) }}"
+    group: "{{ user.value.users_home_group | default(user.key) }}"
   tags:
     - users
 
@@ -79,9 +65,9 @@
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ dir }}"
     state: directory
+    mode: 0700
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    mode: 0700
   when:
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
@@ -112,9 +98,9 @@
   copy:
     src: "files/{{ user.value.users_editor }}/selected_editor"
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.selected_editor"
+    mode: 0644
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    mode: 0644
   when:
     - ( user.value.users_editor is defined ) and ( user.value.users_editor | length > 0 )
   tags:
@@ -128,9 +114,9 @@
         src: "files/vim/vimrc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.vimrc"
         force: false
+        mode: 0644
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0644
 
     - name: "vim set to be default editor for {{ user.key }}"
       lineinfile:
@@ -139,6 +125,9 @@
         line: 'export EDITOR="vim"'
         state: present
         create: true
+        mode: 0644
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
       when:
         - ( user.value.users_editor is defined ) and ( user.value.users_editor == "vim" )
 
@@ -155,9 +144,9 @@
         src: "files/nano/nanorc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.nanorc"
         force: false
+        mode: 0644
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0644
 
     - name: "nano set to be default editor for {{ user.key }}"
       lineinfile:
@@ -166,6 +155,9 @@
         line: 'export EDITOR="nano"'
         state: present
         create: true
+        mode: 0644
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
       when:
         - ( user.value.users_editor is defined ) and ( user.value.users_editor == "nano" )
 
@@ -178,9 +170,9 @@
   template:
     src: gitconfig.j2
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.gitconfig"
+    mode: 0644
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    mode: 0644
   when:
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( user.value.users_name is defined and user.value.users_name != "" )

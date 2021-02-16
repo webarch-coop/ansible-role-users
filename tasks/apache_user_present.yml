@@ -124,6 +124,9 @@
     src: "/etc/apache2/sites-available/{{ user.key }}.conf"
     dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
     remote_src: true
+    mode: 0644
+    owner: root
+    group: root
   when: users_apache_conf_check.stat.exists
   tags:
     - users

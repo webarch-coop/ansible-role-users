@@ -59,6 +59,9 @@
         src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
         remote_src: true
+        mode: 0644
+        owner: root
+        group: root
       when: users_phpfpm_pool_conf_check.stat.exists
 
     - name: "PHP FPM pool.d file present for {{ user.key }}"
@@ -87,12 +90,18 @@
             src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
             remote_src: true
+            mode: 0644
+            owner: root
+            group: root
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so reverting changes"
           copy:
             src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             remote_src: true
+            mode: 0644
+            owner: root
+            group: root
           when: users_phpfpm_pool_conf_check.stat.exists == True
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
@@ -114,6 +123,9 @@
       template:
         src: apache_localhost.conf.j2
         dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+        mode: 0644
+        owner: root
+        group: root
       when:
         - '"apache2" in ansible_facts.packages'
 
@@ -121,8 +133,10 @@
       template:
         src: nginx_localhost.conf.j2
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
-      when:
-        - '"nginx" in ansible_facts.packages'
+        mode: 0644
+        owner: root
+        group: root
+      when: ( "nginx" in ansible_facts.packages )
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
