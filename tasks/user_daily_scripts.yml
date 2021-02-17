@@ -13,7 +13,7 @@
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0750"
-  when: users_bin_cron_daily.stat.exists == False
+  when: not users_bin_cron_daily.stat.exists
   tags:
     - users
 

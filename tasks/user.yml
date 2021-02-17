@@ -175,8 +175,8 @@
     group: "{{ user.value.users_group | default(user.key) }}"
   when:
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
-    - ( user.value.users_name is defined and user.value.users_name != "" )
-    - ( user.value.users_email is defined and user.value.users_email != "" )
+    - ( user.value.users_name is defined ) and ( user.value.users_name | length > 0 )
+    - ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
   tags:
     - users
 ...

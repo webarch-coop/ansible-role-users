@@ -34,7 +34,9 @@
         host: localhost
         port: 25
         secure: never
-      when: user.value.users_email is defined and user.value.users_email != ""
+      when:
+        - user.value.users_email is defined
+        - user.value.users_email | length > 0
 
     - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd file"
       lineinfile:
@@ -47,7 +49,7 @@
         group: "{{ user.key }}"
         mode: 0640
 
-  when: users_notify_passwd_file.stat.exists == False
+  when: not users_notify_passwd_file.stat.exists
   tags:
     - users
 ...

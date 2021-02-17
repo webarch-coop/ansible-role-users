@@ -42,7 +42,9 @@
     owner: www-data
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0640"
-  when: ( htauth.password is defined and htauth.password != "" ) and ( htauth.state is not defined or htauth.state == "present" )
+  when:
+    - htauth.password is defined and htauth.password | length > 0
+    - htauth.state is not defined or htauth.state == "present"
   loop: "{{ vhost.value.users_apache_htauth_users }}"
   loop_control:
     loop_var: htauth

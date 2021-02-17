@@ -46,7 +46,7 @@
   debug:
     msg: "{{ users_domain }} appears not to resolve to a IP address"
   when:
-    - users_domain_dig == False
+    - not users_domain_dig
     - users_domain_check != "strict"
   tags:
     - users
@@ -55,7 +55,7 @@
   fail:
     msg: "{{ users_domain }} appears not to resolve to a IP address"
   when:
-    - users_domain_dig == False
+    - not users_domain_dig
     - users_domain_check == "strict"
   tags:
     - users
