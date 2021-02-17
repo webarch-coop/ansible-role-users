@@ -73,7 +73,7 @@
 
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
-        - ( users_apache is defined ) and ( users_apache == True )
+        - ( users_apache is defined ) and ( users_apache )
 
     - name: Update PHP-FPM config for users present
       block:
@@ -91,7 +91,7 @@
 
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
-        - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+        - ( users_phpfpm_version is defined ) and ( users_phpfpm_version | length > 0 )
 
     - name: Update SSH keys for users present
       block:
@@ -262,7 +262,7 @@
     - name: Firewall tasks included
       include_tasks: firewall.yml
       when:
-        - ( users_firewall is defined ) and ( users_firewall == True )
+        - ( users_firewall is defined ) and ( users_firewall )
 
     - name: List the updated users
       debug:

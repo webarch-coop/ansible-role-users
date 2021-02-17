@@ -81,7 +81,7 @@
     - name: "Check that kimai_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.kimai_notify == True ) or ( vhost.value.kimai_notify == False )
+          - ( vhost.value.kimai_notify ) or ( not vhost.value.kimai_notify )
       when: vhost.value.kimai_notify is defined
 
   tags:

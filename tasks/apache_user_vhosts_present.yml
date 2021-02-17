@@ -64,7 +64,7 @@
         mode: 0644
         owner: root
         group: root
-      when: users_apache_conf_check.stat.exists == True
+      when: users_apache_conf_check.stat.exists
 
     - name: "apache2ctl configtest failed so removing new config and symlink"
       file:
@@ -76,7 +76,7 @@
       loop_control:
         loop_var: file
         label: "{{ file }}"
-      when: users_apache_conf_check.stat.exists == False
+      when: not users_apache_conf_check.stat.exists
 
     - name: "Apache {{ user.key }} sites-enabled symlink absent"
       command: "a2dissite {{ user.key }}"

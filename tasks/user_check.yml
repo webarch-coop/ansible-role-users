@@ -92,13 +92,13 @@
       stat:
         path: "{{ user.value.users_skel }}"
       register: user_skel_path
-      failed_when: user_skel_path.stat.isdir == False
+      failed_when: not user_skel_path.stat.isdir
       when: user.value.users_skel is defined
 
     - name: "Check system for {{ user.key }} is true or false"
       assert:
         that:
-          - ( user.value.users_system == True ) or ( user.value.users_system == False )
+          - ( user.value.users_system ) or ( not user.value.users_system )
         quiet: true
       when: user.value.users_system is defined
 
@@ -109,7 +109,7 @@
     - name: "Check generate_ssh_key for {{ user.key }} is true or false"
       assert:
         that:
-          - ( user.value.users_generate_ssh_key == True ) or ( user.value.users_generate_ssh_key == False )
+          - ( user.value.users_generate_ssh_key ) or ( not user.value.users_generate_ssh_key )
         quiet: true
       when: user.value.users_generate_ssh_key is defined
 
@@ -183,14 +183,14 @@
     - name: "Check that users_notify_passwd for {{ user.key }} is true or false"
       assert:
         that:
-          - ( user.value.users_notify_passwd == True ) or ( user.value.users_notify_passwd == False )
+          - ( user.value.users_notify_passwd ) or ( not user.value.users_notify_passwd )
         quiet: true
       when: user.value.users_notify_passwd is defined
 
     - name: "Check that users_mariadb_notify_passwd for {{ user.key }} is true or false"
       assert:
         that:
-          - ( user.value.users_mariadb_notify_passwd == True ) or ( user.value.users_mariadb_notify_passwd == False )
+          - ( user.value.users_mariadb_notify_passwd ) or ( not user.value.users_mariadb_notify_passwd )
         quiet: true
       when: user.value.users_mariadb_notify_passwd is defined
 

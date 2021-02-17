@@ -12,7 +12,7 @@
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( ansible_check_mode == False )
+  when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( not ansible_check_mode )
   tags:
     - users
 
@@ -47,7 +47,7 @@
       include_role:
         name: acmesh
         tasks_from: letsencrypt
-      when: ansible_check_mode == False
+      when: not ansible_check_mode
 
   when: ( users_cert is defined ) and ( users_cert == 'user' )
   tags:
@@ -108,7 +108,7 @@
   file:
     path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
     state: absent
-  when: users_apache_certs_present == False
+  when: not users_apache_certs_present
   tags:
     - users
 
@@ -135,27 +135,38 @@
   include_tasks: apache_user_www_data_vhosts_present.yml
   when:
     - user.key == "www-data"
-    - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
+    - users_apache_certs_present is defined
+    - users_apache_certs_present
   tags:
     - users
 
 - name: "Generate and enable Apache VirtualHosts for {{ user.key }}"
   include_tasks: apache_user_vhosts_present.yml
   when:
-    - ( user.key != "www-data" )
-    - ( users_apache_certs_present is defined ) and ( users_apache_certs_present == True )
+    - user.key != "www-data"
+    - users_apache_certs_present is defined
+    - users_apache_certs_present
     # - ( users_apache_conf is defined )
   tags:
     - users
 
 - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
-  shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
-  no_log: true
-  register: users_mariadb_password_read
-  check_mode: false
+  command: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client"
   changed_when: false
+  check_mode: false
+  no_log: true
+  register: users_my_print_defaults
   tags:
     - users
+
+- name: "Set a fact for the MySQL password for {{ user.key }}"
+  set_fact:
+    users_mariadb_password: "{{ line | regex_replace('^--password=') | trim }}"
+  when: line is regex('^--password=')
+  loop: "{{ users_my_print_defaults.stdout_lines }}"
+  loop_control:
+    loop_var: line
+  no_log: true
 
 - name: "Matomo site tasks for {{ user.key }}"
   block:
@@ -265,7 +276,7 @@
     wordpress_docroot_mode: "0750"
     wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     wordpress_dbuser: "{{ vhost.value.wordpress_dbuser | default(user.key) }}"
-    wordpress_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    wordpress_dbpass: "{{ users_mariadb_password }}"
     wordpress_dbprefix: "{{ vhost.value.wordpress_dbprefix | default('wp_') }}"
     wordpress_locale: "{{ vhost.value.wordpress_locale | default('en_GB') }}"
     wordpress_url: "{{ vhost.value.wordpress_url | default('https://' + vhost.value.users_apache_server_name) }}"
@@ -292,7 +303,7 @@
     label: "{{ vhost.key }}"
   when:
     - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
-    - ( users_matomo is defined ) and ( users_matomo == True )
+    - ( users_matomo is defined ) and ( users_matomo )
     - ( matomo_user is defined ) and ( matomo_url is defined )
     - ( matomo_home is defined ) and ( matomo_html is defined )
   tags:
@@ -308,7 +319,7 @@
     wordpress_docroot_mode: "0750"
     wordpress_dbname: "{% if vhost.value.wordpress_dbname is defined %}{{ vhost.value.wordpress_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     wordpress_dbuser: "{{ vhost.value.wordpress_dbuser | default(user.key) }}"
-    wordpress_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    wordpress_dbpass: "{{ users_mariadb_password }}"
     wordpress_dbprefix: "{{ vhost.value.wordpress_dbprefix | default('wp_') }}"
     wordpress_locale: "{{ vhost.value.wordpress_locale | default('en_GB') }}"
     wordpress_url: "{{ vhost.value.wordpress_url | default('https://' + vhost.value.users_apache_server_name) }}"
@@ -327,7 +338,7 @@
     label: "{{ vhost.key }}"
   when:
     - ( vhost.value.users_cms is defined ) and ( vhost.value.users_cms == "wordpress" )
-    - ( users_matomo is not defined ) or ( users_matomo == False )
+    - ( users_matomo is not defined ) or ( not users_matomo )
   tags:
     - users
 
@@ -347,7 +358,7 @@
     drupal_locale: "{{ vhost.value.drupal_locale | default('en') }}"
     drupal_dbname: "{% if vhost.value.drupal_dbname is defined %}{{ vhost.value.drupal_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     drupal_dbuser: "{{ vhost.value.drupal_dbuser | default(user.key) }}"
-    drupal_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    drupal_dbpass: "{{ users_mariadb_password }}"
     drupal_dbprefix: "{{ vhost.value.drupal_dbprefix | default('') }}"
     drupal_admin_user: "{{ vhost.value.drupal_admin_user | default(user.key) }}"
     drupal_admin_email: "{{ vhost.value.drupal_admin_email | default(user.value.users_email) }}"
@@ -382,7 +393,7 @@
     kimai_locale: "{{ vhost.value.kimai_locale | default('en') }}"
     kimai_dbname: "{% if vhost.value.kimai_dbname is defined %}{{ vhost.value.kimai_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     kimai_dbuser: "{{ vhost.value.kimai_dbuser | default(user.key) }}"
-    kimai_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    kimai_dbpass: "{{ users_mariadb_password }}"
     kimai_admin_user: "{{ vhost.value.kimai_admin_user | default(user.key) }}"
     kimai_admin_email: "{{ vhost.value.kimai_admin_email | default(user.value.users_email) }}"
     kimai_notify: "{{ vhost.value.kimai_notify | default(true) | bool }}"
@@ -419,7 +430,7 @@
     moodle_locale: "{{ vhost.value.moodle_locale | default('en') }}"
     moodle_dbname: "{% if vhost.value.moodle_dbname is defined %}{{ vhost.value.moodle_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     moodle_dbuser: "{{ vhost.value.moodle_dbuser | default(user.key) }}"
-    moodle_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    moodle_dbpass: "{{ users_mariadb_password }}"
     moodle_dbprefix: "{{ vhost.value.moodle_dbprefix | default('mdl_') }}"
     moodle_admin_user: "{{ vhost.value.moodle_admin_user | default(user.key) }}"
     moodle_admin_email: "{{ vhost.value.moodle_admin_email | default(user.value.users_email) }}"
@@ -457,7 +468,7 @@
     nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
     nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
-    nextcloud_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    nextcloud_dbpass: "{{ users_mariadb_password }}"
     nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
     nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
     nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
@@ -500,7 +511,7 @@
     nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
     nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
-    nextcloud_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    nextcloud_dbpass: "{{ users_mariadb_password }}"
     nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
     nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
     nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
@@ -546,7 +557,7 @@
     flarum_locale: "{{ vhost.value.flarum_locale | default('en') }}"
     flarum_dbname: "{% if vhost.value.flarum_dbname is defined %}{{ vhost.value.flarum_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     flarum_dbuser: "{{ vhost.value.flarum_dbuser | default(user.key) }}"
-    flarum_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    flarum_dbpass: "{{ users_mariadb_password }}"
     flarum_dbprefix: "{{ vhost.value.flarum_dbprefix | default('') }}"
     flarum_admin_user: "{{ vhost.value.flarum_admin_user | default(user.key) }}"
     flarum_admin_email: "{{ vhost.value.flarum_admin_email | default(user.value.users_email) }}"
@@ -583,7 +594,7 @@
     mediawiki_locale: "{{ vhost.value.mediawiki_locale | default('en') }}"
     mediawiki_dbname: "{% if vhost.value.mediawiki_dbname is defined %}{{ vhost.value.mediawiki_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     mediawiki_dbuser: "{{ vhost.value.mediawiki_dbuser | default(user.key) }}"
-    mediawiki_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    mediawiki_dbpass: "{{ users_mariadb_password }}"
     mediawiki_dbprefix: "{{ vhost.value.mediawiki_dbprefix | default('') }}"
     mediawiki_admin_user: "{{ vhost.value.mediawiki_admin_user | default(user.key) }}"
     mediawiki_admin_email: "{{ vhost.value.mediawiki_admin_email | default(user.value.users_email) }}"
@@ -620,7 +631,7 @@
     matomo_bin: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
     matomo_logs: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
     matomo_db_username: "{{ user.key }}"
-    matomo_db_pass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    matomo_db_pass: "{{ users_mariadb_password }}"
     matomo_db_host: localhost
     matomo_dbname: "{% if vhost.value.matomo_dbname is defined %}{{ vhost.value.matomo_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     matomo_first_site_name: "{{ vhost.value.matomo_first_site_name | default(inventory_hostname) }}"
@@ -651,7 +662,7 @@
     phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
     phpmyadmin_dbname: "{% if vhost.value.phpmyadmin_dbname is defined %}{{ vhost.value.phpmyadmin_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
     phpmyadmin_dbuser: "{{ user.key }}"
-    phpmyadmin_dbpass: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+    phpmyadmin_dbpass: "{{ users_mariadb_password }}"
     phpmyadmin_dbhost: localhost
     phpmyadmin_dbport: 3306
     phpmyadmin_dbsocket: /var/run/mysqld/mysqld.sock

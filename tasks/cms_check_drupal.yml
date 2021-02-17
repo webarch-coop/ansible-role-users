@@ -77,13 +77,13 @@
     - name: "Check that drupal_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.drupal_autoupdate == True ) or ( vhost.value.wordpress_notify == False )
+          - ( vhost.value.drupal_autoupdate ) or ( not vhost.value.wordpress_notify )
       when: vhost.value.drupal_autoupdate is defined
 
     - name: "Check that drupal_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.drupal_notify == True ) or ( vhost.value.wordpress_notify == False )
+          - ( vhost.value.drupal_notify ) or ( not vhost.value.wordpress_notify )
       when: vhost.value.drupal_notify is defined
 
   tags:

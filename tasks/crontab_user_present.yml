@@ -17,7 +17,7 @@
 
     - name: "Generate {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       shell: "echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-      when: ( users_cron_min_file.stat is not defined ) or ( users_cron_min_file.stat.exists == False )
+      when: ( users_cron_min_file.stat is not defined ) or ( not users_cron_min_file.stat.exists )
 
     - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       slurp:
@@ -105,7 +105,7 @@
         value: "{{ user.value.users_email }}"
         user: "{{ user.key }}"
         insertafter: PATH
-      when: user.value.users_email is defined and user.value.users_email != ""
+      when: ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
 
     - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
       cron:
@@ -117,7 +117,7 @@
         hour: "{{ users_cron_tmpdir_hour }}"
       when:
         - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-        - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean == True )
+        - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean )
 
     - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
       cron:
@@ -128,7 +128,7 @@
         hour: "{{ users_cron_tmpdir_hour }}"
       when:
         - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-        - ( user.value.users_cron_tmpdir_clean is defined ) and ( user.value.users_cron_tmpdir_clean == False )
+        - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
 
     - name: "Daily MariaDB dump cron job in place for users with databases"
       cron:
@@ -138,7 +138,7 @@
         minute: "{{ users_cron_min }}"
         hour: "{{ users_cron_mysqldump_hour | default('04') }}"
       when:
-        - ( users_mariadb is defined ) and ( users_mariadb == True )
+        - ( users_mariadb is defined ) and ( users_mariadb )
         - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
 
   tags:

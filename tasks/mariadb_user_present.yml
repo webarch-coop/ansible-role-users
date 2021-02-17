@@ -20,29 +20,33 @@
             users_mariadb_password: "{{ users_mariadb_password_gen.stdout | trim | quote }}"
           no_log: true
 
-      when: users_mycnf.stat.exists == False
+      when: not users_mycnf.stat.exists
 
     - name: "Read the MariaDB password for {{ user.key }}"
       block:
 
         - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
-          shell: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client | grep '^--password' | sed -e 's/--password=//'"
-          no_log: true
+          command: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client"
           changed_when: false
           check_mode: false
-          register: users_mariadb_password_read
+          register: users_my_print_defaults
+          no_log: true
 
         - name: Set a fact for the mariadb_password
           set_fact:
-            users_mariadb_password: "{{ users_mariadb_password_read.stdout | trim | quote }}"
+            users_mariadb_password: "{{ line | regex_replace('^--password=') | trim }}"
+          when: line is regex('^--password=')
+          loop: "{{ users_my_print_defaults.stdout_lines }}"
+          loop_control:
+            loop_var: line
           no_log: true
 
-      when: users_mycnf.stat.exists == True
+      when: users_mycnf.stat.exists
 
     - name: Fail when MariaDB password not set
       fail:
         msg: "The mariadb_password appears not to be set"
-      when: ( users_mariadb_password is not defined ) or ( users_mariadb_password == "" )
+      when: ( users_mariadb_password is not defined ) or ( users_mariadb_password | length == 0 )
 
     - name: "mariadb_password written to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
       template:
@@ -116,7 +120,7 @@
       stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd"
       register: users_notify_mariadb_passwd_file
-      when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd == True )
+      when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd )
 
     - block:
 
@@ -131,7 +135,7 @@
             host: localhost
             port: 25
             secure: never
-          when: user.value.users_email is defined and user.value.users_email != ""
+          when: ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
 
         - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
           lineinfile:
@@ -144,7 +148,7 @@
             group: "{{ user.key }}"
             mode: 0640
 
-      when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd == True ) and ( users_notify_mariadb_passwd_file.stat.exists == False )
+      when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd ) and ( not users_notify_mariadb_passwd_file.stat.exists )
 
     - name: Directory present for database backups
       file:

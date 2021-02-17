@@ -13,20 +13,20 @@
   include_tasks: apache_user_absent.yml
   when:
     - ( "apache2" in ansible_facts.packages )
-    - ( users_apache is defined ) and ( users_apache == True )
+    - ( users_apache is defined ) and ( users_apache )
   tags:
     - users
 
 - name: "Absent user {{ user.key }} MariaDB account and databases absent"
   include_tasks: mariadb_user_absent.yml
-  when: ( users_mariadb is defined ) and ( users_mariadb == True )
+  when: ( users_mariadb is defined ) and ( users_mariadb )
   tags:
     - users
 
 - name: "Include PHP FPM user absent tasks for {{ user.key }}"
   include_tasks: phpfpm_user_absent.yml
   when:
-    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version != "" )
+    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version | length > 0 )
   tags:
     - users
 

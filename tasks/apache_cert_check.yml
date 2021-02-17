@@ -46,7 +46,7 @@
     - name: Set a fact for the results if any cert is missing
       set_fact:
         users_apache_certs_present: false
-      when: ( users_apache_tls_cert_check.stat.exists == False ) or ( users_apache_tls_key_check.stat.exists == False ) or ( users_apache_tls_ca_check.stat.exists == False )
+      when: ( not users_apache_tls_cert_check.stat.exists ) or ( not users_apache_tls_key_check.stat.exists ) or ( not users_apache_tls_ca_check.stat.exists )
 
     - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
       set_fact:
@@ -61,7 +61,8 @@
       set_fact:
         users_apache_certs_present: true
       when:
-        - ( users_apache_certs_present is defined ) and ( users_apache_certs_present != False )
+        - users_apache_certs_present is defined
+        - users_apache_certs_present
         - users_apache_tls_cert_check.stat.exists
         - users_apache_tls_key_check.stat.exists
         - users_apache_tls_ca_check.stat.exists

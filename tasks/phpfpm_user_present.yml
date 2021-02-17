@@ -105,13 +105,13 @@
             mode: 0644
             owner: root
             group: root
-          when: users_phpfpm_pool_conf_check.stat.exists == True
+          when: users_phpfpm_pool_conf_check.stat.exists
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
           file:
             path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             state: absent
-          when: users_phpfpm_pool_conf_check.stat.exists == False
+          when: not users_phpfpm_pool_conf_check.stat.exists
 
         - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
           fail:

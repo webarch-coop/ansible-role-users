@@ -75,13 +75,13 @@
         - name: PHP-FPM tasks
           include_tasks: phpfpm.yml
 
-      when: ( users_phpfpm is defined ) and ( users_phpfpm == True )
+      when: ( users_phpfpm is defined ) and ( users_phpfpm )
 
     - name: Check if a chroot exists
       stat:
         path: "{{ chroot_dir | default('/chroot') }}"
       register: users_chroot_dir
-      when: ( users_chroot is defined ) and ( users_chroot == True )
+      when: ( users_chroot is defined ) and ( users_chroot )
 
     - name: Quota tasks
       block:
@@ -113,13 +113,13 @@
             dest: /tmp/
           check_mode: false
 
-      when: ( users_quotaon is defined ) and ( users_quotaon == True ) and ( quota_dir is defined )
+      when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
 
     - name: Include Apache tasks
       include_tasks: apache.yml
       when:
         - ( "apache2" in ansible_facts.packages )
-        - ( users_apache is defined ) and ( users_apache == True )
+        - ( users_apache is defined ) and ( users_apache )
 
     - name: Directories for users state files present
       file:
