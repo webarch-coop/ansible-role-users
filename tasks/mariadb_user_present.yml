@@ -11,7 +11,7 @@
       block:
 
         - name: "Generate a random password for {{ user.key }} MariaDB account as ~/.my.cnf doesn't exist"
-          command: pwgen -n 20 1
+          command: "pwgen -n {{ 24 | random(14) }} 1"
           no_log: true
           register: users_mariadb_password_gen
 
