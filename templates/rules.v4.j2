@@ -20,6 +20,12 @@
 {% if munin_servers is defined %}{% for hosts in munin_servers %}{% for host in hosts %}
 -A INPUT -m state --state NEW -m tcp -p tcp -s {{ hostvars[host].ipv4_addr }} --dport 4949 -j ACCEPT
 {% endfor %}{% endfor %}{% endif %}
+{% if icinga_master_nodes is defined %}{% for hosts in icinga_master_nodes %}{% for host in hosts %}
+-A INPUT -m state --state NEW -m tcp -p tcp -s {{ lookup('dig', host) }} --dport 5665 -j ACCEPT
+{% endfor %}{% endfor %}{% endif %}
+{% if icinga_satellite_nodes is defined %}{% for hosts in icinga_satellite_nodes %}{% for host in hosts %}
+-A INPUT -m state --state NEW -m tcp -p tcp -s {{ lookup('dig', host) }} --dport 5665 -j ACCEPT
+{% endfor %}{% endfor %}{% endif %}
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
 -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
 -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
