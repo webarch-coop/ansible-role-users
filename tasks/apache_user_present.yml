@@ -297,7 +297,9 @@
     wordpress_matomo_login_password: "{{ matomo_login_password }}"
     wordpress_matomo_login_email: "{{ vhost.value.matomo_login_email | default(user.value.users_email) }}"
     wordpress_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
-    wordpress_plugins: "{{ vhost.value.wordpress_plugins }}"
+    wordpress_plugins: "{{ vhost.value.wordpress_plugins | default(wordpress_plugins) | default([]) }}"
+    wordpress_options: "{{ vhost.value.wordpress_options | default(wordpress_options) | default([]) }}"
+    wordpress_config: "{{ vhost.value.wordpress_config | default(wordpress_config) | default([]) }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
@@ -333,7 +335,9 @@
     wordpress_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
     wordpress_notify_headers: "{{ users_notify_headers }}"
     wordpress_notify_signature: "{{ users_notify_signature }}"
-    wordpress_plugins: "{{ vhost.value.wordpress_plugins }}"
+    wordpress_plugins: "{{ vhost.value.wordpress_plugins | default(wordpress_plugins) | default([]) }}"
+    wordpress_options: "{{ vhost.value.wordpress_options | default(wordpress_options) | default([]) }}"
+    wordpress_config: "{{ vhost.value.wordpress_config | default(wordpress_config) | default([]) }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
