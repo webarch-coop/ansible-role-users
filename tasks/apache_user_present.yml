@@ -294,12 +294,12 @@
     wordpress_config: "{{ vhost.value.wordpress_config | default([]) }}"
     wordpress_matomo_user: "{{ matomo_user }}"
     wordpress_matomo_url: "{{ matomo_url }}"
-    wordpress_matomo_home: "{{ matomo_home }}"
-    wordpress_matomo_html: "{{ matomo_html }}"
+    # wordpress_matomo_home: "{{ matomo_home }}"
+    # wordpress_matomo_html: "{{ matomo_html }}"
     wordpress_matomo_login: "{{ matomo_login_existing }}"
     wordpress_matomo_login_password: "{{ matomo_login_password }}"
-    wordpress_matomo_login_email: "{{ vhost.value.matomo_login_email | default(user.value.users_email) }}"
-    wordpress_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+    # wordpress_matomo_login_email: "{{ vhost.value.matomo_login_email | default(user.value.users_email) }}"
+    # wordpress_matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
