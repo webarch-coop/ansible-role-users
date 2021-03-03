@@ -259,7 +259,7 @@
     #   check_mode: false
     #   no_log: true
     #   register: users_my_print_defaults
-    
+
     # - name: "Set a fact for the MySQL password for {{ user.key }}"
     #   set_fact:
     #     users_mariadb_password: "{{ line | regex_replace('^--password=') | trim }}"
@@ -310,7 +310,7 @@
       when:
         - ( vhost.value.users_cms == "wordpress" )
         - ( users_matomo is defined ) and ( users_matomo )
-    
+
     - name: "Include WordPress role for {{ user.key }} without Matomo"
       include_role:
         name: wordpress
@@ -344,7 +344,7 @@
       when:
         - ( vhost.value.users_cms == "wordpress" )
         - ( users_matomo is not defined ) or ( not users_matomo )
-    
+
     - name: "Include Drupal role for {{ user.key }}"
       include_role:
         name: drupal
@@ -377,7 +377,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "drupal" )
-    
+
     - name: "Include Kimai role for {{ user.key }}"
       include_role:
         name: kimai
@@ -408,7 +408,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "kimai" )
-    
+
     - name: "Include Moodle role for {{ user.key }}"
       include_role:
         name: moodle
@@ -446,7 +446,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "moodle" )
-    
+
     - name: "Include Nextcloud role for {{ user.key }} with default apps"
       include_role:
         name: nextcloud
@@ -487,7 +487,7 @@
         - ( vhost.value.nextcloud_app_install is not defined )
         - ( vhost.value.nextcloud_app_disable is not defined )
         - ( vhost.value.nextcloud_app_enable is not defined )
-    
+
     - name: "Include Nextcloud role for {{ user.key }} with custom apps"
       include_role:
         name: nextcloud
@@ -529,7 +529,7 @@
       when:
         - ( vhost.value.users_cms == "nextcloud" )
         - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
-    
+
     - name: "Include Flarum role for {{ user.key }}"
       include_role:
         name: flarum
@@ -566,7 +566,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "flarum" )
-    
+
     - name: "Include MediaWiki role for {{ user.key }}"
       include_role:
         name: mediawiki
@@ -605,7 +605,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "mediawiki" )
-    
+
     - name: "Include Matomo role for {{ user.key }}"
       include_role:
         name: matomo
@@ -639,7 +639,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "matomo" )
-    
+
     - name: "Include phpMyAdmin role for {{ user.key }}"
       include_role:
         name: phpmyadmin
