@@ -69,7 +69,7 @@
         - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check == "strict" )
         - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
 
-  when: users_domain is not regex('^[*][.].*$') 
+  when: users_domain is not regex('^[*][.].*$')
   tags:
     - users
 ...
