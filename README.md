@@ -1,8 +1,10 @@
 # Ansible Debian Users Role 
 
+[![pipeline status](https://git.coop/webarch/users/badges/master/pipeline.svg)](https://git.coop/webarch/users/-/commits/master)
+
 This repository contains an Ansible role for adding user accounts to Debian servers.
 
-Lots of documentation needs to be added to this file.
+**Lots of documentation needs to be added to this file, what follows probably isn't up to date.**
 
 To use this role you need to use Ansible Galaxy to install it into another repository under `galaxy/roles/users` by adding a `requirements.yml` file in that repo that contains:
 
