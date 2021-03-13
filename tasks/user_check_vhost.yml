@@ -19,6 +19,7 @@
       vars:
         users_domain: "{{ vhost.value.users_apache_server_name }}"
         users_reverse_proxy: "{% if vhost.value.users_apache_remoteip is defined %}{{ vhost.value.users_apache_remoteip }}{% endif %}"
+      when: vhost.value.users_apache_server_name is not regex('^[*][.]')
 
     - name: "Check ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
@@ -34,6 +35,7 @@
           vars:
             users_domain: "{{ domain }}"
             users_reverse_proxy: "{% if vhost.value.users_apache_remoteip is defined %}{{ vhost.value.users_apache_remoteip }}{% endif %}"
+          when: domain is not regex('^[*][.]')
           loop: "{{ vhost.value.users_apache_server_aliases }}"
           loop_control:
             loop_var: domain

@@ -1,84 +1,75 @@
 ---
-# Locally test that users_domain resolves to a IP address
-- name: Variable users_domain_dig set to empty
-  set_fact:
-    users_domain_dig: ""
-  tags:
-    - users
+- name: Skip the checks if the domain starts with an asterisk
+  block:
 
-- name: Set a fact for the domain we are testing
-  set_fact:
-    users_domain_dig: "{{ query('dig', users_domain) | ipv4 }}"
-  tags:
-    - users
+    # Locally test that users_domain resolves to a IP address
+    - name: Variable users_domain_dig set to empty
+      set_fact:
+        users_domain_dig: ""
 
-- name: Debug domain name and IP address
-  debug:
-    msg:
-      - "users_domain: {{ users_domain }}"
-      - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
-      - "ansible_all_ipv4_addresses: {{ ansible_all_ipv4_addresses }}"
-      - "users_domain_dig: {{ users_domain_dig }}"
-      - "users_domain_check: {{ users_domain_check }}"
-    verbosity: 1
-  when:
-    - ( users_domain_check is defined )
-    - ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
-  tags:
-    - users
+    - name: Set a fact for the domain we are testing
+      set_fact:
+        users_domain_dig: "{{ query('dig', users_domain) | ipv4 }}"
 
-- name: Debug domain name and IP address
-  debug:
-    msg:
-      - "users_domain: {{ users_domain }}"
-      - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
-      - "ansible_all_ipv4_addresses: {{ ansible_all_ipv4_addresses }}"
-      - "users_domain_dig[0]: {{ users_domain_dig[0] }}"
-      - "users_domain_check: {{ users_domain_check }}"
-    verbosity: 1
-  when:
-    - ( users_domain_check is defined )
-    - ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
-  tags:
-    - users
+    - name: Debug domain name and IP address
+      debug:
+        msg:
+          - "users_domain: {{ users_domain }}"
+          - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
+          - "ansible_all_ipv4_addresses: {{ ansible_all_ipv4_addresses }}"
+          - "users_domain_dig: {{ users_domain_dig }}"
+          - "users_domain_check: {{ users_domain_check }}"
+        verbosity: 1
+      when:
+        - ( users_domain_check is defined )
+        - ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
 
-- name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
-  debug:
-    msg: "{{ users_domain }} appears not to resolve to a IP address"
-  when:
-    - not users_domain_dig
-    - users_domain_check != "strict"
-  tags:
-    - users
+    - name: Debug domain name and IP address
+      debug:
+        msg:
+          - "users_domain: {{ users_domain }}"
+          - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
+          - "ansible_all_ipv4_addresses: {{ ansible_all_ipv4_addresses }}"
+          - "users_domain_dig[0]: {{ users_domain_dig[0] }}"
+          - "users_domain_check: {{ users_domain_check }}"
+        verbosity: 1
+      when:
+        - ( users_domain_check is defined )
+        - ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
 
-- name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
-  fail:
-    msg: "{{ users_domain }} appears not to resolve to a IP address"
-  when:
-    - not users_domain_dig
-    - users_domain_check == "strict"
-  tags:
-    - users
+    - name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
+      debug:
+        msg: "{{ users_domain }} appears not to resolve to a IP address"
+      when:
+        - not users_domain_dig
+        - users_domain_check != "strict"
 
-- name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
-  debug:
-    msg: "{{ users_domain_dig[0] }} not in {{ ansible_all_ipv4_addresses }}"
-  when:
-    - users_domain_dig[0] is defined
-    - users_domain_dig[0] not in ansible_all_ipv4_addresses
-    - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check != "strict" )
-    - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
-  tags:
-    - users
+    - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
+      fail:
+        msg: "{{ users_domain }} appears not to resolve to a IP address"
+      when:
+        - not users_domain_dig
+        - users_domain_check == "strict"
 
-- name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
-  fail:
-    msg: "{{ users_domain_dig[0] }} not in {{ ansible_all_ipv4_addresses }}"
-  when:
-    - users_domain_dig[0] is defined
-    - users_domain_dig[0] not in ansible_all_ipv4_addresses
-    - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check == "strict" )
-    - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
+    - name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
+      debug:
+        msg: "{{ users_domain_dig[0] }} not in {{ ansible_all_ipv4_addresses }}"
+      when:
+        - users_domain_dig[0] is defined
+        - users_domain_dig[0] not in ansible_all_ipv4_addresses
+        - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check != "strict" )
+        - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
+
+    - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
+      fail:
+        msg: "{{ users_domain_dig[0] }} not in {{ ansible_all_ipv4_addresses }}"
+      when:
+        - users_domain_dig[0] is defined
+        - users_domain_dig[0] not in ansible_all_ipv4_addresses
+        - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check == "strict" )
+        - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
+
+  when: users_domain is not regex('^[*][.]') 
   tags:
     - users
 ...
