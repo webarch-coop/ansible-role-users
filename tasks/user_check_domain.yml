@@ -41,15 +41,15 @@
       debug:
         msg: "{{ users_domain }} appears not to resolve to a IP address"
       when:
-        - not users_domain_dig
-        - users_domain_check != "strict"
+        - ( users_domain_dig == [] ) or ( users_domain_dig | length == 0 )
+        - ( users_domain_check != "strict" )
 
     - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
       fail:
         msg: "{{ users_domain }} appears not to resolve to a IP address"
       when:
-        - not users_domain_dig
-        - users_domain_check == "strict"
+        - ( users_domain_dig == [] ) or ( users_domain_dig | length == 0 )
+        - ( users_domain_check == "strict" )
 
     - name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
       debug:
@@ -69,7 +69,7 @@
         - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check == "strict" )
         - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
 
-  when: users_domain is not regex('^[*][.]') 
+  when: users_domain is not regex('^[*][.].*$') 
   tags:
     - users
 ...
