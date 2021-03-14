@@ -1,5 +1,4 @@
 ---
-# https://github.com/digitalist-se/userconsole#usercreate
 - name: Include user_present tasks from Matomo role
   include_role:
     name: matomo
