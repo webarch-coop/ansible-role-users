@@ -17,7 +17,7 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
         state: directory
         owner: root
-        group: "{{ user.value.users_group }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
         mode: 0750
 
     - name: Users PHP FPM logs touched
@@ -27,7 +27,7 @@
         access_time: preserve
         modification_time: preserve
         owner: "{{ user.key }}"
-        group: "{{ user.value.users_group }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
         mode: 0640
       loop:
         - php-fpm.mail.log
