@@ -18,7 +18,7 @@
     - users
 
 - name: "Hourly scripts in place for {{ user.key }}"
-  lineinfile:
+  blockinfile:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
     block: |
       {% for users_hourly_script in vhost.value.users_hourly_scripts %}
