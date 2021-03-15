@@ -374,6 +374,20 @@
 
       when: ( user.value.users_phpfpm_pm is defined ) and ( user.value.users_phpfpm_pm == "dynamic" )
 
+    - name: "Check that the users_daily_scripts array for {{ user.key }} is a non-empty list if defined"
+      assert:
+        that:
+          - user.value.users_daily_scripts | type_debug == "list"
+          - user.value.users_daily_scripts | length > 0
+      when: user.value.users_daily_scripts is defined
+
+    - name: "Check that the users_hourly_scripts array for {{ user.key }} is a non-empty list if defined"
+      assert:
+        that:
+          - user.value.users_hourly_scripts | type_debug == "list"
+          - user.value.users_hourly_scripts | length > 0
+      when: user.value.users_hourly_scripts is defined
+
   tags:
     - users
 ...
