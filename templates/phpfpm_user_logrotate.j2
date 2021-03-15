@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+
+{{ users_basedir }}/{{ user.key }}/logs/php-fpm*log {
+        daily
+        rotate 28
+        missingok
+        notifempty
+        compress
+        delaycompress
+        create 640 {{ user.key }} {{ users.value.users_group }}
+        dateext
+        sharedscripts
+        prerotate
+                chown {{ user.key }}:{{ users.value.users_group }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+        endscript
+        postrotate
+                /usr/lib/php/php{{ users_phpfpm_version }}-fpm-reopenlogs
+                chown {{ user.key }}:{{ users.value.users_group }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+                chown {{ user.key }}:{{ users.value.users_group }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
+        endscript
+}

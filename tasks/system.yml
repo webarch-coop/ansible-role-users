@@ -72,8 +72,28 @@
               - users_phpfpm_version is defined
               - users_phpfpm_version is regex('^[1-9][.][1-9]$')
 
-        - name: PHP-FPM tasks
-          include_tasks: phpfpm.yml
+        - name: Legacy /etc/logrotate.d/phpfpm_users_logrotate absent
+          file:
+            path: /etc/logrotate.d/phpfpm_users_logrotate
+            state: absent
+
+        - name: /etc/apache2/localhost.d present
+          file:
+            path: /etc/apache2/localhost.d
+            state: directory
+            mode: 0755
+            owner: root
+            group: root
+          when: ( "apache2" in ansible_facts.packages )
+
+        - name: /etc/nginx/localhost.d present
+          file:
+            path: /etc/nginx/localhost.d
+            state: directory
+            mode: 0755
+            owner: root
+            group: root
+          when: ( "nginx" in ansible_facts.packages )
 
       when: ( users_phpfpm is defined ) and ( users_phpfpm )
 

@@ -2,7 +2,7 @@
 - name: "PHP FPM config absent for {{ user.key }}"
   block:
 
-    - name: "PHP FPM secondary files for {{ user.key }} absent"
+    - name: "PHP FPM files for {{ user.key }} absent"
       file:
         path: "{{ file }}"
         state: absent
@@ -11,6 +11,7 @@
         - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
         - "/etc/apache2/localhost.d/{{ user.key }}.conf"
         - "/etc/nginx/localhost.d/{{ user.key }}.conf"
+        - "/etc/logrotate.d/phpfpm_{{ user.key }}"
       loop_control:
         loop_var: file
         label: "{{ file }}"

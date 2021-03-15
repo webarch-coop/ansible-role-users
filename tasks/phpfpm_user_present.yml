@@ -17,7 +17,7 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
         state: directory
         owner: root
-        group: "{{ user.key }}"
+        group: "{{ user.value.users_group }}"
         mode: 0750
 
     - name: Users PHP FPM logs touched
@@ -27,7 +27,7 @@
         access_time: preserve
         modification_time: preserve
         owner: "{{ user.key }}"
-        group: "{{ user.key }}"
+        group: "{{ user.value.users_group }}"
         mode: 0640
       loop:
         - php-fpm.mail.log
@@ -37,6 +37,14 @@
       loop_control:
         loop_var: log
         label: "{{ log }}"
+
+    - name: Users PHP FPM log rotation config in place
+      template:
+        src: phpfpm_user_logrotate.j2
+        dest: "/etc/logrotate.d/phpfpm_{{ user.key }}"
+        owner: root
+        group: root
+        mode: 0755
 
     - name: Check the PHP FPM pm variables
       include_role:
