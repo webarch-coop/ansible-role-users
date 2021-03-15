@@ -15,7 +15,7 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh"
         block: |
           {% if user.value.users_daily_scripts is defined %}
-          {% for users_daily_script in vhost.value.users_daily_scripts %}
+          {% for users_daily_script in user.value.users_daily_scripts %}
           {{ users_daily_script }}
           {% endfor %}
           {% else %}
@@ -41,7 +41,7 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
         block: |
           {% if user.value.users_hourly_scripts is defined %}
-          {% for users_hourly_script in vhost.value.users_hourly_scripts %}
+          {% for users_hourly_script in user.value.users_hourly_scripts %}
           {{ users_hourly_script }}
           {% endfor %}
           {% else %}
