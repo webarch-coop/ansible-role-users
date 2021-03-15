@@ -26,7 +26,7 @@
       {% endfor %}
     state: present
     create: false
-    marker: "# {mark } ANSIBLE SCRIPTS"
+    marker: "# {mark} ANSIBLE SCRIPTS"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0750"
