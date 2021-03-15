@@ -17,21 +17,19 @@
   tags:
     - users
 
-- name: "Daily scripts in place for {{ user.key }}"
+- name: "Hourly scripts in place for {{ user.key }}"
   lineinfile:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
-    line: "{{ command }}"
+    block: |
+      {% for users_hourly_script in vhost.value.users_hourly_scripts %}
+      {{ users_hourly_script }}
+      {% endfor %}
     state: present
-    insertbefore: "^# END ANSIBLE SCRIPTS"
-    firstmatch: true
     create: false
+    marker: "# {mark } ANSIBLE SCRIPTS"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: "0750"
-  loop: "{{ vhost.value.users_hourly_scripts }}"
-  loop_control:
-    loop_var: command
-    label: "{{ command }}"
   tags:
     - users
 ...
