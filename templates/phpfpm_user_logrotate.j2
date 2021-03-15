@@ -7,15 +7,15 @@
         notifempty
         compress
         delaycompress
-        create 640 {{ user.key }} {{ users.value.users_group | default(user.key) }}
+        create 640 {{ user.key }} {{ user.value.users_group | default(user.key) }}
         dateext
         sharedscripts
         prerotate
-                chown {{ user.key }}:{{ users.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+                chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
         endscript
         postrotate
                 /usr/lib/php/php{{ users_phpfpm_version }}-fpm-reopenlogs
-                chown {{ user.key }}:{{ users.value.users_group }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
-                chown {{ user.key }}:{{ users.value.users_group }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
+                chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+                chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
         endscript
 }
