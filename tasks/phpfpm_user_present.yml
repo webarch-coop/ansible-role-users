@@ -28,7 +28,7 @@
         modification_time: preserve
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0640
+        mode: 0600
       loop:
         - php-fpm.mail.log
         - php-fpm.slow.log
