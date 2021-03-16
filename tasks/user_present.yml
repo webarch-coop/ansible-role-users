@@ -153,10 +153,6 @@
         - ( matomo_password is defined ) and ( matomo_password | length > 0 )
         - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
 
-    # - name: Debug fail
-    #   fail:
-    #     msg: debug
-
     - name: "Include Apache config tasks present for user {{ user.key }}"
       include_tasks: apache_user_present.yml
       when:
@@ -164,7 +160,10 @@
         - ( users_apache is defined ) and ( users_apache )
         - ( user.value.users_apache_virtual_hosts is defined )
 
-    - name: Users state files updated
+    - name: "Include daily script tasks for {{ user.key }}"
+      include_tasks: user_scripts.yml
+
+    - name: "User state files updated for {{ user.key }}"
       include_tasks: user_updated.yml
 
   tags:

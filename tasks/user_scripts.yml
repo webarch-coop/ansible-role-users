@@ -1,0 +1,59 @@
+---
+- name: Users scripts file in place
+  block:
+
+    - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh in place"
+      template:
+        src: cron_daily.sh.j2
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0750"
+
+    - name: "Daily scripts in place for {{ user.key }}"
+      blockinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh"
+        block: |
+          {% if user.value.users_daily_scripts is defined %}
+          {% for users_daily_script in user.value.users_daily_scripts %}
+          {{ users_daily_script }}
+          {% endfor %}
+          {% else %}
+          # None
+          {% endif %}
+        state: present
+        create: false
+        marker: "# {mark} ANSIBLE SCRIPTS"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0700"
+
+    - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh in place"
+      template:
+        src: cron_hourly.sh.j2
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0750"
+
+    - name: "Hourly scripts in place for {{ user.key }}"
+      blockinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
+        block: |
+          {% if user.value.users_hourly_scripts is defined %}
+          {% for users_hourly_script in user.value.users_hourly_scripts %}
+          {{ users_hourly_script }}
+          {% endfor %}
+          {% else %}
+          # None
+          {% endif %}
+        state: present
+        create: false
+        marker: "# {mark} ANSIBLE SCRIPTS"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0750"
+
+  tags:
+    - users
+...
