@@ -34,7 +34,7 @@
         # Check if the ~/bin/cron_daily.sh exists and is not empty and check
         # if it contains lines that are not comments or simply whitespace
         # if it does then run it in the chroot, as the user and send the
-        # user any results in an email 
+        # user any results in an email
         - name: "Daily cron jobs for {{ user.key }}"
           cron:
             name: "Daily cron jobs"
