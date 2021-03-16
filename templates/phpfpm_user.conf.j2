@@ -61,8 +61,13 @@ php_admin_value[sys_temp_dir] = {{ user.value.users_home | default(users_basedir
 php_admin_value[soap.wsdl_cache_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[uploadprogress.file.contents_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upload_contents_%s
 php_admin_value[uploadprogress.file.filename_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt
+{% if user.value.users_phpfpm_sendmail_from is defined %}
+php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ user.value.users_phpfpm_sendmail_from }}
+php_admin_value[sendmail_from] = {{ user.value.users_phpfpm_sendmail_from }}
+{% else %}
 php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ user.key }}@{{ inventory_hostname }}
 php_admin_value[sendmail_from] = {{ user.key }}@{{ inventory_hostname }}
+{% endif %}
 php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log
 
 pm = {{ user.value.users_phpfpm_pm | default('ondemand') }}
