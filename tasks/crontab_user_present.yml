@@ -81,7 +81,8 @@
             name: "Daily cron jobs"
             user: "{{ user.key }}"
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ];
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
               then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh; fi"
             minute: "{{ users_cron_min }}"
             hour: "{{ users_cron_daily_hour | default('05') }}"
@@ -91,7 +92,8 @@
             name: "Hourly cron jobs"
             user: "{{ user.key }}"
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ];
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
               then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh; fi"
             minute: "{{ users_cron_min }}"
             hour: "*"
