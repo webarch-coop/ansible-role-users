@@ -106,6 +106,10 @@
     # No AuthUserFile for this Location as AuthType is None
       {%- elif loc.authtype is not defined and loc.redirect is defined %}
     # Redirect Location so no AuthUserFile
+      {%- elif loc.authtype is not defined and loc.proxypass is defined %}
+    # ProxyPass Location so no AuthUserFile
+      {%- elif loc.authtype is not defined and loc.proxypassreverse is defined %}
+    # ProxyPassReverse Location so no AuthUserFile
       {%- else %}
     AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       {%- endif %}
