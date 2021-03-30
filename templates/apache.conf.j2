@@ -106,10 +106,12 @@
     # No AuthUserFile for this Location as AuthType is None
       {%- elif loc.authtype is not defined and loc.redirect is defined %}
     # Redirect Location so no AuthUserFile
+      {%- elif loc.authtype is not defined and loc.proxypass is defined %}
+    # ProxyPass Location so no AuthUserFile
       {%- else %}
     AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       {%- endif %}
-      {%- if loc.redirect is not defined %}
+      {%- if loc.redirect is not defined and loc.proxypass is not defined and loc.proxypassreverse is not defined %}
     AuthName "{% if loc.authname is defined %}{{ loc.authname }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.authtype is defined %}{{ loc.authtype }}{% else %}Basic{% endif %}
         {%- if loc.require is defined %}{% for req in loc.require %}
@@ -118,7 +120,15 @@
     Require valid-user
         {%- endif %}
       {%- else %}
+        {%- if loc.redirect is defined %}
     Redirect "{{ loc.redirect }}"
+        {%- endif %}
+        {%- if loc.proxypass is defined %}
+    ProxyPass "{{ loc.proxypass }}"
+        {%- endif %}
+        {%- if loc.proxypassreverse is defined %}
+    ProxyPassReverse "{{ loc.proxypassreverse }}"
+        {%- endif %}
       {%- endif %}
   </Location>
     {%- endfor %}

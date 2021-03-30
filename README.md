@@ -244,6 +244,47 @@ It is also possible to set `redirect`, see [the Apache Documentation](https://ht
             redirect: https://example.org/
 ```
 
+### Reverse Proxy
+
+The `Location` blocks can also be used for reverse proxies, for example for a [Nextcloud notify_push reverse proxy](https://github.com/nextcloud/notify_push#apache) like this:
+
+```apache
+ProxyPass /push/ws ws://127.0.0.1:7867/ws
+ProxyPass /push/ http://127.0.0.1:7867/
+ProxyPassReverse /push/ http://127.0.0.1:7867/
+```
+
+You can specify:
+
+
+```yml
+        users_apache_locations:
+          - location: /push/ws
+            proxy_pass: ws://127.0.0.1:7867/ws
+          - location: /push/
+            proxy_pass: http://127.0.0.1:7867/
+        users_apache_proxy_pass_reverse:
+          - path: /push/
+            url: http://127.0.0.1:7867/
+```
+
+And this will result in:
+
+
+
+Or if you want to proxy everything apart from some files in a `/media` and a `/static` directory this example:
+
+```apache
+ProxyPass /static !
+ProxyPass /media !
+ProxyPass / http://127.0.0.1:8000/
+ProxyPassReverse / http://127.0.0.1:8000/
+```
+
+Can be specified using:
+
+
+
 ### Expires
 
 The optional `users_apache_expires` variable can be used to select the [medium](https://git.coop/webarch/apache/blob/master/templates/expires-medium.conf.j2) or [strict](https://git.coop/webarch/apache/blob/master/templates/expires-strict.conf.j2) configuration to `Include` into the `VirtualHost`.
