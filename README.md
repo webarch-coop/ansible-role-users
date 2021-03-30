@@ -266,6 +266,18 @@ You can specify:
             proxypassreverse: http://127.0.0.1:7867/
 ```
 
+And this will generate:
+
+```apache
+  <Location "/push/ws" >
+    ProxyPass "ws://127.0.0.1:7867/ws"
+  </Location>
+  <Location "/push/" >
+    ProxyPass "http://127.0.0.1:7867/"
+    ProxyPassReverse "http://127.0.0.1:7867/"
+  </Location>
+```
+
 Or if you want to proxy everything apart from some files in a `/media` and a `/static` directory this example:
 
 ```apache
