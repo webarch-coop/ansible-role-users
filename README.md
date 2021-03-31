@@ -292,9 +292,9 @@ You can specify:
 ```yml
         users_apache_locations:
           - location: /static
-            proxypass: !
+            proxypass: "!"
           - location: /media
-            proxypass: !
+            proxypass: "!"
           - location: /
             proxypass: http://127.0.0.1:8000/
             proxypassreverse: http://127.0.0.1:8000/
