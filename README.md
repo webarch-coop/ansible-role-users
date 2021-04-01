@@ -244,6 +244,13 @@ It is also possible to set `redirect`, see [the Apache Documentation](https://ht
             redirect: https://example.org/
 ```
 
+An `Alias` can also be used in a `Location`:
+```yml
+        users_apache_locations:
+          - location: /static
+            alias: /home/foo/sites/www/staticfiles
+```
+
 #### Reverse Proxy in a Location block
 
 The `Location` blocks can also be used for reverse proxies, for example for a [Nextcloud notify_push reverse proxy](https://github.com/nextcloud/notify_push#apache) like this:
