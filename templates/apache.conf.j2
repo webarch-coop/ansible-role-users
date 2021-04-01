@@ -104,6 +104,8 @@
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
       {%- if loc.authtype is defined and loc.authtype == "None" %}
     # No AuthUserFile for this Location as AuthType is None
+      {%- elif loc.authtype is not defined and loc.alias is defined %}
+    # Alias Location so no AuthUserFile
       {%- elif loc.authtype is not defined and loc.redirect is defined %}
     # Redirect Location so no AuthUserFile
       {%- elif loc.authtype is not defined and loc.proxypass is defined %}
@@ -122,6 +124,8 @@
     Require valid-user
         {%- endif %}
       {%- else %}
+        {%- if loc.alias is defined %}
+    Alias "{{ loc.alias }}"
         {%- if loc.redirect is defined %}
     Redirect "{{ loc.redirect }}"
         {% elif loc.proxypass is defined or loc.proxypassreverse is defined %} 
