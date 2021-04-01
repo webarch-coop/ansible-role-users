@@ -126,7 +126,7 @@
       {%- else %}
         {%- if loc.alias is defined %}
     Alias "{{ loc.alias }}"
-        {%- if loc.redirect is defined %}
+        {%- elif loc.redirect is defined %}
     Redirect "{{ loc.redirect }}"
         {% elif loc.proxypass is defined or loc.proxypassreverse is defined %} 
           {%- if loc.proxypass is defined %}
