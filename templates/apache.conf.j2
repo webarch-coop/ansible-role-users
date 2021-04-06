@@ -143,8 +143,8 @@
       {%- endif %}
     {%- endfor %}
   {%- endif %}
-  {%- if user.value.users_apache_directories is defined %}
-    {%- for dir in user.value.users_apache_directories %}
+  {%- if vhost_config.users_apache_directories is defined %}
+    {%- for dir in vhost_config.users_apache_directories %}
   <Directory "{{ dir.path }}">
       {%- if dir.options is defined %}
     Options{% for option in dir.options %} {{ option }}{% endfor %}
