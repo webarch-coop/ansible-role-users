@@ -266,8 +266,8 @@
   </Directory>
     {%- endfor %}
   {%- endif %}
-  {%- if users_apache_proxy_pass is defined %}
-    {%- for proxy in users_apache_proxy_pass %}
+  {%- if vhost_config.users_apache_proxy_pass is defined %}
+    {%- for proxy in vhost_config.users_apache_proxy_pass %}
   ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
       {%- if proxy.reverse is defined and proxy.reverse %}
   ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
