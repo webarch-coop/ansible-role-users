@@ -108,14 +108,10 @@
     # Alias Location so no AuthUserFile
       {%- elif loc.authtype is not defined and loc.redirect is defined %}
     # Redirect Location so no AuthUserFile
-      {%- elif loc.authtype is not defined and loc.proxypass is defined %}
-    # ProxyPass Location so no AuthUserFile
-      {%- elif loc.authtype is not defined and loc.proxypassreverse is defined %}
-    # ProxyPassReverse Location so no AuthUserFile
       {%- else %}
     AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       {%- endif %}
-      {%- if loc.alias is not defined and loc.redirect is not defined and loc.proxypass is not defined and loc.proxypassreverse is not defined %}
+      {%- if loc.alias is not defined and loc.redirect is not defined %}
     AuthName "{% if loc.authname is defined %}{{ loc.authname }}{% else %}Authorised Users{% endif %}"
     AuthType {% if loc.authtype is defined %}{{ loc.authtype }}{% else %}Basic{% endif %}
         {%- if loc.require is defined %}{% for req in loc.require %}
@@ -128,13 +124,6 @@
     Alias "{{ loc.alias }}"
         {%- elif loc.redirect is defined %}
     Redirect "{{ loc.redirect }}"
-        {% elif loc.proxypass is defined or loc.proxypassreverse is defined %} 
-          {%- if loc.proxypass is defined %}
-    ProxyPass "{{ loc.proxypass }}"
-          {%- endif %}
-          {%- if loc.proxypassreverse is defined %}
-    ProxyPassReverse "{{ loc.proxypassreverse }}"
-          {%- endif %}
         {%- endif %}
       {%- endif %}
   </Location>
@@ -154,47 +143,70 @@
       {%- endif %}
     {%- endfor %}
   {%- endif %}
-  {%- if user.value.users_apache_vhost_docroot is defined %}
+  {%- if user.value.users_apache_directories is defined %}
+    {%- for dir in user.value.users_apache_directories %}
+  <Directory "{{ dir.path }}">
+      {%- if dir.options is defined %}
+    Options{% for option in dir.options %} {{ option }}{% endfor %}
+      {%- else %}
+    Options FollowSymlinks
+      {%- endif %}
+      {%- if dir.allow_override is defined %}
+    AllowOverride{% for override in dir.allow_override %} {{ override }}{% endfor %}
+      {%- else %}
+    AllowOverride None
+      {%- endif %}
+      {%- if dir.require is defined %}
+        {%- for reqirement in dir.require %}
+    Require {{ reqirement }}
+        {%- endfor %}
+      {%- else %}
+    Require all granted
+      {%- endif %}
+  </Directory>
+    {%- endfor %}
+  {%- else %}
+    {%- if user.value.users_apache_vhost_docroot is defined %}
   DocumentRoot "{{ user.value.users_apache_vhost_docroot }}" 
   <Directory "{{ user.value.users_apache_vhost_docroot }}">
-  {%- else %}
+    {%- else %}
   DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-  {%- endif %}
-  {%- if vhost_config.users_apache_options is defined %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_options is defined %}
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
-  {%- elif users_apache_options is defined %}
+    {%- elif users_apache_options is defined %}
     Options {% for option in users_apache_options %} {{ option }}{% endfor %}
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-  {%- else %}
+    {%- else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-  {%- endif %}
-  {%- if vhost_config.users_apache_index is defined %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
-  {%- elif users_apache_index is defined %}
+    {%- elif users_apache_index is defined %}
     DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     DirectoryIndex index.php index.html index.htm index.shtml
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     DirectoryIndex index.cgi index.pl index.html index.htm index.shtml
-  {%- else %}
+    {%- else %}
     DirectoryIndex index.html index.htm index.shtml
-  {%- endif %}
-  {%- if vhost_config.users_apache_override is defined %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_override is defined %}
     AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
-  {%- elif users_apache_override is defined %}
+    {%- elif users_apache_override is defined %}
     AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-  {%- else %}
+    {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-  {%- endif %}
-  {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
     <IfModule proxy_fcgi_module>
       <IfModule setenvif_module>
@@ -202,23 +214,23 @@
       </IfModule>
       <FilesMatch "\.php$">
         <If "-f %{REQUEST_FILENAME}">
-    {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
-      {%- if "chroot" in user.value.users_groups %}
+      {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
+        {%- if "chroot" in user.value.users_groups %}
           SetHandler "proxy:unix:{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
-      {%- else %}
+        {%- else %}
           SetHandler "proxy:unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
-      {%- endif %}
-    {%- elif users_phpfpm_version is defined %}
+        {%- endif %}
+      {%- elif users_phpfpm_version is defined %}
           SetHandler "proxy:unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost"
-    {%- else -%}
+      {%- else -%}
           # Something went wrong the users_phpfpm_version variable needs to be 
           # set to the PHP version in order for SetHandler path to the socket 
           # to be set for the www-data user
-    {%- endif %}
+      {%- endif %}
         </If>
       </FilesMatch>
     </IfModule>
-  {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     <IfModule fcgid_module>
       <IfModule mime_module>
         <FilesMatch "[^.]+\.cgi$">
@@ -229,14 +241,15 @@
         </FilesMatch>
       </IfModule>
     </IfModule>
-  {%- endif %}
+    {%- endif %}
     Require all granted
-  {%- if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
+    {%- if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
-  {%- elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
+    {%- elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
     IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
-  {%- endif %}
+    {%- endif %}
   </Directory>
+  {% endif %}
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
     {%- for dir in vhost_config.users_apache_nophp_dirs %}
   # No PHP allowed in this directory
@@ -251,6 +264,14 @@
       </If>
     </FilesMatch>
   </Directory>
+    {%- endfor %}
+  {%- endif %}
+  {%- if users_apache_proxy is defined %}
+    {%- for proxy in users_apache_proxy %}
+  ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
+      {%- if proxy.reverse is defined and proxy.reverse %}
+  ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
+      {%- endif %}
     {%- endfor %}
   {%- endif %}
   CustomLog /var/log/apache2/{{ user.key }}_access.log bandwidth
