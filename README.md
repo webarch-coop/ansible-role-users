@@ -209,12 +209,24 @@ The arrays, `users_apache_options`, `users_apache_index` and `users_apache_overr
 
 ### Location
 
-The `users_apache_locations` array can be used to apply HTTP Authentication to directories, for example:
+The `users_apache_locations` array can be used to apply HTTP Authentication to files and directories, for example:
 
 ```yml
         users_apache_locations:
           - authname: WordPress Login
             location: /wp-login.php
+          - authname: WordPress Admin
+            location: /wp-admin/
+          - authname: WordPress Admin Ajax
+            location: /wp-admin/admin-ajax.php
+            authtype: None
+            require:
+              - all granted
+          - authname: WordPress Config
+            location: /wp-config.php
+            authtype: None
+            require:
+              - all denied
 ```
 The `users_apache_htauth_users` array can be used to set usernames and passwords, these are written to `~/.htpasswd/` in one file per `users_apache_server_name`, the optional `state` variables can be set to absent to remove users, for example:
 
@@ -237,7 +249,7 @@ If the `authtype` is set to `None` then `AuthUserFile` isn't set and then a `req
               - method GET POST
 ```
 
-It is also possible to set `redirect`, see [the Apache Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
+It is also possible to set `Redirect`, see [the Apache Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
 ```yml
         users_apache_locations:
           - location: old-site/
