@@ -251,61 +251,84 @@ An `Alias` can also be used in a `Location`:
             alias: /home/foo/sites/www/staticfiles
 ```
 
-#### Reverse Proxy in a Location block
+### Reverse Proxy
 
-The `Location` blocks can also be used for reverse proxies, for example for a [Nextcloud notify_push reverse proxy](https://github.com/nextcloud/notify_push#apache) like this:
-
-```apache
-ProxyPass /push/ws ws://127.0.0.1:7867/ws
-ProxyPass /push/ http://127.0.0.1:7867/
-ProxyPassReverse /push/ http://127.0.0.1:7867/
-```
-
-You can specify:
-
+Configure a reverse proxy, for example for a [Nextcloud notify_push
+server](https://github.com/nextcloud/notify_push#apache) like this you can
+specify:
 
 ```yml
-        users_apache_locations:
-          - location: /push/ws
-            proxypass: ws://127.0.0.1:7867/ws
-          - location: /push/
-            proxypass: http://127.0.0.1:7867/
-            proxypassreverse: http://127.0.0.1:7867/
+        users_apache_proxy_pass:
+          - path: /push/ws
+            url: ws://127.0.0.1:7867/ws
+          - path: /push/
+            url: http://127.0.0.1:7867/
+            reverse: true
 ```
 
 And this will generate:
 
 ```apache
-  <Location "/push/ws" >
-    ProxyPass "ws://127.0.0.1:7867/ws"
-  </Location>
-  <Location "/push/" >
-    ProxyPass "http://127.0.0.1:7867/"
-    ProxyPassReverse "http://127.0.0.1:7867/"
-  </Location>
+  ProxyPass "/push/ws" "ws://127.0.0.1:7867/ws"
+  ProxyPass "/push/" "http://127.0.0.1:7867/"
+  ProxyPassReverse "/push/" "http://127.0.0.1:7867/"
 ```
 
-Or if you want to proxy everything apart from some files in a `/media` and a `/static` directory this example:
+### Directories
 
-```apache
-ProxyPass /static !
-ProxyPass /media !
-ProxyPass / http://127.0.0.1:8000/
-ProxyPassReverse / http://127.0.0.1:8000/
-```
-
-You can specify:
+If `users_apache_directories` are specified at the `VirtualHost` level then the
+default `Directory` section of the [Apache
+template](https://git.coop/webarch/users/-/blob/master/templates/apache.conf.j2)
+will be skipped, this is handy when some directories are needed for static
+content and `Alias` and also a proxy, for example:
 
 ```yml
-        users_apache_locations:
-          - location: /static
-            proxypass: "!"
-          - location: /media
-            proxypass: "!"
-          - location: /
-            proxypass: http://127.0.0.1:8000/
-            proxypassreverse: http://127.0.0.1:8000/
-```            
+    users_apache_virtual_hosts:
+      api:
+        users_apache_type: static
+        users_apache_server_name: "api.{{ inventory_hostname }}"
+        users_apache_alias:
+          - url: /static
+            path: /home/api/sites/api/staticfiles
+          - url: /media
+            path: /home/api/sites/api/media
+        users_apache_directories:
+          - path: /home/api/sites/api/staticfiles
+            options:
+              - Indexes
+          - path: /home/api/sites/api/media
+            options:
+              - Indexes
+        users_apache_proxy_pass:
+          - path: /static
+            url: "!"
+          - path: /media
+            url: "!"
+          - path: /
+            url: http://127.0.0.1:8000/
+            reverse: true
+```
+
+And this will generate:
+
+```apache
+  Alias "/static" "/home/api/sites/api/staticfiles"
+  Alias "/media" "/home/api/sites/api/media"
+  <Directory "/home/api/sites/api/staticfiles">
+    Options Indexes
+    AllowOverride None
+    Require all granted
+  </Directory>
+  <Directory "/home/api/sites/api/media">
+    Options Indexes
+    AllowOverride None
+    Require all granted
+  </Directory>
+  ProxyPass "/static" "!"
+  ProxyPass "/media" "!"
+  ProxyPass "/" "http://127.0.0.1:8000/"
+  ProxyPassReverse "/" "http://127.0.0.1:8000/"
+```
 
 ### Expires
 
