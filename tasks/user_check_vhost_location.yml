@@ -22,7 +22,7 @@
         - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
           assert:
             that:
-              - req is regex("(?i)[not]?all granted|[not]?all denied|[not]?env .*|[not]?method .*|[not]?expr .*|[not]?user .*|[not]?group .*|[not]?valid-user|[not]?ip .*")
+              - req is regex("(?i)[not]?all granted|[not]?all denied|[not]?env .*|[not]?method .*|[not]?expr .*|[not]?user .*|[not]?group .*|[not]?valid-user|[not]?ip .*|local")
           loop: "{{ loc.require }}"
           loop_control:
             loop_var: req
