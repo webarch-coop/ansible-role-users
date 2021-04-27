@@ -226,6 +226,7 @@
               debug:
                 msg: "Users in the phpfpm and chroot groups: {{ users_in_phpfpm_and_chroot_group }}"
                 verbosity: 1
+              when: users_in_phpfpm_and_chroot_group is defined
 
             - name: Include the munin-node phpfpm-multi tasks
               include_role:
