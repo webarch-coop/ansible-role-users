@@ -6,7 +6,7 @@
     tasks_from: letsencrypt
   vars:
     common_name: "{{ vhost.value.users_apache_server_name }}"
-    subject_alt_names: "{{ vhost.value.users_apache_server_aliases }}"
+    subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) }}"
     reloadcmd: "service apache2 reload"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
