@@ -180,6 +180,32 @@
 
       when: vhost.value.users_apache_index is defined
 
+    - name: "Check that AuthType is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      assert:
+        that:
+          - vhost.value.users_apache_auth_type | type_debug == "AnsibleUnicode"
+          - vhost.value.users_apache_auth_type is regex("None|Basic|Digest|Form")
+      when: vhost.value.users_apache_auth_type is defined
+
+    - name: "Check that Require is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
+
+        - name: "Check that users_apache_require is a list for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - vhost.value.users_apache_require | type_debug == "list"
+
+#        - name: "Check that that values for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
+#          assert:
+#            that:
+#              - req is regex("^all granted|all denied|env .*|method 
+#          loop: "{{ vhost.value.users_apache_require }}"
+#          loop_control:
+#            loop_var: req
+#            label: "{{ req }}"
+
+      when: ( vhost.value.users_apache_require is defined ) and ( vhost.value.users_apache_require != [] )
+
     - name: "The users_daily_scripts array should be defined at at user level for {{ user.key }} not at a VirtualHost level"
       assert:
         that:
