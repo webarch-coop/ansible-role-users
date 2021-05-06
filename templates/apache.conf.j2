@@ -245,19 +245,19 @@
       </IfModule>
     </IfModule>
     {%- endif %}
-    {%- if users_apache_auth_name is defined %}
-    AuthName {{ users_apache_auth_name }}
+    {%- if vhost_config.users_apache_auth_name is defined %}
+    AuthName {{ vhost_config.users_apache_auth_name }}
     {%- endif %}
-    {%- if users_apache_auth_type is defined %}
-    AuthType {{ users_apache_auth_type }}
-      {% if users_apache_auth_type == "Basic" %}
+    {%- if vhost_config.users_apache_auth_type is defined %}
+    AuthType {{ vhost_config.users_apache_auth_type }}
+      {% if vhost_config.users_apache_auth_type == "Basic" %}
     AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"  
       {%- endif %}
     {%- else %}
     AuthType None
     {%- endif %}
-    {%- if users_apache_require is defined and users_apache_require != [] %}
-      {%- for req in users_apache_require_any %}
+    {%- if vhost_config.users_apache_require is defined and vhost_config.users_apache_require != [] %}
+      {%- for req in vhost_config.users_apache_require_any %}
     Require {{ req }}
       {%- endfor %}
     {%- else %}
