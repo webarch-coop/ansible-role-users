@@ -195,14 +195,15 @@
             that:
               - vhost.value.users_apache_require | type_debug == "list"
 
-#        - name: "Check that that values for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
-#          assert:
-#            that:
-#              - req is regex("^all granted|all denied|env .*|method
-#          loop: "{{ vhost.value.users_apache_require }}"
-#          loop_control:
-#            loop_var: req
-#            label: "{{ req }}"
+        - name: "Check that that values other than method for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - req is regex("^all granted|^all denied|^env .*|^method [A-Z ]{3,51}|^expr .*|^user .*|^group .*|^valid-user|^ip .*|^forward-dns .*")
+          when: req is not regex("method .*")
+          loop: "{{ vhost.value.users_apache_require }}"
+          loop_control:
+            loop_var: req
+            label: "{{ req }}"
 
       when: ( vhost.value.users_apache_require is defined ) and ( vhost.value.users_apache_require != [] )
 
