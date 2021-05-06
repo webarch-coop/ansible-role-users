@@ -180,6 +180,9 @@
 
       when: vhost.value.users_apache_index is defined
 
+    - debug:
+        msg: "{{ vhost.value.users_apache_auth_type | type_debug }}"
+
     - name: "Check that AuthType is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       assert:
         that:
