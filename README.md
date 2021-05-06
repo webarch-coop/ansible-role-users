@@ -218,7 +218,7 @@ Basic authentication can be set on the `DocumentRoot` `Directory`:
 
 ### Location
 
-The `users_apache_locations` array can be used to apply HTTP Authentication to files and directories, for example:
+The `users_apache_locations` array can be used to apply HTTP Authentication to URL paths, for example:
 
 ```yml
         users_apache_locations:
