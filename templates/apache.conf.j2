@@ -257,7 +257,7 @@
     AuthType None
     {%- endif %}
     {%- if vhost_config.users_apache_require is defined and vhost_config.users_apache_require != [] %}
-      {%- for req in vhost_config.users_apache_require_any %}
+      {%- for req in vhost_config.users_apache_require %}
     Require {{ req }}
       {%- endfor %}
     {%- else %}
