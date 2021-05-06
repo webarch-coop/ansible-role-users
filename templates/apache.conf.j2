@@ -246,22 +246,22 @@
     </IfModule>
     {%- endif %}
     {%- if vhost_config.users_apache_auth_name is defined %}
-    AuthName {{ vhost_config.users_apache_auth_name }}
+    AuthName "{{ vhost_config.users_apache_auth_name }}"
     {%- endif %}
     {%- if vhost_config.users_apache_auth_type is defined %}
-    AuthType {{ vhost_config.users_apache_auth_type }}
+    AuthType "{{ vhost_config.users_apache_auth_type }}"
       {% if vhost_config.users_apache_auth_type == "Basic" %}
     AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"  
       {%- endif %}
     {%- else %}
-    AuthType None
+    AuthType "None"
     {%- endif %}
     {%- if vhost_config.users_apache_require is defined and vhost_config.users_apache_require != [] %}
       {%- for req in vhost_config.users_apache_require %}
-    Require {{ req }}
+    Require "{{ req }}"
       {%- endfor %}
     {%- else %}
-    Require all granted
+    Require "all granted"
     {%- endif %}
     {%- if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
