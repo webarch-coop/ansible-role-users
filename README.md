@@ -207,9 +207,9 @@ AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerM
 
 The arrays, `users_apache_options`, `users_apache_index` and `users_apache_override` can also be set by `VirtualHost` and if they are these overrule the other settings, see the [Apache template for the details](templates/apache.conf.j2).
 
-Basic authentication:
+Basic authentication can be set on the `DocumentRoot` `Directory`:
 
-```apache
+```yml
         users_apache_auth_name: Private
         users_apache_auth_type: Basic
         users_apache_require:
