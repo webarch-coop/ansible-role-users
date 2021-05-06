@@ -180,15 +180,10 @@
 
       when: vhost.value.users_apache_index is defined
 
-    - name: "Debug AuthType"
-      debug:
-        msg: "{{ vhost.value.users_apache_auth_type | type_debug }}"
-      when: vhost.value.users_apache_auth_type is defined
-
     - name: "Check that AuthType is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       assert:
         that:
-          - vhost.value.users_apache_auth_type | type_debug == "str"
+          - vhost.value.users_apache_auth_type | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
           - vhost.value.users_apache_auth_type is regex("None|Basic|Digest|Form")
       when: vhost.value.users_apache_auth_type is defined
 
