@@ -258,10 +258,10 @@
     {%- endif %}
     {%- if vhost_config.users_apache_require is defined and vhost_config.users_apache_require != [] %}
       {%- for req in vhost_config.users_apache_require %}
-    Require "{{ req }}"
+    Require {{ req }}
       {%- endfor %}
     {%- else %}
-    Require "all granted"
+    Require all granted
     {%- endif %}
     {%- if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
