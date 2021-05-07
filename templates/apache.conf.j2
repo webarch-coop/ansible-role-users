@@ -66,12 +66,12 @@
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
   <IfModule headers_module>
-    Header always set Permissions-Policy "interest-cohort=()"
   {%- if vhost_config.users_apache_sts is defined %}
     Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
-  {% else %}
+  {%- else %}
     Header always set Strict-Transport-Security "max-age=31536000"
   {%- endif %}
+    Header always set Permissions-Policy "interest-cohort=()"
   </IfModule>
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
