@@ -207,14 +207,18 @@ AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerM
 
 The arrays, `users_apache_options`, `users_apache_index` and `users_apache_override` can also be set by `VirtualHost` and if they are these overrule the other settings, see the [Apache template for the details](templates/apache.conf.j2).
 
-Basic authentication can be set on the `DocumentRoot` `Directory`:
+Basic authentication can be set on the `DocumentRoot` directory, for example for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 
 ```yml
         users_apache_auth_name: Private
         users_apache_auth_type: Basic
         users_apache_require:
           - valid-user
+          - ip "{{ ansible_default_ipv4.address }}"
+          - ip 127.0.0.1
 ```
+
+The same `users_apache_htauth_users` array is used for the usernaes and passwords as documented below.
 
 ### Location
 
