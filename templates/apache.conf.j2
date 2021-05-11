@@ -289,7 +289,7 @@
   {%- if vhost_config.users_apache_proxy_pass is defined %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
   ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
-      {%- if proxy.rewrite_conditions is defined or proxy.rewrite_rules is defined %}
+      {%- if proxy.rewrite_rules is defined and proxy.rewrite_rules != [] %}
   RewriteEngine on
       {%- endif %}
       {%- if proxy.rewrite_conditions is defined %}

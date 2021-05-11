@@ -299,6 +299,33 @@ And this will generate:
   ProxyPassReverse "/push/" "http://127.0.0.1:7867/"
 ```
 
+For a [reverse
+proxy](https://docs.rocket.chat/installing-and-updating/manual-installation/configuring-ssl-reverse-proxy#running-behind-an-apache-ssl-reverse-proxy)
+to a [Rocket.Chat server installed using snaps](https://docs.rocket.chat/installing-and-updating/snaps):
+
+```yml
+        users_apache_proxy_pass:
+          - path: /
+            url: http://127.0.0.1:3000/
+            rewrite_conditions:
+              - '%{HTTP:Upgrade} websocket [NC]'
+              - '%{HTTP:Connection} upgrade [NC]'
+            rewrite_rules:
+              - '^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]'
+            reverse: true
+```
+
+And this will generate:
+
+```apache
+  ProxyPass "/" "http://127.0.0.1:3000/"
+  RewriteEngine on
+  RewriteCond %{HTTP:Upgrade} websocket [NC]
+  RewriteCond %{HTTP:Connection} upgrade [NC]
+  RewriteRule ^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]
+  ProxyPassReverse "/" "http://127.0.0.1:3000/"
+```
+
 ### Directories
 
 If `users_apache_directories` are specified at the `VirtualHost` level then the
