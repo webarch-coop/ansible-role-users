@@ -289,6 +289,19 @@
   {%- if vhost_config.users_apache_proxy_pass is defined %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
   ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
+      {%- if proxy.rewrite_conditions is defined or proxy.rewrite_rules is defined %}
+  RewriteEngine on
+      {%- endif %}
+      {%- if proxy.rewrite_conditions is defined %}
+        {% for cond in proxy.rewrite_conditions %}
+  RewriteCond {{ cond }}
+        {%- endfor %}
+      {%- endif %}
+      {%- if proxy.rewrite_rules is defined %}
+        {% for rule in proxy.rewrite_rules %}
+  RewriteRule {{ rule }}
+        {%- endfor %}
+      {%- endif %}
       {%- if proxy.reverse is defined and proxy.reverse %}
   ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
       {%- endif %}
