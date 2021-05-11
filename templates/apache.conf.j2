@@ -293,12 +293,12 @@
   RewriteEngine on
       {%- endif %}
       {%- if proxy.rewrite_conditions is defined %}
-        {% for cond in proxy.rewrite_conditions %}
+        {%- for cond in proxy.rewrite_conditions %}
   RewriteCond {{ cond }}
         {%- endfor %}
       {%- endif %}
       {%- if proxy.rewrite_rules is defined %}
-        {% for rule in proxy.rewrite_rules %}
+        {%- for rule in proxy.rewrite_rules %}
   RewriteRule {{ rule }}
         {%- endfor %}
       {%- endif %}
