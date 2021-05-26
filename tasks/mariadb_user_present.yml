@@ -114,7 +114,7 @@
         update_password: always
         login_user: root
         login_unix_socket: /var/run/mysqld/mysqld.sock
-      no_log: true
+      no_log: "{% if ansible_verbosity != 0 %}false{% else %}true{% endif %}"
 
     - name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
       stat:
