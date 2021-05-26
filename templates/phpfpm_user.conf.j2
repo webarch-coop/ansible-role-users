@@ -58,6 +58,11 @@ php_admin_value[open_basedir] = "{{ user.value.users_home | default(users_basedi
 ; php_admin_value[open_basedir] =
 {% endif %}
 
+{% if user.value.users_phpfpm_mysqli_allow_local_infile %}
+php_admin_value[mysqli.allow_local_infile] = 1
+php_admin_value[mysqli.local_infile_directory] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
+{% endif %}
+
 php_admin_value[session.save_path] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[upload_tmp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[sys_temp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
