@@ -243,7 +243,7 @@
         - name: "Check that the MariaDB database privileges are valid for {{ user.key }}"
           assert:
             that:
-              - priv is regex("^ALL|ALTER[ ]{0,1}ROUTINE|ALTER|CREATE[ ]{0,1}VIEW|CREATE[ ]{0,1}ROUTINE|CREATE[ ]{0,1}TEMPORARY[ ]{0,1}TABLES|CREATE[ ]{0,1}VIEW|CREATE|DELETE[ ]{0,1}HISTORY|DELETE|DROP|EXECUTE|EVENT|FILE|GRANT[ ]{0,1}OPTION|INDEX|INSERT|LOCK[ ]{0,1}TABLES|REFERENCES|SELECT|SHOW[ ]{0,1}VIEW|TRIGGER|UPDATE$")
+              - priv is regex("^ALL|ALTER[ ]{0,1}ROUTINE|ALTER|CREATE[ ]{0,1}VIEW|CREATE[ ]{0,1}ROUTINE|CREATE[ ]{0,1}TEMPORARY[ ]{0,1}TABLES|CREATE[ ]{0,1}VIEW|CREATE|DELETE[ ]{0,1}HISTORY|DELETE|DROP|EXECUTE|EVENT|GRANT[ ]{0,1}OPTION|INDEX|INSERT|LOCK[ ]{0,1}TABLES|REFERENCES|SELECT|SHOW[ ]{0,1}VIEW|TRIGGER|UPDATE$")
             fail_msg: "Privilege, {{ priv }} is not valid"
             quiet: true
           loop: "{{ user.value.users_mariadb_database_privileges }}"
