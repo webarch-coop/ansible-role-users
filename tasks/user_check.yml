@@ -374,6 +374,12 @@
 
       when: ( user.value.users_phpfpm_pm is defined ) and ( user.value.users_phpfpm_pm == "dynamic" )
 
+    - name: "Check that users_phpfpm_mysqli_allow_local_infile is set to true or false if defined"
+      assert:
+        that:
+          - ( user.value.users_phpfpm_mysqli_allow_local_infile ) or ( not user.value.users_phpfpm_mysqli_allow_local_infile )
+      when: user.value.users_phpfpm_mysqli_allow_local_infile is defined
+
     - name: "Check that the users_daily_scripts array for {{ user.key }} is a non-empty list if defined"
       assert:
         that:
