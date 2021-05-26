@@ -157,7 +157,7 @@
       {%- if dir.allow_override is defined %}
     AllowOverride{% for override in dir.allow_override %} {{ override }}{% endfor %}
       {%- else %}
-    AllowOverride None
+    AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
       {%- endif %}
       {%- if dir.require is defined %}
         {%- for req in dir.require %}
