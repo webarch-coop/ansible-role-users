@@ -33,6 +33,7 @@
       # - "email: {{ user.value.users_email }}"
     verbosity: 1
 
+# TODO Check that the user doesn't already exist in getent_passwd
 - name: "User account for {{ user.key }} present"
   user:
     name: "{{ user.key }}"
