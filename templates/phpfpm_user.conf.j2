@@ -58,7 +58,7 @@ php_admin_value[open_basedir] = "{{ user.value.users_home | default(users_basedi
 ; php_admin_value[open_basedir] =
 {% endif %}
 
-{% if user.value.users_phpfpm_mysqli_allow_local_infile %}
+{% if user.value.users_phpfpm_mysqli_allow_local_infile is defined and user.value.users_phpfpm_mysqli_allow_local_infile %}
 ; Matomo needs mysqli.allow_local_infile enabled
 php_admin_value[mysqli.allow_local_infile] = 1
 php_admin_value[mysqli.local_infile_directory] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
