@@ -148,7 +148,7 @@
   {%- endif %}
   {%- if vhost_config.users_apache_directories is defined %}
     {%- if vhost_config.users_apache_directories == [] %}
-    # No Directories are defined
+  # No Directories are defined
     {%- else %}
       {%- for dir in vhost_config.users_apache_directories %}
   <Directory "{{ dir.path }}">
