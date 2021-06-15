@@ -171,7 +171,7 @@
         {%- endif %}
   </Directory>
       {%- endfor %}
-    {%- endif %
+    {%- endif %}
   {%- else %}
     {%- if user.value.users_apache_vhost_docroot is defined %}
   DocumentRoot "{{ user.value.users_apache_vhost_docroot }}" 
