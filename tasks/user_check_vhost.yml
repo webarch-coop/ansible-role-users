@@ -46,7 +46,7 @@
     - name: "Check that users_apache_directories for {{ vhost.key }} VirtualHost for {{ user.key }} is a list if it is defined"
       assert:
         that:
-          - vhost_config.users_apache_directories | type_debug == "list" 
+          - vhost_config.users_apache_directories | type_debug == "list"
       when: vhost_config.users_apache_directories is defined
 
     - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
