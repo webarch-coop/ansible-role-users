@@ -51,11 +51,11 @@
         name: php
         tasks_from: pool_check.yml
       vars:
-        phpfpm_pm: "{{ user.value.users_phpfpm_pm | default('dynamic') }}"
-        phpfpm_pm_max_children: "{{ user.value.users_phpfpm_max_children | default('2') | int }}"
-        phpfpm_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') | int }}"
-        phpfpm_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') | int }}"
-        phpfpm_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') | int }}"
+        php_pm: "{{ user.value.users_phpfpm_pm | default('dynamic') }}"
+        php_pm_max_children: "{{ user.value.users_phpfpm_max_children | default('2') | int }}"
+        php_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') | int }}"
+        php_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') | int }}"
+        php_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') | int }}"
 
     - name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf exists"
       stat:
