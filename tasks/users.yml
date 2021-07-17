@@ -8,10 +8,7 @@
           - bc
           - bsd-mailx
           - mutt
-          - python-dns
-          - python-dnspython
           - python3-dnspython
-          - python-passlib
           - python3-passlib
           - pwgen
           - slay
@@ -19,6 +16,15 @@
           - vim
           - whois
         state: present
+
+    - name: Debian Stretch and Jessie Python 2 packages present
+      apt:
+        pkg:
+          - python-dns
+          - python-dnspython
+          - python-passlib
+        state: present
+      when: ansible_distribution_release is regex('jessie|stretch')
 
     - name: Check that usernames are between 2 and 14 ascii letters, numbers and dashes
       assert:

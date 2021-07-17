@@ -10,7 +10,6 @@
           - ( vhost.value.kimai_dbname is defined ) and ( vhost.value.kimai_dbname in user.value.users_mariadb_databases )
           - vhost.value.kimai_version is defined
           - ( vhost.value.kimai_admin_user is defined ) and ( vhost.value.kimai_admin_user is regex("^[a-z0-9_-]*$") )
-          - vhost.value.users_apache_sts is defined
 
     - name: "Check that {{ user.key }} is in the phpfpm group if it is present"
       assert:

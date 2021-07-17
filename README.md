@@ -382,6 +382,8 @@ And this will generate:
   ProxyPassReverse "/" "http://127.0.0.1:8000/"
 ```
 
+If no Directories are required use `users_apache_directories: []`.
+
 ### Expires
 
 The optional `users_apache_expires` variable can be used to select the [medium](https://git.coop/webarch/apache/blob/master/templates/expires-medium.conf.j2) or [strict](https://git.coop/webarch/apache/blob/master/templates/expires-strict.conf.j2) configuration to `Include` into the `VirtualHost`.

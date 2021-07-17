@@ -147,27 +147,31 @@
     {%- endfor %}
   {%- endif %}
   {%- if vhost_config.users_apache_directories is defined %}
-    {%- for dir in vhost_config.users_apache_directories %}
+    {%- if vhost_config.users_apache_directories == [] %}
+  # No Directories are defined
+    {%- else %}
+      {%- for dir in vhost_config.users_apache_directories %}
   <Directory "{{ dir.path }}">
-      {%- if dir.options is defined %}
+        {%- if dir.options is defined %}
     Options{% for option in dir.options %} {{ option }}{% endfor %}
-      {%- else %}
+        {%- else %}
     Options FollowSymlinks
-      {%- endif %}
-      {%- if dir.allow_override is defined %}
+        {%- endif %}
+        {%- if dir.allow_override is defined %}
     AllowOverride{% for override in dir.allow_override %} {{ override }}{% endfor %}
-      {%- else %}
+        {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-      {%- endif %}
-      {%- if dir.require is defined %}
-        {%- for req in dir.require %}
+        {%- endif %}
+        {%- if dir.require is defined %}
+          {%- for req in dir.require %}
     Require {{ req }}
-        {%- endfor %}
-      {%- else %}
+          {%- endfor %}
+        {%- else %}
     Require all granted
-      {%- endif %}
+        {%- endif %}
   </Directory>
-    {%- endfor %}
+      {%- endfor %}
+    {%- endif %}
   {%- else %}
     {%- if user.value.users_apache_vhost_docroot is defined %}
   DocumentRoot "{{ user.value.users_apache_vhost_docroot }}" 
