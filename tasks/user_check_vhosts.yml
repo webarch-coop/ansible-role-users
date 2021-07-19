@@ -43,6 +43,10 @@
   tags:
     - users
 
+- name: Debug users_cert
+  debug:
+    var: users_cert
+
 - fail:
     msg: debug
 ...
