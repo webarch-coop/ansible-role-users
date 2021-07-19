@@ -66,12 +66,12 @@
   {%- endif %}
   {%- if users_cert is defined %}
   SSLEngine on
-    {%- if users_cert == "user" and if apache_mods_enabled is defined and if "md" not in apache_mods_enabled %}
+    {%- if users_cert == "user" and apache_mods_enabled is defined and "md" not in apache_mods_enabled %}
   SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
     {%- endif %}
-    {%- if users_cert == "vhost" and if apache_mods_enabled is defined and if "md" not in apache_mods_enabled %}
+    {%- if users_cert == "vhost" and apache_mods_enabled is defined and "md" not in apache_mods_enabled %}
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
