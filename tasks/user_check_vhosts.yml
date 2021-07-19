@@ -42,7 +42,4 @@
   when: users_cert == "user"
   tags:
     - users
-
-- fail:
-    msg: debug
 ...
