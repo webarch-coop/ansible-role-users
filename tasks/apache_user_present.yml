@@ -12,7 +12,9 @@
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( users_cert is defined ) and ( users_cert == "vhost" ) and ( not ansible_check_mode )
+  when:
+    - ( users_cert is defined ) and ( users_cert == "vhost" ) and ( not ansible_check_mode )
+    - ( apache_mods_enabled is defined ) and ( "md" not in apache_mods_enabled )
   tags:
     - users
 
@@ -49,7 +51,9 @@
         tasks_from: letsencrypt
       when: not ansible_check_mode
 
-  when: ( users_cert is defined ) and ( users_cert == 'user' )
+  when:
+    - ( users_cert is defined ) and ( users_cert == 'user' )
+    - ( apache_mods_enabled is defined ) and ( "md" not in apache_mods_enabled )
   tags:
     - users
 
@@ -100,7 +104,9 @@
 
 - name: "Check that the SSL certs for {{ user.key }} are present"
   include_tasks: apache_cert_check.yml
-  when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
+  when:
+    - ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
+    - ( apache_mods_enabled is defined ) and ( "md" not in apache_mods_enabled )
   tags:
     - users
 
