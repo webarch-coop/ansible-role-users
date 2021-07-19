@@ -7,7 +7,7 @@
   <MDomain {{ user.key }}.{{ inventory_hostname }}>
     MDStapling on
     MDRequireHttps permanent
-    MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
+    MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
   </MDomain>
 </IfModule>
@@ -16,6 +16,21 @@
 {%- endif %}
 
 {%- for vhost,vhost_config in user.value.users_apache_virtual_hosts.items() %}
+
+{%- if apache_mods_enabled is defined %}
+  {%- if "md" in apache_mods_enabled %}
+    {%- if users_cert == "vhost" %}
+<IfModule md_module>
+  <MDomain {{ vhost_config.users_apache_server_name }}
+    MDStapling on
+    MDRequireHttps permanent
+    MDCertificateFile {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.fullchain.pem
+    MDCertificateKeyFile {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
+  </MDomain>
+</IfModule>
+    {%- endif %}
+  {%- endif %}
+{%- endif %}
 
 # {{ vhost_config.users_apache_server_name }}
 {%- if user.value.users_apache_vhost_docroot is defined %}
