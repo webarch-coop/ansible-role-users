@@ -37,7 +37,7 @@
 
     - name: "Check that {{ user.key }}.{{ inventory_hostname }} is a ServerName or ServerAlias for {{ user.key }}"
       assert:
-        that: users_apache_mdomain in users_apache_server_names 
+        that: users_apache_mdomain in users_apache_server_names
 
   when: users_cert == "users"
   tags:
