@@ -13,12 +13,33 @@
   tags:
     - users
 
+- name: Set users_apache_server_names variable to an empty array
+  set_fact:
+    users_apache_server_names: []
+  tags:
+    - users
+
 - name: "Loop thought the VirtualServer's for {{ user.key }}"
   include_tasks: user_check_vhost.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
     label: "{{ vhost }}"
+  tags:
+    - users
+
+- name: Check that a ServerName or ServerAlias contains the name that will be used for the cert
+  block:
+
+    - name: Set a fact for the name that will be used for the cert
+      set_fact:
+        users_apache_mdomain: "{{ user.key }}.{{ inventory_hostname }}"
+
+    - name: "Check that {{ user.key }}.{{ inventory_hostname }} is a ServerName or ServerAlias for {{ user.key }}"
+      assert:
+        that: users_apache_mdomain in users_apache_server_names 
+
+  when: users_cert == "users"
   tags:
     - users
 ...
