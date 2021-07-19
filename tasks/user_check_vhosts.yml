@@ -39,13 +39,9 @@
       assert:
         that: users_apache_mdomain in users_apache_server_names
 
-  when: users_cert == "users"
+  when: users_cert == "user"
   tags:
     - users
-
-- name: Debug users_cert
-  debug:
-    var: users_cert
 
 - fail:
     msg: debug
