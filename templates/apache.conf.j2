@@ -4,7 +4,7 @@
   {%- if "md" in apache_mods_enabled %}
     {%- if users_cert == "user" %}
 <IfModule md_module>
-  <MDomain "{{ user.key }}.{{ inventory_hostname }}">
+  <MDomain {{ user.key }}.{{ inventory_hostname }}>
     MDStapling on
     MDRequireHttps permanent
     MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
