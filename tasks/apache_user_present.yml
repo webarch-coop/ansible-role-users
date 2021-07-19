@@ -114,7 +114,7 @@
   file:
     path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
     state: absent
-  when: not users_apache_certs_present
+  when: ( users_apache_certs_present is defined ) and ( not users_apache_certs_present )
   tags:
     - users
 
