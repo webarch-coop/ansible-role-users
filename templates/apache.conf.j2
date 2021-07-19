@@ -1,5 +1,20 @@
 # {{ ansible_managed }} 
 
+{%- if apache_mods_enabled is defined %}
+  {%- if md in apache_mods_enabled %}
+    {%- if users_cert == "user" %}
+<IfModule md_module>
+  <MDomain "{{ user.key }}.{{ inventory_hostname }}">
+    MDStapling on
+    MDRequireHttps permanent
+    MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
+    MDCertificateKeyFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
+  </MDomain>
+</IfModule>
+    {%- endif %}
+  {%- endif %}
+{%- endif %}
+
 {%- for vhost,vhost_config in user.value.users_apache_virtual_hosts.items() %}
 
 # {{ vhost_config.users_apache_server_name }}
@@ -51,12 +66,12 @@
   {%- endif %}
   {%- if users_cert is defined %}
   SSLEngine on
-    {%- if users_cert == "user" %}
+    {%- if users_cert == "user" and if apache_mods_enabled is defined and if "md" not in apache_mods_enabled %}
   SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
     {%- endif %}
-    {%- if users_cert == "vhost" %}
+    {%- if users_cert == "vhost" and if apache_mods_enabled is defined and if "md" not in apache_mods_enabled %}
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
@@ -66,10 +81,12 @@
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
   <IfModule headers_module>
-  {%- if vhost_config.users_apache_sts is defined %}
+  {%- if "md" not in apache_mods_enabled %}
+    {%- if vhost_config.users_apache_sts is defined %}
     Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
-  {%- else %}
+    {%- else %}
     Header always set Strict-Transport-Security "max-age=31536000"
+    {%- endif %}
   {%- endif %}
     Header always set Permissions-Policy "interest-cohort=()"
   </IfModule>
