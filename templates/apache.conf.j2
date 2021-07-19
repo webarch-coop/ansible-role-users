@@ -1,7 +1,7 @@
 # {{ ansible_managed }} 
 
 {%- if apache_mods_enabled is defined %}
-  {%- if md in apache_mods_enabled %}
+  {%- if "md" in apache_mods_enabled %}
     {%- if users_cert == "user" %}
 <IfModule md_module>
   <MDomain "{{ user.key }}.{{ inventory_hostname }}">
