@@ -1,6 +1,6 @@
 ---
 # TODO
-# Check mod_md status, if it is good omit paths for old certs and skil
+# Check mod_md status, if it is good omit paths for old certs and skip
 # acme.sh include
 
 # One cert per VirtualHost
@@ -25,6 +25,13 @@
 # One cert per user
 - name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
   block:
+
+    - name: "Include Apache role to check mod_md status for {{ user.key }}"
+      include_role:
+        name: apache
+        tasks_from: md_status.yml
+      vars:
+        apache_mdomain: "{ user.key }}.{{ inventory_hostname }}"
 
     - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
       set_fact:

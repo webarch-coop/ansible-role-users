@@ -19,7 +19,7 @@
     - name: "Apache {{ user.key }} sites-enabled symlink present"
       command: "a2ensite {{ user.key }}"
       register: users_a2ensite
-      changed_when: '"already enabled" not in users_a2ensite.stdout'
+      changed_when: ( "already enabled" not in users_a2ensite.stdout )
 
     - name: "apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
       command: apache2ctl configtest
@@ -30,7 +30,7 @@
     - name: Apache restart
       service:
         name: apache2
-        state: restarted
+        state: graceful
       when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" in users_apache2ctl_configtest.stderr )
 
   rescue:

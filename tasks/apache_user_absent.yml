@@ -17,14 +17,14 @@
 
         - name: "apache2ctl configtest to check deletion of /etc/apache2/sites-enabled/{{ user.key }}.conf"
           command: apache2ctl configtest
-          changed_when: '"Syntax OK" not in users_apache2ctl_configtest.stderr'
+          changed_when: ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
           check_mode: false
           register: users_apache2ctl_configtest
 
         - name: Apache restart
           service:
             name: apache2
-            state: restarted
+            state: graceful
           when: ( users_apachectl_configtest is defined ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
 
       when: ( users_apache_site_enabled is defined ) and ( users_apache_site_enabled.stat.exists )
