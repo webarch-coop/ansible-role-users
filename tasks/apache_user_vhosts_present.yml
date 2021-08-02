@@ -24,7 +24,7 @@
     - name: "apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
       command: apache2ctl configtest
       check_mode: false
-      changed_when: false 
+      changed_when: false
       register: users_apache2ctl_configtest
 
     - name: Apache restart

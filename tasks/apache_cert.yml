@@ -35,6 +35,7 @@
             tasks_from: md_status.yml
           vars:
             apache_mdomain: "{ user.key }}.{{ inventory_hostname }}"
+          when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
 
         - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
           set_fact:
@@ -67,7 +68,6 @@
 
       when:
         - ( users_cert is defined ) and ( users_cert == 'user' )
-        - ( apache_mods_enabled is defined ) and ( "md" not in apache_mods_enabled )
 
   tags:
     - apache
