@@ -1,8 +1,4 @@
 ---
-# TODO
-# Check mod_md status, if it is good omit paths for old certs and skip
-# acme.sh include
-
 - name: Apache certificate tasks
   block:
 
@@ -29,42 +25,55 @@
     - name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
       block:
 
-        - name: "Include Apache role to check mod_md status for {{ user.key }}"
-          include_role:
-            name: apache
-            tasks_from: md_status.yml
-          vars:
-            apache_mdomain: "{{ user.key }}.{{ inventory_hostname }}"
-          when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
+        - name: "Query the status for {{ apache_mdomain }}"
+          uri:
+            url: "http://localhost/md-status/{{ user.key }}.{{ inventory_hostname }}"
+            return_content: true
+            status_code:
+              - 200
+              - 404
+          check_mode: false
+          register: users_mdomain_status
 
-        - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
-          set_fact:
-            common_name: "{{ user.key }}.{{ inventory_hostname }}"
-            subject_alt_names: []
-            reloadcmd: "service apache2 reload"
-          check_mode: true
-
-        - name: "Set fact for subjectAltNames for {{ user.key }}"
-          set_fact:
-            subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
-          check_mode: true
-          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-          loop_control:
-            loop_var: vhost
-            label: "{{ vhost.key }}"
-
-        - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
+        - name: "Debug the mdomain RSA status for {{ users_mdomain_status }}"
           debug:
-            msg:
-              - "subject_alt_names is set to: {{ subject_alt_names }}"
-              - "common_name is set to: {{ common_name }}"
-            verbosity: 1
+            var: users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status
+            verbosity: 2
+          when: users_mdomain_status.json.cert.rsa is defined
 
-        - name: "Let's Encrypt cert role included for {{ user.key }}"
-          include_role:
-            name: acmesh
-            tasks_from: letsencrypt
-          when: not ansible_check_mode
+        - name: Run acme.sh tasks when mod_md cert isn't available
+          block: 
+
+            - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
+              set_fact:
+                common_name: "{{ user.key }}.{{ inventory_hostname }}"
+                subject_alt_names: []
+                reloadcmd: "service apache2 reload"
+              check_mode: true
+    
+            - name: "Set fact for subjectAltNames for {{ user.key }}"
+              set_fact:
+                subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
+              check_mode: true
+              loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+              loop_control:
+                loop_var: vhost
+                label: "{{ vhost.key }}"
+    
+            - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
+              debug:
+                msg:
+                  - "subject_alt_names is set to: {{ subject_alt_names }}"
+                  - "common_name is set to: {{ common_name }}"
+                verbosity: 1
+    
+            - name: "Let's Encrypt cert role included for {{ user.key }}"
+              include_role:
+                name: acmesh
+                tasks_from: letsencrypt
+              when: not ansible_check_mode
+
+          when: ( users_mdomain_status.status == 404 ) or ( users_mdomain_status.json.cert.rsa != 0 )
 
       when:
         - ( users_cert is defined ) and ( users_cert == 'user' )

@@ -8,8 +8,10 @@
     MDStapling on
     MDRequireHttps permanent
     MDPrivateKeys secp256r1 rsa3072
+    {% if users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status != 0 %}
     MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
+    {% endif %}
   </MDomain>
 </IfModule>
     {%- endif %}
@@ -84,9 +86,11 @@
   {%- if users_cert is defined %}
   SSLEngine on
     {%- if users_cert == "user" %}
+      {%- if users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status != 0 %}
   SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
+      {%- endif %}
     {%- endif %}
     {%- if users_cert == "vhost" %}
   SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
