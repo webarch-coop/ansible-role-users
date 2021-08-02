@@ -73,7 +73,7 @@
                 tasks_from: letsencrypt
               when: not ansible_check_mode
 
-          when: ( users_mdomain_status.status == 404 ) or ( users_mdomain_status.json.cert.rsa != 0 )
+          when: ( users_mdomain_status.status == 404 ) or ( users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status != 0 )
 
       when:
         - ( users_cert is defined ) and ( users_cert == 'user' )
