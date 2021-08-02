@@ -1,4 +1,8 @@
 ---
+# TODO
+# Check mod_md status, if it is good omit paths for old certs and skil
+# acme.sh include
+
 # One cert per VirtualHost
 - name: "Let's Encrypt cert per vhost role included for {{ user.key }}"
   include_role:
