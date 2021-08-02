@@ -86,13 +86,15 @@
 
         - name: "PHP FPM pool.d configtest for {{ user.key }}"
           command: "php-fpm{{ users_phpfpm_version }} --test"
+          check_mode: false
+          changed_when: false
           register: users_phpfpm_pool_configtest
 
         - name: "PHP FPM restarted for changes for {{ user.key }}"
           service:
             name: "php{{ users_phpfpm_version }}-fpm"
             state: restarted
-          when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
+          when: ( "test is successful" in users_phpfpm_pool_configtest.stderr )
 
       rescue:
 
