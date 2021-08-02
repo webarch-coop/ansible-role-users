@@ -96,6 +96,7 @@
             state: restarted
           when:
             - ( users_phpfpm_pool_configtest is defined )
+            - ( users_phpfpm_pool_configtest.stderr is defined )
             - ( "test is successful" in users_phpfpm_pool_configtest.stderr )
 
       rescue:
