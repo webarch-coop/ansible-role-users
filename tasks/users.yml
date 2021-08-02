@@ -77,6 +77,10 @@
             - ( user.value.users_apache_virtual_hosts is defined )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
 
+        - name: Fail debug
+          fail:
+            msg: Debug
+
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "certs" )
         - ( users_apache is defined ) and ( users_apache )
