@@ -63,6 +63,24 @@
         users_update: []
       when: users_update is not defined
 
+    - name: Configure certs for users present
+      block:
+
+        - name: Include cert tasks
+          include_tasks: apache_cert.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
+            - ( user.value.users_apache_virtual_hosts is defined )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "certs" )
+        - ( users_apache is defined ) and ( users_apache )
+
     - name: Update Apache config for users present
       block:
 
