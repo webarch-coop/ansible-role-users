@@ -42,7 +42,7 @@
           when: users_mdomain_status.json.cert.rsa is defined
 
         - name: Run acme.sh tasks when mod_md cert isn't available
-          block: 
+          block:
 
             - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
               set_fact:
@@ -50,7 +50,7 @@
                 subject_alt_names: []
                 reloadcmd: "service apache2 reload"
               check_mode: true
-    
+
             - name: "Set fact for subjectAltNames for {{ user.key }}"
               set_fact:
                 subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
@@ -59,14 +59,14 @@
               loop_control:
                 loop_var: vhost
                 label: "{{ vhost.key }}"
-    
+
             - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
               debug:
                 msg:
                   - "subject_alt_names is set to: {{ subject_alt_names }}"
                   - "common_name is set to: {{ common_name }}"
                 verbosity: 1
-    
+
             - name: "Let's Encrypt cert role included for {{ user.key }}"
               include_role:
                 name: acmesh
