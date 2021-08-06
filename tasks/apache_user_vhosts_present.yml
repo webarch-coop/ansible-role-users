@@ -5,7 +5,11 @@
     - name: One cert per user
       block:
 
-        - name: "Query the status for {{ user.key }}.{{ inventory_hostname }}"
+        - name: "Set a fact for users_mdomain to equal {{ user.key }}.{{ inventory_hostname }}"
+          set_fact:
+            users_mdomain: "{{ user.key }}.{{ inventory_hostname }}"
+
+        - name: "Query the status for {{ user.key }}.{{ inventory_hostname }} using http://localhost/md-status/{{ user.key }}.{{ inventory_hostname }}"
           uri:
             url: "http://localhost/md-status/{{ user.key }}.{{ inventory_hostname }}"
             return_content: true
@@ -18,13 +22,17 @@
           debug:
             var: users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status
             verbosity: 2
-          when: users_mdomain_status.json.cert is defined
+          when:
+            - users_mdomain_status.json.cert is defined
+            - users_mdomain_status.json.name == users_mdomain
 
         - name: "Debug the mdomain EC status for {{ users_mdomain_status }}"
           debug:
             var: users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status
             verbosity: 2
-          when: users_mdomain_status.json.cert is defined
+          when:
+            - users_mdomain_status.json.cert is defined
+            - users_mdomain_status.json.name == users_mdomain
 
       when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
 
