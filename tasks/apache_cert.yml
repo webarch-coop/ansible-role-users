@@ -31,7 +31,6 @@
             return_content: true
             status_code:
               - 200
-              - 404
           check_mode: false
           register: users_mdomain_status
 
@@ -73,7 +72,7 @@
                 tasks_from: letsencrypt
               when: not ansible_check_mode
 
-          when: ( users_mdomain_status.status == 404 ) or ( users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status != 0 )
+          when: ( users_mdomain_status.json.cert is dbot defined )
 
       when:
         - ( users_cert is defined ) and ( users_cert == 'user' )
