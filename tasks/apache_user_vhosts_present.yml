@@ -54,7 +54,7 @@
         - name: Apache restart
           service:
             name: apache2
-            state: graceful
+            state: reloaded
           when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" in users_apache2ctl_configtest.stderr )
     
       rescue:
