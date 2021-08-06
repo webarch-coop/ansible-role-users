@@ -20,6 +20,12 @@
             verbosity: 2
           when: users_mdomain_status.json.cert is defined
 
+        - name: "Debug the mdomain EC status for {{ users_mdomain_status }}"
+          debug:
+            var: users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status
+            verbosity: 2
+          when: users_mdomain_status.json.cert is defined
+
       when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
 
     - name: "Apache {{ user.key }} sites-available file present"

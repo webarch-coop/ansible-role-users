@@ -7,8 +7,8 @@
   <MDomain {{ user.key }}.{{ inventory_hostname }}>
     MDStapling on
     MDRequireHttps permanent
-    MDPrivateKeys secp384r1 rsa3072
-    {% if users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status != 0 %}
+    MDPrivateKeys{% for key in users_md_private_keys %} {{ key }}{% endfor %}
+    {% if users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status != 0 %}
     MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
     {% endif %}
@@ -27,7 +27,7 @@
   <MDomain {{ vhost_config.users_apache_server_name }}
     MDStapling on
     MDRequireHttps permanent
-    MDPrivateKeys secp384r1 rsa3072
+    MDPrivateKeys{% for key in users_md_private_keys %} {{ key }}{% endfor %}
     MDCertificateFile {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   </MDomain>
@@ -86,7 +86,7 @@
   {%- if users_cert is defined %}
   SSLEngine on
     {%- if users_cert == "user" %}
-      {%- if users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status != 0 %}
+      {%- if users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status != 0 %}
   SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
