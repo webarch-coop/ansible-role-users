@@ -115,9 +115,9 @@
 
       when: users_apache_conf.changed
 
-      - name: Pause to allow Apache to sort itself out
-        pause:
-          seconds: 4
+    - name: Pause to allow Apache to sort itself out
+      pause:
+        seconds: 4
 
   tags:
     - users
