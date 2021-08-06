@@ -5,13 +5,12 @@
     - name: One cert per user
       block:
 
-        - name: "Query the status for {{ apache_mdomain }}"
+        - name: "Query the status for {{ user.key }}.{{ inventory_hostname }}"
           uri:
             url: "http://localhost/md-status/{{ user.key }}.{{ inventory_hostname }}"
             return_content: true
             status_code:
               - 200
-              - 404
           check_mode: false
           register: users_mdomain_status
     
