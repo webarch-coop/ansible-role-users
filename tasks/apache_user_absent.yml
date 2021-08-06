@@ -24,7 +24,7 @@
         - name: Apache restart
           service:
             name: apache2
-            state: reloaded
+            state: restart
           when: ( users_apachectl_configtest is defined ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
 
       when: ( users_apache_site_enabled is defined ) and ( users_apache_site_enabled.stat.exists )

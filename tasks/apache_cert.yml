@@ -10,7 +10,7 @@
       vars:
         common_name: "{{ vhost.value.users_apache_server_name }}"
         subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) }}"
-        reloadcmd: "service apache2 reload"
+        reloadcmd: "service apache2 restart"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -47,7 +47,7 @@
               set_fact:
                 common_name: "{{ user.key }}.{{ inventory_hostname }}"
                 subject_alt_names: []
-                reloadcmd: "service apache2 reload"
+                reloadcmd: "service apache2 restart"
               check_mode: true
 
             - name: "Set fact for subjectAltNames for {{ user.key }}"
