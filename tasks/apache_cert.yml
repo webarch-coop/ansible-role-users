@@ -72,7 +72,7 @@
                 tasks_from: letsencrypt
               when: not ansible_check_mode
 
-          when: ( users_mdomain_status.json.cert is dbot defined )
+          when: ( users_mdomain_status.json.cert is not defined )
 
       when:
         - ( users_cert is defined ) and ( users_cert == 'user' )
