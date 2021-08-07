@@ -119,7 +119,7 @@
         #     loop_var: file
         #     label: "{{ file }}"
         #   when: not users_apache_conf_check.stat.exists
-       
+
         # - name: "Apache {{ user.key }} sites-enabled symlink absent"
         #   command: "a2dissite {{ user.key }}"
         #   register: users_a2dissite
