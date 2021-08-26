@@ -43,6 +43,38 @@
 
       when: ( munin_servers is defined ) and ( munin_servers != [] )
 
+    - name: Get Icinga master servers IP addresses
+      block:
+
+        - name: Set users_hosts to an empty array
+          set_fact:
+            users_host_ipv4s: []
+
+        - name: Debug groups.icinga_master_nodes
+          debug:
+            var: groups.icinga_master_nodes
+            verbosity: 2
+
+        - name: Get Icinga servers IP addresses
+          include: dig.yml
+          vars:
+            users_host: "{{ host }}"
+          loop: "{{ groups.icinga_master_nodes }}"
+          loop_control:
+            loop_var: host
+
+        - name: Set a fact for the IPv$ addresses of the Icinga servers
+          set_fact:
+            icinga_servers_ipv4s: "{{ users_host_ipv4s }}"
+
+        - name: Debug icinga_servers_ipv4s
+          debug:
+            var: icinga_servers_ipv4s
+            verbosity: 2
+
+      when: ( icinga_master_nodes is defined ) and ( icinga_master_nodes != [] )
+
+
     - name: IPv4 iptables rules in place
       template:
         src: rules.v4.j2
