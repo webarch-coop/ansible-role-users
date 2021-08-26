@@ -17,9 +17,9 @@
 -A INPUT -p tcp -m tcp --dport {{ coturn_tls_listening_port }} -j ACCEPT
 -A INPUT -p udp -m udp --dport {{ coturn_tls_listening_port }} -j ACCEPT
 {% endif %}
-{% if munin_servers is defined %}{% for hosts in munin_servers %}{% for host in hosts %}
--A INPUT -m state --state NEW -m tcp -p tcp -s {{ lookup('dig', host) }} --dport 4949 -j ACCEPT
-{% endfor %}{% endfor %}{% endif %}
+{% if munin_servers is defined and munin_servers_ipv4s is defined %}{% for ipv4 in munin_servers_ipv4s %}
+-A INPUT -m state --state NEW -m tcp -p tcp -s {{ ipv4 }} --dport 4949 -j ACCEPT
+{% endfor %}{% endif %}
 {% if icinga_master_nodes is defined %}{% for hosts in icinga_master_nodes %}{% for host in hosts %}
 -A INPUT -m state --state NEW -m tcp -p tcp -s {{ lookup('dig', host) }} --dport 5665 -j ACCEPT
 {% endfor %}{% endfor %}{% endif %}
