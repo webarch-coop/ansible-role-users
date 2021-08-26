@@ -28,7 +28,7 @@
           include: dig.yml
           vars:
             users_host: "{{ host }}"
-          loop: "{{ groups.munin_servers.hosts }}"
+          loop: "{{ groups.munin_servers }}"
           loop_control:
             loop_var: host
 
