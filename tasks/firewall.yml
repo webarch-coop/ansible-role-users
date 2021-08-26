@@ -17,7 +17,7 @@
 
         - name: Set users_hosts to an empty array
           set_fact:
-            users_ipv4_hosts: []
+            users_host_ipv4s: []
 
         - name: Debug groups.munin_servers
           debug:
@@ -34,7 +34,7 @@
 
         - name: Set a fact for the IPv$ addresses of the Munin servers
           set_fact:
-            munin_servers_ipv4s: "{{ users_ipv4_hosts }}"
+            munin_servers_ipv4s: "{{ users_host_ipv4s }}"
 
         - name: Debug munin_servers_ipv4s
           debug:

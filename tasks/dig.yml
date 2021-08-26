@@ -1,4 +1,6 @@
 ---
+# Set "users_host_ipv4s" to an empty array before including these tasks
+# in order to get the IPv4 addresses for "host"
 - name: Lookup a IPv4 address on the server
   block:
 
@@ -8,7 +10,7 @@
 
     - name: Add users_host_ipv4 addresses to the users_ipv4_hosts array
       set_fact:
-        users_ipv4_hosts: "{{ users_host_ipv4s }} + [ '{{ users_ipv4.trim }}' ]"
+        users_host_ipv4s: "{{ users_host_ipv4s }} + [ '{{ users_ipv4.trim }}' ]"
       loop: "{{ users_host_ipv4.stdout_lines }}"
       loop_control:
         loop_var: users_ipv4
