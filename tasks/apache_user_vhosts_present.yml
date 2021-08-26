@@ -24,6 +24,7 @@
             verbosity: 2
           when:
             - users_mdomain_status.json.cert is defined
+            - users_mdomain_status.json.name is defined
             - users_mdomain_status.json.name == users_mdomain
 
         - name: "Debug the mdomain EC status for {{ users_mdomain_status }}"
@@ -32,6 +33,7 @@
             verbosity: 2
           when:
             - users_mdomain_status.json.cert is defined
+            - users_mdomain_status.json.name is defined
             - users_mdomain_status.json.name == users_mdomain
 
       when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )

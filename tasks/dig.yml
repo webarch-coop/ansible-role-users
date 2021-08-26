@@ -1,0 +1,21 @@
+---
+- name: Looking a IPv4 address on the server
+  block:
+
+    - name: Run dig to lookup an IPv4 address
+      command: "dig -4 +short {{ users_host }}"
+      register: users_host_ipv4
+
+    - name: Add users_host_ipv4 addresses to the users_ipv4_hosts array
+      set_fact:
+        users_ipv4_hosts: "{{ users_host_ipv4s }} + [ '{{ users_ipv4.trim }}' ]"
+      loop: users_host_ipv4.stdout_lines
+      loop_control:
+        loop_var: users_ipv4
+
+  when:
+    - users_host is defined
+    - users_host is regex('([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}')
+  tags:
+    - users
+... 

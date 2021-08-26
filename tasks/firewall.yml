@@ -1,28 +1,60 @@
 ---
-- name: Firewall packages present
-  apt:
-    pkg:
-      - iptables
-      - iptables-persistent
-      - nftables
-      - netfilter-persistent
-      - python3-pyinotify
-    state: present
+- name: Configure the IPv4 firewall
+  block:
 
-- name: IPv4 iptables rules in place
-  template:
-    src: rules.v4.j2
-    dest: /etc/iptables/rules.v4
-    mode: 0644
-    owner: root
-    group: root
-    backup: true
+    - name: Firewall packages present
+      apt:
+        pkg:
+          - iptables
+          - iptables-persistent
+          - nftables
+          - netfilter-persistent
+          - python3-pyinotify
+        state: present
 
-- name: IPv4 iptables rules restored
-  shell: "iptables-restore < /etc/iptables/rules.v4"
+    - name: Get Munin servers IP addresses
+      block:
 
-- name: fail2ban restarted
-  service:
-    name: fail2ban
-    state: restarted
+        - name: Set users_hosts to an empty array
+          set_fact:
+            users_ipv4_hosts: []
+
+        - name: Get Munin servers IP addresses
+          include: dig.yml
+          vars:
+            users_host: "{{ host }}"
+          loop: "{{ groups.munin_servers.hosts }}" 
+          loop_control:
+            loop_var: host
+
+        - name: Set a fact for the IPv$ addresses of the Munin servers
+          set_fact:
+            munin_servers_ipv4s: "{{ users_ipv4_hosts }}"
+
+        - name: Debug munin_servers_ipv4s
+          debug:
+            var: munin_servers_ipv4s
+            verbosity: 2
+
+      when: ( munin_servers is defined ) and ( munin_servers != [] )
+
+    - name: IPv4 iptables rules in place
+      template:
+        src: rules.v4.j2
+        dest: /etc/iptables/rules.v4
+        mode: 0644
+        owner: root
+        group: root
+        backup: true
+
+    - name: IPv4 iptables rules restored
+      shell: "iptables-restore < /etc/iptables/rules.v4"
+
+    - name: fail2ban restarted
+      service:
+        name: fail2ban
+        state: restarted
+
+  tags:
+    - users
 ...
