@@ -19,6 +19,11 @@
           set_fact:
             users_ipv4_hosts: []
 
+        - name: Debug groups.munin_servers
+          debug:
+            var: groups.munin_servers
+            verbosity: 2
+
         - name: Get Munin servers IP addresses
           include: dig.yml
           vars:
