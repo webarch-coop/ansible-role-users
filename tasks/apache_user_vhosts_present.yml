@@ -100,6 +100,10 @@
             state: restarted
           when: ( users_apache2ctl_configtest is defined ) and ( "Syntax OK" in users_apache2ctl_configtest.stderr )
 
+        - name: Pause to allow Apache to sort itself out
+          pause:
+            seconds: 4
+
       rescue:
 
         - name: Standard out from apache2ctl configtest
@@ -149,6 +153,10 @@
             name: apache2
             state: restarted
 
+        - name: Pause to allow Apache to sort itself out
+          pause:
+            seconds: 4
+
         - name: Fail as apache2ctl configtest or apache2ctl restart failed
           fail:
             msg:
@@ -157,10 +165,6 @@
               - "The configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
 
       when: users_apache_conf.changed
-
-    - name: Pause to allow Apache to sort itself out
-      pause:
-        seconds: 4
 
   tags:
     - users
