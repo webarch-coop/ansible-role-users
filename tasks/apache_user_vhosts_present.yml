@@ -104,6 +104,17 @@
           pause:
             seconds: 4
 
+        - name: Check Apache status
+          command: service apache2 status
+          check_mode: false
+          changed_when: false
+          register: users_apache2_status
+
+        - name: Fail if Apache is not running
+          fail:
+            msg: "Apache is not running, for a temp fix try: a2dissite {{ user.key }} && service apache2 start"
+          when: users_apache2_status.rc == 3
+
       rescue:
 
         - name: Standard out from apache2ctl configtest
@@ -156,6 +167,17 @@
         - name: Pause to allow Apache to sort itself out
           pause:
             seconds: 4
+
+        - name: Check Apache status
+          command: service apache2 status
+          check_mode: false
+          changed_when: false
+          register: users_apache2_status
+
+        - name: Fail if Apache is not running
+          fail:
+            msg: "Apache is not running, for a temp fix try: a2dissite {{ user.key }} && service apache2 start"
+          when: users_apache2_status.rc == 3
 
         - name: Fail as apache2ctl configtest or apache2ctl restart failed
           fail:
