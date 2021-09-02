@@ -38,6 +38,20 @@
 
       when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
 
+    - name: "Check if the Apache config for {{ user.key }} exists"
+      stat:
+        path: "/etc/apache2/sites-available/{{ user.key }}.conf"
+      register: users_apache_conf_check
+
+    - name: "As the Apache config for {{ user.key }} exists create a backup of it"
+      copy:
+        src: "/etc/apache2/sites-available/{{ user.key }}.conf"
+        dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+        mode: 0644
+        owner: root
+        group: root
+      when: users_apache_conf_check.stat.exists
+
     - name: "Apache {{ user.key }} sites-available file present"
       template:
         src: apache.conf.j2
@@ -49,8 +63,6 @@
         group: root
       register: users_apache_conf
       when: user.key != "www-data"
-      tags:
-        - users
 
     - name: Apache configtest
       block:
@@ -86,7 +98,7 @@
               - "apache2ctl configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
             verbosity: 1
 
-        - name: "Apache configtest or restart failed, writing failed fconfig to /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
+        - name: "Apache configtest or restart failed, writing failed config to /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
           copy:
             src: "/etc/apache2/sites-available/{{ user.key }}.conf"
             dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
@@ -94,6 +106,11 @@
             mode: 0644
             owner: root
             group: root
+
+        - name: "Check if a backup of the Apache config for {{ user.key }} exists"
+          stat:
+            path: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+          register: users_apache_conf_backup_check
 
         - name: "Apache configtest or restart failed, reverting to previous config from /etc/apache2/sites-available/.{{ user.key }}.conf.bak"
           copy:
@@ -103,34 +120,23 @@
             mode: 0644
             owner: root
             group: root
-          when: users_apache_conf_check.stat.exists
+          when: users_apache_conf_backup_check.stat.exists
+
+        - name: "Apache {{ user.key }} sites-enabled symlink absent"
+          command: "a2dissite {{ user.key }}"
+          register: users_a2dissite
+          changed_when: '"already enabled" not in users_a2dissite.stdout'
+          when: not users_apache_conf_backup_check.stat.exists
 
         - name: Apache restart
           service:
             name: apache2
             state: restarted
 
-        # - name: "apache2ctl configtest failed so removing new config and symlink"
-        #   file:
-        #     path: "{{ file }}"
-        #     state: absent
-        #   loop:
-        #     - "/etc/apache2/sites-available/{{ user.key }}.conf"
-        #     - "/etc/apache2/sites-enabled/{{ user.key }}.conf"
-        #   loop_control:
-        #     loop_var: file
-        #     label: "{{ file }}"
-        #   when: not users_apache_conf_check.stat.exists
-
-        # - name: "Apache {{ user.key }} sites-enabled symlink absent"
-        #   command: "a2dissite {{ user.key }}"
-        #   register: users_a2dissite
-        #   changed_when: '"already enabled" not in users_a2dissite.stdout'
-
         - name: Fail as apache2ctl configtest or apache2ctl restart failed
           fail:
             msg:
-              - "apache2ctl configtest or restart failed for {{ user.key }} and as a result changes that would prevent a restart have been reverted."
+              - "apache2ctl configtest or restart failed for {{ user.key }} and as a result changes that might prevent a restart have been reverted."
               - "The broken config is available in /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
               - "The configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
 
