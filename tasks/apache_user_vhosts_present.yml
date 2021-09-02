@@ -21,27 +21,33 @@
         - name: "Debug the status for {{ users_mdomain_status }}"
           debug:
             var: users_mdomain_status.json
-            verbosity: 3
-          when:
-            - users_mdomain_status.jsont is defined
-
-        - name: "Debug the mdomain RSA status for {{ users_mdomain_status }}"
-          debug:
-            var: users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status
             verbosity: 2
           when:
-            - users_mdomain_status.json.cert is defined
-            - users_mdomain_status.json.name is defined
-            - ( users_mdomain_status.json.name | regex_replace('^"') | regex_replace('"$') ) == users_mdomain
+            - users_mdomain_status.json is defined
 
-        - name: "Debug the mdomain EC status for {{ users_mdomain_status }}"
-          debug:
-            var: users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status
-            verbosity: 2
+        - name: Set users_md_private_keys_present to an empty array
+          set_fact:
+            users_md_private_keys_present: []
+
+        - name: "Set a fact for the mdomain RSA status for {{ users_mdomain_status }}"
+          set_fact:
+            users_md_private_keys_present: "{{ users_md_private_keys_present }} + [ 'rsa3072' ]"
           when:
-            - users_mdomain_status.json.cert is defined
-            - users_mdomain_status.json.name is defined
+            - ( "rsa3072" in users_md_private_keys )
+            - ( users_mdomain_status.json.cert is defined )
+            - ( users_mdomain_status.json.name is defined )
             - ( users_mdomain_status.json.name | regex_replace('^"') | regex_replace('"$') ) == users_mdomain
+            - ( users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status == 0 )
+
+        - name: "Set a fact for the mdomain EC status for {{ users_mdomain_status }}"
+          set_fact:
+            users_md_private_keys_present: "{{ users_md_private_keys_present }} + [ 'secp384r1' ]"
+          when:
+            - ( "secp384r1" in users_md_private_keys )
+            - ( users_mdomain_status.json.cert is defined )
+            - ( users_mdomain_status.json.name is defined )
+            - ( users_mdomain_status.json.name | regex_replace('^"') | regex_replace('"$') ) == users_mdomain
+            - ( users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status == 0 )
 
       when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
 

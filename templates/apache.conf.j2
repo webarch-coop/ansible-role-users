@@ -7,11 +7,13 @@
   <MDomain {{ user.key }}.{{ inventory_hostname }}>
     MDStapling on
     MDRequireHttps permanent
-    MDPrivateKeys{% for key in users_md_private_keys %} {{ key }}{% endfor %}
-    {% if users_mdomain_status.json.name is not defined or users_mdomain_status.json.name != users_mdomain or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status != 0 %}
+{% if users_md_private_keys_present != [] %}
+    MDPrivateKeys{% for key in users_md_private_keys_present %} {{ key }}{% endfor %}
+{% endif %}
+{% if users_mdomain_status.json.name is not defined or users_mdomain_status.json.name != users_mdomain or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status != 0 %}
     MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
-    {% endif %}
+{% endif %}
   </MDomain>
 </IfModule>
     {%- endif %}
