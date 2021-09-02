@@ -264,9 +264,9 @@
                 verbosity: 1
               when: users_in_phpfpm_and_chroot_group is defined
 
-            - name: Include the munin-node phpfpm-multi tasks
+            - name: Include the munin_node phpfpm-multi tasks
               include_role:
-                name: munin-node
+                name: munin_node
                 tasks_from: phpfpm_multi.yml
               vars:
                 munin_phpfpm_users: "{{ users_in_phpfpm_and_chroot_group }}"
