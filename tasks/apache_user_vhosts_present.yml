@@ -25,7 +25,7 @@
           when:
             - users_mdomain_status.json.cert is defined
             - users_mdomain_status.json.name is defined
-            - users_mdomain_status.json.name == users_mdomain
+            - ( users_mdomain_status.json.name | regex_replace('^"') | regex_replace('"$') ) == users_mdomain
 
         - name: "Debug the mdomain EC status for {{ users_mdomain_status }}"
           debug:
@@ -34,7 +34,7 @@
           when:
             - users_mdomain_status.json.cert is defined
             - users_mdomain_status.json.name is defined
-            - users_mdomain_status.json.name == users_mdomain
+            - ( users_mdomain_status.json.name | regex_replace('^"') | regex_replace('"$') ) == users_mdomain
 
       when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
 
@@ -47,6 +47,7 @@
       copy:
         src: "/etc/apache2/sites-available/{{ user.key }}.conf"
         dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+        remote_src: true
         mode: 0644
         owner: root
         group: root
