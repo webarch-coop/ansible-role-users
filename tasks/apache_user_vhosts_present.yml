@@ -37,6 +37,7 @@
             - ( users_mdomain_status.json.cert is defined )
             - ( users_mdomain_status.json.name is defined )
             - ( users_mdomain_status.json.name | regex_replace('^"') | regex_replace('"$') ) == users_mdomain
+            - ( users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status is defined )
             - ( users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status == 0 )
 
         - name: "Set a fact for the mdomain EC status for {{ users_mdomain_status }}"
@@ -47,6 +48,7 @@
             - ( users_mdomain_status.json.cert is defined )
             - ( users_mdomain_status.json.name is defined )
             - ( users_mdomain_status.json.name | regex_replace('^"') | regex_replace('"$') ) == users_mdomain
+            - ( users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status is defined )
             - ( users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status == 0 )
 
       when: ( apache_mods_enabled is defined ) and ( "md" in apache_mods_enabled )
