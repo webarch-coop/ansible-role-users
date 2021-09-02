@@ -7,7 +7,7 @@
   <MDomain {{ user.key }}.{{ inventory_hostname }}>
     MDStapling on
     MDRequireHttps permanent
-      {-% if users_md_private_keys_present != [] %}
+      {%- if users_md_private_keys_present != [] %}
     MDPrivateKeys{% for key in users_md_private_keys_present %} {{ key }}{% endfor %}
       {%- endif %}
       {%- if users_mdomain_status.json.name is not defined %}
