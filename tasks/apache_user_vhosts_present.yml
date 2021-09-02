@@ -18,6 +18,13 @@
           check_mode: false
           register: users_mdomain_status
 
+        - name: "Debug the status for {{ users_mdomain_status }}"
+          debug:
+            var: users_mdomain_status.json
+            verbosity: 3
+          when:
+            - users_mdomain_status.jsont is defined
+
         - name: "Debug the mdomain RSA status for {{ users_mdomain_status }}"
           debug:
             var: users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status
