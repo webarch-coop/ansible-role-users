@@ -1,8 +1,10 @@
 # {{ ansible_managed }}
 *filter
-:INPUT ACCEPT [755:82388]
+:INPUT ACCEPT [0:0]
 :FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [536:477294]
+:OUTPUT ACCEPT [0:0]
+:f2b-sshd - [0:0]
+-A INPUT -p tcp -m multiport --dports 22 -j f2b-sshd
 -A INPUT -d 127.0.0.0/8 ! -i lo -j REJECT --reject-with icmp-port-unreachable
 -A INPUT -d 127.0.0.0/8 -i lo -j ACCEPT
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
@@ -18,10 +20,10 @@
 -A INPUT -p udp -m udp --dport {{ coturn_tls_listening_port }} -j ACCEPT
 {% endif %}
 {% if munin_servers is defined and munin_servers_ipv4s is defined %}{% for ipv4 in munin_servers_ipv4s %}
--A INPUT -m state --state NEW -m tcp -p tcp -s {{ ipv4 }} --dport 4949 -j ACCEPT
+-A INPUT -s {{ ipv4 }}/32 -p tcp -m state --state NEW -m tcp --dport 4949 -j ACCEPT
 {% endfor %}{% endif %}
 {% if icinga_master_nodes is defined and icinga_servers_ipv4s is defined %}{% for ipv4 in icinga_servers_ipv4s %}
--A INPUT -m state --state NEW -m tcp -p tcp -s {{ ipv4 }} --dport 5665 -j ACCEPT
+-A INPUT -s {{ ipv4 }}/32 -p tcp -m state --state NEW -m tcp --dport 5665 -j ACCEPT
 {% endfor %}{% endif %}
 -A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
 -A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
@@ -29,5 +31,6 @@
 -A INPUT -j REJECT --reject-with icmp-port-unreachable
 -A FORWARD -j REJECT --reject-with icmp-port-unreachable
 -A OUTPUT -j ACCEPT
+-A f2b-sshd -j RETURN
 COMMIT
 # vim: set ft=ipfilter: 

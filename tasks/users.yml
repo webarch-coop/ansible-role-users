@@ -58,6 +58,18 @@
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
 
+    - name: Update the firewall rules only
+      block:
+
+        - name: Update firewall
+          include_tasks: firewall.yml
+
+        - name: End as checks completed
+          meta: end_play
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "firewall" )
+
     - name: Set an empty users_update array
       set_fact:
         users_update: []
