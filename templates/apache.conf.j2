@@ -10,11 +10,9 @@
       {%- if users_md_private_keys_present != [] %}
     MDPrivateKeys{% for key in users_md_private_keys_present %} {{ key }}{% endfor %}
       {%- endif %}
-      {%- if users_mdomain_status.json.name is not defined %}
-        {%- if "rsa3072" not in users_md_private_keys_present and "secp384r1" not in users_md_private_keys_present %}
+      {%- if "rsa3072" not in users_md_private_keys_present or "secp384r1" not in users_md_private_keys_present %}
     MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
-        {%- endif %}
       {%- endif %}
   </MDomain>
 </IfModule>
@@ -90,10 +88,12 @@
   {%- if users_cert is defined %}
   SSLEngine on
     {%- if users_cert == "user" %}
-      {%- if users_mdomain_status.json.name is not defined or users_mdomain_status.json.name != users_mdomain or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status is not defined or users_mdomain_status.json.cert.secp384r1.ocsp.renewal.last.status != 0 %}
+      {%- if users_md_private_keys_present != [] %}
+        {%- if "rsa3072" not in users_md_private_keys_present or "secp384r1" not in users_md_private_keys_present %}
   SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
+        {%- endif %}
       {%- endif %}
     {%- endif %}
     {%- if users_cert == "vhost" %}
