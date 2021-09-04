@@ -110,10 +110,11 @@ users_phpfpm_enable_open_basedir: false
 users_phpfpm_disable_functions:
   - chgrp
   - chown
-  # curl_multi_exec is used by the MediaWiki VisualEditor and perhaps other things?
+  # curl_multi_exec is used by the MediaWiki VisualEditor
   # - curl_multi_exec
   - dl
-  - exec
+  # exec is used by the Nexcloud ONLYOFFICE app
+  # - exec
   # fsockopen is used by CiviCRM to send email
   # - fsockopen
   - passthru
