@@ -668,23 +668,15 @@
   tags:
     - users
 
-- name: "Include daily scripts role for {{ user.key }}"
-  include_tasks: user_daily_scripts.yml
+- name: "Include scripts role for {{ user.key }}"
+  include_tasks: user_scripts.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
-  tags:
-    - users
-
-- name: "Include hourly scripts role for {{ user.key }}"
-  include_tasks: user_hourly_scripts.yml
-  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-    label: "{{ vhost.key }}"
-  when: ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] )
+  when: > 
+    ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] ) or
+    ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] )
   tags:
     - users
 
