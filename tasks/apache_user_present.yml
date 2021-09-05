@@ -674,7 +674,7 @@
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: > 
+  when: >
     ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] ) or
     ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] )
   tags:
