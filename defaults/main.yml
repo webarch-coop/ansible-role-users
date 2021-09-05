@@ -111,6 +111,120 @@ users_phpfpm_disable_functions:
   - chgrp
   - chown
   # curl_exec is used by Nextcloud
+  - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  - curl_multi_exec
+  - dl
+  # exec is used by the Nexcloud ONLYOFFICE app
+  - exec
+  # fsockopen is used by CiviCRM to send email
+  - fsockopen
+  # passthru is used by many WordPress themes and plugins and other applications
+  # - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  # The shell_exec function is used by Matomo
+  - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_civicrm:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud
+  - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  - curl_multi_exec
+  - dl
+  # exec is used by the Nexcloud ONLYOFFICE app
+  - exec
+  # fsockopen is used by CiviCRM to send email
+  # - fsockopen
+  # passthru is used by many WordPress themes and plugins and other applications
+  # - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  # The shell_exec function is used by Matomo
+  - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_matomo:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud
   # - curl_exec
   # curl_multi_exec is used by the MediaWiki VisualEditor
   # - curl_multi_exec
@@ -119,7 +233,122 @@ users_phpfpm_disable_functions:
   # - exec
   # fsockopen is used by CiviCRM to send email
   # - fsockopen
-  - passthru
+  # passthru is used by many WordPress themes and plugins and other applications
+  # - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  # - proc_close
+  # - proc_get_status
+  # - proc_nice
+  # - proc_open
+  # - proc_terminate
+  # The shell_exec function is used by Matomo
+  - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_mediawiki:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud
+  # - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  - curl_multi_exec
+  - dl
+  # exec is used by the Nexcloud ONLYOFFICE app
+  # - exec
+  # fsockopen is used by CiviCRM to send email
+  # - fsockopen
+  # passthru is used by many WordPress themes and plugins and other applications
+  # - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  # The shell_exec function is used by Matomo
+  # - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_nextcloud:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud
+  - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  # - curl_multi_exec
+  - dl
+  # exec is used by the Nexcloud ONLYOFFICE app
+  - exec
+  # fsockopen is used by CiviCRM to send email
+  # - fsockopen
+  # passthru is used by many WordPress themes and plugins and other applications
+  # - passthru
   - pcntl_alarm
   - pcntl_fork
   - pcntl_waitpid
