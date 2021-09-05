@@ -42,8 +42,10 @@ php_admin_value[disable_functions] = "{% for func in user.value.users_phpfpm_dis
 ; disable_functions set from users_phpfpm_disable_functions
 php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
 {% else %}
-; disable_functions not set as neither user.value.users_phpfpm_disable_functions or
-; users_phpfpm_disable_functions are set
+; disable_functions not set as neither
+; user.value.users_phpfpm_disable_functions or users_phpfpm_disable_functions
+; are set however php_disable_functions might be applied to the main php.ini
+; file
 ; php_admin_value[disable_functions] = 
 {% endif %}
 
