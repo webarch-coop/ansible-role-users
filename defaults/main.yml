@@ -227,7 +227,6 @@ users_phpfpm_disable_functions_matomo:
   # curl_multi_exec is used by the MediaWiki VisualEditor
   - curl_multi_exec
   - dl
-  # exec is used by the Nexcloud ONLYOFFICE app
   - exec
   # fsockopen is used by CiviCRM to send email
   - fsockopen
@@ -283,7 +282,6 @@ users_phpfpm_disable_functions_mediawiki:
   # curl_multi_exec is used by the MediaWiki VisualEditor
   # - curl_multi_exec
   - dl
-  # exec is used by the Nexcloud ONLYOFFICE app
   - exec
   # fsockopen is used by CiviCRM to send email
   - fsockopen
@@ -339,8 +337,7 @@ users_phpfpm_disable_functions_nextcloud:
   # curl_multi_exec is used by the MediaWiki VisualEditor
   - curl_multi_exec
   - dl
-  # exec is used by the Nexcloud ONLYOFFICE app
-  # - exec
+  - exec
   # fsockopen is used by CiviCRM to send email
   - fsockopen
   - passthru
