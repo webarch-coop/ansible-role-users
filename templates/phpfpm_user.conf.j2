@@ -52,8 +52,8 @@ php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functi
 {% if users_phpfpm_enable_open_basedir is defined and users_phpfpm_enable_open_basedir %}
 {% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir != [] %}
 php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
-{% else %}
-php_admin_value[open_basedir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/:/usr/share/php"
+{% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir != [] %}
+php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
 {% endif %}
 ; open_basedir is not set as neither user.value.users_phpfpm_open_basedir or
 ; users_phpfpm_enable_open_basedir are set
