@@ -105,7 +105,7 @@ users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_phpfpm_request_terminate_timeout: 360
 users_phpfpm_enable_open_basedir: false
-# PHP expends $pool to the pool name and in this case it is the same as the username
+# PHP expands $pool to the pool name and in this case it is the same as the username
 users_phpfpm_open_basedir:
   - "{{ users_basedir }}/$pool/{{ users_sites_dir }}/"
   - "{{ users_basedir }}/$pool/tmp/"
