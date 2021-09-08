@@ -34,7 +34,6 @@ chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
 ; previously defined php.ini values, but will append the new value instead. 
 ;
 ; https://www.php.net/install.fpm.configuration
-
 {% if user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions != [] %} 
 ; disable_functions set from user.value.users_phpfpm_disable_functions
 php_admin_value[disable_functions] = "{% for func in user.value.users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
