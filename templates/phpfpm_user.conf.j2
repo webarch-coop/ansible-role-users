@@ -58,10 +58,15 @@ php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_base
 {% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir != [] %}
 ; open_basedir set from the users_phpfpm_open_basedir array
 php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
+{% else %}
+; netiher user.value.users_phpfpm_open_basedir or users_phpfpm_open_basedir are defined and 
+; not empty list so open_basedir has not been set
 {% endif %}
-; user.value.users_phpfpm_enable_open_basedir is not defined or true
+{% else %}
+; user.value.users_phpfpm_enable_open_basedir is not defined or true so open_basedir has not been set
 {% endif %}
-; users_phpfpm_enable_open_basedir is not defined or false
+{% else %}
+; users_phpfpm_enable_open_basedir is not defined or false so open_basedir has not been set
 {% endif %}
   
 {% if user.value.users_phpfpm_mysqli_allow_local_infile is defined and user.value.users_phpfpm_mysqli_allow_local_infile %}
