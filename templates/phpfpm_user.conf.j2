@@ -63,7 +63,7 @@ php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ di
 ; not empty list so open_basedir has not been set
 {% endif %}
 {% else %}
-; user.value.users_phpfpm_enable_open_basedir is not defined or true so open_basedir has not been set
+; user.value.users_phpfpm_enable_open_basedir is not defined or false so open_basedir has not been set
 {% endif %}
 {% else %}
 ; users_phpfpm_enable_open_basedir is not defined or false so open_basedir has not been set
