@@ -121,8 +121,9 @@ users_phpfpm_open_basedir_mediawiki:
 users_phpfpm_disable_functions:
   - chgrp
   - chown
-  # curl_exec is used by Nextcloud and some MediaWiki extensions
-  - curl_exec
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the 
+  # WordPress Piwik plugin
+  # - curl_exec
   # curl_multi_exec is used by the MediaWiki VisualEditor
   - curl_multi_exec
   - dl
@@ -177,8 +178,9 @@ users_phpfpm_disable_functions:
 users_phpfpm_disable_functions_civicrm:
   - chgrp
   - chown
-  # curl_exec is used by Nextcloud and some MediaWiki extensions
-  - curl_exec
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the 
+  # WordPress Piwik plugin
+  # - curl_exec
   # curl_multi_exec is used by the MediaWiki VisualEditor
   - curl_multi_exec
   - dl
@@ -233,8 +235,9 @@ users_phpfpm_disable_functions_civicrm:
 users_phpfpm_disable_functions_matomo:
   - chgrp
   - chown
-  # curl_exec is used by Nextcloud and some MediaWiki extensions
-  - curl_exec
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the 
+  # WordPress Piwik plugin
+  # - curl_exec
   # curl_multi_exec is used by the MediaWiki VisualEditor
   - curl_multi_exec
   - dl
@@ -288,7 +291,8 @@ users_phpfpm_disable_functions_matomo:
 users_phpfpm_disable_functions_mediawiki:
   - chgrp
   - chown
-  # curl_exec is used by Nextcloud and some MediaWiki extensions
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the 
+  # WordPress Piwik plugin
   # - curl_exec
   # curl_multi_exec is used by the MediaWiki VisualEditor
   # - curl_multi_exec
@@ -343,7 +347,7 @@ users_phpfpm_disable_functions_mediawiki:
 users_phpfpm_disable_functions_nextcloud:
   - chgrp
   - chown
-  # curl_exec is used by Nextcloud
+  # curl_exec is used by Nextcloud and some MediaWiki extensions
   # - curl_exec
   # curl_multi_exec is used by the MediaWiki VisualEditor
   - curl_multi_exec
