@@ -92,7 +92,10 @@
           service:
             name: "php{{ users_phpfpm_version }}-fpm"
             state: restarted
-          when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
+          when:
+            - not ansible_check_mode
+            - users_phpfpm_pool_configtest is defined
+            - ( "test is successful" in users_phpfpm_pool_configtest.stderr )
 
       rescue:
 
