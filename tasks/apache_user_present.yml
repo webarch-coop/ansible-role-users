@@ -417,6 +417,9 @@
         nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
         nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
         nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
+        nextcloud_mail_from_address: "{{ vhost.value.nextcloud_mail_from_address | default(user.key) }}"
+        nextcloud_mail_domain: "{{ vhost.value.nextcloud_mail_domain | default(inventory_hostname) }}"
+        nextcloud_default_phone_region: "{{ vhost.value.nextcloud_default_phone_region | default('GB') }}"
         nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
         nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
         nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
@@ -458,6 +461,9 @@
         nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
         nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
         nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
+        nextcloud_mail_from_address: "{{ vhost.value.nextcloud_mail_from_address | default(user.key) }}"
+        nextcloud_mail_domain: "{{ vhost.value.nextcloud_mail_domain | default(inventory_hostname) }}"
+        nextcloud_default_phone_region: "{{ vhost.value.nextcloud_default_phone_region | default('GB') }}"
         nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
         nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
         nextcloud_app_remove: "{{ vhost.value.nextcloud_app_remove | default([]) }}"
@@ -621,23 +627,15 @@
   tags:
     - users
 
-- name: "Include daily scripts role for {{ user.key }}"
-  include_tasks: user_daily_scripts.yml
+- name: "Include scripts role for {{ user.key }}"
+  include_tasks: user_scripts.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] )
-  tags:
-    - users
-
-- name: "Include hourly scripts role for {{ user.key }}"
-  include_tasks: user_hourly_scripts.yml
-  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-    label: "{{ vhost.key }}"
-  when: ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] )
+  when: >
+    ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] ) or
+    ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] )
   tags:
     - users
 

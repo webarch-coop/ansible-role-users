@@ -6,6 +6,7 @@
       apt:
         pkg:
           - bc
+          - bind9-dnsutils
           - bsd-mailx
           - mutt
           - python3-dnspython

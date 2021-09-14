@@ -108,17 +108,201 @@ users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_phpfpm_request_terminate_timeout: 360
 users_phpfpm_enable_open_basedir: false
+# PHP expands $pool to the pool name and in this case it is the same as the username
+users_phpfpm_open_basedir:
+  - "{{ users_basedir }}/$pool/{{ users_sites_dir }}/"
+  - "{{ users_basedir }}/$pool/tmp/"
+  - /usr/share/php
+# The MediaWiki file includes/shell/Command.php uses/bin/bash
+users_phpfpm_open_basedir_mediawiki:
+  - "{{ users_basedir }}/$pool/{{ users_sites_dir }}/"
+  - "{{ users_basedir }}/$pool/tmp/"
+  - /usr/share/php
+  - /bin
 # users_phpfpm_disable_functions values are appended, they do not overwrite
 # previously defined php.ini values, set to [] to disable
 users_phpfpm_disable_functions:
   - chgrp
   - chown
-  # curl_multi_exec is used by the MediaWiki VisualEditor and perhaps other things?
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the
+  # WordPress Piwik plugin
+  # - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  - curl_multi_exec
+  - dl
+  # exec is used by the Nexcloud ONLYOFFICE app
+  - exec
+  # fsockopen is used by CiviCRM to send email
+  - fsockopen
+  - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  # The shell_exec function is used by Matomo
+  - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_civicrm:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the
+  # WordPress Piwik plugin
+  # - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  - curl_multi_exec
+  - dl
+  # exec is used by the Nexcloud ONLYOFFICE app
+  - exec
+  # fsockopen is used by CiviCRM to send email
+  # - fsockopen
+  - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  # The shell_exec function is used by Matomo
+  - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_matomo:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the
+  # WordPress Piwik plugin
+  # - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  - curl_multi_exec
+  - dl
+  - exec
+  # fsockopen is used by CiviCRM to send email
+  - fsockopen
+  - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  # The shell_exec function is used by Matomo
+  # - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_mediawiki:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud, some MediaWiki extensions and the
+  # WordPress Piwik plugin
+  # - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
   # - curl_multi_exec
   - dl
   - exec
   # fsockopen is used by CiviCRM to send email
-  # - fsockopen
+  - fsockopen
   - passthru
   - pcntl_alarm
   - pcntl_fork
@@ -157,7 +341,62 @@ users_phpfpm_disable_functions:
   # - proc_open
   # - proc_terminate
   # The shell_exec function is used by Matomo
-  # - shell_exec
+  - shell_exec
+  - show_source
+  - socket_create
+  - symlink
+  - system
+  - system_exec
+users_phpfpm_disable_functions_nextcloud:
+  - chgrp
+  - chown
+  # curl_exec is used by Nextcloud and some MediaWiki extensions
+  # - curl_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor
+  - curl_multi_exec
+  - dl
+  - exec
+  # fsockopen is used by CiviCRM to send email
+  - fsockopen
+  - passthru
+  - pcntl_alarm
+  - pcntl_fork
+  - pcntl_waitpid
+  - pcntl_wait
+  - pcntl_wifexited
+  - pcntl_wifstopped
+  - pcntl_wifsignaled
+  - pcntl_wifcontinued
+  - pcntl_wexitstatus
+  - pcntl_wtermsig
+  - pcntl_wstopsig
+  - pcntl_signal
+  - pcntl_signal_get_handler
+  - pcntl_signal_dispatch
+  - pcntl_get_last_error
+  - pcntl_strerror
+  - pcntl_sigprocmask
+  - pcntl_sigwaitinfo
+  - pcntl_sigtimedwait
+  - pcntl_exec
+  - pcntl_getpriority
+  - pcntl_setpriority
+  - pcntl_async_signals
+  - pcntl_unshare
+  - popen
+  - posix_kill
+  - posix_mkfifo
+  - posix_setpgid
+  - posix_setsid
+  - posix_setuid
+  # The proc_ functions are used by some features of MediaWiki
+  - proc_close
+  - proc_get_status
+  - proc_nice
+  - proc_open
+  - proc_terminate
+  # The shell_exec function is used by Matomo
+  - shell_exec
   - show_source
   - socket_create
   - symlink
