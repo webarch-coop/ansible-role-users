@@ -25,20 +25,12 @@
     - name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
       block:
 
-        - name: "Query the status for {{ apache_mdomain }}"
-          uri:
-            url: "http://localhost/md-status/{{ user.key }}.{{ inventory_hostname }}"
-            return_content: true
-            status_code:
-              - 200
-          check_mode: false
-          register: users_mdomain_status
-
-        - name: "Debug the mdomain RSA status for {{ users_mdomain_status }}"
-          debug:
-            var: users_mdomain_status.json.cert.rsa.ocsp.renewal.last.status
-            verbosity: 2
-          when: users_mdomain_status.json.cert.rsa is defined
+        - name: Include mod_md tasks from the apache role
+          include_role:
+            name: apache
+            tasks_from: md_status.yml
+          vars:
+            apache_mdomain: "{{ user.key }}.{{ inventory_hostname }}"
 
         - name: Run acme.sh tasks when mod_md cert isn't available
           block:
@@ -72,7 +64,7 @@
                 tasks_from: letsencrypt
               when: not ansible_check_mode
 
-          when: ( users_mdomain_status.json.cert is not defined )
+          when: not apache_md_certs
 
       when:
         - ( users_cert is defined ) and ( users_cert == 'user' )
