@@ -9,8 +9,6 @@
     MDRequireHttps permanent
       {%- if users_md_private_keys is defined %}
     MDPrivateKeys{% for key in users_md_private_keys %} {{ key }}{% endfor %}
-      {%- elif apache_md_private_keys is defined %}
-    MDPrivateKeys{% for key in apache_md_private_keys %} {{ key }}{% endfor %}
       {%- endif %}
       {%- if not apache_md_certs %}
     MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
