@@ -74,9 +74,9 @@ users_notify_cron_append: "Reply-To: {{ users_notify_reply_to }}"
 users_forward: true
 users_muttrc: true
 users_cert: user
-users_md_private_keys:
-  - secp384r1
-  - rsa3072
+# users_md_private_keys:
+#   - secp384r1
+#   - rsa3072
 #
 # Define one or more of the the three following arrays if you want to overide
 # the users_apache_type of php, cgi or the default of static that are set in

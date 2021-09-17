@@ -7,8 +7,12 @@
   <MDomain {{ user.key }}.{{ inventory_hostname }}>
     MDStapling on
     MDRequireHttps permanent
+      {%- if users_md_private_keys is defined %}
     MDPrivateKeys{% for key in users_md_private_keys %} {{ key }}{% endfor %}
-      {%- if "rsa3072" not in users_md_private_keys_present or "secp384r1" not in users_md_private_keys_present %}
+      {%- elif apache_md_private_keys is defined %}
+    MDPrivateKeys{% for key in apache_md_private_keys %} {{ key }}{% endfor %}
+      {%- endif %}
+      {%- if not apache_md_certs %}
     MDCertificateFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
       {%- endif %}
@@ -27,7 +31,11 @@
   <MDomain {{ vhost_config.users_apache_server_name }}
     MDStapling on
     MDRequireHttps permanent
+      {%- if users_md_private_keys is defined %}
     MDPrivateKeys{% for key in users_md_private_keys %} {{ key }}{% endfor %}
+      {%- elif apache_md_private_keys is defined %}
+    MDPrivateKeys{% for key in apache_md_private_keys %} {{ key }}{% endfor %}
+      {%- endif %}
     MDCertificateFile {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.fullchain.pem
     MDCertificateKeyFile {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
   </MDomain>
@@ -86,12 +94,10 @@
   {%- if users_cert is defined %}
   SSLEngine on
     {%- if users_cert == "user" %}
-      {%- if users_md_private_keys_present != [] %}
-        {%- if "rsa3072" not in users_md_private_keys_present or "secp384r1" not in users_md_private_keys_present %}
+      {%- if not apache_md_certs %}
   SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
   SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
   SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
-        {%- endif %}
       {%- endif %}
     {%- endif %}
     {%- if users_cert == "vhost" %}
