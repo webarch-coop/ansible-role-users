@@ -124,8 +124,9 @@ users_phpfpm_disable_functions:
   # curl_exec is used by Nextcloud, some MediaWiki extensions and the
   # WordPress Piwik plugin
   # - curl_exec
-  # curl_multi_exec is used by the MediaWiki VisualEditor
-  - curl_multi_exec
+  # curl_multi_exec is used by the MediaWiki VisualEditor and some
+  # WordPress plugins
+  # - curl_multi_exec
   - dl
   # exec is used by the Nexcloud ONLYOFFICE app
   - exec
