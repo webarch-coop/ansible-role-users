@@ -429,6 +429,7 @@
         nextcloud_notify_headers: "{{ users_notify_headers }}"
         nextcloud_notify_signature: "{{ users_notify_signature }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
+        nextcloud_memcache: "{{ vhost.value.nextcloud_memcache | default(false) | bool }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -477,6 +478,7 @@
         nextcloud_notify_headers: "{{ users_notify_headers }}"
         nextcloud_notify_signature: "{{ users_notify_signature }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
+        nextcloud_memcache: "{{ vhost.value.nextcloud_memcache | default(false) | bool }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
