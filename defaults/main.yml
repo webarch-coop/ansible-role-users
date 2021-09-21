@@ -77,6 +77,9 @@ users_cert: user
 users_md_private_keys:
   - secp384r1
   - rsa3072
+# For Nextcloud updates users_apache_php_proxy_timeout needs to be set to 1200, 
+# this is best done at a VirtualHost level
+users_apache_php_proxy_timeout: 300
 #
 # Define one or more of the the three following arrays if you want to overide
 # the users_apache_type of php, cgi or the default of static that are set in
