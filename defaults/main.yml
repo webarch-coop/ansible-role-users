@@ -74,7 +74,7 @@ users_notify_cron_append: "Reply-To: {{ users_notify_reply_to }}"
 users_forward: true
 users_muttrc: true
 users_cert: user
-# For Nextcloud updates users_apache_php_proxy_timeout needs to be set to 1200, 
+# For Nextcloud updates users_apache_php_proxy_timeout needs to be set to 1200,
 # this is best done at a VirtualHost level
 users_apache_php_proxy_timeout: 300
 #
