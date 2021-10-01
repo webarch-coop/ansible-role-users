@@ -195,9 +195,9 @@
     {%- if "chroot" in user.value.users_groups %}
     <Proxy "unix:{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost">
       {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
-      {%- elif user.value.users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+      {%- elif user.value.users_apache_php_proxy_timeout is defined %}
+      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
       {%- elif users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ users_apache_php_proxy_timeout }}
       {%- endif %}
@@ -205,9 +205,9 @@
     {%- else %}
     <Proxy "unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost">
       {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
-      {%- elif user.value.users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+      {%- elif user.value.users_apache_php_proxy_timeout is defined %}
+      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
       {%- elif users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ users_apache_php_proxy_timeout }}
       {%- endif %}
@@ -216,9 +216,9 @@
   {%- elif users_phpfpm_version is defined %}
     <Proxy "unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost">
       {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
-      {%- elif user.value.users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+      {%- elif user.value.users_apache_php_proxy_timeout is defined %}
+      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
       {%- elif users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ users_apache_php_proxy_timeout }}
       {%- endif %}
