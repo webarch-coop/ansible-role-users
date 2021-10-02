@@ -230,6 +230,13 @@
           - vhost.value.users_apache_nophp_dirs[0] is defined
       when: vhost.value.users_apache_nophp_dirs is defined
 
+    - name: "Check that the users_apache_deny_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
+      assert:
+        that:
+          - vhost.value.users_apache_deny_dirs | length
+          - vhost.value.users_apache_deny_dirs[0] is defined
+      when: vhost.value.users_apache_deny_dirs is defined
+
   tags:
     - users
 
