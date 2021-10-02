@@ -326,6 +326,20 @@
   </Directory>
     {%- endfor %}
   {%- endif %}
+  {%- if vhost_config.users_apache_deny_dirs is defined %}
+    {%- for dir in vhost_config.users_apache_deny_dirs %}
+  # No access allowed for this directory
+      {%- if user.value.users_apache_vhost_docroot is defined %}
+  <Directory "{{ user.value.users_apache_vhost_docroot }}/{{ dir }}">
+      {%- else %}
+  <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+      {%- endif %}
+    <IfModule mod_authz_core.c>
+      Require all denied
+    </IfModule>
+  </Directory>
+    {%- endfor %}
+  {%- endif %}
   {%- if vhost_config.users_apache_proxy_pass is defined %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
   ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
