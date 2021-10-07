@@ -45,6 +45,23 @@
             loop_var: group
             label: "{{ group }}"
 
+        - name: Chroot'ed user checks
+          block:
+
+            - name: "Check that users_chroot_dir is defined when {{ user.key }} is in the chroot group"
+              assert:
+                that: users_chroot_dir is defined
+
+            - name: "Check that the chroot directory exists when {{ user.key }} is in the chroot group"
+              stat:
+                path: users_chroot_dir
+
+            - name: "Check that {{ users_chroot_dir }} exists when {{ user.key }} is in the chroot group"
+              assert:
+                that: users_chroot_dir.stat.exists
+
+          when: ( "chroot" in user.value.users_groups )
+
       when: user.value.users_groups is defined
 
     - name: "Check users that are members of the {{ user.key }} group"
