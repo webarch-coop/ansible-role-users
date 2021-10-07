@@ -48,17 +48,18 @@
         - name: Chroot'ed user checks
           block:
 
-            - name: "Check that users_chroot_dir is defined when {{ user.key }} is in the chroot group"
+            - name: "Check that users_chroot is defined and true when {{ user.key }} is in the chroot group"
               assert:
-                that: users_chroot_dir is defined
+                that:
+                  - users_chroot is defined
+                  - users_chroot
 
-            - name: "Check that the chroot directory exists when {{ user.key }} is in the chroot group"
-              stat:
-                path: users_chroot_dir
-
-            - name: "Check that {{ users_chroot_dir }} exists when {{ user.key }} is in the chroot group"
+            # NOTE users_chroot_dir is defined via a task in system.yml
+            - name: "Check that users_chroot_dir is defined and the directory is present when {{ user.key }} is in the chroot group"
               assert:
-                that: users_chroot_dir.stat.exists
+                that:
+                  - users_chroot_dir is defined
+                  - users_chroot_dir.stat.exists
 
           when: ( "chroot" in user.value.users_groups )
 
