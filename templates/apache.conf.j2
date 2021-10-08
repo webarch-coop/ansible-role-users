@@ -249,19 +249,18 @@
     {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
     {%- endif %}
-    {% if vhost_config.users_apache_filesmatch is defined %}
+    {%- if vhost_config.users_apache_filesmatch is defined %}
       {%- for fm in vhost_config.users_apache_filesmatch %}
-    <FilesMatch "{{ fm.regex }}" > 
+    <FilesMatch "{{ fm.regex }}" >
         {%- if fm.require is defined %}
-          {% for req in fm.require %}
+          {%- for req in fm.require %}
       Require {{ req }}
           {%- endfor %}
-        {% else %}     
+        {%- else %}
       Require all denied
         {%- endif %}
     </FilesMatch>
       {%- endfor %}
-    {%- endif %}
     {%- endif %}
     {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
