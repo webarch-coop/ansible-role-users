@@ -326,6 +326,27 @@ And this will generate:
   ProxyPassReverse "/" "http://127.0.0.1:3000/"
 ```
 
+### FilesMatch
+
+If an `users_apache_filesmatch` array specified at the `VirtualHost` level with a list of `regex` like this:
+
+```yml
+        users_apache_filesmatch:
+          - regex: '^license\.txt$'
+          - regex: '^readme\.html$'
+          - regex: '^xmlrpc\.php$'
+```
+
+Then access to these files will be denied, unless one of more `require` items are listed, for example:
+
+```yml
+        users_apache_filesmatch:
+          - regex: '^xmlrpc\.php$'
+            require:
+              - method GET HEAD
+              - ip 9.9.9.9
+```
+
 ### Directories
 
 If `users_apache_directories` are specified at the `VirtualHost` level then the
