@@ -69,9 +69,7 @@
             minute: "{{ users_cron_min }}"
             hour: "*"
 
-      when:
-        - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
-        - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+      when: ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
 
     - name: Crontabs present for non-chrooted users
       block:
@@ -98,8 +96,7 @@
             minute: "{{ users_cron_min }}"
             hour: "*"
 
-      when:
-        - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
+      when: ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
 
     - name: "USER env var added to {{ user.key }} crontab"
       cron:

@@ -293,6 +293,20 @@
     {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
     {%- endif %}
+    {% if vhost_config.users_apache_filesmatch is defined %}
+      {%- for fm in vhost_config.users_apache_filesmatch %}
+    <FilesMatch "{{ fm.regex }}" > 
+        {%- if fm.require is defined %}
+          {% for req in fm.require %}
+      Require {{ req }}
+          {%- endfor %}
+        {% else %}     
+      Require all denied
+        {%- endif %}
+    </FilesMatch>
+      {%- endfor %}
+    {%- endif %}
+    {%- endif %}
     {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
     <IfModule proxy_fcgi_module>
@@ -367,6 +381,20 @@
         Require all denied
       </If>
     </FilesMatch>
+  </Directory>
+    {%- endfor %}
+  {%- endif %}
+  {%- if vhost_config.users_apache_deny_dirs is defined %}
+    {%- for dir in vhost_config.users_apache_deny_dirs %}
+  # No access allowed for this directory
+      {%- if user.value.users_apache_vhost_docroot is defined %}
+  <Directory "{{ user.value.users_apache_vhost_docroot }}/{{ dir }}">
+      {%- else %}
+  <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+      {%- endif %}
+    <IfModule mod_authz_core.c>
+      Require all denied
+    </IfModule>
   </Directory>
     {%- endfor %}
   {%- endif %}
