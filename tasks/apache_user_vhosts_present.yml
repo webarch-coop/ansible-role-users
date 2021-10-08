@@ -1,4 +1,19 @@
 ---
+- name: Check Apache status
+  command: service apache2 status
+  check_mode: false
+  changed_when: false
+  register: users_apache2_status
+  tags:
+    - users
+
+- name: Fail if Apache is not running
+  fail:
+    msg: "Apache is not running!"
+  when: users_apache2_status.rc == 3
+  tags:
+    - users
+
 - name: Generate Apache config files
   block:
 
