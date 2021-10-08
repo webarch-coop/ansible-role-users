@@ -245,12 +245,12 @@
 
     - name: Debug users_apache_filesmatch variable type
       debug:
-        msg: "{{ users_apache_filesmatch | type_debug }}"
+        msg: "{{ vhost.value.users_apache_filesmatch | type_debug }}"
 
     - name: "Check that users_apache_filesmatch is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - users_apache_filesmatch | type_debug == "list"
+          - vhost.value.users_apache_filesmatch | type_debug == "list"
 
     - name: "Check that regex is defined for FilesMatch for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
