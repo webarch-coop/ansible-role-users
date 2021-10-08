@@ -84,7 +84,7 @@
 
         - name: Pause to allow Apache to sort itself out
           pause:
-            seconds: 2
+            seconds: 4
 
         - name: Check Apache status
           command: service apache2 status
@@ -148,7 +148,7 @@
 
         - name: Pause to allow Apache to sort itself out
           pause:
-            seconds: 2
+            seconds: 4
 
         - name: Check Apache status
           command: service apache2 status
