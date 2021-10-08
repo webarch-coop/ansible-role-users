@@ -305,8 +305,6 @@
         {%- endif %}
     </FilesMatch>
       {%- endfor %}
-    {%- else %}
-    # No FilesMatch
     {%- endif %}
     {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
