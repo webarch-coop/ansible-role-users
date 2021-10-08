@@ -242,7 +242,7 @@
 
 - name: "FilesMatch checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:
-          
+
     - name: "Check that users_apache_filesmatch is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
