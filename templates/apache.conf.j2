@@ -195,37 +195,37 @@
     {%- if "chroot" in user.value.users_groups %}
     <Proxy "unix:{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost">
       {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
       {%- elif user.value.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
       {%- elif users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ users_apache_php_proxy_timeout }}
       {%- endif %}
     </Proxy>
     {%- else %}
     <Proxy "unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost">
       {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
       {%- elif user.value.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
       {%- elif users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ users_apache_php_proxy_timeout }}
       {%- endif %}
     </Proxy>
     {%- endif %}
   {%- elif users_phpfpm_version is defined %}
     <Proxy "unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost">
       {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
       {%- elif user.value.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
       {%- elif users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ users_apache_php_proxy_timeout }}
+    ProxySet timeout={{ users_apache_php_proxy_timeout }}
       {%- endif %}
     </Proxy>
-  </IfModule>
   {%- else -%}
   {%- endif %}
+  </IfModule>
   {%- if vhost_config.users_apache_directories is defined %}
     {%- if vhost_config.users_apache_directories == [] %}
   # No Directories are defined
