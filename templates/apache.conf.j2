@@ -297,15 +297,14 @@
       {%- for fm in vhost_config.users_apache_filesmatch %}
     <FilesMatch "{{ fm.regex }}" > 
         {%- if fm.require is defined %}
-          {% for req in fm.require %}
+          {%- for req in fm.require %}
       Require {{ req }}
           {%- endfor %}
-        {% else %}     
+        {%- else %}     
       Require all denied
         {%- endif %}
     </FilesMatch>
       {%- endfor %}
-    {%- endif %}
     {%- else %}
     # No FilesMatch
     {%- endif %}
