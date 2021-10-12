@@ -270,13 +270,13 @@
       {%- endfor %}
     {%- endif %}
     {%- if users_apache_add_type is defined %}
-      {%- for type in users_apache_add_type %}
-    AddType {{ type }}   
+      {%- for mimetype in users_apache_add_type %}
+    AddType "{{ mimetype.type }}" .{{ type.ext }}   
       {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_add_type is defined %}
-      {%- for type in vhost_config.users_apache_add_type %}
-    AddType {{ type }}
+      {%- for mimetype in vhost_config.users_apache_add_type %}
+    AddType "{{ mimetype.type }}" . {{ type.ext }}
       {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_filesmatch is defined %}
