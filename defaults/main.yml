@@ -107,6 +107,9 @@ users_phpfpm_pm_start_servers: 2
 users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_phpfpm_request_terminate_timeout: 360
+# Change users_phpfpm_extension to change what files are processed, for example
+# html? would match html and htm
+users_phpfpm_extension: php
 users_phpfpm_enable_open_basedir: false
 # PHP expands $pool to the pool name and in this case it is the same as the username
 users_phpfpm_open_basedir:

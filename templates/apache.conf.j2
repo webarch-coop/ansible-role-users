@@ -227,6 +227,16 @@
     {%- else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     {%- endif %}
+    {%- if vhost_config.users_apache_index_options is defined %}
+    IndexOptions{% for opt in vhost_config.users_apache_index_options %} {{ opt }}{% endfor %}
+    {%- elif users_apache_index_options is defined %}
+    IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_ssi_legacy is defined %}
+    SSILegacyExprParser {% if vhost_config.users_apache_ssi_legacy %}on{% else %}off{% endif %}
+    {%- elif users_apache_ssi_legacy is defined %}
+    SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
+    {%- endif %}
     {%- if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
     {%- elif users_apache_index is defined %}
@@ -249,6 +259,26 @@
     {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
     {%- endif %}
+    {%- if users_apache_add_output_filters is defined %}
+      {%- for filter in users_apache_add_output_filters %}
+    AddOutputFilter {{ filter }}   
+      {%- endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_add_output_filters is defined %}
+      {%- for filter in vhost_config.users_apache_add_output_filters %}
+    AddOutputFilter {{ filter }}   
+      {%- endfor %}
+    {%- endif %}
+    {%- if users_apache_add_type is defined %}
+      {%- for type in users_apache_add_type %}
+    AddType {{ type }}   
+      {%- endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_add_type is defined %}
+      {%- for type in vhost_config.users_apache_add_type %}
+    AddType {{ type }}
+      {%- endfor %}
+    {%- endif %}
     {%- if vhost_config.users_apache_filesmatch is defined %}
       {%- for fm in vhost_config.users_apache_filesmatch %}
     <FilesMatch "{{ fm.regex }}" >
@@ -268,7 +298,11 @@
       <IfModule setenvif_module>
         SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
       </IfModule>
-      <FilesMatch "\.php$">
+      {%- if vhost_config.users_phpfpm_extension is defined %}
+      <FilesMatch "\.{{ vhost_config.users_phpfpm_extension }}$">
+      {%- else %}
+      <FilesMatch "\.{{ users_phpfpm_extension }}$">
+      {%- endif %}
         <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
         {%- if "chroot" in user.value.users_groups %}
