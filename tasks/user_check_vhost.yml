@@ -147,6 +147,7 @@
       when: vhost.value.users_apache_options is defined
 
     - name: "Check that only valid IndexOptions listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
 
         - name: "Check that the IndexOptions for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
           assert:
