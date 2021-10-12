@@ -70,7 +70,7 @@
     - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
       assert:
         that:
-          - ( vhost.value.users_apache_expires is regex('^medium|strict|forever$')
+          - vhost.value.users_apache_expires is regex('^medium|strict|forever$')
       when: vhost.value.users_apache_expires is defined
 
     - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
