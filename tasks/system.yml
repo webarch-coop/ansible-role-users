@@ -140,7 +140,8 @@
 
       when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
 
-    - debug: fail
+    - fail:
+        msg: debug
 
     - name: Include Apache tasks
       include_tasks: apache.yml
