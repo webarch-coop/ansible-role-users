@@ -267,17 +267,20 @@
           shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
           register: users_repquota_md5sum_after
           check_mode: false
-          changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+          changed_when: >
+            ( users_repquota_md5sum_before is not defined ) or
+            ( users_repquota_md5sum_before is defined and users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout )
 
         - name: Updated users quotas fetched
           fetch:
             src: "{{ quota_dir }}/quota_user.csv"
             dest: /tmp/
           check_mode: false
-          when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+          when: >
+            ( users_repquota_md5sum_before is not defined ) or
+            ( users_repquota_md5sum_before is defined and users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout )
 
-      when:
-        - quota_dir is defined
+      when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
 
     - name: Firewall tasks included
       include_tasks: firewall.yml
