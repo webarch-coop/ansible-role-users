@@ -298,8 +298,8 @@
       <IfModule setenvif_module>
         SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
       </IfModule>
-      {%- if users.value.users_phpfpm_extensions is defined %}
-      <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      {%- if user.value.users_phpfpm_extensions is defined %}
+      <FilesMatch "\.{% for ext in user.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
       {%- else %}
       <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
       {%- endif %}
