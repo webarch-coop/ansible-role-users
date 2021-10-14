@@ -91,31 +91,31 @@
   {%- endif %}
   {%- if users_cert is defined %}
   SSLEngine on
+  <IfModule !md_module>
     {%- if users_cert == "user" %}
-      {%- if not apache_md_certs %}
-  SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
-  SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
-  SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
-      {%- endif %}
+    SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
+    SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
+    SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
     {%- endif %}
     {%- if users_cert == "vhost" %}
-  SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
-  SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
-  SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
+    SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
+    SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
+    SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
     {%- endif %}
+  </IfModule>
   {%- endif %}
   {%- if user.value.users_email is defined and user.value.users_email != "" %}
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
   <IfModule headers_module>
-  {%- if "md" not in apache_mods_enabled %}
-    {%- if vhost_config.users_apache_sts is defined %}
-    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
-    {%- else %}
-    Header always set Strict-Transport-Security "max-age=31536000"
-    {%- endif %}
+    <IfModule !md_module>
+  {%- if vhost_config.users_apache_sts is defined %}
+      Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
+  {%- else %}
+      Header always set Strict-Transport-Security "max-age=31536000"
   {%- endif %}
-    Header always set Permissions-Policy "interest-cohort=()"
+      Header always set Permissions-Policy "interest-cohort=()"
+    </IfModule>
   </IfModule>
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
@@ -271,6 +271,16 @@
     {%- else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     {%- endif %}
+    {%- if vhost_config.users_apache_index_options is defined %}
+    IndexOptions{% for opt in vhost_config.users_apache_index_options %} {{ opt }}{% endfor %}
+    {%- elif users_apache_index_options is defined %}
+    IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_ssi_legacy is defined %}
+    SSILegacyExprParser {% if vhost_config.users_apache_ssi_legacy %}on{% else %}off{% endif %}
+    {%- elif users_apache_ssi_legacy is defined %}
+    SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
+    {%- endif %}
     {%- if vhost_config.users_apache_index is defined %}
     DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
     {%- elif users_apache_index is defined %}
@@ -293,14 +303,34 @@
     {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
     {%- endif %}
+    {%- if users_apache_add_output_filters is defined %}
+      {%- for filter in users_apache_add_output_filters %}
+    AddOutputFilter {{ filter }}   
+      {%- endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_add_output_filters is defined %}
+      {%- for filter in vhost_config.users_apache_add_output_filters %}
+    AddOutputFilter {{ filter }}   
+      {%- endfor %}
+    {%- endif %}
+    {%- if users_apache_add_type is defined %}
+      {%- for mimetype in users_apache_add_type %}
+    AddType "{{ mimetype.type }}" .{{ mimetype.ext }}   
+      {%- endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_add_type is defined %}
+      {%- for mimetype in vhost_config.users_apache_add_type %}
+    AddType "{{ mimetype.type }}" . {{ mimetype.ext }}
+      {%- endfor %}
+    {%- endif %}
     {%- if vhost_config.users_apache_filesmatch is defined %}
       {%- for fm in vhost_config.users_apache_filesmatch %}
-    <FilesMatch "{{ fm.regex }}" > 
+    <FilesMatch "{{ fm.regex }}" >
         {%- if fm.require is defined %}
           {%- for req in fm.require %}
       Require {{ req }}
           {%- endfor %}
-        {%- else %}     
+        {%- else %}
       Require all denied
         {%- endif %}
     </FilesMatch>
@@ -312,7 +342,11 @@
       <IfModule setenvif_module>
         SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
       </IfModule>
-      <FilesMatch "\.php$">
+      {%- if users.value.users_phpfpm_extensions is defined %}
+      <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endif %}$">
+      {%- else %}
+      <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endif %}$">
+      {%- endif %}
         <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
         {%- if "chroot" in user.value.users_groups %}

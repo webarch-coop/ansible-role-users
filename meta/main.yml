@@ -1,6 +1,7 @@
 ---
 galaxy_info:
   role_name: users
+  namespace: chriscroome
   author: Chris Croome
   description: Ansible role for adding user accounts to Debian and Ubuntu servers
   company: Webarchitects Co-operative
