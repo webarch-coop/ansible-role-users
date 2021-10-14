@@ -299,6 +299,26 @@
   tags:
     - users
 
+- name: "ErrorDocument checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+  block:
+
+    - name: "Check that users_apache_error_docs is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - vhost.value.users_apache_error_docs | type_debug == "list"
+
+    - name: "Check that the code and path values for users_apache_error_docs are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - doc.code is defined
+          - doc.code is regex('^4|5[0-9][0-9]$')
+          - doc.path is defined
+      loop: "{{ vhost.value.users_apache_error_docs }}"
+      loop_control:
+        loop_var: doc
+
+  when: vhost.value.users_apache_error_docs is defined 
+
 - name: "CMS checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:
 
