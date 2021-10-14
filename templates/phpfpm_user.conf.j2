@@ -139,13 +139,13 @@ clear_env = yes
 ; Note: set an empty value to allow all extensions.
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5 .php7
-{%- if user.value.users_phpfpm_extensions is defined %}
+{% if user.value.users_phpfpm_extensions is defined %}
 security.limit_extensions = {% for ext in user.value.users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
-{%- elif users_phpfpm_extensions is defined %}
+{% elif users_phpfpm_extensions is defined %}
 security.limit_extensions = {% for ext in users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
-{%- else %}
+{% else %}
 security.limit_extensions = .php
-{%- endif %}
+{% endif %}
 
 ; Pass environment variables like LD_LIBRARY_PATH. All $VARIABLEs are taken from
 ; the current environment.
