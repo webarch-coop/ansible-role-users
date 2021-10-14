@@ -298,10 +298,10 @@
       <IfModule setenvif_module>
         SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
       </IfModule>
-      {%- if vhost_config.users_phpfpm_extension is defined %}
-      <FilesMatch "\.{{ vhost_config.users_phpfpm_extension }}$">
+      {%- if users.value.users_phpfpm_extensions is defined %}
+      <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endif %}$">
       {%- else %}
-      <FilesMatch "\.{{ users_phpfpm_extension }}$">
+      <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endif %}$">
       {%- endif %}
         <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
