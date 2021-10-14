@@ -107,8 +107,8 @@ users_phpfpm_pm_start_servers: 2
 users_phpfpm_pm_min_spare_servers: 1
 users_phpfpm_pm_max_spare_servers: 1
 users_phpfpm_request_terminate_timeout: 360
-# Change users_phpfpm_extension to change what files are processed, for example
-# html? would match html and htm
+# The users_phpfpm_extensions array is for a list of files extensions to be
+# processed for PHP commands, it can also be set at a users level
 users_phpfpm_extensions:
   - php
 users_phpfpm_enable_open_basedir: false
