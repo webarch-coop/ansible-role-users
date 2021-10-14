@@ -57,11 +57,11 @@
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
   </If>
   {%- if vhost_config.users_apache_server_aliases is defined %}
-  {%- for alias in vhost_config.users_apache_server_aliases %}
+    {%- for alias in vhost_config.users_apache_server_aliases %}
   <ElseIf "%{HTTP_HOST} == '{{ alias }}'">
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ alias }}$0
   </ElseIf>
-  {%- endfor %}
+    {%- endfor %}
   {%- endif %}
   <Else>
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
@@ -343,9 +343,9 @@
         SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
       </IfModule>
       {%- if users.value.users_phpfpm_extensions is defined %}
-      <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endif %}$">
+      <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
       {%- else %}
-      <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endif %}$">
+      <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
       {%- endif %}
         <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
