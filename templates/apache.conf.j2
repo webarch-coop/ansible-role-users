@@ -300,8 +300,10 @@
       </IfModule>
       {%- if user.value.users_phpfpm_extensions is defined %}
       <FilesMatch "\.{% for ext in user.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
-      {%- else %}
+      {%- elif users_phpfpm_extensions is defined %}
       <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      {%- else %}
+      <FilesMatch "\.php$">
       {%- endif %}
         <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
