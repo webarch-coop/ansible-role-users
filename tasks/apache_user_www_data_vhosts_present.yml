@@ -1,5 +1,5 @@
 ---
-- name: Debug the apache.conf.j2 template variables
+- name: Debug some apache.conf.j2 template variables
   debug:
     msg:
       - "user.key: {{ user.key }}"

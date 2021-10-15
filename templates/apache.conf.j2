@@ -2,12 +2,7 @@
 
 {%- for vhost,vhost_config in user.value.users_apache_virtual_hosts.items() %}
 
-# {{ vhost_config.users_apache_server_name }}
-{%- if user.value.users_apache_vhost_docroot is defined %}
-# {{ user.value.users_apache_vhost_docroot }}
-{%- else %}
-# {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
-{%- endif %}
+# {{ vhost_config.users_apache_server_name }} port 80
 <VirtualHost *:80>
   ServerName {{ vhost_config.users_apache_server_name }}
   {%- if vhost_config.users_apache_server_aliases is defined %}
@@ -27,12 +22,8 @@
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
   </Else>
 </VirtualHost>
-# {{ vhost_config.users_apache_server_name }}
-{%- if user.value.users_apache_vhost_docroot is defined %}
-# {{ user.value.users_apache_vhost_docroot }}
-{%- else %}
+# {{ vhost_config.users_apache_server_name }} port 443
 # {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
-{%- endif %}
 <VirtualHost *:443>
   ServerName {{ vhost_config.users_apache_server_name }}
   {%- if vhost_config.users_apache_server_aliases is defined %}
@@ -185,37 +176,91 @@
   {%- if vhost_config.users_apache_directories is defined %}
     {%- if vhost_config.users_apache_directories == [] %}
   # No Directories are defined
-    {%- else %}
-      {%- for dir in vhost_config.users_apache_directories %}
-  <Directory "{{ dir.path }}">
-        {%- if dir.options is defined %}
-    Options{% for option in dir.options %} {{ option }}{% endfor %}
+     {%- else %}
+       {%- for dir in vhost_config.users_apache_directories %}
+  <Directory "{{ dir.directory }}">
+        {%- if dir.users_apache_options is defined %}
+    Options{% for option in dir.users_apache_options %} {{ option }}{% endfor %}
         {%- else %}
-    Options FollowSymlinks
+    Options None
         {%- endif %}
-        {%- if dir.allow_override is defined %}
-    AllowOverride{% for override in dir.allow_override %} {{ override }}{% endfor %}
+        {%- if dir.users_apache_index_options is defined %}
+    IndexOptions{% for opt in dir.users_apache_index_options %} {{ opt }}{% endfor %}
+        {%- elif users_apache_index_options is defined %}
+    IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
+        {%- endif %}
+        {%- if dir.users_apache_ssi_legacy is defined %}
+    SSILegacyExprParser {% if dir.users_apache_ssi_legacy %}on{% else %}off{% endif %}
+        {%- elif users_apache_ssi_legacy is defined %}
+    SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
+        {%- endif %}
+        {%- if dir.users_apache_index is defined %}
+    DirectoryIndex{% for file in dir.users_apache_index %} {{ file }}{% endfor %} 
+        {%- else %}
+    DirectoryIndex index.html index.htm
+        {%- endif %}
+        {%- if dir.users_apache_override is defined %}
+    AllowOverride{% for option in dir.users_apache_override %} {{ option }}{% endfor %}
         {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
         {%- endif %}
-        {%- if dir.require is defined %}
-          {%- for req in dir.require %}
+        {%- if dir.users_apache_add_output_filters is defined %}
+          {%- for filter in dir.users_apache_add_output_filters %}
+    AddOutputFilter {{ filter }}   
+          {%- endfor %}
+        {%- endif %}
+        {%- if dir.users_apache_add_type is defined %}
+          {%- for mimetype in dir.users_apache_add_type %}
+    AddType "{{ mimetype.type }}" . {{ mimetype.ext }}
+          {%- endfor %}
+        {%- endif %}
+        {%- if dir.users_apache_filesmatch is defined %}
+          {%- for fm in dir.users_apache_filesmatch %}
+    <FilesMatch "{{ fm.regex }}" >
+            {%- if fm.require is defined %}
+              {%- for req in fm.require %}
+      Require {{ req }}
+              {%- endfor %}
+            {%- else %}
+      Require all denied
+            {%- endif %}
+    </FilesMatch>
+          {%- endfor %}
+        {%- endif %}
+        {%- if dir.users_apache_auth_name is defined %}
+    AuthName "{{ dir.users_apache_auth_name }}"
+        {%- endif %}
+        {%- if dir.users_apache_auth_type is defined %}
+    AuthType "{{ dir.users_apache_auth_type }}"
+          {%- if dir.users_apache_auth_type == "Basic" %}
+    AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"  
+          {%- endif %}
+        {%- else %}
+    AuthType "None"
+        {%- endif %}
+        {%- if dir.users_apache_require is defined and dir.users_apache_require != [] %}
+          {%- for req in dir.users_apache_require %}
     Require {{ req }}
           {%- endfor %}
         {%- else %}
     Require all granted
         {%- endif %}
+        {%- if dir.users_apache_expires is defined %}
+          {% if dir.users_apache_expires == "medium" %}
+    IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
+          {%- elif dir.users_apache_expires == "strict" %}
+    IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
+          {%- elif dir.users_apache_expires == "forever" %}
+    IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
+          {%- endif %}
+        {%- endif %}
   </Directory>
       {%- endfor %}
     {%- endif %}
-  {%- else %}
-    {%- if user.value.users_apache_vhost_docroot is defined %}
-  DocumentRoot "{{ user.value.users_apache_vhost_docroot }}" 
-  <Directory "{{ user.value.users_apache_vhost_docroot }}">
-    {%- else %}
+  {%- endif %}
+  {%- if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot %}
   DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-    {%- endif %}
     {%- if vhost_config.users_apache_options is defined %}
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
     {%- elif users_apache_options is defined %}
@@ -300,8 +345,10 @@
       </IfModule>
       {%- if users.value.users_phpfpm_extensions is defined %}
       <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
-      {%- else %}
+      {%- elif users_phpfpm_extensions is defined %}
       <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      {% else %}
+      <FilesMatch "\.php$">
       {%- endif %}
         <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
@@ -350,22 +397,35 @@
     {%- else %}
     Require all granted
     {%- endif %}
-    {%- if vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "medium" %}
+    {%- if vhost_config.users_apache_expires is defined %}
+      {% if vhost_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
-    {%- elif vhost_config.users_apache_expires is defined and vhost_config.users_apache_expires == "strict" %}
+      {%- elif vhost_config.users_apache_expires == "strict" %}
     IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
+      {%- elif vhost_config.users_apache_expires == "forever" %}
+    IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
+      {%- endif %}
     {%- endif %}
   </Directory>
   {%- endif %}
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
     {%- for dir in vhost_config.users_apache_nophp_dirs %}
   # No PHP allowed in this directory
-      {%- if user.value.users_apache_vhost_docroot is defined %}
-  <Directory "{{ user.value.users_apache_vhost_docroot }}/{{ dir }}">
-      {%- else %}
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+      {%- if users.value.users_phpfpm_extensions is defined %}
+    RemoveHandler {% for ext in users.value.users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
+      {%- elif users_phpfpm_extensions is defined %}
+    RemoveHandler {% for ext in users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
+      {% else %}
+    RemoveHandler .php
       {%- endif %}
+      {%- if users.value.users_phpfpm_extensions is defined %}
+    <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      {%- elif users_phpfpm_extensions is defined %}
+    <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      {% else %}
     <FilesMatch "\.php$">
+      {%- endif %}
       <If "-f %{REQUEST_FILENAME}">
         Require all denied
       </If>
@@ -376,14 +436,8 @@
   {%- if vhost_config.users_apache_deny_dirs is defined %}
     {%- for dir in vhost_config.users_apache_deny_dirs %}
   # No access allowed for this directory
-      {%- if user.value.users_apache_vhost_docroot is defined %}
-  <Directory "{{ user.value.users_apache_vhost_docroot }}/{{ dir }}">
-      {%- else %}
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-      {%- endif %}
-    <IfModule mod_authz_core.c>
-      Require all denied
-    </IfModule>
+    Require all denied
   </Directory>
     {%- endfor %}
   {%- endif %}
