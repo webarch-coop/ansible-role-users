@@ -168,12 +168,14 @@
           loop: "{{ vhost_config.users_apache_directories | dict2items }}"
           loop_control:
             loop_var: dir
+            label: "{{ dir.key }}"
 
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
           include_tasks: user_check_vhost_dir.yml
-          loop: "{{ vhost_config.users_apache_directories }}"
+          loop: "{{ vhost_config.users_apache_directories | dict2items }}"
           loop_control:
             loop_var: dir
+            label: "{{ dir.key }}"
 
       when: vhost_config.users_apache_directories is defined
 

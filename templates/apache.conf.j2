@@ -177,45 +177,45 @@
     {%- if vhost_config.users_apache_directories == [] %}
   # No Directories are defined
      {%- else %}
-       {%- for dir in vhost_config.users_apache_directories %}
-  <Directory "{{ dir.directory }}">
-        {%- if dir.users_apache_options is defined %}
-    Options{% for option in dir.users_apache_options %} {{ option }}{% endfor %}
+       {%- for dir,dir_config in vhost_config.users_apache_directories.items() %}
+  <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
+        {%- if dir_config.users_apache_options is defined %}
+    Options{% for option in dir_config.users_apache_options %} {{ option }}{% endfor %}
         {%- else %}
     Options None
         {%- endif %}
-        {%- if dir.users_apache_index_options is defined %}
-    IndexOptions{% for opt in dir.users_apache_index_options %} {{ opt }}{% endfor %}
+        {%- if dir_config.users_apache_index_options is defined %}
+    IndexOptions{% for opt in dir_config.users_apache_index_options %} {{ opt }}{% endfor %}
         {%- elif users_apache_index_options is defined %}
     IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
         {%- endif %}
-        {%- if dir.users_apache_ssi_legacy is defined %}
-    SSILegacyExprParser {% if dir.users_apache_ssi_legacy %}on{% else %}off{% endif %}
+        {%- if dir_config.users_apache_ssi_legacy is defined %}
+    SSILegacyExprParser {% if dir_config.users_apache_ssi_legacy %}on{% else %}off{% endif %}
         {%- elif users_apache_ssi_legacy is defined %}
     SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
         {%- endif %}
-        {%- if dir.users_apache_index is defined %}
-    DirectoryIndex{% for file in dir.users_apache_index %} {{ file }}{% endfor %} 
+        {%- if dir_config.users_apache_index is defined %}
+    DirectoryIndex{% for file in dir_config.users_apache_index %} {{ file }}{% endfor %} 
         {%- else %}
     DirectoryIndex index.html index.htm
         {%- endif %}
-        {%- if dir.users_apache_override is defined %}
-    AllowOverride{% for option in dir.users_apache_override %} {{ option }}{% endfor %}
+        {%- if dir_config.users_apache_override is defined %}
+    AllowOverride{% for option in dir_config.users_apache_override %} {{ option }}{% endfor %}
         {%- else %}
     AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
         {%- endif %}
-        {%- if dir.users_apache_add_output_filters is defined %}
-          {%- for filter in dir.users_apache_add_output_filters %}
+        {%- if dir_config.users_apache_add_output_filters is defined %}
+          {%- for filter in dir_config.users_apache_add_output_filters %}
     AddOutputFilter {{ filter }}   
           {%- endfor %}
         {%- endif %}
-        {%- if dir.users_apache_add_type is defined %}
-          {%- for mimetype in dir.users_apache_add_type %}
+        {%- if dir_config.users_apache_add_type is defined %}
+          {%- for mimetype in dir_config.users_apache_add_type %}
     AddType "{{ mimetype.type }}" . {{ mimetype.ext }}
           {%- endfor %}
         {%- endif %}
-        {%- if dir.users_apache_filesmatch is defined %}
-          {%- for fm in dir.users_apache_filesmatch %}
+        {%- if dir_config.users_apache_filesmatch is defined %}
+          {%- for fm in dir_config.users_apache_filesmatch %}
     <FilesMatch "{{ fm.regex }}" >
             {%- if fm.require is defined %}
               {%- for req in fm.require %}
@@ -227,30 +227,30 @@
     </FilesMatch>
           {%- endfor %}
         {%- endif %}
-        {%- if dir.users_apache_auth_name is defined %}
-    AuthName "{{ dir.users_apache_auth_name }}"
+        {%- if dir_config.users_apache_auth_name is defined %}
+    AuthName "{{ dir_config.users_apache_auth_name }}"
         {%- endif %}
-        {%- if dir.users_apache_auth_type is defined %}
-    AuthType "{{ dir.users_apache_auth_type }}"
-          {%- if dir.users_apache_auth_type == "Basic" %}
-    AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"  
+        {%- if dir_config.users_apache_auth_type is defined %}
+    AuthType "{{ dir_config.users_apache_auth_type }}"
+          {%- if dir_config.users_apache_auth_type == "Basic" %}
+    AuthUserFile "{{ user.value.users_home | default(users_basedir_config.+ '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"  
           {%- endif %}
         {%- else %}
     AuthType "None"
         {%- endif %}
-        {%- if dir.users_apache_require is defined and dir.users_apache_require != [] %}
-          {%- for req in dir.users_apache_require %}
+        {%- if dir_config.users_apache_require is defined and dir_config.users_apache_require != [] %}
+          {%- for req in dir_config.users_apache_require %}
     Require {{ req }}
           {%- endfor %}
         {%- else %}
     Require all granted
         {%- endif %}
-        {%- if dir.users_apache_expires is defined %}
-          {% if dir.users_apache_expires == "medium" %}
+        {%- if dir_config.users_apache_expires is defined %}
+          {% if dir_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
-          {%- elif dir.users_apache_expires == "strict" %}
+          {%- elif dir_config.users_apache_expires == "strict" %}
     IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
-          {%- elif dir.users_apache_expires == "forever" %}
+          {%- elif dir_config.users_apache_expires == "forever" %}
     IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
           {%- endif %}
         {%- endif %}

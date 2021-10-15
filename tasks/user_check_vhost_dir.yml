@@ -2,11 +2,18 @@
 - name: "Apache Directory directives checks for the {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:
 
+    - name: "Check the directory key for the {{ dir.key }} Directory in VirtualHost for {{ user.key }} contains valid characters"
+      assert:
+        that:
+          - dir.key is not regex("^[\/].*$")
+          - dir.key is regex("^[a-zA-Z0-9/_.-]*$")
+        fail_msg: "A relative DocumentRoot path, only letters, numbers, underscores, dashes and forward slashes are allowed"
+
     - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
       assert:
         that:
-          - dir.users_apache_expires is regex('^medium|strict|forever$')
-      when: dir.users_apache_expires is defined
+          - dir.value.users_apache_expires is regex('^medium|strict|forever$')
+      when: dir.value.users_apache_expires is defined
 
     - name: "Check that only valid Options are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
@@ -14,19 +21,19 @@
         - name: "Check that the Options for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
           assert:
             that:
-              - dir.users_apache_options | length
-              - dir.users_apache_options[0] is defined
+              - dir.value.users_apache_options | length
+              - dir.value.users_apache_options[0] is defined
 
         - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - option is regex("^[+-](?i)All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$")
-          loop: "{{ dir.users_apache_options }}"
+          loop: "{{ dir.value.users_apache_options }}"
           loop_control:
             loop_var: option
             label: "{{ option }}"
 
-      when: dir.users_apache_options is defined
+      when: dir.value.users_apache_options is defined
 
     - name: "Check that only valid IndexOptions listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
@@ -34,37 +41,37 @@
         - name: "Check that the IndexOptions for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
           assert:
             that:
-              - dir.users_apache_index_options | length
-              - dir.users_apache_index_options[0] is defined
+              - dir.value.users_apache_index_options | length
+              - dir.value.users_apache_index_options[0] is defined
 
         - name: "Check that all IndexOptions are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - option is regex("^[+-](?i)AddAltClass|Charset|DescriptionWidth|FancyIndexing|FoldersFirst|HTMLTable|IconsAreLinks|IconHeight|IconWidth|IgnoreCase|IgnoreClient|NameWidth|ScanHTMLTitles|ShowForbidden|SuppressColumnSorting|SuppressDescription|SuppressHTMLPreamble|SuppressIcon|SuppressLastModified|SuppressRules|SuppressSize|TrackModified|UseOldDateFormat|VersionSort|XHTML.*$")
-          loop: "{{ dir.users_apache_index_options }}"
+          loop: "{{ dir.value.users_apache_index_options }}"
           loop_control:
             loop_var: option
             label: "{{ option }}"
 
-      when: dir.users_apache_index_options is defined
+      when: dir.value.users_apache_index_options is defined
 
     - name: "Check that SSILegacyExprParser is true or false for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       assert:
         that:
-          - dir.users_apache_ssi_legacy | type_debug == "bool"
-      when: dir.users_apache_ssi_legacy is defined
+          - dir.value.users_apache_ssi_legacy | type_debug == "bool"
+      when: dir.value.users_apache_ssi_legacy is defined
 
     - name: "Check that AddOutputFilter for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
       assert:
         that:
-          - dir.users_apache_add_output_filters | type_debug == "list"
-      when: dir.users_apache_add_output_filters is defined
+          - dir.value.users_apache_add_output_filters | type_debug == "list"
+      when: dir.value.users_apache_add_output_filters is defined
 
     - name: "Check that AddType for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
       assert:
         that:
-          - dir.users_apache_add_type | type_debug == "list"
-      when: dir.users_apache_add_type is defined
+          - dir.value.users_apache_add_type | type_debug == "list"
+      when: dir.value.users_apache_add_type is defined
 
     - name: "Check that only valid AllowOverride directives are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
@@ -72,19 +79,19 @@
         - name: "Check that the AllowOverride directives for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
           assert:
             that:
-              - dir.users_apache_override | length
-              - dir.users_apache_override[0] is defined
+              - dir.value.users_apache_override | length
+              - dir.value.users_apache_override[0] is defined
 
         - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
-          loop: "{{ dir.users_apache_override }}"
+          loop: "{{ dir.value.users_apache_override }}"
           loop_control:
             loop_var: override
             label: "{{ override }}"
 
-      when: dir.users_apache_override is defined
+      when: dir.value.users_apache_override is defined
 
     - name: "Check that file names are listed for the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array if defined"
       block:
@@ -92,26 +99,26 @@
         - name: "Check that the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
           assert:
             that:
-              - dir.users_apache_index | length
-              - dir.users_apache_index[0] is defined
+              - dir.value.users_apache_index | length
+              - dir.value.users_apache_index[0] is defined
 
         - name: "Check that each DirectoryIndex appears to be a filename for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - index is regex("^\w+\.\w+$")
-          loop: "{{ dir.users_apache_index }}"
+          loop: "{{ dir.value.users_apache_index }}"
           loop_control:
             loop_var: index
             label: "{{ index }}"
 
-      when: dir.users_apache_index is defined
+      when: dir.value.users_apache_index is defined
 
     - name: "Check that AuthType is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       assert:
         that:
-          - dir.users_apache_auth_type | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
-          - dir.users_apache_auth_type is regex("None|Basic|Digest|Form")
-      when: dir.users_apache_auth_type is defined
+          - dir.value.users_apache_auth_type | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
+          - dir.value.users_apache_auth_type is regex("None|Basic|Digest|Form")
+      when: dir.value.users_apache_auth_type is defined
 
     - name: "Check that Require is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
@@ -119,19 +126,19 @@
         - name: "Check that users_apache_require is a list for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - dir.users_apache_require | type_debug == "list"
+              - dir.value.users_apache_require | type_debug == "list"
 
         - name: "Check that that values other than method for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - req is regex("^all granted|^all denied|^env .*|^method [A-Z ]{3,51}|^expr .*|^user .*|^group .*|^valid-user|^ip .*|^forward-dns .*")
           when: req is not regex("method .*")
-          loop: "{{ dir.users_apache_require }}"
+          loop: "{{ dir.value.users_apache_require }}"
           loop_control:
             loop_var: req
             label: "{{ req }}"
 
-      when: ( dir.users_apache_require is defined ) and ( dir.users_apache_require != [] )
+      when: ( dir.value.users_apache_require is defined ) and ( dir.value.users_apache_require != [] )
 
     - name: "FilesMatch checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
@@ -139,18 +146,18 @@
         - name: "Check that users_apache_filesmatch is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - dir.users_apache_filesmatch | type_debug == "list"
+              - dir.value.users_apache_filesmatch | type_debug == "list"
 
         - name: "Check that regex is defined for FilesMatch for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - fm.regex is defined
-          loop: "{{ dir.users_apache_filesmatch }}"
+          loop: "{{ dir.value.users_apache_filesmatch }}"
           loop_control:
             loop_var: fm
             label: "{{ fm }}"
 
-      when: dir.users_apache_filesmatch is defined
+      when: dir.value.users_apache_filesmatch is defined
 
   tags:
     - users
