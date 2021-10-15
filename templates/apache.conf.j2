@@ -208,7 +208,8 @@
   </Directory>
       {%- endfor %}
     {%- endif %}
-  {%- else %}
+  {%- endif %}
+  {%- if vhost_config.users_apache_default_dir is not defined or vhost_config.users_apache_default_dir %}
     {%- if user.value.users_apache_vhost_docroot is defined %}
   DocumentRoot "{{ user.value.users_apache_vhost_docroot }}" 
   <Directory "{{ user.value.users_apache_vhost_docroot }}">
