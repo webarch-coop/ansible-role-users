@@ -2,17 +2,10 @@
 - name: "Apache Directory directives checks for the {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:
 
-    - name: Debug Directory array
+    - name: "Debug Directory array for {{ vhost.key }} VirtualHost for {{ user.key }} user"
       debug:
         var: dir
         verbosity: 2
-
-    - name: "Check the directory key for the {{ dir.key }} Directory in VirtualHost for {{ user.key }} contains valid characters"
-      assert:
-        that:
-          - dir.key is not regex("^[\/].*$")
-          - dir.key is regex("^[a-zA-Z0-9/_.-]*$")
-        fail_msg: "A relative DocumentRoot path, only letters, numbers, underscores, dashes and forward slashes are allowed"
 
     - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
       assert:

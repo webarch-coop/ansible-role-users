@@ -170,6 +170,17 @@
             loop_var: dir
             label: "{{ dir.key }}"
 
+        - name: "Check that the users_apache_directories keys, which are relative paths, for {{ vhost.key }} VirtualHost for {{ user.key }} contain valid characters"
+          assert:
+            that:
+              - dir.key is not regex("^[\/].*$")
+              - dir.key is regex("^[a-zA-Z0-9/_.-]*$")
+            fail_msg: "A relative DocumentRoot path, only letters, numbers, underscores, dashes and forward slashes are allowed"
+          loop: "{{ vhost_config.users_apache_directories | dict2items }}"
+          loop_control:
+            loop_var: dir
+            label: "{{ dir.key }}"
+
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
           include_tasks: user_check_vhost_dir.yml
           loop: "{{ vhost_config.users_apache_directories | dict2items }}"
@@ -191,7 +202,7 @@
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
           include_tasks: user_check_vhost_dir.yml
           vars:
-            dir: "{{ vhost.value }}"
+            dir: "{{ vhost.value | dict2items }}"
 
       when: ( users_apache_vhost_docroot is not defined ) or ( users_apache_vhost_docroot is defined and users_apache_vhost_docroot )
 
