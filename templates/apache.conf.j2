@@ -233,7 +233,7 @@
         {%- if dir_config.users_apache_auth_type is defined %}
     AuthType "{{ dir_config.users_apache_auth_type }}"
           {%- if dir_config.users_apache_auth_type == "Basic" %}
-    AuthUserFile "{{ user.value.users_home | default(users_basedir_config.+ '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"  
+    AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"  
           {%- endif %}
         {%- else %}
     AuthType "None"
