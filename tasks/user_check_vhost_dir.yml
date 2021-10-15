@@ -1,5 +1,5 @@
 ---
-- name: "Apache Directory directives checks for the {{ vhost.key }} VirtualHost for {{ user.key }}" 
+- name: "Apache Directory directives checks for the {{ vhost.key }} VirtualHost for {{ user.key }}"
   block:
 
     - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
@@ -135,12 +135,12 @@
 
     - name: "FilesMatch checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
-    
+
         - name: "Check that users_apache_filesmatch is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - dir.users_apache_filesmatch | type_debug == "list"
-    
+
         - name: "Check that regex is defined for FilesMatch for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
@@ -149,7 +149,7 @@
           loop_control:
             loop_var: fm
             label: "{{ fm }}"
-    
+
       when: dir.users_apache_filesmatch is defined
 
   tags:
