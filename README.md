@@ -6,7 +6,9 @@ This repository contains an Ansible role for adding user accounts to Debian
 servers.
 
 **Lots of documentation needs to be added to this file, what follows probably
-isn't up to date.**
+isn't up to date, see the [releases](https://git.coop/webarch/users/-/releases)
+for updates and changes, do not use the `master` branch for production, it is
+used for development.**
 
 To use this role you need to use Ansible Galaxy to install it into another
 repository under `galaxy/roles/users` by adding a `requirements.yml` file in
