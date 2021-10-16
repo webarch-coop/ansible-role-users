@@ -2,11 +2,15 @@
 
 [![pipeline status](https://git.coop/webarch/users/badges/master/pipeline.svg)](https://git.coop/webarch/users/-/commits/master)
 
-This repository contains an Ansible role for adding user accounts to Debian servers.
+This repository contains an Ansible role for adding user accounts to Debian
+servers.
 
-**Lots of documentation needs to be added to this file, what follows probably isn't up to date.**
+**Lots of documentation needs to be added to this file, what follows probably
+isn't up to date.**
 
-To use this role you need to use Ansible Galaxy to install it into another repository under `galaxy/roles/users` by adding a `requirements.yml` file in that repo that contains:
+To use this role you need to use Ansible Galaxy to install it into another
+repository under `galaxy/roles/users` by adding a `requirements.yml` file in
+that repo that contains:
 
 ```yml
 ---
@@ -16,7 +20,10 @@ To use this role you need to use Ansible Galaxy to install it into another repos
   scm: git
 ```
 
-If you want to use any of the `quota_` variables then you also need to include the [quota role](https://git.coop/webarch/quota) and make sure that `quota_dir` is set to a mount point for a partition, for example have a seperate `/home` partition.
+If you want to use any of the `quota_` variables then you also need to include
+the [quota role](https://git.coop/webarch/quota) and make sure that `quota_dir`
+is set to a mount point for a partition, for example have a seperate `/home`
+partition.
 
 ```yml
 ---
@@ -131,9 +138,13 @@ ansible-playbook users.yml
 
 ## Debugging
 
-If `users_update_strategy: check`, for example on the command line using `--extra-vars "users_update_strategy=true"` then no changes will be made other than to generate `/root/users/proposed/*.yml` state files.
+If `users_update_strategy: check`, for example on the command line using
+`--extra-vars "users_update_strategy=true"` then no changes will be made other
+than to generate `/root/users/proposed/*.yml` state files.
 
-If `users_domain_check` is set to `strict` then if a domain name doesn't resolve to the servers IP address then the tasks will stop rather than just warn.
+If `users_domain_check` is set to `strict` then if a domain name doesn't
+resolve to the servers IP address then the tasks will stop rather than just
+warn.
 
 So, for example:
 
@@ -144,7 +155,8 @@ ansible-galaxy install -r requirements.yml --force && \
 
 ## SSH Public Keys
 
-The `users_ssh_public_keys` array should be set to a list of one or more URL's for public keys (eg from GitHub).
+The `users_ssh_public_keys` array should be set to a list of one or more URL's
+for public keys (eg from GitHub).
 
 All the files at the URL's will be downloaded to files named:
 
@@ -152,13 +164,27 @@ All the files at the URL's will be downloaded to files named:
 * `~/.ssh/authorized_keys.d/authorized_keys_1`
 * `~/.ssh/authorized_keys.d/authorized_keys_2`
 
-Then the `~/.ssh/authorized_keys.d/authorized_keys_*` files are assembled to `~/.ssh/authorized_keys`, (inless this file name is overridden from the default, see the users_ssh_authorized_keys_file_name variable) this means if you want to add additional keys then you can simply add them to this directory, with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`. 
+Then the `~/.ssh/authorized_keys.d/authorized_keys_*` files are assembled to
+`~/.ssh/authorized_keys`, (inless this file name is overridden from the
+default, see the users_ssh_authorized_keys_file_name variable) this means if
+you want to add additional keys then you can simply add them to this directory,
+with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`. 
 
 ## Apache
 
+By default a `DocumentRoot` and `Directory` set of directives are generated for
+each `VirtualHost` based on the YAML dictionaries defined by
+`users_apache_virtual_hosts`. This `DocumentRoot` and `Directory` will be
+omitted if `users_apache_vhost_docroot` is set to `False` at a `VirtualHost`
+level (prior to version `3.0.0` of this role the `users_apache_vhost_docroot`
+was not a boolean and could be set to a path, however this wasn't used so it
+was re-purposed) . Additional `Directory` sections can be added using
+`users_apache_directories` at a `VirtualHost` level.
+
 ### Options
 
-Server wide settings for `VirtualHosts` can be set like this (see the commented out variables in [defaults/main.yml](defaults/main.yml)):
+Server wide settings for `VirtualHosts` can be set like this (see the commented
+out variables in [defaults/main.yml](defaults/main.yml)):
 
 ```yml
 users_apache_options:
@@ -181,7 +207,9 @@ users_apache_override:
   - Nonfatal=Override
 ```
 
-If these variables ar not set server-wide then the `users_apache_type` variable can be used per `VirtualHost` and if it is set to `php` then these directives are used:
+If these variables ar not set server-wide then the `users_apache_type` variable
+can be used per `VirtualHost` and if it is set to `php` then these directives
+are used:
 
 ```apache
 Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
@@ -197,7 +225,8 @@ DirectoryIndex index.cgi index.pl index.html index.htm index.shtml
 AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 ```
 
-And if `users_apache_type` is omitted (or set to a value such as `static`) then these defaults are used:
+And if `users_apache_type` is omitted (or set to a value such as `static`) then
+these defaults are used:
 
 ```apache
 Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
@@ -205,9 +234,13 @@ DirectoryIndex index.html index.htm index.shtml
 AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 ```
 
-The arrays, `users_apache_options`, `users_apache_index` and `users_apache_override` can also be set by `VirtualHost` and if they are these overrule the other settings, see the [Apache template for the details](templates/apache.conf.j2).
+The arrays, `users_apache_options`, `users_apache_index` and
+`users_apache_override` can also be set by `VirtualHost` aand if they are these
+overrule the other settings for the `DocumentRoot` directory, see the [Apache
+template for the details](templates/apache.conf.j2).
 
-Basic authentication can be set on the `DocumentRoot` directory, for example for MediaWiki (the `VisualEditor` needs access via the `localhost`):
+Basic authentication can be set on the `DocumentRoot` directory, for example
+for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 
 ```yml
         users_apache_auth_name: Private
@@ -218,11 +251,13 @@ Basic authentication can be set on the `DocumentRoot` directory, for example for
           - ip 127.0.0.1
 ```
 
-The same `users_apache_htauth_users` array is used for the usernaes and passwords as documented below.
+The same `users_apache_htauth_users` array is used for the usernaes and
+passwords as documented below.
 
 ### Location
 
-The `users_apache_locations` array can be used to apply HTTP Authentication to URL paths, for example:
+The `users_apache_locations` array can be used to apply HTTP Authentication to
+URL paths, for example:
 
 ```yml
         users_apache_locations:
@@ -241,7 +276,11 @@ The `users_apache_locations` array can be used to apply HTTP Authentication to U
             require:
               - all denied
 ```
-The `users_apache_htauth_users` array can be used to set usernames and passwords, these are written to `~/.htpasswd/` in one file per `users_apache_server_name`, the optional `state` variables can be set to absent to remove users, for example:
+
+The `users_apache_htauth_users` array can be used to set usernames and
+passwords, these are written to `~/.htpasswd/` in one file per
+`users_apache_server_name`, the optional `state` variables can be set to absent
+to remove users, for example:
 
 ```yml
         users_apache_htauth_users:
@@ -250,7 +289,11 @@ The `users_apache_htauth_users` array can be used to set usernames and passwords
           - name: baz
             state: absent
 ```
-If the `authtype` is set to `None` then `AuthUserFile` isn't set and then a `require` array can be set [to do things like only allow a few IP addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require), for example:
+
+If the `authtype` is set to `None` then `AuthUserFile` isn't set and then a
+`require` array can be set [to do things like only allow a few IP
+addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require),
+for example:
 
 ```yml
         users_apache_locations:
@@ -262,7 +305,9 @@ If the `authtype` is set to `None` then `AuthUserFile` isn't set and then a `req
               - method GET POST
 ```
 
-It is also possible to set `Redirect`, see [the Apache Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
+It is also possible to set `Redirect`, see [the Apache
+Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
+
 ```yml
         users_apache_locations:
           - location: old-site/
@@ -276,83 +321,21 @@ An `Alias` can also be used in a `Location`:
             alias: /home/foo/sites/www/staticfiles
 ```
 
-### Reverse Proxy
-
-Configure a reverse proxy, for example for a [Nextcloud notify_push
-server](https://github.com/nextcloud/notify_push#apache) like this you can
-specify:
-
-```yml
-        users_apache_proxy_pass:
-          - path: /push/ws
-            url: ws://127.0.0.1:7867/ws
-          - path: /push/
-            url: http://127.0.0.1:7867/
-            reverse: true
-```
-
-And this will generate:
-
-```apache
-  ProxyPass "/push/ws" "ws://127.0.0.1:7867/ws"
-  ProxyPass "/push/" "http://127.0.0.1:7867/"
-  ProxyPassReverse "/push/" "http://127.0.0.1:7867/"
-```
-
-For a [reverse
-proxy](https://docs.rocket.chat/installing-and-updating/manual-installation/configuring-ssl-reverse-proxy#running-behind-an-apache-ssl-reverse-proxy)
-to a [Rocket.Chat server installed using snaps](https://docs.rocket.chat/installing-and-updating/snaps):
-
-```yml
-        users_apache_proxy_pass:
-          - path: /
-            url: http://127.0.0.1:3000/
-            rewrite_conditions:
-              - '%{HTTP:Upgrade} websocket [NC]'
-              - '%{HTTP:Connection} upgrade [NC]'
-            rewrite_rules:
-              - '^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]'
-            reverse: true
-```
-
-And this will generate:
-
-```apache
-  ProxyPass "/" "http://127.0.0.1:3000/"
-  RewriteEngine on
-  RewriteCond %{HTTP:Upgrade} websocket [NC]
-  RewriteCond %{HTTP:Connection} upgrade [NC]
-  RewriteRule ^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]
-  ProxyPassReverse "/" "http://127.0.0.1:3000/"
-```
-
-### FilesMatch
-
-If an `users_apache_filesmatch` array specified at the `VirtualHost` level with a list of `regex` like this:
-
-```yml
-        users_apache_filesmatch:
-          - regex: '^license\.txt$'
-          - regex: '^readme\.html$'
-          - regex: '^xmlrpc\.php$'
-```
-
-Then access to these files will be denied, unless one of more `require` items are listed, for example:
-
-```yml
-        users_apache_filesmatch:
-          - regex: '^xmlrpc\.php$'
-            require:
-              - method GET HEAD
-              - ip 9.9.9.9
-```
-
 ### Directories
 
-If `users_apache_directories` are specified at the `VirtualHost` level then the
-default `Directory` section of the [Apache
-template](https://git.coop/webarch/users/-/blob/master/templates/apache.conf.j2)
-will be skipped, this is handy when some directories are needed for static
+The `users_apache_directories` variable can be used at a `VirtualHost` level to
+list dictionaries representing `Directory` directives, **relative to the
+`users_sites_dir` path**. The variables that can be used are the same as the
+ones for the `DocumentRoot` directory apart from `users_apache_type`, this
+can't be used to set the `Ditectory` type to `php` or `static`.
+
+Prior to version `3.0.0` of this role `users_apache_directories` was used for
+an array of directories and when it was used the default `DocumentRoot` /
+`Directory` was omitted, from version `3.0.0` and up a dictionary rather than
+an array is used and the default `DocumentRoot` / `Directory` can be ommitted
+by setting `users_apache_vhost_docroot` to `False`.
+
+This is handy when some directories are needed for static
 content and `Alias` and also a proxy, for example:
 
 ```yml
@@ -366,11 +349,11 @@ content and `Alias` and also a proxy, for example:
           - url: /media
             path: /home/api/sites/api/media
         users_apache_directories:
-          - path: /home/api/sites/api/staticfiles
-            options:
+          api/static:
+            users_apache_options:
               - Indexes
-          - path: /home/api/sites/api/media
-            options:
+          api/media:
+            users_apache_options:
               - Indexes
         users_apache_proxy_pass:
           - path: /static
@@ -405,17 +388,102 @@ And this will generate:
 
 If no Directories are required use `users_apache_directories: []`.
 
+### Reverse Proxy
+
+Configure a reverse proxy, for example for a [Nextcloud notify_push
+server](https://github.com/nextcloud/notify_push#apache) like this you can
+specify:
+
+```yml
+        users_apache_proxy_pass:
+          - path: /push/ws
+            url: ws://127.0.0.1:7867/ws
+          - path: /push/
+            url: http://127.0.0.1:7867/
+            reverse: true
+```
+
+And this will generate:
+
+```apache
+  ProxyPass "/push/ws" "ws://127.0.0.1:7867/ws"
+  ProxyPass "/push/" "http://127.0.0.1:7867/"
+  ProxyPassReverse "/push/" "http://127.0.0.1:7867/"
+```
+
+For a [reverse
+proxy](https://docs.rocket.chat/installing-and-updating/manual-installation/configuring-ssl-reverse-proxy#running-behind-an-apache-ssl-reverse-proxy)
+to a [Rocket.Chat server installed using
+snaps](https://docs.rocket.chat/installing-and-updating/snaps):
+
+```yml
+        users_apache_proxy_pass:
+          - path: /
+            url: http://127.0.0.1:3000/
+            rewrite_conditions:
+              - '%{HTTP:Upgrade} websocket [NC]'
+              - '%{HTTP:Connection} upgrade [NC]'
+            rewrite_rules:
+              - '^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]'
+            reverse: true
+```
+
+And this will generate:
+
+```apache
+  ProxyPass "/" "http://127.0.0.1:3000/"
+  RewriteEngine on
+  RewriteCond %{HTTP:Upgrade} websocket [NC]
+  RewriteCond %{HTTP:Connection} upgrade [NC]
+  RewriteRule ^/?(.*) "ws://127.0.0.1:3000/$1" [P,L]
+  ProxyPassReverse "/" "http://127.0.0.1:3000/"
+```
+
+### FilesMatch
+
+If an `users_apache_filesmatch` array specified at the `VirtualHost` level with
+a list of `regex` like this:
+
+```yml
+        users_apache_filesmatch:
+          - regex: '^license\.txt$'
+          - regex: '^readme\.html$'
+          - regex: '^xmlrpc\.php$'
+```
+
+Then access to these files will be denied, unless one of more `require` items
+are listed, for example:
+
+```yml
+        users_apache_filesmatch:
+          - regex: '^xmlrpc\.php$'
+            require:
+              - method GET HEAD
+              - ip 9.9.9.9
+```
+
 ### Expires
 
-The optional `users_apache_expires` variable can be used to select the [medium](https://git.coop/webarch/apache/blob/master/templates/expires-medium.conf.j2) or [strict](https://git.coop/webarch/apache/blob/master/templates/expires-strict.conf.j2) configuration to `Include` into the `VirtualHost`.
+The optional `users_apache_expires` variable can be used to select the
+[medium](https://git.coop/webarch/apache/blob/master/templates/expires-medium.conf.j2)
+or
+[strict](https://git.coop/webarch/apache/blob/master/templates/expires-strict.conf.j2)
+configuration to `Include` into the `VirtualHost`.
 
 ### Robots
 
-The optional `users_apache_robots` variable can be set to `deny` to `Include` the [robots config](https://git.coop/webarch/apache/blob/master/templates/robots-deny.conf.j2) and this will also set an `Alias` for the [robots.txt](https://git.coop/webarch/apache/blob/master/templates/robots.deny.txt.j2) file.
+The optional `users_apache_robots` variable can be set to `deny` to `Include`
+the [robots
+config](https://git.coop/webarch/apache/blob/master/templates/robots-deny.conf.j2)
+and this will also set an `Alias` for the
+[robots.txt](https://git.coop/webarch/apache/blob/master/templates/robots.deny.txt.j2)
+file.
 
 ### PHP
 
-Some specific PHP variables include the `users_apache_nophp_dirs` array, this can be used to list directories that PHP cannot be used in, for example directories where users can upload files, for example:
+Some specific PHP variables include the `users_apache_nophp_dirs` array, this
+can be used to list directories that PHP cannot be used in, for example
+directories where users can upload files, for example:
 
 ```yml
         users_apache_nophp_dirs:
@@ -604,6 +672,13 @@ It will generate an Apache config like this:
 
 ## TODO
 
+* Generate a CHANGELOG.md from the
+  [releases](https://git.coop/webarch/users/-/releases) perhaps using [Release
+  Exporter](https://github.com/akshaybabloo/release-exporter)
+
 * Better documentation
+
 * [Better CMS options](https://git.coop/webarch/users/issues/29)
-* Add more options from the [Ansible user module](https://docs.ansible.com/ansible/latest/modules/user_module.html)
+
+* Add more options from the [Ansible user
+  module](https://docs.ansible.com/ansible/latest/modules/user_module.html)
