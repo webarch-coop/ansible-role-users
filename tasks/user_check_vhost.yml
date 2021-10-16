@@ -11,7 +11,7 @@
     - name: "Check that users_apache_vhost_docroot is a boolean if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - vhost.value.users_apache_vhost_docroot | debug_type == "bool"
+          - vhost.value.users_apache_vhost_docroot | type_debug == "bool"
       when: vhost.value.users_apache_vhost_docroot is defined
 
     - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
