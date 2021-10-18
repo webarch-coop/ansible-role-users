@@ -56,7 +56,23 @@
   {%- if user.value.users_email is defined and user.value.users_email != "" %}
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
+  {%- if vhost_config.users_apache_set_env_if is defined %}
+  <IfModule setenvif_module>
+    {%- for setenv in vhost_config.users_apache_set_env_if %}
+  SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+    {%- endfor %} 
+  </IfModule>
+  {%- endif %}
   <IfModule headers_module>
+  {%- if vhost_config.users_apache_headers is defined %}
+    {%- for header in vhost_config.users_apache_headers %}
+      {% if header.type == "request" %}
+    RequestHeader {{ header.action }} {{ header.arg }}
+      {% elif header.type == "response" %}
+    Header {% if header.con is defined %}{{ header.con }} {% endif %}{{ header.action }} {{ header.expr }}
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
   {%- if vhost_config.users_apache_sts is defined %}
     Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
   {%- else %}
@@ -134,6 +150,17 @@
   Alias "{{ alias.url }}" "{{ alias.path }}"
       {%- elif alias.regex_url is defined and alias.regex_path is defined %}
   AliasMatch "{{ alias.regex_url }}" "{{ alias.regex_path }}"
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+  {%- if vhost_config.users_apache_rewrite is defined %}
+  RewriteEngine on
+    {%- for rewrite in vhost_config.users_apacherewrite %}
+      {%- if rewrite.cond is defined %}
+  RewriteCond {{ rewrite.cond }}
+      {%- endif %}
+      {%- if rewrite.rule %}
+  RewriteRule {{ rewrite.rule iis defined }}
       {%- endif %}
     {%- endfor %}
   {%- endif %}
@@ -444,7 +471,15 @@
   {%- endif %}
   {%- if vhost_config.users_apache_proxy_pass is defined %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
+      {%- if proxy.add_headers is defined %}
+  ProxyAddHeaders {% if proxy.add_headers %}On{% else %}Off{% endif %}
+      {%- endif %}
+      {%- if proxy.path is defined and proxy.url is defined %}
   ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
+      {%- endif %}
+      {%- if proxy.pathmatch is defined and proxy.url is defined %}
+  ProxyPassMatch "{{ proxy.pathmatch }}" "{{ proxy.url }}"
+      {%- endif %}
       {%- if proxy.rewrite_rules is defined and proxy.rewrite_rules != [] %}
   RewriteEngine on
       {%- endif %}

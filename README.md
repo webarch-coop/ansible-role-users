@@ -441,6 +441,23 @@ And this will generate:
   ProxyPassReverse "/" "http://127.0.0.1:3000/"
 ```
 
+For an
+[ONLYOFFICE](https://github.com/biva/documentation/blob/biva/admin_manual/configuration_server/onlyoffice_configuration.rst)
+server:
+
+```yml
+        
+        users_apache_proxy_pass:
+          - add_headers: false
+            path: /.well-known
+            url: !
+          - pathmatch: (.*)(\/websocket)$
+            url: "ws://127.0.0.1:8006/$1$2"
+          - path: /
+            url: http://127.0.0.1:8006/
+            reverse: true
+```
+
 ### FilesMatch
 
 If an `users_apache_filesmatch` array specified at the `VirtualHost` level with
