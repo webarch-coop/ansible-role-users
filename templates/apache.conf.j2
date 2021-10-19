@@ -59,7 +59,7 @@
   {%- if vhost_config.users_apache_set_env_if is defined %}
   <IfModule setenvif_module>
     {%- for setenv in vhost_config.users_apache_set_env_if %}
-  SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+    SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
     {%- endfor %} 
   </IfModule>
   {%- endif %}
@@ -145,24 +145,28 @@
     {%- endfor %}
   {%- endif %}
   {%- if vhost_config.users_apache_alias is defined %}
+  <IfModule alias_module>
     {%- for alias in vhost_config.users_apache_alias %}
       {%- if alias.url is defined and alias.path is defined %}
-  Alias "{{ alias.url }}" "{{ alias.path }}"
+    Alias "{{ alias.url }}" "{{ alias.path }}"
       {%- elif alias.regex_url is defined and alias.regex_path is defined %}
-  AliasMatch "{{ alias.regex_url }}" "{{ alias.regex_path }}"
+    AliasMatch "{{ alias.regex_url }}" "{{ alias.regex_path }}"
       {%- endif %}
     {%- endfor %}
+  </IfModule>
   {%- endif %}
   {%- if vhost_config.users_apache_rewrite is defined %}
-  RewriteEngine on
-    {%- for rewrite in vhost_config.users_apacherewrite %}
+  <IfModule rewrite_module>
+    RewriteEngine on
+    {%- for rewrite in vhost_config.users_apache_rewrite %}
       {%- if rewrite.cond is defined %}
-  RewriteCond {{ rewrite.cond }}
+    RewriteCond {{ rewrite.cond }}
       {%- endif %}
       {%- if rewrite.rule %}
-  RewriteRule {{ rewrite.rule iis defined }}
+    RewriteRule {{ rewrite.rule is defined }}
       {%- endif %}
     {%- endfor %}
+  </IfModule>
   {%- endif %}
   {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
   <IfModule proxy_fcgi_module>

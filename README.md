@@ -256,6 +256,73 @@ for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 The same `users_apache_htauth_users` array is used for the usernaes and
 passwords as documented below.
 
+### SetEnvIf
+
+The `users_apache_set_env_if` array can be used to set env vars, at a
+`VirtualHost` level, for example:
+
+```yml
+        users_apache_set_env_if:
+          - attribute: Host
+            regex: "^(.*)$"
+            env: THE_HOST=$1
+```
+
+Will generate:
+
+```apache
+SetEnvIf Host "^(.*)$" THE_HOST=$1
+```
+
+### Header and RequestHeader
+
+The `users_apache_headers` array can be used to set `Header` and
+`RequestHeader` directives, at a `VirtualHost` level, for example:
+
+```yml
+        users_apache_headers:
+          - type: request
+            action: setifempty
+            argument: X-Forwarded-Proto https
+          - type: request
+            action: setifempty
+            argument: X-Forwarded-Host %{THE_HOST}e
+```
+
+### Rewrite
+
+The `users_apache_rewrite` array can be used to set `RewriteCond` and
+`RewriteRule` directives, for example:
+
+```yml
+        users_apache_rewrite_rules:
+          - cond: %{HTTP_USER_AGENT} DavClnt
+          - rule: ^$ /remote.php/webdav/ [L,R=302]
+          - rule: .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+          - rule: ^\.well-known/carddav /remote.php/dav/ [R=301,L]
+          - rule: ^\.well-known/caldav /remote.php/dav/ [R=301,L]
+          - rule: ^remote/(.*) remote.php [QSA,L]
+          - rule: ^(?:build|tests|config|lib|3rdparty|templates)/.* - [R=404,L]
+          - rule: ^\.well-known/(?!acme-challenge|pki-validation) /index.php [QSA,L]
+          - rule: ^(?:\.(?!well-known)|autotest|occ|issue|indie|db_|console).* - [R=404,L]
+         
+```
+
+To generate:
+
+```apache
+  RewriteEngine on
+  RewriteCond %{HTTP_USER_AGENT} DavClnt
+  RewriteRule ^$ /remote.php/webdav/ [L,R=302]
+  RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+  RewriteRule ^\.well-known/carddav /remote.php/dav/ [R=301,L]
+  RewriteRule ^\.well-known/caldav /remote.php/dav/ [R=301,L]
+  RewriteRule ^remote/(.*) remote.php [QSA,L]
+  RewriteRule ^(?:build|tests|config|lib|3rdparty|templates)/.* - [R=404,L]
+  RewriteRule ^\.well-known/(?!acme-challenge|pki-validation) /index.php [QSA,L]
+  RewriteRule ^(?:\.(?!well-known)|autotest|occ|issue|indie|db_|console).* - [R=404,L]
+```
+
 ### Location
 
 The `users_apache_locations` array can be used to apply HTTP Authentication to
@@ -447,6 +514,17 @@ server:
 
 ```yml
         
+        users_apache_set_env_if:
+          - attribute: Host
+            regex: "^(.*)$"
+            env: THE_HOST=$1
+        users_apache_headers:
+          - type: request
+            action: setifempty
+            argument: X-Forwarded-Proto https
+          - type: request
+            action: setifempty
+            argument: X-Forwarded-Host %{THE_HOST}e
         users_apache_proxy_pass:
           - add_headers: false
             path: /.well-known

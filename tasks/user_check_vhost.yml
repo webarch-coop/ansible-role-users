@@ -55,6 +55,53 @@
           - vhost.value.users_apache_type is regex("php|cgi|static")
       when: vhost.value.users_apache_type is defined
 
+    - name: "Check that the attributes for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }} are defined if users_apache_set_env_if is defined"
+      assert:
+        that:
+          - setenv.attribute is defined
+          - setenv.regex is defined
+          - setenv.env is defined
+      loop: "{{ vhost.value.users_apache_set_env_if }}"
+      loop_control:
+        loop_var: setenv
+      when: vhost.value.users_apache_set_env_if is defined
+
+    - name: "Check the attributes for Header and RequestHeader for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
+
+        - name: "Check that the header type is set to either request or response for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - header.type is defined
+              - header.type is regex('^request|response$')
+          loop: "{{ vhost.value.users_apache_headers }}"
+          loop_control:
+            loop_var: header
+
+        - name: "Checks for RequestHeader for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - header.action is defined
+              - header.action is regex('add|append|edit[*]?|merge|set|setifempty|unset')
+              - header.arg is defined
+          loop: "{{ vhost.value.users_apache_headers }}"
+          loop_control:
+            loop_var: header
+          when: header.type == "request"
+
+        - name: "Checks for Header for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - header.action is defined
+              - header.action is regex('add|append|echo|edit[*]?|merge|set|setifempty|unset|note')
+              - header.expr is defined
+          loop: "{{ vhost.value.users_apache_headers }}"
+          loop_control:
+            loop_var: header
+          when: header.type == "request"
+
+      when: users_apache_headers is defined
+
     - name: "Check that users_apache_robots is set to deny is defined for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
       assert:
         that:
@@ -107,6 +154,40 @@
             label: "{{ htuser.name }}"
 
       when: vhost.value.users_apache_htauth_users is defined
+
+    - name: "Check the Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      block:
+
+        - name: "Check that atttibutes for Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+          assert:
+            that:
+              - ( alias.url is defined and alias.path is defined ) or ( alias.regex_url is defined and alias.rergex_path is defined )
+          loop: "{{ vhost.value.users_apache_alias }}"
+          loop_control:
+            loop_var: alias
+
+        - name: "Checks for Alias directive {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - alias.url is regex('^[\/].*')
+              - alias.path is regex('^[\/].*')
+          loop: "{{ vhost.value.users_apache_alias }}"
+          loop_control:
+            loop_var: alias
+          when:
+            - alias.url is defined
+            - alias.path is defined
+
+      when: vhost.value.users_apache_alias is defined
+
+    - name: "Check that the users_apache_rewrite array contains condiutions or rules when it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - ( rewrite.cond is defined ) or ( rewrite.rule is defined )
+      loop: "{{ vhost.value.users_apache_rewrite }}"
+      loop_control:
+        loop_var: rewrite
+      when: vhost.value.users_apache_rewrite is defined
 
     - name: "Check the locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
