@@ -274,6 +274,8 @@ Will generate:
 SetEnvIf Host "^(.*)$" THE_HOST=$1
 ```
 
+See the [Apache SetEnvIf documentation](https://httpd.apache.org/docs/current/mod/mod_setenvif.html).
+
 ### Header and RequestHeader
 
 The `users_apache_headers` array can be used to set `Header` and

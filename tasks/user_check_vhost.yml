@@ -168,7 +168,7 @@
           loop_control:
             loop_var: alias
 
-        - name: "Checks for Alias directive {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Checks for Alias directive URL and path {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - alias.url is regex('^[\/].*')
@@ -179,6 +179,18 @@
           when:
             - alias.url is defined
             - alias.path is defined
+
+        - name: "Checks for Alias directive regular expression alias and path {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - alias.regex_url is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+              - alias.regex_path is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+          loop: "{{ vhost.value.users_apache_alias }}"
+          loop_control:
+            loop_var: alias
+          when:
+            - alias.regex_url is defined
+            - alias.regex_path is defined
 
       when: vhost.value.users_apache_alias is defined
 
@@ -310,6 +322,81 @@
             dir: "{{ vhost.value | dict2items }}"
 
       when: ( users_apache_vhost_docroot is not defined ) or ( users_apache_vhost_docroot is defined and users_apache_vhost_docroot )
+
+    - name: "Proxy checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      block:
+
+        - name: "Check that users_apache_proxy_pass is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - vhost.value.users_apache_proxy_pass | type_debug == "list"
+
+        - name: "Check add_headers is a boolean for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - proxy.add_headers | type_debug == "bool"
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: proxy.add_headers is defined
+
+        - name: "Check that either a path and URL or regular expression and URL are defined for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - ( proxy.path is defined and proxy.url is defined ) or ( proxy.pathmatch and proxy.url is defined )
+
+        - name: "Check that path and URL are valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - proxy.path is defined
+              - proxy.path is regex('^(unix:\/.*)|(\/.*)$')
+              - proxy.url is defined
+              - proxy.url is regex('^([!])|(https?:\/\/.*)$')
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: ( proxy.url is defined ) and ( proxy.path is defined )
+
+        - name: "Check that pathmatch and URL are valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - proxy.pathmatch is defined
+              - proxy.url is defined
+              - proxy.url is regex('^([!])|(https?:\/\/.*)$')
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: ( proxy.url is defined ) and ( proxy.pathmatch is defined )
+
+        - name: "Check that proxy.reverse is a boolean if defined for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - proxy.reverse | type_debug == "bool"
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: ( proxy.reverse is defined )
+
+        - name: "Check that proxy.rewrite_rules are defined when proxy.rewrite_conditions are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - proxy.rewrite_rules are defined
+              - proxy.rewrite_rules | type_debug == "list"
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: proxy.rewrite_conditions are defined
+
+        - name: "Check that proxy.rewrite_rules are a list if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - proxy.rewrite_rules | type_debug == "list"
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: proxy.rewrite_rules are defined
+
+      when: vhost.value.users_apache_proxy_pass is defined
 
     - name: "ErrorDocument checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
