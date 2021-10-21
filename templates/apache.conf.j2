@@ -162,8 +162,8 @@
       {%- if rewrite.cond is defined %}
     RewriteCond {{ rewrite.cond }}
       {%- endif %}
-      {%- if rewrite.rule %}
-    RewriteRule {{ rewrite.rule is defined }}
+      {%- if rewrite.rule is defined %}
+    RewriteRule {{ rewrite.rule }}
       {%- endif %}
     {%- endfor %}
   </IfModule>
