@@ -344,6 +344,10 @@
           assert:
             that:
               - ( proxy.path is defined and proxy.url is defined ) or ( proxy.pathmatch and proxy.url is defined )
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: ( proxy.url is defined ) and ( proxy.path is defined )
 
         - name: "Check that path and URL are valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
