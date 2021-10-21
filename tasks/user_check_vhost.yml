@@ -384,7 +384,7 @@
         - name: "Check that proxy.rewrite_rules are defined when proxy.rewrite_conditions are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - proxy.rewrite_rules are defined
+              - proxy.rewrite_rules is defined
               - proxy.rewrite_rules | type_debug == "list"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
