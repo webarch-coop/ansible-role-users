@@ -14,6 +14,10 @@
           - vhost.value.users_apache_vhost_docroot | type_debug == "bool"
       when: vhost.value.users_apache_vhost_docroot is defined
 
+    - name: Debug vhost.value.users_apache_server_name
+      debug:
+         msg: "vhost.value.users_apache_server_name is type: {{ vhost.value.users_apache_server_name | type_debug }}"
+
     - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
       assert:
         that:
