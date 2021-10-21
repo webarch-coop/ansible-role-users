@@ -183,8 +183,8 @@
         - name: "Checks for Alias directive regular expression alias and path {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - alias.regex_url is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
-              - alias.regex_path is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+              - alias.regex_url | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+              - alias.regex_path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
           loop: "{{ vhost.value.users_apache_alias }}"
           loop_control:
             loop_var: alias
