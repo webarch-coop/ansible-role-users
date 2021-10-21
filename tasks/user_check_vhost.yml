@@ -163,7 +163,7 @@
         - name: "Check that atttibutes for Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
           assert:
             that:
-              - ( alias.url is defined and alias.path is defined ) or ( alias.regex_url is defined and alias.rergex_path is defined )
+              - ( alias.url is defined and alias.path is defined ) or ( alias.regex_url is defined and alias.regex_path is defined )
           loop: "{{ vhost.value.users_apache_alias }}"
           loop_control:
             loop_var: alias
