@@ -163,7 +163,7 @@
         - name: "Check that attributes for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
           assert:
             that:
-              - ( redirect.url is defined and redirect.path is defined ) or ( redirect.regex_url is defined and redirect.path is defined )
+              - ( redirect.path is defined and redirect.url is defined ) or ( redirect.regex_path is defined and redirect.url is defined )
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
@@ -203,7 +203,7 @@
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
-          when: redirect.regexpath is defined
+          when: redirect.regex_path is defined
 
       when: vhost.value.users_apache_redirects is defined
 
