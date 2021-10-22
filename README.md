@@ -291,6 +291,43 @@ The `users_apache_headers` array can be used to set `Header` and
             argument: X-Forwarded-Host %{THE_HOST}e
 ```
 
+### Alias and Redirect
+
+The `users_apache_redirects` array can be used to generate
+[`Redirect`](https://httpd.apache.org/docs/current/mod/mod_alias.html#redirect),
+[`RedirectMatch`](https://httpd.apache.org/docs/current/mod/mod_alias.html#redirectmatch),
+[`RedirectPermanent`](https://httpd.apache.org/docs/current/mod/mod_alias.html#redirectpermanent)
+and
+[`RedirectTemp`](https://httpd.apache.org/docs/current/mod/mod_alias.html#redirecttemp)
+directives, for example:
+
+```yml
+        users_apache_redirects:
+          - path: /service
+            url: http://foo2.example.com/service
+            status: 301
+          - path: /one
+            url: http://example.com/two
+            status: permanent
+          - regex_path: (.*)\.gif$
+            url: http://other.example.com$1.jpg
+```
+
+The `users_apache_alias` array can be used to generate
+[`Alias`](https://httpd.apache.org/docs/current/mod/mod_alias.html#alias) and
+[`AliasMatch`](https://httpd.apache.org/docs/current/mod/mod_alias.html#aliasmatch)
+directives, for example: 
+
+```yml
+        users_apache_alias:
+          - url: /image
+            path: /ftp/pub/image
+          - url: /icons/
+            path: /usr/local/apache/icons/
+          - regex_url: ^/icons(/|$)(.*)
+            path: /usr/local/apache/icons$1$2
+```
+
 ### Rewrite
 
 The `users_apache_rewrite` array can be used to set `RewriteCond` and

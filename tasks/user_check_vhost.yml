@@ -157,10 +157,60 @@
 
       when: vhost.value.users_apache_htauth_users is defined
 
+    - name: "Check the Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      block:
+
+        - name: "Check that attributes for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+          assert:
+            that:
+              - ( redirect.url is defined and redirect.path is defined ) or ( redirect.regex_url is defined and redirect.path is defined )
+          loop: "{{ vhost.value.users_apache_redirects }}"
+          loop_control:
+            loop_var: redirect
+
+        - name: "Check the value of the status if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - redirect.status is regex('^301|302|303|410|permanent|temp|seeother|gone$')
+          loop: "{{ vhost.value.users_apache_redirects }}"
+          loop_control:
+            loop_var: redirect
+          when: redirect.status is defined
+
+        - name: "Check values of the URL if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - redirect.status is regex('^https?:\/\/.*$')
+          loop: "{{ vhost.value.users_apache_redirects }}"
+          loop_control:
+            loop_var: redirect
+          when: redirect.url is defined
+
+        - name: "Check values of the path if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - redirect.path is | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+              - redirect.path is regex('^\/.*$')
+          loop: "{{ vhost.value.users_apache_redirects }}"
+          loop_control:
+            loop_var: redirect
+          when: redirect.path is defined
+
+        - name: "Check values of the regular expression path if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - redirect.regex_path is | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+          loop: "{{ vhost.value.users_apache_redirects }}"
+          loop_control:
+            loop_var: redirect
+          when: redirect.regexpath is defined
+
+      when: vhost.value.users_apache_redirects is defined
+
     - name: "Check the Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
 
-        - name: "Check that atttibutes for Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+        - name: "Check that attributes for Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
           assert:
             that:
               - ( alias.url is defined and alias.path is defined ) or ( alias.regex_url is defined and alias.regex_path is defined )

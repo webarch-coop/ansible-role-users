@@ -144,15 +144,26 @@
   IncludeOptional {{ inc }}
     {%- endfor %}
   {%- endif %}
-  {%- if vhost_config.users_apache_alias is defined %}
+  {%- if vhost_config.users_apache_alias is defined or vhost_config.users_apache_redirects is defined %}
   <IfModule alias_module>
-    {%- for alias in vhost_config.users_apache_alias %}
-      {%- if alias.url is defined and alias.path is defined %}
+    {%- if vhost_config.users_apache_redirects is defined %} 
+      {%- for redirect in vhost_config.users_apache_redirects %} 
+        {%- if redirect.regex is defined and redirect.url is defined %}
+    RedirectMatch {% if redirect.status is defined %} {{ redirect.status }}{% endif %} "{{ redirect.regex_path }}" "{{ redirect.url }}"
+        {%- elif redirect.path is defined and redirect.url is defined %}
+    Redirect{% if redirect.status is defined %} {{ redirect.status }}{% endif %} "{{ redirect.path }}" "{{ redirect.url }}"
+        {%- endif %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_alias is defined %}
+      {%- for alias in vhost_config.users_apache_alias %}
+        {%- if alias.url is defined and alias.path is defined %}
     Alias "{{ alias.url }}" "{{ alias.path }}"
-      {%- elif alias.regex_url is defined and alias.regex_path is defined %}
+        {%- elif alias.regex_url is defined and alias.regex_path is defined %}
     AliasMatch "{{ alias.regex_url }}" "{{ alias.regex_path }}"
-      {%- endif %}
-    {%- endfor %}
+        {%- endif %}
+      {%- endfor %}
+    {%- endif %}
   </IfModule>
   {%- endif %}
   {%- if vhost_config.users_apache_rewrite is defined %}
@@ -278,7 +289,7 @@
     Require all granted
         {%- endif %}
         {%- if dir_config.users_apache_expires is defined %}
-          {% if dir_config.users_apache_expires == "medium" %}
+          {%- if dir_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
           {%- elif dir_config.users_apache_expires == "strict" %}
     IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
