@@ -180,7 +180,7 @@
         - name: "Check values of the URL if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
-              - redirect.status is regex('^https?:\/\/.*$')
+              - redirect.url is regex('^https?:\/\/.*$')
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
