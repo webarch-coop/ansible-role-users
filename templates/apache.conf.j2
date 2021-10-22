@@ -148,7 +148,7 @@
   <IfModule alias_module>
     {%- if vhost_config.users_apache_redirects is defined %} 
       {%- for redirect in vhost_config.users_apache_redirects %} 
-        {%- if redirect.regex is defined and redirect.url is defined %}
+        {%- if redirect.regex_path is defined and redirect.url is defined %}
     RedirectMatch {% if redirect.status is defined %} {{ redirect.status }}{% endif %} "{{ redirect.regex_path }}" "{{ redirect.url }}"
         {%- elif redirect.path is defined and redirect.url is defined %}
     Redirect{% if redirect.status is defined %} {{ redirect.status }}{% endif %} "{{ redirect.path }}" "{{ redirect.url }}"
