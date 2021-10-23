@@ -232,10 +232,25 @@
         {%- elif users_apache_index_options is defined %}
     IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
         {%- endif %}
+        {%- if dir_config.users_apache_header_name is defined %}
+    HeaderName {{ dir_config.users_apache_header_name }}
+        {%- elif users_apache_header_name is defined %}
+    HeaderName {{ users_apache_header_name is defined }}
+        {%- endif %}
+        {%- if dir_config.users_apache_readme_name is defined %}
+    ReadmeName {{ dir_config.users_apache_readme_name }}
+        {%- elif users_apache_readme_name is defined %}
+    ReadmeName {{ users_apache_readme_name is defined }}
+        {%- endif %}
         {%- if dir_config.users_apache_ssi_legacy is defined %}
     SSILegacyExprParser {% if dir_config.users_apache_ssi_legacy %}on{% else %}off{% endif %}
         {%- elif users_apache_ssi_legacy is defined %}
     SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
+        {%- endif %}
+        {%- if dir_config.users_apache_ssi_modified is defined %}
+    SSILastModified {% if dir_config.users_apache_ssi_modified %}on{% else %}off{% endif %}
+        {%- elif users_apache_ssi_modified is defined %}
+    SSILastModified {% if users_apache_ssi_modified %}on{% else %}off{% endif %}
         {%- endif %}
         {%- if dir_config.users_apache_index is defined %}
     DirectoryIndex{% for file in dir_config.users_apache_index %} {{ file }}{% endfor %} 
@@ -319,6 +334,16 @@
     IndexOptions{% for opt in vhost_config.users_apache_index_options %} {{ opt }}{% endfor %}
     {%- elif users_apache_index_options is defined %}
     IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_header_name is defined %}
+    HeaderName {{ vhost_config.users_apache_header_name }}
+    {%- elif users_apache_header_name is defined %}
+    HeaderName {{ users_apache_header_name is defined }}
+    {%- endif %}
+    {%- if vhost_config.users_apache_readme_name is defined %}
+    ReadmeName {{ vhost_config.users_apache_readme_name }}
+    {%- elif users_apache_readme_name is defined %}
+    ReadmeName {{ users_apache_readme_name is defined }}
     {%- endif %}
     {%- if vhost_config.users_apache_ssi_legacy is defined %}
     SSILegacyExprParser {% if vhost_config.users_apache_ssi_legacy %}on{% else %}off{% endif %}
