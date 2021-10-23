@@ -53,13 +53,13 @@
 
       when: dir.value.users_apache_index_options is defined
 
-    - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}" 
+    - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - dir.value.users_apache_header_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
       when: dir.value.users_apache_header_name is defined
 
-    - name: "Check that the ReadmeName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}" 
+    - name: "Check that the ReadmeName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - dir.value.users_apache_readme_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
