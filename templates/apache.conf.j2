@@ -254,7 +254,7 @@
         {%- endif %}
         {%- if dir_config.users_apache_add_type is defined %}
           {%- for mimetype in dir_config.users_apache_add_type %}
-    AddType "{{ mimetype.type }}" . {{ mimetype.ext }}
+    AddType "{{ mimetype.type }}" .{{ mimetype.ext }}
           {%- endfor %}
         {%- endif %}
         {%- if dir_config.users_apache_filesmatch is defined %}
@@ -364,7 +364,7 @@
     {%- endif %}
     {%- if vhost_config.users_apache_add_type is defined %}
       {%- for mimetype in vhost_config.users_apache_add_type %}
-    AddType "{{ mimetype.type }}" . {{ mimetype.ext }}
+    AddType "{{ mimetype.type }}" .{{ mimetype.ext }}
       {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_filesmatch is defined %}
@@ -441,7 +441,7 @@
     Require all granted
     {%- endif %}
     {%- if vhost_config.users_apache_expires is defined %}
-      {% if vhost_config.users_apache_expires == "medium" %}
+      {%- if vhost_config.users_apache_expires == "medium" %}
     IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
       {%- elif vhost_config.users_apache_expires == "strict" %}
     IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
