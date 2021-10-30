@@ -336,7 +336,7 @@
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     {%- endif %}
     {%- if vhost_config.users_apache_index_head_insert is defined %}
-    IndexHeadInsert "{{ dir_config.users_apache_index_head_insert | regex_replace('[\"]', '\"') }}"
+    IndexHeadInsert "{{ vhost_config.users_apache_index_head_insert | regex_replace('[\"]', '\"') }}"
     {%- elif users_apache_index_head_insert is defined %}
     IndexHeadInsert "{{ users_apache_index_head_insert | regex_replace('[\"]', '\"') }}"
     {%- endif %}
