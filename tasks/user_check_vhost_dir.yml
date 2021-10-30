@@ -53,10 +53,11 @@
 
       when: dir.value.users_apache_index_options is defined
 
-    - name: "Check that the IndexHeadInsert is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that the IndexHeadInsert is a string, which doesn't contain single quotes if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - dir.value.users_apache_index_head_insert | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
+          - dir.value.users_apache_index_head_insert is not regex('[\']')
       when: dir.value.users_apache_index_head_insert is defined
 
     - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"

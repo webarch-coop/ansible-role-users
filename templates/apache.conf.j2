@@ -233,9 +233,9 @@
     IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
         {%- endif %}
         {%- if dir_config.users_apache_index_head_insert is defined %}
-    IndexHeadInsert {{ dir_config.users_apache_index_head_insert }}
+    IndexHeadInsert '{{ dir_config.users_apache_index_head_insert }}'
         {%- elif users_apache_index_head_insert is defined %}
-    IndexHeadInsert {{ users_apache_index_head_insert }}
+    IndexHeadInsert '{{ users_apache_index_head_insert }}'
         {%- endif %}
         {%- if dir_config.users_apache_header_name is defined %}
     HeaderName {{ dir_config.users_apache_header_name }}
@@ -334,6 +334,11 @@
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
     {%- else %}
     Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
+    {%- endif %}
+    {%- if vhost_config.users_apache_index_head_insert is defined %}
+    IndexHeadInsert '{{ dir_config.users_apache_index_head_insert }}'
+    {%- elif users_apache_index_head_insert is defined %}
+    IndexHeadInsert '{{ users_apache_index_head_insert }}'
     {%- endif %}
     {%- if vhost_config.users_apache_index_options is defined %}
     IndexOptions{% for opt in vhost_config.users_apache_index_options %} {{ opt }}{% endfor %}
