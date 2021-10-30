@@ -53,6 +53,12 @@
 
       when: dir.value.users_apache_index_options is defined
 
+    - name: "Check that the IndexHeadInsert is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      assert:
+        that:
+          - dir.value.users_apache_index_head_insert | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
+      when: dir.value.users_apache_index_head_insert is defined
+
     - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
