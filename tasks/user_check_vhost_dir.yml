@@ -57,7 +57,6 @@
       assert:
         that:
           - dir.value.users_apache_index_head_insert | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
-          - dir.value.users_apache_index_head_insert is not regex('[\']')
       when: dir.value.users_apache_index_head_insert is defined
 
     - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
