@@ -57,15 +57,59 @@
           - vhost.value.users_apache_type is regex("php|cgi|static")
       when: vhost.value.users_apache_type is defined
 
-    - name: "Check that the attributes for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }} are defined if users_apache_set_env_if is defined"
-      assert:
-        that:
-          - ( setenv.attribute is defined ) and ( setenv.attribute | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
-          - ( setenv.regex is defined ) and ( setenv.regex | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
-          - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
-      loop: "{{ vhost.value.users_apache_set_env_if }}"
-      loop_control:
-        loop_var: setenv
+    - name: "Check the attributes for SetEnv and UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      block:
+
+        - name: "Check that the set attribute for SetEnv and UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }} is a boolean if defined"
+          assert:
+            that: setenv.set | type_debug == "bool"
+          loop: "{{ vhost.value.users_apache_set_env }}"
+          loop_control:
+            loop_var: setenv
+          when: setenv.set is defined
+
+        - name: "Check that the env attribute for UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }} is defined"
+          assert:
+            that:
+              - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+          loop: "{{ vhost.value.users_apache_set_env }}"
+          loop_control:
+            loop_var: setenv
+          when: ( setenv.set is defined ) and ( not setenv.set )
+
+        - name: "Check that the set attributes for SetEnv for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+          assert:
+            that:
+              - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+              - ( setenv.value is defined ) and ( setenv.regex | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+          loop: "{{ vhost.value.users_apache_set_env }}"
+          loop_control:
+            loop_var: setenv
+          when: ( setenv.set is not defined ) or ( setenv.set is defined and setenv.set )
+
+      when: vhost.value.users_apache_set_env is defined
+
+    - name: "Check the attributes for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      block:
+
+        - name: "Check that the attributes for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+          assert:
+            that:
+              - ( setenv.attribute is defined ) and ( setenv.attribute | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+              - ( setenv.regex is defined ) and ( setenv.regex | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+              - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+          loop: "{{ vhost.value.users_apache_set_env_if }}"
+          loop_control:
+            loop_var: setenv
+
+        - name: "Check that the case attribute for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }} is a boolean if defined"
+          assert:
+            that: setenv.env | type_debug == "bool"
+          loop: "{{ vhost.value.users_apache_set_env_if }}"
+          loop_control:
+            loop_var: setenv
+          when: setenv.case is defined
+
       when: vhost.value.users_apache_set_env_if is defined
 
     - name: "Check the attributes for Header and RequestHeader for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"

@@ -256,9 +256,29 @@ for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 The same `users_apache_htauth_users` array is used for the usernaes and
 passwords as documented below.
 
+### SetEnv 
+
+The `users_apache_env` array can be used to set and remove environmental
+variables, at a server or `VirtualHost` level, for example:
+
+```yml
+        users_apache_env:
+          - env: FOO
+            value: bar
+          - env: BAZ
+            set: false
+```
+
+Will generate:
+
+```apache
+SetEnv FOO bar
+UnsetEnv BAZ
+``` 
+
 ### SetEnvIf
 
-The `users_apache_set_env_if` array can be used to set env vars, at a
+The `users_apache_set_env_if` array can be used to set env vars, at a server or
 `VirtualHost` level, for example:
 
 ```yml
@@ -266,8 +286,19 @@ The `users_apache_set_env_if` array can be used to set env vars, at a
           - attribute: Host
             regex: "^(.*)$"
             env: THE_HOST=$1
+            case: false
+```
+Will generate:
+
+```apache
+SetEnvIfNoCase Host "^(.*)$" THE_HOST=$1
 ```
 
+And if `case` is omitted or set to `True`:
+
+```apache
+SetEnvIf Host "^(.*)$" THE_HOST=$1
+```
 Will generate:
 
 ```apache

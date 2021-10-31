@@ -56,11 +56,46 @@
   {%- if user.value.users_email is defined and user.value.users_email != "" %}
   ServerAdmin "{{ user.value.users_email }}"
   {%- endif %}
-  {%- if vhost_config.users_apache_set_env_if is defined %}
+  {%- if users_apache_env is defined or vhost_config.users_apache_env is defined %}
+  <IfModule env_module>
+    {%- if users_apache_env is defined %}
+      {%- for setenv in users_apache_env %}
+        {%- if setenv.set if not defined or setenv.set is defined and setenv.set %}
+    SetEnv {{ setenv.env }} {{ setenv.value }}
+        {%- else  %}
+    UnsetEnv {{ setenv.env }}
+        {% endif %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if vhost_config.users_apache_env is defined %}
+      {%- for setenv in vhost_config.users_apache_env %}
+        {%- if setenv.set if not defined or setenv.set is defined and setenv.set %}
+    SetEnv {{ setenv.env }} {{ setenv.value }}
+        {%- else  %}
+    UnsetEnv {{ setenv.env }}
+        {% endif %}
+      {%- endfor %}
+    {%- endif %}
+  </IfModule>
+  {%- endif %}
+  {%- if users_apache_set_env_if is defined or vhost_config.users_apache_set_env_if is defined %}
   <IfModule setenvif_module>
-    {%- for setenv in vhost_config.users_apache_set_env_if %}
+    {%- if users_apache_set_env_if is defined %
+      {%- for setenv in users_apache_set_env_if %}
+        {%- if setenv.case is not defined or setenv.case is defined and setenv.case %}
     SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
-    {%- endfor %} 
+        {%- else %}
+    SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+      {%- endfor %} 
+    {%- endif %}
+    {%- if vhost_config.users_apache_set_env_if is defined %
+      {%- for setenv in vhost_config.users_apache_set_env_if %}
+        {%- if setenv.case is not defined or setenv.case is defined and setenv.case %}
+    SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+        {%- else %}
+    SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+      {%- endfor %} 
+    {%- endif %}
   </IfModule>
   {%- endif %}
   <IfModule headers_module>
