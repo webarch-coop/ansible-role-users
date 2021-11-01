@@ -5,14 +5,12 @@ variables:
   ANSIBLE_FORCE_COLOR: "1"
 before_script:
   - chmod 700 $(pwd)
-  - ls /usr/local/bin -lah
-  - echo ${PATH}
 stages:
   - lint
 lint:
   stage: lint
   script:
-    - find -name '*.j2' -exec /usr/local/bin/jinja2lint.py {} +
+    - find -type f -name '*.j2' -exec ansiblej2lint.py {} +
     - yamllint .
     - molecule lint
 # vim: syntax=yaml
