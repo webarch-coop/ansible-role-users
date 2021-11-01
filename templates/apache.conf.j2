@@ -60,7 +60,7 @@
   <IfModule env_module>
     {%- if users_apache_env is defined %}
       {%- for setenv in users_apache_env %}
-        {%- if setenv.set if not defined or setenv.set is defined and setenv.set %}
+        {%- if setenv.set is not defined or setenv.set is defined and setenv.set %}
     SetEnv {{ setenv.env }} {{ setenv.value }}
         {%- else  %}
     UnsetEnv {{ setenv.env }}
@@ -69,7 +69,7 @@
     {%- endif %}
     {%- if vhost_config.users_apache_env is defined %}
       {%- for setenv in vhost_config.users_apache_env %}
-        {%- if setenv.set if not defined or setenv.set is defined and setenv.set %}
+        {%- if setenv.set is not defined or setenv.set is defined and setenv.set %}
     SetEnv {{ setenv.env }} {{ setenv.value }}
         {%- else  %}
     UnsetEnv {{ setenv.env }}
@@ -80,20 +80,22 @@
   {%- endif %}
   {%- if users_apache_set_env_if is defined or vhost_config.users_apache_set_env_if is defined %}
   <IfModule setenvif_module>
-    {%- if users_apache_set_env_if is defined %
+    {%- if users_apache_set_env_if is defined %}
       {%- for setenv in users_apache_set_env_if %}
         {%- if setenv.case is not defined or setenv.case is defined and setenv.case %}
     SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
         {%- else %}
     SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+        {% endif %}
       {%- endfor %} 
     {%- endif %}
-    {%- if vhost_config.users_apache_set_env_if is defined %
+    {%- if vhost_config.users_apache_set_env_if is defined %}
       {%- for setenv in vhost_config.users_apache_set_env_if %}
         {%- if setenv.case is not defined or setenv.case is defined and setenv.case %}
     SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
         {%- else %}
     SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+        {% endif %}
       {%- endfor %} 
     {%- endif %}
   </IfModule>
