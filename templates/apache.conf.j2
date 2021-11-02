@@ -68,17 +68,7 @@
       {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_env is defined %}
-    # DEBUG
-    # =====
-    # 
-    # vhost_config.users_apache_env: {{ vhost_config.users_apache_env | to_yaml }}
-    #
       {%- for setenv in vhost_config.users_apache_env %}
-    #
-    # {% if setenv.set is defined %}setenv.set: {{ setenv.set }}{% endif %}
-    # {% if setenv.env is defined %}setenv.env:  {{ setenv.env }}{% endif %}
-    # {% if setenv.value is defined %}setenv.value:  {{ setenv.value }}{% endif %}
-    #
         {%- if ( setenv.set is not defined ) or ( setenv.set is defined and setenv.set ) %}
     SetEnv {{ setenv.env }} {{ setenv.value }}
         {%- else  %}
