@@ -10,8 +10,6 @@ stages:
 lint:
   stage: lint
   script:
-    - find -type f -name '*.j2' -exec ansiblej2lint.py {} +
-    - yamllint .
     - molecule lint
 # vim: syntax=yaml
 ...
