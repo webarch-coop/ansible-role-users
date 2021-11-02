@@ -259,7 +259,11 @@ passwords as documented below.
 ### SetEnv 
 
 The `users_apache_env` array can be used to set and remove environmental
-variables, at a server or `VirtualHost` level, for example:
+variables, at a server or `VirtualHost` level, via [the
+`SetEnv`](https://httpd.apache.org/docs/current/mod/mod_env.html#setenv) and
+[the
+`UnsetEnv`](https://httpd.apache.org/docs/current/mod/mod_env.html#unsetenv)
+Apache directives, for example:
 
 ```yml
         users_apache_env:
@@ -279,7 +283,11 @@ UnsetEnv BAZ
 ### SetEnvIf
 
 The `users_apache_set_env_if` array can be used to set env vars, at a server or
-`VirtualHost` level, for example:
+`VirtualHost` level, using [the
+`SetEnvIf`](https://httpd.apache.org/docs/current/mod/mod_setenvif.html#setenvif)
+and [the
+`SetEnvIfNoCase`](https://httpd.apache.org/docs/current/mod/mod_setenvif.html#setenvifnocase)
+Apache directives, for example:
 
 ```yml
         users_apache_set_env_if:
