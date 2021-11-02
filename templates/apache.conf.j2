@@ -60,7 +60,7 @@
   <IfModule env_module>
     {%- if users_apache_env is defined %}
       {%- for setenv in users_apache_env %}
-        {%- if setenv.set is not defined or setenv.set is defined and setenv.set %}
+        {%- if ( setenv.set is not defined ) or ( setenv.set is defined and setenv.set ) %}
     SetEnv {{ setenv.env }} {{ setenv.value }}
         {%- else  %}
     UnsetEnv {{ setenv.env }}
@@ -69,7 +69,7 @@
     {%- endif %}
     {%- if vhost_config.users_apache_env is defined %}
       {%- for setenv in vhost_config.users_apache_env %}
-        {%- if setenv.set is not defined or setenv.set is defined and setenv.set %}
+        {%- if ( setenv.set is not defined ) or ( setenv.set is defined and setenv.set ) %}
     SetEnv {{ setenv.env }} {{ setenv.value }}
         {%- else  %}
     UnsetEnv {{ setenv.env }}
