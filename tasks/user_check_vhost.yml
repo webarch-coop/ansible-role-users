@@ -204,15 +204,6 @@
     - name: "Check the Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
 
-        - name: "Check that attributes for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
-          assert:
-            that:
-              - ( redirect.path is defined and redirect.url is defined ) or ( redirect.regex_path is defined and redirect.url is defined )
-          when: redirect.status is regex('^301|302|303|permanent|temp|seeother$'
-          loop: "{{ vhost.value.users_apache_redirects }}"
-          loop_control:
-            loop_var: redirect
-
         - name: "Check the value of the status if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
@@ -221,6 +212,15 @@
           loop_control:
             loop_var: redirect
           when: redirect.status is defined
+
+        - name: "Check that attributes for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
+          assert:
+            that:
+              - ( redirect.path is defined and redirect.url is defined ) or ( redirect.regex_path is defined and redirect.url is defined )
+          when: redirect.status is regex('^301|302|303|permanent|temp|seeother$')
+          loop: "{{ vhost.value.users_apache_redirects }}"
+          loop_control:
+            loop_var: redirect
 
         - name: "Check values of the URL if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
