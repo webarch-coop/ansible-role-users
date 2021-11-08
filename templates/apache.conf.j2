@@ -187,11 +187,11 @@
       {%- for redirect in vhost_config.users_apache_redirects %} 
         {%- if redirect.regex_path is defined and redirect.url is defined %}
     RedirectMatch {% if redirect.status is defined %} {{ redirect.status }}{% endif %} "{{ redirect.regex_path }}" "{{ redirect.url }}"
-        {%- elif redirect.regex_path is defined and redirect.status is defined and redirect.status is regex('^310|gone$') %}
+        {%- elif redirect.regex_path is defined and redirect.status is defined and redirect.status is regex('^410|gone$') %}
     RedirectMatch {{ redirect.status }} "{{ redirect.regex_path }}"
         {%- elif redirect.path is defined and redirect.url is defined %}
     Redirect{% if redirect.status is defined %} {{ redirect.status }}{% endif %} "{{ redirect.path }}" "{{ redirect.url }}"
-        {%- elif redirect.path is defined and redirect.status is defined and redirect.status is regex('^310|gone$') %}
+        {%- elif redirect.path is defined and redirect.status is defined and redirect.status is regex('^410|gone$') %}
     Redirect {{ redirect.status }} "{{ redirect.path }}"
         {%- endif %}
       {%- endfor %}
