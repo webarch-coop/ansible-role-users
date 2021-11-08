@@ -208,6 +208,7 @@
           assert:
             that:
               - ( redirect.path is defined and redirect.url is defined ) or ( redirect.regex_path is defined and redirect.url is defined )
+          when: redirect.status is regex('^301|302|303|permanent|temp|seeother$'
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
