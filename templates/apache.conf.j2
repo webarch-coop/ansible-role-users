@@ -563,7 +563,7 @@
   {%- if vhost_config.users_apache_proxy_pass is defined %}
   <IfModule proxy_module>
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
-      {% if proxy.preserve_host is defined %}
+      {%- if proxy.preserve_host is defined %}
     ProxyPreserveHost {% if proxy.preserve_host %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.add_headers is defined %}
