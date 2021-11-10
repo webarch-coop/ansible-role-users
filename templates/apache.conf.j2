@@ -561,33 +561,38 @@
     {%- endfor %}
   {%- endif %}
   {%- if vhost_config.users_apache_proxy_pass is defined %}
+  <IfModule proxy_module>
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
+      {% if proxy.preserve_host is defined %}
+    ProxyPreserveHost {% if proxy.preserve_host %}On{% else %}Off{% endif %}
+      {%- endif %}
       {%- if proxy.add_headers is defined %}
-  ProxyAddHeaders {% if proxy.add_headers %}On{% else %}Off{% endif %}
+    ProxyAddHeaders {% if proxy.add_headers %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.path is defined and proxy.url is defined %}
-  ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
+    ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
       {%- endif %}
       {%- if proxy.pathmatch is defined and proxy.url is defined %}
-  ProxyPassMatch "{{ proxy.pathmatch }}" "{{ proxy.url }}"
+    ProxyPassMatch "{{ proxy.pathmatch }}" "{{ proxy.url }}"
       {%- endif %}
       {%- if proxy.rewrite_rules is defined and proxy.rewrite_rules != [] %}
-  RewriteEngine on
+    RewriteEngine on
       {%- endif %}
       {%- if proxy.rewrite_conditions is defined %}
         {%- for cond in proxy.rewrite_conditions %}
-  RewriteCond {{ cond }}
+    RewriteCond {{ cond }}
         {%- endfor %}
       {%- endif %}
       {%- if proxy.rewrite_rules is defined %}
         {%- for rule in proxy.rewrite_rules %}
-  RewriteRule {{ rule }}
+    RewriteRule {{ rule }}
         {%- endfor %}
       {%- endif %}
       {%- if proxy.reverse is defined and proxy.reverse %}
-  ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
+    ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
       {%- endif %}
     {%- endfor %}
+  </IfModule>
   {%- endif %}
   {%- if vhost_config.users_apache_error_docs is defined %}
     {%- for doc in vhost_config.users_apache_error_docs %}

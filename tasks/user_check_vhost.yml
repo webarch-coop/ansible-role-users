@@ -428,6 +428,15 @@
             that:
               - vhost.value.users_apache_proxy_pass | type_debug == "list"
 
+        - name: "Check preserve_host is a boolean for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          assert:
+            that:
+              - proxy.preserve_host | type_debug == "bool"
+          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop_control:
+            loop_var: proxy
+          when: proxy.preserve_host is defined
+
         - name: "Check add_headers is a boolean for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
