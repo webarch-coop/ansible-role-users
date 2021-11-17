@@ -86,12 +86,12 @@
           - vhost.value.flarum_dbprefix is regex("^.{1,6}$")
       when: vhost.value.flarum_dbprefix is defined
 
-    - name: "Check that the flarum_admin_user contains only ascii letters and numbers and is between 2 and 14 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that the flarum_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - vhost.value.flarum_admin_user | length
           - vhost.value.flarum_admin_user is regex("^[a-zA-Z0-9]*$")
-          - vhost.value.flarum_admin_user is regex("^.{2,14}$")
+          - vhost.value.flarum_admin_user is regex("^.{2,17}$")
       when: vhost.value.flarum_admin_user is defined
 
     - name: "Check that the flarum_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
