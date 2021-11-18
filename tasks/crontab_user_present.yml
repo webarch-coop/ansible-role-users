@@ -176,13 +176,13 @@
             minute: "{{ job.minute | default('*') }}"
             hour: "{{ job.hour | default('*') }}"
             day: "{{ job.day | default('*') }}"
-            month: "{{ job.month | default('*') }}" 
+            month: "{{ job.month | default('*') }}"
             weekday: "{{ job.weekday | default('*') }}"
-          loop: "{{ user.value.users_cron_jobs }}" 
+          loop: "{{ user.value.users_cron_jobs }}"
           loop_control:
             loop_var: job
             label: "{{ job.name }}"
-          when: ( job.special_time is not defined ) 
+          when: ( job.special_time is not defined )
 
         - name: "Cron jobs with a special time, defined at a user level, present or absent"
           cron:
@@ -190,12 +190,12 @@
             user: "{{ user.key }}"
             state: "{{ job.state | default('present') }}"
             disabled: "{{ job.disabled | default(False) }}"
-            special_time: "{{ job.special_time }}" 
-          loop: "{{ user.value.users_cron_jobs }}" 
+            special_time: "{{ job.special_time }}"
+          loop: "{{ user.value.users_cron_jobs }}"
           loop_control:
             loop_var: job
             label: "{{ job.name }}"
-          when: ( job.special_time is defined ) 
+          when: ( job.special_time is defined )
 
       when: ( user.value.users_cron_jobs is defined ) and ( user.value.users_cron_jobs != [] )
 

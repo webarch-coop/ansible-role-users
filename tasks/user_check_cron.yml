@@ -1,5 +1,5 @@
 ---
-# Cron regular expressions copied from 
+# Cron regular expressions copied from
 # https://stackoverflow.com/questions/14203122/create-a-regular-expression-for-cron-statement
 # NOTE that many things will fail like MON and FEB, this needs improvement or scrapping!
 - name: Check the values in the user_cron_jobs array
