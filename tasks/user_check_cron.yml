@@ -1,7 +1,7 @@
 ---
 # Cron regular expressions copied from
 # https://stackoverflow.com/questions/14203122/create-a-regular-expression-for-cron-statement
-# NOTE that these need improvement! 
+# NOTE that these need improvement!
 - name: Check the values in the user_cron_jobs array
   block:
 
