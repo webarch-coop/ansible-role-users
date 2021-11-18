@@ -1,7 +1,7 @@
 ---
 # Cron regular expressions copied from
 # https://stackoverflow.com/questions/14203122/create-a-regular-expression-for-cron-statement
-# NOTE that many things will fail like MON and FEB, this needs improvement or scrapping!
+# NOTE that these need improvement! 
 - name: Check the values in the user_cron_jobs array
   block:
 
@@ -32,7 +32,7 @@
     - name: Ensure that the minute for the cron job is valid if defined
       assert:
         that:
-          - job.minute is regex('^(\\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\\*\\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]))$')
+          - ( job.minute == "*" ) or ( job.minute is regex('^\*\/[0-9]{1,2}$)' ) or ( job.minute is regex('[1-5]?[0-9]') )
       when: job.minute is defined
 
     - name: Ensure that the hour for the cron job is valid if defined
