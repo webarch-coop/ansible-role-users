@@ -56,6 +56,16 @@
         user: "{{ user.key }}"
         state: absent
 
+    - name: "Cron jobs defined at a user level absent"
+      cron:
+        name: "{{ job.name }}"
+        state: absent
+      loop: "{{ users.value.users_cron_jobs }}"
+      loop_control:
+        loop_var: job
+        label: "{{ job.name }}"
+      when: ( users.value.users_cron_jobs is defined ) and ( users.value.users_cron_jobs != [] )
+
   tags:
     - users
 ...

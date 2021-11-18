@@ -430,6 +430,13 @@
           - user.value.users_hourly_scripts | length > 0
       when: user.value.users_hourly_scripts is defined
 
+    - name: Check the entries in the users_cron_jobs array if defined
+      include_tasks: user_check_cron.yml
+      loop: "{{ user.value.users_cron_jobs }}"
+      loop_control:
+        loop_var: job
+      when: user.value.users_cron_jobs is defined
+
   tags:
     - users
 ...
