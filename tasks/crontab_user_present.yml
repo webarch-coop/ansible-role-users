@@ -170,6 +170,7 @@
         - name: "Cron jobs without a special time, defined at a user level, present or absent"
           cron:
             name: "{{ job.name }}"
+            job: "{{ job.job }}"
             user: "{{ user.key }}"
             state: "{{ job.state | default('present') }}"
             disabled: "{{ job.disabled | default(False) }}"
@@ -187,6 +188,7 @@
         - name: "Cron jobs with a special time, defined at a user level, present or absent"
           cron:
             name: "{{ job.name }}"
+            job: "{{ job.job }}"
             user: "{{ user.key }}"
             state: "{{ job.state | default('present') }}"
             disabled: "{{ job.disabled | default(False) }}"
