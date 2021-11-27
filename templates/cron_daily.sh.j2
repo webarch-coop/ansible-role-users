@@ -2,6 +2,11 @@
 #
 # {{ ansible_managed }}
 #
+export SHELL="/bin/bash"
+export BASH_ENV="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+export PATH="/usr/local/bin:/usr/bin:/bin"
+export TMPDIR="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+#
 # The scripts listed in this file will be run every day
 #
 # BEGIN ANSIBLE SCRIPTS
