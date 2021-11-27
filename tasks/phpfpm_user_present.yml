@@ -152,6 +152,28 @@
         group: root
       when: ( "nginx" in ansible_facts.packages )
 
+    - name: Alias php via ~/.bashrc for CLI usage to include settings from ~/.php.ini
+      lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        regexp: '^alias php='
+        line: 'alias php="php --php-ini ~/.php.ini"'
+        state: present
+        create: true
+        mode: 0644
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+
+    - name: Users ~/.php.ini file present and sys_temp_dir set to ~/tmp
+      lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+        regexp: '^sys_temp_dir = '
+        line: 'sys_temp_dir = "/home/{{ user.key }}/tmp"'
+        state: present
+        create: true
+        mode: 0644
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
     - users
