@@ -152,9 +152,9 @@
         group: root
       when: ( "nginx" in ansible_facts.packages )
 
-    - name: Alias php via ~/.bashrc for CLI usage to include settings from ~/.php.ini
+    - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
       lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_aliases"
         regexp: '^alias php='
         line: 'alias php="php --php-ini ~/.php.ini"'
         state: present
