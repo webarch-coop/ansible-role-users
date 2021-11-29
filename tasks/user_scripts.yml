@@ -6,6 +6,7 @@
       template:
         src: cron_daily.sh.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh"
+        force: false
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
@@ -32,6 +33,7 @@
       template:
         src: cron_hourly.sh.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh"
+        force: false
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
