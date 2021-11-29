@@ -455,13 +455,13 @@
             loop_var: proxy
           when: ( proxy.url is defined ) and ( proxy.path is defined )
 
-        - name: "Check that path and URL are valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that path and URL appear valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           assert:
             that:
               - proxy.path is defined
               - proxy.path is regex('^(unix:\/.*)|(\/.*)$')
               - proxy.url is defined
-              - proxy.url is regex('^([!])|(https?:\/\/.*)$')
+              - ( proxy.url == "!" ) or ( proxy.url is regex('^https?:\/\/.*$') ) or ( proxy.url is regex('^ws:\/\/.*$') )
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
