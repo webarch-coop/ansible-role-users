@@ -44,10 +44,9 @@
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
               then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }}
-              SHELL=/bin/sh
-              TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
               PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
-              /bin/bash {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh 2>&1 |
+              TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh 2>&1 |
               mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ user.key }} account on {{ inventory_hostname }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
@@ -62,10 +61,9 @@
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
               then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }}
-              SHELL=/bin/sh
-              TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
               PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
-              /bin/bash {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh 2>&1 |
+              TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh 2>&1 |
               mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ user.key }} account on {{ inventory_hostname }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
@@ -83,7 +81,7 @@
             job: >
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
-              then /bin/bash {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh; fi
+              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh; fi
             minute: "{{ users_cron_min }}"
             hour: "{{ users_cron_daily_hour | default('05') }}"
 
@@ -94,25 +92,11 @@
             job: >
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
-              then /bin/bash {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh; fi
+              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh; fi
             minute: "{{ users_cron_min }}"
             hour: "*"
 
       when: ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
-
-    - name: "SHELL env var added to {{ user.key }} crontab"
-      cron:
-        env: true
-        name: SHELL
-        value: "/bin/bash"
-        user: "{{ user.key }}"
-
-    - name: "BASH_ENV env var added to {{ user.key }} crontab"
-      cron:
-        env: true
-        name: BASH_ENV
-        value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
-        user: "{{ user.key }}"
 
     - name: "USER env var added to {{ user.key }} crontab"
       cron:
