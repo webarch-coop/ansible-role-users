@@ -36,6 +36,8 @@
       when:
         - user.key != "root"
         - quota_dir is defined
+        - users_quota is defined and users_quota
+        - users_quotaon is defined and users_quotaon
         - user.value.users_quota is defined
         - user.value.users_quota | length > 0
 
