@@ -1,4 +1,12 @@
 ---
+- name: Debug the users disctionary
+  debug:
+    var: users
+    verbosity: 2
+  when: ( users is defined ) and ( users | length > 0 )
+  tags:
+    - users
+
 - name: The users dictionary needs to be defined for this role
   include_tasks: users.yml
   when: ( users is defined ) and ( users | length > 0 )
