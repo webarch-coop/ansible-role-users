@@ -1,5 +1,5 @@
 ---
-- name: Debug the users disctionary
+- name: Debug the users dictionary
   debug:
     var: users
     verbosity: 2
