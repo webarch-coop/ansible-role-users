@@ -18,6 +18,7 @@
       assert:
         that:
           - vhost.value.users_apache_server_name is defined
+          - vhost.value.users_apache_server_name | type_debug is not regex('^dict|list|int|bool$')
           - vhost.value.users_apache_server_name | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
           - vhost.value.users_apache_server_name | length
 
