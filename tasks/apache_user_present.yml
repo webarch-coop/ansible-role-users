@@ -73,7 +73,7 @@
     mode: 0750
   when: ( vhost.value.users_apache_vhost_docroot is not defined ) or ( not vhost.value.users_apache_vhost_docroot )
   # loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
-  loop: "{{ user.value.users_apache_virtual_hosts | dist2items }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
     # label: "{{ vhost }}"
