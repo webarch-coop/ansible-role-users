@@ -511,7 +511,7 @@ The `users_apache_directories` variable can be used at a `VirtualHost` level to
 list dictionaries representing `Directory` directives, **relative to the
 `users_sites_dir` path**. The variables that can be used are the same as the
 ones for the `DocumentRoot` directory apart from `users_apache_type`, this
-can't be used to set the `Ditectory` type to `php` or `static`.
+can't be used to set the `Directory` type to `php` or `static`.
 
 Prior to version `3.0.0` of this role `users_apache_directories` was used for
 an array of directories and when it was used the default `DocumentRoot` /
