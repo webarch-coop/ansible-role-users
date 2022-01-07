@@ -66,26 +66,28 @@
 
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
   file:
-    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     state: directory
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
-  when: ( vhost.users_apache_vhost_docroot is not defined ) or ( not vhost.users_apache_vhost_docroot )
-  loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
+  when: ( vhost.value.users_apache_vhost_docroot is not defined ) or ( not vhost.value.users_apache_vhost_docroot )
+  # loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
+  loop: "{{ user.value.users_apache_virtual_hosts | dist2items }}"
   loop_control:
     loop_var: vhost
-    label: "{{ vhost }}"
+    # label: "{{ vhost }}"
+    label: "{{ vhost.key }}"
   tags:
     - users
 
 - name: "HTTP Authentication htpasswd files present for {{ user.key }}"
   include_tasks: htauth.yml
+  when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
     label: "{{ vhost.key }}"
-  when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   tags:
     - users
 
