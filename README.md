@@ -387,6 +387,9 @@ directives, for example:
             status: permanent
           - regex_path: (.*)\.gif$
             url: http://other.example.com$1.jpg
+          # Use a `regex_path` if you want any URL on the domain to be redirected to a specific page
+          - regex_path: (.*)
+            url: http://new.example.com/about
 ```
 
 The `users_apache_alias` array can be used to generate
