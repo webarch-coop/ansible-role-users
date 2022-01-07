@@ -71,7 +71,7 @@
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
-  when: ( vhost.value.users_apache_vhost_docroot is not defined ) or ( not vhost.value.users_apache_vhost_docroot )
+  when: ( vhost.value.users_apache_vhost_docroot is not defined ) or ( vhost.value.users_apache_vhost_docroot )
   # loop: "{{ user.value.users_apache_virtual_hosts.keys() | list }}"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
