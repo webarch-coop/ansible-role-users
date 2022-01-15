@@ -31,6 +31,17 @@
         - ( users_mariadb is defined ) and ( users_mariadb )
         - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
 
+    - name: Debug quota settings
+      debug:
+        msg:
+          - "quota_dir: {{ quota_dir }}"
+          - "users_quotaon: {{ users_quotaon }}"
+          - "user.value.users_quota: {{ user.value.users_quota }}"
+      when:
+        - quota_dir is defined
+        - users_quotaon is defined
+        - user.value.users_quota is defined
+
     - name: "Quotas set for {{ user.key }}"
       include_tasks: quota.yml
       when:
