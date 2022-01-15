@@ -35,10 +35,12 @@
       debug:
         msg:
           - "quota_dir: {{ quota_dir }}"
+          - "users_quota: {{ users_quota }}"
           - "users_quotaon: {{ users_quotaon }}"
           - "user.value.users_quota: {{ user.value.users_quota }}"
       when:
         - quota_dir is defined
+        - users_quota is defined
         - users_quotaon is defined
         - user.value.users_quota is defined
 
