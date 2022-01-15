@@ -35,12 +35,10 @@
       debug:
         msg:
           - "quota_dir: {{ quota_dir }}"
-          - "users_quota: {{ users_quota }}"
           - "users_quotaon: {{ users_quotaon }}"
           - "user.value.users_quota: {{ user.value.users_quota }}"
       when:
         - quota_dir is defined
-        # - users_quota is defined
         - users_quotaon is defined
         - user.value.users_quota is defined
 
@@ -49,7 +47,6 @@
       when:
         - user.key != "root"
         - quota_dir is defined
-        - users_quota is defined and users_quota
         - users_quotaon is defined and users_quotaon
         - user.value.users_quota is defined
         - user.value.users_quota | length > 0
