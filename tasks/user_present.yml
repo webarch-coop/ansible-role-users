@@ -41,6 +41,10 @@
         - user.value.users_quota is defined
         - user.value.users_quota | length > 0
 
+    - name: Debug fail
+      fail:
+        msg: Fail for quota debug
+
     - name: "Set passwds and notify user {{ user.key }}"
       include_tasks: notify_passwd.yml
       when:
