@@ -132,7 +132,7 @@
     - name: Update quotas for users present
       block:
 
-        - name: "Quotas set for {{ user.key }}"
+        - name: Quotas set for users
           include_tasks: quota.yml
           loop: "{{ users | dict2items }}"
           loop_control:
@@ -282,6 +282,21 @@
     - name: Users quota CSV file updated
       block:
 
+        - name: "Touch {{ quota_dir }}/quota_user.csv"
+          file:
+            path: "{{ quota_dir }}/quota_user.csv"
+            state: touch
+            access_time: preserve
+            modification_time: preserve
+          check_mode: false
+          changed_when: false
+
+        - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
+          command: "md5sum {{ quota_dir }}/quota_user.csv"
+          register: users_repquota_md5sum_before
+          check_mode: false
+          changed_when: false
+
         - name: Updated users quotas written and md5sum printed
           shell: |
             set -e -o pipefail
@@ -294,7 +309,7 @@
           check_mode: false
           changed_when: >
             ( users_repquota_md5sum_before is not defined ) or
-            ( users_repquota_md5sum_before is defined and users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout )
+            ( ( users_repquota_md5sum_before is defined and users_repquota_md5sum_before.stdout ) != users_repquota_md5sum_after.stdout )
 
         - name: Updated users quotas fetched
           fetch:

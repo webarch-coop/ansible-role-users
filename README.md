@@ -10,6 +10,11 @@ isn't up to date, see the [releases](https://git.coop/webarch/users/-/releases)
 for updates and changes, do not use the `master` branch for production, it is
 used for development.**
 
+For an example of a users YAML dictionary see [the users dictionary for the
+development
+server](https://git.coop/webarch/wsh/-/blob/master/host_vars/wsh.webarchitects.org.uk/vars.yml)
+that is used for testing this role.
+
 ## Users update strategy
 
 By default this role will update all users defined in the `users` dictionary.
