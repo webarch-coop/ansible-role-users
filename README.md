@@ -12,11 +12,11 @@ used for development.**
 
 ## Users update strategy
 
-Because running all the tasks in this role for all the users takes a long time
-and does a lot of unneeded things when there is only a small change to be made
-the tasks that are to be run can be limited in various ways.
-
 By default this role will update all users defined in the `users` dictionary.
+
+However, since running all the tasks in this role for all the users takes a
+long time and usually runs a lot of tasks that won't make changes, the tasks
+that are to be run can be limited in various ways.
 
 In order to keep track of the users state, on the server (so that updates can
 be aplied from different places), YAML files for each user are written to
