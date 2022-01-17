@@ -316,6 +316,7 @@
       debug:
         msg: "Users updated: {{ users_update }}"
       when:
+        - users_update != []
         - users_update_strategy != "sshkeys"
 
   tags:

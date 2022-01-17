@@ -18,8 +18,7 @@ that is used for testing this role.
 ## Users update strategy
 
 By default this role will update users defined in the `users` dictionary for
-whome their YAML dictionary has changed (see [the
-defaults](defaults/main.yml)).
+whom their YAML dictionary has changed (see [the defaults](defaults/main.yml)).
 
 The reason for this is since running all the tasks in this role for all the
 users takes a long time and usually runs a lot of tasks that won't make
