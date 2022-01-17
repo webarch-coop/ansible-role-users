@@ -1,14 +1,15 @@
 ---
-- name: Debug the users dictionary
-  debug:
-    var: users
-    verbosity: 2
-  when: ( users is defined ) and ( users | length > 0 )
-  tags:
-    - users
+- name: Webarchitects Ansible User Role
+  block:
 
-- name: The users dictionary needs to be defined for this role
-  include_tasks: users.yml
+  - name: Debug the users dictionary
+    debug:
+      var: users
+      verbosity: 2
+
+  - name: The users dictionary needs to be defined for this role
+    include_tasks: users.yml
+
   when: ( users is defined ) and ( users | length > 0 )
   tags:
     - users

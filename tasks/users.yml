@@ -129,6 +129,23 @@
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "sshkeys" )
 
+    - name: Update quotas for users present
+
+        - name: "Quotas set for {{ user.key }}"
+          include_tasks: quota.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - user.key != "root"
+            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+            - ( user.value.users_quota is defined ) and ( user.value.users_quota | length > 0 )
+
+      when:
+        - ( users_update_strategy is defined ) and ( users_update_strategy == "quotas" )
+        - ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
+
     - name: Set users to update to all
       block:
 
@@ -265,7 +282,13 @@
       block:
 
         - name: Updated users quotas written and md5sum printed
-          shell: "repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv ; chmod 600 {{ quota_dir }}/quota_user.csv ; md5sum {{ quota_dir }}/quota_user.csv"
+          shell: |
+            set -e -o pipefail
+            repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
+            chmod 600 {{ quota_dir }}/quota_user.csv
+            md5sum {{ quota_dir }}/quota_user.csv
+          args:
+            executable: /usr/bin/bash
           register: users_repquota_md5sum_after
           check_mode: false
           changed_when: >

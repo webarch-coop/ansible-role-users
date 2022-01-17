@@ -10,6 +10,85 @@ isn't up to date, see the [releases](https://git.coop/webarch/users/-/releases)
 for updates and changes, do not use the `master` branch for production, it is
 used for development.**
 
+## Users update strategy
+
+Because running all the tasks in this role for all the users takes a long time
+and does a lot of unneeded things when there is only a small change to be made
+the tasks that are to be run can be limited in various ways.
+
+By default this role will update all users defined in the `users` dictionary.
+
+In order to keep track of the users state, on the server (so that updates can
+be aplied from different places), YAML files for each user are written to
+sub-directories of `/root/users` called, `current`, `previous` and `proposed`.
+
+By setting the `users_update_strategy` variable to "changed" (rather than the
+default of undefined, which is considered to be the same as "all") only users
+with a changed `users` dictionary will be updated.
+
+In addition alternative update strategies can be specified by setting the
+`users_update_strategy` variable to a few other optional values.
+
+### Update all users 
+
+This is the default:
+
+```bash
+ansible-playbook wsh.yml --extra-vars "users_update_strategy=all"
+```
+
+### Only run checks on users
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=check"
+```
+
+### Only update changed users
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=changed"
+```
+
+### Only update users Apache sites-available files
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=apache"
+```
+
+## Only update users disk quotas
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=quotas"
+```
+
+### Only update the firewall rules
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=firewall"
+```
+
+### Only update users PHP-FPM pool.d files
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=phpfpm"
+```
+
+### Update users SSH public keys
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=sshkeys"
+```
+
+### Updated users in additional groups
+
+Update all users which have `users_groups` defined:
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=groups"
+```
+
+## How to use this role
+
 To use this role you need to use Ansible Galaxy to install it into another
 repository under `galaxy/roles/users` by adding a `requirements.yml` file in
 that repo that contains:
