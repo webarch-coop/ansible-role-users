@@ -282,21 +282,6 @@
     - name: Users quota CSV file updated
       block:
 
-        - name: "Touch {{ quota_dir }}/quota_user.csv"
-          file:
-            path: "{{ quota_dir }}/quota_user.csv"
-            state: touch
-            access_time: preserve
-            modification_time: preserve
-          check_mode: false
-          changed_when: false
-
-        - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
-          command: "md5sum {{ quota_dir }}/quota_user.csv"
-          register: users_repquota_md5sum_before
-          check_mode: false
-          changed_when: false
-
         - name: Updated users quotas written and md5sum printed
           shell: |
             set -e -o pipefail
