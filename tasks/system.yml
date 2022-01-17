@@ -18,7 +18,7 @@
         loop_var: shell
         label: "{{ shell }}"
 
-    - name: Variable set for path to Bash shell 
+    - name: Variable set for path to Bash shell
       set_fact:
         users_bash: "{{ shell }}"
       when: shell is regex('\/bash$')
@@ -151,7 +151,7 @@
             md5sum {{ quota_dir }}/quota_user.csv
           args:
             chdir: "{{ quota_dir | dirname }}"
-            executable: "{{ users_bash }}" 
+            executable: "{{ users_bash }}"
           register: users_repquota_md5sum_after
           check_mode: false
           # changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
