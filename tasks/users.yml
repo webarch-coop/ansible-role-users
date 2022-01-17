@@ -304,7 +304,7 @@
             chmod 600 {{ quota_dir }}/quota_user.csv
             md5sum {{ quota_dir }}/quota_user.csv
           args:
-            executable: /usr/bin/bash
+            executable: "{{ users_bash }}"
           register: users_repquota_md5sum_after
           check_mode: false
           changed_when: >

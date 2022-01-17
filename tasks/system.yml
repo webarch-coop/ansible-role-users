@@ -9,18 +9,29 @@
       changed_when: false
       register: users_shells_b64encoded
 
-    - name: Array set for shells
+    - name: Array set for available shells
       set_fact:
-        users_shells: "{{ users_shells | default([]) }} + [ '{{ shell }}' ]"
-      when: shell is not regex('^#')
+        users_shells: "{{ users_shells | default([]) | trim }} + [ '{{ shell }}' ]"
+      when: ( shell is not regex('^#') ) and ( shell | length > 0 )
       loop: "{{ ( users_shells_b64encoded['content'] | b64decode ).split('\n') | list }}"
       loop_control:
         loop_var: shell
         label: "{{ shell }}"
 
-    - name: Print available shells
+    - name: Variable set for path to Bash shell 
+      set_fact:
+        users_bash: "{{ shell }}"
+      when: shell is regex('\/bash$')
+      loop: "{{ users_shells }}"
+      loop_control:
+        loop_var: shell
+        label: "{{ shell }}"
+
+    - name: Print available shells and the path for Bash
       debug:
-        msg: "Available shells: {{ users_shells }}"
+        msg:
+          - "Available shells: {{ users_shells }}"
+          - "Path to Bash: {{ users_bash }}"
         verbosity: 2
 
     - name: Get all groups
@@ -140,7 +151,7 @@
             md5sum {{ quota_dir }}/quota_user.csv
           args:
             chdir: "{{ quota_dir | dirname }}"
-            executable: /usr/bin/bash
+            executable: "{{ users_bash }}" 
           register: users_repquota_md5sum_after
           check_mode: false
           # changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
