@@ -158,12 +158,6 @@
           check_mode: false
           # changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
 
-        - name: Debug fail
-          fail:
-            msg:
-              - "users_repquota_md5sum_before.stdout: {{ users_repquota_md5sum_before.stdout }}"
-              - "users_repquota_md5sum_after.stdout: {{ users_repquota_md5sum_after.stdout }}"
-
         - name: Users quotas fetched
           fetch:
             src: "{{ quota_dir }}/quota_user.csv"
