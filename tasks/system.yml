@@ -156,7 +156,7 @@
             executable: "{{ users_bash }}"
           register: users_repquota_md5sum_after
           check_mode: false
-          # changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
+          changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
 
         - name: Users quotas fetched
           fetch:
