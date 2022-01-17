@@ -17,26 +17,26 @@ that is used for testing this role.
 
 ## Users update strategy
 
-By default this role will update all users defined in the `users` dictionary.
+By default this role will update users defined in the `users` dictionary for
+whome their YAML dictionary has changed (see [the
+defaults](defaults/main.yml)).
 
-However, since running all the tasks in this role for all the users takes a
-long time and usually runs a lot of tasks that won't make changes, the tasks
-that are to be run can be limited in various ways.
+The reason for this is since running all the tasks in this role for all the
+users takes a long time and usually runs a lot of tasks that won't make
+changes. 
 
 In order to keep track of the users state, on the server (so that updates can
-be aplied from different places), YAML files for each user are written to
+be applied from different places), YAML files for each user are written to
 sub-directories of `/root/users` called, `current`, `previous` and `proposed`.
 
-By setting the `users_update_strategy` variable to "changed" (rather than the
-default of undefined, which is considered to be the same as "all") only users
-with a changed `users` dictionary will be updated.
+By setting the `users_update_strategy` variable to "all" (rather than the
+default of "changed") all, rather than only users with a changed `users`
+dictionary, will be updated.
 
-In addition alternative update strategies can be specified by setting the
-`users_update_strategy` variable to a few other optional values.
+Alternative update strategies can be specified by setting the
+`users_update_strategy` variable to a few optional values as explained below.
 
 ### Update all users 
-
-This is the default:
 
 ```bash
 ansible-playbook wsh.yml --extra-vars "users_update_strategy=all"
@@ -49,6 +49,8 @@ ansible-playbook users.yml --extra-vars "users_update_strategy=check"
 ```
 
 ### Only update changed users
+
+This is the default:
 
 ```bash
 ansible-playbook users.yml --extra-vars "users_update_strategy=changed"
