@@ -18,11 +18,12 @@
         loop_var: shell
         label: "{{ shell }}"
 
-    # On Bullseye Bash is /bin/bash on Xenial it is also in /usr/bin/bash
-    - name: Variable set for path to Bash shell
+    - name: Variable set for path to last Bash shell
       set_fact:
         users_bash: "{{ shell }}"
-      when: shell is regex('\/bash$')
+      when:
+        - users_bash is not defined
+        - shell is regex('\/bash$')
       loop: "{{ users_shells }}"
       loop_control:
         loop_var: shell
@@ -34,9 +35,6 @@
           - "Available shells: {{ users_shells }}"
           - "Path to Bash: {{ users_bash }}"
         verbosity: 2
-
-    - name: Debug fail
-      fail:
 
     - name: Get all groups
       getent:

@@ -418,4 +418,9 @@ users_cron_tmpdir_max_age_days: 2
 # users_matomo_delete_users is set to true
 users_matomo_delete_users: false
 users_ssh_authorized_keys_file_name: authorized_keys
+# On Bullseye Bash is /bin/bash, on Xenial it is also in /usr/bin/bash, on
+# Bookworm it will be in /usr/bin/bash, this role will set users_bash to the
+# last option in /etc/shells ending in /bash, so set it manually if this isn't
+# what is wanted
+# users_bash: /usr/bin/bash
 ...
