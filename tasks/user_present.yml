@@ -116,13 +116,12 @@
     - name: "Matomo login account tasks for {{ user.key }}"
       block:
 
-        - name: "Check if the Matomo {{ matomo_user }} system user account exists"
-          shell: "id {{ matomo_user }} && echo true || echo false"
-          check_mode: false
-          register: user_matomo_user_check
-          changed_when: '"no such user" in user_matomo_user_check.stderr'
+        - name: Get all users
+          getent:
+            database: passwd
+            split: ':'
 
-        - name: "Check if a Matomo config file exists"
+        - name: When the Matomo user is present check if a Matomo config file exists
           block:
 
             - name: "Stat {{ matomo_html }}/config/config.ini.php"
@@ -155,7 +154,7 @@
 
               when: user_matomo_config.stat.exists
 
-          when: ( user_matomo_user_check is defined ) and ( "no such user" not in user_matomo_user_check.stderr )
+          when: matomo_user in getent_passwd.keys()
 
       when:
         - ( user.key != "root" )

@@ -7,7 +7,7 @@
       var: users
       verbosity: 2
 
-  - name: The users dictionary needs to be defined for this role
+  - name: Include the users tasks when the users dictionary is defined
     include_tasks: users.yml
 
   when: ( users is defined ) and ( users | length > 0 )

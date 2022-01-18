@@ -1,5 +1,5 @@
 ---
-- name: Apply the users tag to all tasks
+- name: Users tasks
   block:
 
     - name: Packages present
