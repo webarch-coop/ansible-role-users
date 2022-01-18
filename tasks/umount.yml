@@ -7,7 +7,7 @@
       check_mode: false
       changed_when: false
       register: users_findmnt
-      failed_when: findmnt.rc is not regex('^0|1$')
+      failed_when: users_findmnt.rc is not regex('^0|1$')
 
     - name: "Disk {{ users_mount_point }} unmounted"
       command: "umount -l {{ users_mount_point }}"
