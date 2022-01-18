@@ -1,5 +1,5 @@
 ---
-- name: Check if a disk is mounted and unmount it when it is
+- name: Check if a filesystem is mounted and unmount it when it is
   block:
 
     - name: "Check if {{ users_mount_point }} is mounted"

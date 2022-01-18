@@ -14,7 +14,7 @@
         regexp: "^{{ user.key }}:"
         state: absent
 
-    - name: Include tasks to unmount mounted disks
+    - name: Include tasks to unmount mounted filesystems
       include_tasks: umount.yml
       loop:
         - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot"
