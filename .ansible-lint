@@ -10,7 +10,7 @@ skip_list:
   # Using command rather than module
   - "303"
   # Shells that use pipes should set the pipefail option
-  - "306"
+  # - "306"
   # Tasks that run when changed should likely be handlers
   - "503"
 # vim: syntax=yaml

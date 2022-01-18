@@ -16,8 +16,12 @@
       register: users_cron_min_file
 
     - name: "Generate {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-      shell: "echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-      when: ( users_cron_min_file.stat is not defined ) or ( not users_cron_min_file.stat.exists )
+      shell: |
+        set -e -o pipefail
+        echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
+      args:
+        executable: "{{ users_bash }}"
+      when: not users_cron_min_file.stat.exists
 
     - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       slurp:

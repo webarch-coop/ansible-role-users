@@ -5,8 +5,8 @@
     - name: "Read {{ user.key }} entry from /etc/passwd"
       command: "grep ^{{ user.key }}: /etc/passwd"
       check_mode: false
-      register: users_etc_passwd
       changed_when: false
+      register: users_etc_passwd
 
     - name: "{{ user.key }} present in {{ chroot_dir | default('/chroot') }}/etc/passwd"
       lineinfile:
@@ -17,8 +17,8 @@
     - name: "Read {{ user.key }} entry from /etc/group"
       command: "grep ^{{ user.key }}: /etc/group"
       check_mode: false
-      register: users_etc_group
       changed_when: false
+      register: users_etc_group
 
     - name: "{{ user.key }} present in {{ chroot_dir | default('/chroot') }}/etc/group"
       lineinfile:
@@ -35,10 +35,11 @@
         state: directory
 
     - name: "Check if {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
-      shell: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} >/dev/null && echo PRESENT || echo ABSENT"
+      command: "findmnt {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       check_mode: false
+      changed_when: false
       register: users_chroot_users_home_mount
-      changed_when: '"ABSENT" in users_chroot_users_home_mount.stdout'
+      failed_when: users_chroot_users_home_mount.rc is not regex('^0|1$')
 
     - name: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
       file:
@@ -47,7 +48,7 @@
         group: root
         mode: "0750"
         state: directory
-      when: '"ABSENT" in users_chroot_users_home_mount.stdout'
+      when: users_chroot_users_home_mount.rc == 1
 
     - name: "Chroot directories mounted for {{ user.key }}"
       mount:

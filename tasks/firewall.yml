@@ -85,7 +85,11 @@
         backup: true
 
     - name: IPv4 iptables rules restored
-      shell: "iptables-restore < /etc/iptables/rules.v4"
+      shell: |
+        set -e -o pipefail
+        iptables-restore < /etc/iptables/rules.v4
+      args:
+        executable: "{{ users_bash }}"
 
     - name: fail2ban restarted
       service:
