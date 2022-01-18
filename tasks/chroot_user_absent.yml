@@ -19,7 +19,7 @@
       loop:
         - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot"
         - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld"
-        - "{{ chroot_users_dir | default('/users') }}{{ user.key }}/{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
       loop_control:
         loop_var: users_mount_point

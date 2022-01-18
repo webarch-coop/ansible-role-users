@@ -7,7 +7,7 @@
   loop:
     - "^/run/chroot {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot ext4 "
     - "^/run/mysqld {{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld ext4 "
-    - "^{{ user.value.users_home | default(users_basedir + '/' + user.key) }} {{ chroot_users_dir | default('/users') }}/{{ user.key }}/{{ user.value.users_home | default(users_basedir + '/' + user.key) }} ext4 "
+    - "^{{ user.value.users_home | default(users_basedir + '/' + user.key) }} {{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} ext4 "
     - "^{{ chroot_dir | default('/chroot') }} {{ chroot_users_dir | default('/users') }}/{{ user.key }} ext4 "
   loop_control:
     loop_var: mount
