@@ -599,7 +599,7 @@
   <IfModule proxy_module>
     {%- for proxy in vhost_config.users_apache_proxy %}
       {%- if proxy.url is defined %}
-m   <Proxy "{{ proxy.url }}">
+    <Proxy "{{ proxy.url }}">
       {%- else %}
     <Proxy "*">
       {%- endif %}
