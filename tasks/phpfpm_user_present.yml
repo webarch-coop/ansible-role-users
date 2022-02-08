@@ -1,4 +1,6 @@
 ---
+# TODO Include Tasks to check PHP FPM variables
+#
 - name: "PHP FPM config present for {{ user.key }}"
   block:
 

@@ -1,4 +1,6 @@
 ---
+# TODO Include Tasks to check Apache variables
+
 - name: Check Apache status
   command: service apache2 status
   check_mode: false
