@@ -594,6 +594,31 @@
     {%- endfor %}
   </IfModule>
   {%- endif %}
+  {# TODO The following Proxy section needs work! #}
+  {% if vhost_config.users_apache_proxy is defined %}
+  <IfModule proxy_module>
+    {%- for proxy in vhost_config.users_apache_proxy %}
+      {%- if proxy.url is defined %}
+m   <Proxy "{{ proxy.url }}>
+      {%- else %}
+    <Proxy "*">
+      {%- endif %}
+      {%- if proxy.authtype is defined and proxy.authtype == "None" %}
+      # No AuthUserFile for this Proxy as AuthType is None
+      {%- else %}
+      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      AuthName "{% if proxy.authname is defined %}{{ proxy.authname }}{% else %}Authorised Users{% endif %}"
+      AuthType {% if proxy.authtype is defined %}{{ proxy.authtype }}{% else %}Basic{% endif %}
+      {%- endif %}
+      {%- if proxy.require is defined %}{% for req in proxy.require %}
+      Require {{ req }}
+        {%- endfor %}{% else %}
+      Require valid-user
+      {%- endif %}
+    </Proxy>
+    {%- endfor %}
+  </IfModule>
+  {%- endif %}
   {%- if vhost_config.users_apache_error_docs is defined %}
     {%- for doc in vhost_config.users_apache_error_docs %}
   ErrorDocument {{ doc.code }} {{ doc.path }}
