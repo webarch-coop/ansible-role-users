@@ -594,8 +594,8 @@
     {%- endfor %}
   </IfModule>
   {%- endif %}
-  {# TODO The following Proxy section needs work! #}
-  {% if vhost_config.users_apache_proxy is defined %}
+  {#- TODO The following Proxy section needs work! #}
+  {%- if vhost_config.users_apache_proxy is defined %}
   <IfModule proxy_module>
     {%- for proxy in vhost_config.users_apache_proxy %}
       {%- if proxy.url is defined %}
