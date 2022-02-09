@@ -562,12 +562,11 @@
   {%- endif %}
   {%- if vhost_config.users_apache_proxy_pass is defined %}
   <IfModule proxy_module>
-    # In a typical reverse proxy or gateway configuration, ProxyRequests should be set to Off.
-    {%- if proxy.requests is not defined %}
+    # In reverse proxy or gateway configuration, ProxyRequests should be set to Off
     ProxyRequests Off
-    {%- else %}
-    ProxyRequests {% if proxy.requests %}On{% else %}Off{% endif %}
-    {%- endif %}
+    # Enable error documents under /wsh to be server rather than proxying error responses
+    ProxyErrorOverride On
+    ProxyPass "/wsh/" "!"
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
       {%- if proxy.path is defined and proxy.url is defined %}
     ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
@@ -596,11 +595,6 @@
       {%- endif %}
       {%- if proxy.reverse is defined and proxy.reverse %}
     ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
-      {%- endif %}
-      {%- if proxy.error_override is not defined %}
-    ProxyErrorOverride On
-      {%- elif proxy.error_override is defined %}
-    ProxyErrorOverride {% if proxy.error_override %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.htauth is defined and proxy.htauth %}
     <Proxy "{{ proxy.url }}">
