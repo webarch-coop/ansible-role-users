@@ -563,14 +563,20 @@
   {%- if vhost_config.users_apache_proxy_pass is defined %}
   <IfModule proxy_module>
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
+      {%- if proxy.path is defined and proxy.url is defined %}
+    ProxyRequests off
+    ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
+      {%- endif %}
+      {% if proxy.error_override is not defined %}
+    ProxyErrorOverride on
+      {% elif proxy.error_override is defined %}
+    ProxyErrorOverride {% if proxy.error_override %}On{% else %}Off{% endif %}
+      {%- endif %}
       {%- if proxy.preserve_host is defined %}
     ProxyPreserveHost {% if proxy.preserve_host %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.add_headers is defined %}
     ProxyAddHeaders {% if proxy.add_headers %}On{% else %}Off{% endif %}
-      {%- endif %}
-      {%- if proxy.path is defined and proxy.url is defined %}
-    ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
       {%- endif %}
       {%- if proxy.pathmatch is defined and proxy.url is defined %}
     ProxyPassMatch "{{ proxy.pathmatch }}" "{{ proxy.url }}"
