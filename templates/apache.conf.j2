@@ -562,15 +562,15 @@
   {%- endif %}
   {%- if vhost_config.users_apache_proxy_pass is defined %}
   <IfModule proxy_module>
+    # In a typical reverse proxy or gateway configuration, ProxyRequests should be set to Off.
+    {%- if proxy.requests is not defined %}
+    ProxyRequests Off
+    {% else %}
+    ProxyRequests {% if proxy.requests %}On{% else %}Off{% endif %}
+    {%- endif %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
       {%- if proxy.path is defined and proxy.url is defined %}
-    ProxyRequests off
     ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
-      {%- endif %}
-      {%- if proxy.error_override is not defined %}
-    ProxyErrorOverride on
-      {%- elif proxy.error_override is defined %}
-    ProxyErrorOverride {% if proxy.error_override %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.preserve_host is defined %}
     ProxyPreserveHost {% if proxy.preserve_host %}On{% else %}Off{% endif %}
@@ -582,7 +582,7 @@
     ProxyPassMatch "{{ proxy.pathmatch }}" "{{ proxy.url }}"
       {%- endif %}
       {%- if proxy.rewrite_rules is defined and proxy.rewrite_rules != [] %}
-    RewriteEngine on
+    RewriteEngine On
       {%- endif %}
       {%- if proxy.rewrite_conditions is defined %}
         {%- for cond in proxy.rewrite_conditions %}
@@ -596,6 +596,11 @@
       {%- endif %}
       {%- if proxy.reverse is defined and proxy.reverse %}
     ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
+      {%- endif %}
+      {%- if proxy.error_override is not defined %}
+    ProxyErrorOverride On
+      {%- elif proxy.error_override is defined %}
+    ProxyErrorOverride {% if proxy.error_override %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.htauth is defined and proxy.htauth %}
     <Proxy "{{ proxy.url }}">
