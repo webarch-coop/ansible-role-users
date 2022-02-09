@@ -591,31 +591,18 @@
       {%- if proxy.reverse is defined and proxy.reverse %}
     ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
       {%- endif %}
-    {%- endfor %}
-  </IfModule>
-  {%- endif %}
-  {#- TODO The following Proxy section needs work! #}
-  {%- if vhost_config.users_apache_proxy is defined %}
-  <IfModule proxy_module>
-    {%- for proxy in vhost_config.users_apache_proxy %}
-      {%- if proxy.url is defined %}
-    <Proxy "{{ proxy.url }}">
-      {%- else %}
-    <Proxy "*">
-      {%- endif %}
-      {%- if proxy.authtype is defined and proxy.authtype == "None" %}
-      # No AuthUserFile for this Proxy as AuthType is None
-      {%- else %}
-      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
-      AuthName "{% if proxy.authname is defined %}{{ proxy.authname }}{% else %}Authorised Users{% endif %}"
+      {%- if proxy.htauth is defined and proxy.htauth %}
+    <Proxy "{{ proxy.path }}">
       AuthType {% if proxy.authtype is defined %}{{ proxy.authtype }}{% else %}Basic{% endif %}
-      {%- endif %}
-      {%- if proxy.require is defined %}{% for req in proxy.require %}
+      AuthName "{% if proxy.authname is defined %}{{ proxy.authname }}{% else %}Authorised Users{% endif %}"
+      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+        {%- if proxy.require is defined %}{% for req in proxy.require %}
       Require {{ req }}
-        {%- endfor %}{% else %}
+          {%- endfor %}{% else %}
       Require valid-user
-      {%- endif %}
+        {%- endif %}
     </Proxy>
+      {%- endif %}
     {%- endfor %}
   </IfModule>
   {%- endif %}
