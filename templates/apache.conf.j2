@@ -564,7 +564,7 @@
   <IfModule proxy_module>
     # In reverse proxy or gateway configuration, ProxyRequests should be set to Off
     ProxyRequests Off
-    # Enable error documents under /wsh to be server rather than proxying error responses
+    # Enable error documents under /wsh to be served rather than proxying error responses
     ProxyErrorOverride On
     ProxyPass "/wsh/" "!"
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
