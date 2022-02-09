@@ -565,7 +565,7 @@
     # In a typical reverse proxy or gateway configuration, ProxyRequests should be set to Off.
     {%- if proxy.requests is not defined %}
     ProxyRequests Off
-    {% else %}
+    {%- else %}
     ProxyRequests {% if proxy.requests %}On{% else %}Off{% endif %}
     {%- endif %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
