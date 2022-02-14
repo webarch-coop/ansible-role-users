@@ -2,6 +2,8 @@
 - name: Apache un-chrooted
   block:
 
+    # TODO Stop Apache?
+
     - name: Chroot directories unmounted for Apache
       mount:
         path: "{{ path }}"
