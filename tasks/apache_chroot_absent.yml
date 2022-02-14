@@ -25,7 +25,7 @@
       blockinfile:
         path: /etc/fstab
         state: absent
-        marker: "<!-- {mark} APACHE CHROOT -->"
+        marker: "# {mark} APACHE CHROOT"
 
   tags:
     - users

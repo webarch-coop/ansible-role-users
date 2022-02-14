@@ -59,7 +59,7 @@
         path: /etc/fstab
         block: |
           {{ chroot_dir }} {{ chroot_users_dir }}/www-data ext4 ro,nosuid,bind,private 0 0
-          # {% if users_apache_chroot_suexec %}/usr/lib/apache2 {{ chroot_users_dir }}/www-data/usr/lib/apache2 ext4 ro,bind,private 0 0{% endif %}
+          {% if users_apache_chroot_suexec %}/usr/lib/apache2 {{ chroot_users_dir }}/www-data/usr/lib/apache2 ext4 ro,bind,private 0 0{% endif %}
           {{ users_basedir }} {{ chroot_users_dir }}/www-data{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
           /var/www {{ chroot_users_dir }}/www-data/var/www ext4 rw,nodev,nosuid,bind,private 0 0
           /var/www{{ chroot_users_dir }} {{ chroot_users_dir }}/www-data{{ chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
@@ -67,7 +67,7 @@
           /run/chroot {{ chroot_users_dir }}/www-data/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/mysqld {{ chroot_users_dir }}/www-data/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/php {{ chroot_users_dir }}/www-data/run/php ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-        marker: "<!-- {mark} APACHE CHROOT -->"
+        marker: "# {mark} APACHE CHROOT"
         insertafter: '^\/dev\/'
 
     - name: Apache www-data user suexec configuration in place
