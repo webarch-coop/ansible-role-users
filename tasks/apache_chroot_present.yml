@@ -51,7 +51,7 @@
           path: "{{ chroot_users_dir }}/www-data/run/php"
           opts: ro,nodev,nosuid,noexec,bind,private
 
-    - name: Apache chroot mounts present in /etc/fstab 
+    - name: Apache chroot mounts present in /etc/fstab
       blockinfile:
         path: /etc/fstab
         block: |
