@@ -1,7 +1,32 @@
 ---
-# - name: Apache un-chrooted
-#   block:
-#
-#   tags:
-#     - users
+- name: Apache un-chrooted
+  block:
+
+    - name: Chroot directories unmounted for Apache
+      mount:
+        path: "{{ path }}"
+        state: unmounted
+      loop:
+        - "{{ chroot_users_dir }}/www-data"
+        # Does suexec need to have setuid in the chroot?
+        # - "{{ chroot_users_dir }}/www-data/usr/lib/apache2"
+        - "{{ chroot_users_dir }}/www-data{{ users_basedir }}"
+        - "{{ chroot_users_dir }}/www-data/var/www"
+        - "{{ chroot_users_dir }}/www-data{{ chroot_users_dir }}"
+        - "{{ chroot_users_dir }}/www-data/run/apache2"
+        - "{{ chroot_users_dir }}/www-data/run/chroot"
+        - "{{ chroot_users_dir }}/www-data/run/mysqld"
+        - "{{ chroot_users_dir }}/www-data/run/php"
+      loop_control:
+        loop_var: path
+        label: "{{ path | basename }}"
+
+    - name: Apache chroot mounts absent from /etc/fstab
+      blockinfile:
+        path: /etc/fstab
+        state: absent
+        marker: "<!-- {mark} APACHE CHROOT -->"
+
+  tags:
+    - users
 ...
