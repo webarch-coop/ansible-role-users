@@ -1,32 +1,43 @@
 ---
-- name: Users Apache logrotation config in place
-  template:
-    src: apache_users_logrotate.j2
-    dest: /etc/logrotate.d/apache_users_logrotate
-    owner: root
-    group: root
-    mode: 0644
-  tags:
-    - users
+- name: Apache configuration
+  block:
 
-- name: Cron job to delete Apache logs when older than 30 days
-  cron:
-    name: Delete Apache log files
-    hour: "0"
-    minute: "0"
-    day: "1"
-    job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
-  tags:
-    - users
+    - name: Apache chroot present configuration
+      include_tasks: apache_chroot_present.yml
+      when:
+        - ( users_apache_chroot is defined ) and ( users_apache_chroot )
+        - ( users_apache_chroot_dir is defined ) and ( users_apache_chroot_dir == "/users/www-data" )
 
-- name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
-  cron:
-    name: "Email monthly Apache bandwidth"
-    hour: "1"
-    minute: "0"
-    day: "1"
-    job: "/usr/local/bin/apache_data_usage_by_user {{ users_apache_bandwidth_email }}"
-  when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email | length > 0 )
+    - name: Apache chroot absent configuration
+      include_tasks: apache_chroot_present.yml
+      when:
+        - ( users_apache_chroot is not defined ) or ( not users_apache_chroot )
+
+    - name: Users Apache logrotation config in place
+      template:
+        src: apache_users_logrotate.j2
+        dest: /etc/logrotate.d/apache_users_logrotate
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Cron job to delete Apache logs when older than 30 days
+      cron:
+        name: Delete Apache log files
+        hour: "0"
+        minute: "0"
+        day: "1"
+        job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
+
+    - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
+      cron:
+        name: "Email monthly Apache bandwidth"
+        hour: "1"
+        minute: "0"
+        day: "1"
+        job: "/usr/local/bin/apache_data_usage_by_user {{ users_apache_bandwidth_email }}"
+      when: ( users_apache_bandwidth_email is defined ) and ( users_apache_bandwidth_email | length > 0 )
+
   tags:
     - users
 ...

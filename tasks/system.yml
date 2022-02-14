@@ -67,6 +67,12 @@
         msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
       when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
 
+    - name: Include Apache tasks
+      include_tasks: apache.yml
+      when:
+        - ( "apache2" in ansible_facts.packages )
+        - ( users_apache is defined ) and ( users_apache )
+
     - name: PHP FPM checks and tasks
       block:
 
@@ -165,12 +171,6 @@
           check_mode: false
 
       when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
-
-    - name: Include Apache tasks
-      include_tasks: apache.yml
-      when:
-        - ( "apache2" in ansible_facts.packages )
-        - ( users_apache is defined ) and ( users_apache )
 
     - name: Directories for users state files present
       file:
