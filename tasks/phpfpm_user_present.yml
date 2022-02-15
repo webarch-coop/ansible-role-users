@@ -29,7 +29,7 @@
           file:
             src: "{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
             dest: "/var/www{{ chroot_users_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
-            mode: link
+            state: link
             follow: false
             mode: 0777
             owner: root
