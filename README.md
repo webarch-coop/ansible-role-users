@@ -790,6 +790,21 @@ directories where users can upload files, for example:
           - wp-content/uploads
 ```
 
+In order to enable PHP settings for the CLI to be configured differently for each user this Bash alias is written to `~/.bash_aliases`:
+
+```bash
+alias php="php --php-ini ~/.php.ini"
+```
+
+And `~/.php.ini` is created with the following two lines (with `example` replaced with the username):
+
+```
+sys_temp_dir = "/home/example/tmp"
+memory_limit = -1
+```
+
+Setting `memory_limit = -1` overides the default of 128M, this is required for the Nextcloud CLI updater.
+
 ### Example Apache VirtualHost 
 
 If a user has a set of variables like this:
