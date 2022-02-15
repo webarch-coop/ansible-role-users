@@ -14,6 +14,31 @@
         var: getent_group
         verbosity: 2
 
+    - name: Apache chroot symlink for PHP socket
+      block:
+
+        - name: "Directory for symlink to PHP socket present for {{ user.key }}"
+          file:
+            path: "/var/www{{ chroot_users_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}"
+            state: directory
+            mode: 0755
+            owner: root
+            group: root
+
+        - name: "Symlink to PHP socket present for {{ user.key }}"
+          file:
+            src: "{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
+            dest: "/var/www{{ chroot_users_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
+            mode: link
+            follow: false
+            mode: 0777
+            owner: root
+            group: root
+
+      when:
+        - ( users_apache_chroot is defined ) and ( users_apache_chroot )
+        - ( users_apache_chroot_dir is defined ) and ( users_apache_chroot_dir == "/users/www-data" )
+
     - name: Users PHP FPM log directory present
       file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
@@ -175,30 +200,6 @@
         mode: 0644
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-
-    - name: Apache chroot symlink for PHP socket
-      block:
-
-        - name: "Directory for symlink to PHP socket present for {{ user.key }}"
-          file:
-            path: "/var/www{{ chroot_users_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}"
-            state: directory
-            mode: 0755
-            owner: root
-            group: root
-
-        - name: "Symlink to PHP socket present for {{ user.key }}"
-          file:
-            src: "{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
-            dest: "/var/www{{ chroot_users_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
-            follow: false
-            mode: 0777
-            owner: root
-            group: root
-
-      when:
-        - ( users_apache_chroot is defined ) and ( users_apache_chroot )
-        - ( users_apache_chroot_dir is defined ) and ( users_apache_chroot_dir == "/users/www-data" )
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
