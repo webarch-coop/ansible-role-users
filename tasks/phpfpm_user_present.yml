@@ -212,6 +212,18 @@
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
+    - name: Users ~/.php.ini file present and apc.enable_cli set to 1
+      lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+        regexp: '^apc.enable_cli = '
+        line: 'apc.enable_cli = 1'
+        state: present
+        create: true
+        mode: 0644
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+     when: ( "php-apcu" in ansible_facts.packages )
+
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
     - users
