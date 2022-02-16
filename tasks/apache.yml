@@ -2,6 +2,12 @@
 - name: Apache configuration
   block:
 
+    - name: Debug Apache chroot variable
+      debug:
+        var: users_apache_chroot
+        verbosity: 2
+      when: users_apache_chroot is defined
+
     - name: Apache chroot present configuration
       include_tasks: apache_chroot_present.yml
       when:
