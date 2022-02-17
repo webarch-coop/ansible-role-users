@@ -15,7 +15,7 @@
         - ( users_apache_chroot_dir is defined ) and ( users_apache_chroot_dir == "/users/www-data" )
 
     - name: Apache chroot absent configuration
-      include_tasks: apache_chroot_present.yml
+      include_tasks: apache_chroot_absent.yml
       when:
         - ( users_apache_chroot is not defined ) or ( not users_apache_chroot )
 
