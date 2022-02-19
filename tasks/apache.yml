@@ -17,7 +17,7 @@
     - name: Apache chroot absent configuration
       include_tasks: apache_chroot_absent.yml
       when:
-        - ( users_apache_chroot is not defined ) or ( not users_apache_chroot )
+        - ( users_apache_chroot is defined ) and ( not users_apache_chroot )
 
     - name: Users Apache logrotation config in place
       template:
