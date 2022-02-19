@@ -796,11 +796,12 @@ In order to enable PHP settings for the CLI to be configured differently for eac
 alias php="php --php-ini ~/.php.ini"
 ```
 
-And `~/.php.ini` is created with the following two lines (with `example` replaced with the username):
+And `~/.php.ini` is created with the following three lines (with `example` replaced with the username):
 
 ```
 sys_temp_dir = "/home/example/tmp"
 memory_limit = -1
+apc.enable_cli = 1
 ```
 
 Setting `memory_limit = -1` overides the default of 128M, this is required for the Nextcloud CLI updater.
