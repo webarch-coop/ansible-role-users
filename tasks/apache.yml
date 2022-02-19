@@ -17,6 +17,7 @@
     - name: Apache chroot absent configuration
       include_tasks: apache_chroot_absent.yml
       when:
+        - ( users_apache_chroot_remove is defined and ( users_apache_chroot_remove )
         - ( users_apache_chroot is defined ) and ( not users_apache_chroot )
 
     - name: Users Apache logrotation config in place
