@@ -739,6 +739,26 @@ server:
             reverse: true
 ```
 
+A reverse proxy to an applicaton that doesn't have any user authentication can be configured to use HTTP Authentication, for example for [Mailcatcher](https://git.coop/webarch/mailcatcher):
+
+```yml
+        users_apache_proxy_pass:
+          - path: /
+            url: http://127.0.0.1:1080/
+            reverse: true
+            htauth: true
+        users_apache_htauth_users:
+          - name: mailcatcher
+            password: foo
+```
+
+By default the reverse proxy doesn't proxy error documents served from `/wsh`:
+
+```apache
+    ProxyErrorOverride On
+    ProxyPass "/wsh/" "!"
+```
+
 ### FilesMatch
 
 If an `users_apache_filesmatch` array specified at the `VirtualHost` level with
