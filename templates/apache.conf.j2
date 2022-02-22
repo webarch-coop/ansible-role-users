@@ -31,7 +31,7 @@
   {%- endif %}
   {%- if apache_mods_enabled is defined and "suexec" in apache_mods_enabled %}
   <IfModule suexec_module>
-    SuexecUserGroup {{ user.key }} {{ user.key }}
+    SuexecUserGroup {{ user.key }} {{ user.value.users_group }}
   </IfModule>
   {%- endif %}
   {%- if apache_mods_enabled is defined and "mpm_itk" in apache_mods_enabled %}
@@ -489,12 +489,19 @@
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     <IfModule fcgid_module>
       <IfModule mime_module>
-        <FilesMatch "[^.]+\.cgi$">
+      {%- if user.value.users_cgi_extensions is defined %}
+        <FilesMatch "\.{% for ext in user.value.users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
           SetHandler fcgid-script
         </FilesMatch>
-        <FilesMatch "[^.]+\.pl$">
+      {%- elif users_phpfpm_extensions is defined %}
+        <FilesMatch "\.{% for ext in users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
           SetHandler fcgid-script
         </FilesMatch>
+      {%- else %}
+        <FilesMatch "\.cgi$">
+          SetHandler fcgid-script
+        </FilesMatch>
+      {%- endif %}
       </IfModule>
     </IfModule>
     {%- endif %}

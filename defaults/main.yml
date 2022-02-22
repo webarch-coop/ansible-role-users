@@ -105,6 +105,10 @@ users_apache_php_proxy_timeout: 300
 #   - Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC
 #   - Nonfatal=Override
 #
+# The users_cgi_extensions array is for a list of files extensions to be
+# processed as CGI, it can also be set at a users level
+users_cgi_extensions:
+  - cgi
 # https://www.php.net/manual/en/install.fpm.configuration.php
 users_phpfpm_pm: dynamic
 users_phpfpm_pm_max_children: 3
