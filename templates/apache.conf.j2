@@ -31,7 +31,7 @@
   {%- endif %}
   {%- if apache_mods_enabled is defined and "suexec" in apache_mods_enabled %}
   <IfModule suexec_module>
-    SuexecUserGroup {{ user.key }} {{ user.value.users_group }}
+    SuexecUserGroup {{ user.key }} {{ user.value.users_group | default(user.key) }}
   </IfModule>
   {%- endif %}
   {%- if apache_mods_enabled is defined and "mpm_itk" in apache_mods_enabled %}
