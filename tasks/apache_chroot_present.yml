@@ -25,10 +25,6 @@
         - src: "{{ chroot_dir | default('/chroot') }}"
           path: "{{ chroot_users_dir }}/www-data"
           opts: ro,nosuid,bind,private
-        # Does suexec need to have setuid in the chroot?
-        # - src: /usr/lib/apache2
-          # path: {{ chroot_users_dir }}/www-data/usr/lib/apache2
-          # opts: ro,bind,private
         - src: "{{ users_basedir }}"
           path: "{{ chroot_users_dir }}/www-data{{ users_basedir }}"
           opts: rw,nodev,nosuid,bind,private
@@ -56,18 +52,11 @@
 
     - name: suEXEC chroot directory mounted for Apache
       mount:
-        src: "{{ mnt.src }}"
-        path: "{{ mnt.path }}"
-        opts: "{{ mnt.opts }}"
+        src: /usr/lib/apache2
+        path: "{{ chroot_users_dir }}/www-data/usr/lib/apache2"
+        opts: ro,bind,private
         fstype: ext4
         state: mounted
-      loop:
-        - src: /usr/lib/apache2
-          path: {{ chroot_users_dir }}/www-data/usr/lib/apache2
-          opts: ro,bind,private
-      loop_control:
-        loop_var: mnt
-        label: "{{ mnt.path | basename }}"
       when: ( users_apache_chroot_suexec is defined ) and ( users_apache_chroot_suexec )
 
     - name: Apache chroot mounts present in /etc/fstab

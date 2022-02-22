@@ -9,8 +9,7 @@
         path: "{{ path }}"
         state: unmounted
       loop:
-        # Does suexec need to have setuid in the chroot?
-        # - "{{ chroot_users_dir }}/www-data/usr/lib/apache2"
+        - "{{ chroot_users_dir }}/www-data/usr/lib/apache2"
         - "{{ chroot_users_dir }}/www-data{{ users_basedir }}"
         - "{{ chroot_users_dir }}/www-data/var/www"
         - "{{ chroot_users_dir }}/www-data{{ chroot_users_dir }}"
