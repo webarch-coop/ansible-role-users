@@ -13,7 +13,7 @@
         loop_var: dir
         label: "{{ dir }}"
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
- 
+
     - name: Chroot directories unmounted for Apache
       include_tasks: umount.yml
       loop:
