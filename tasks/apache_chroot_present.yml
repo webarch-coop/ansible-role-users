@@ -116,7 +116,7 @@
 
         - name: Sub-directories of /var/www present in the chroot
           file:
-            path: "{{ users_chroot_dir }}/{{ dir }}"
+            path: "{{ users_chroot_dir }}/var/www/{{ dir }}"
             state: directory
             mode: 0755
           loop: "{{ users_apache_chroot_mount_dirs }}"

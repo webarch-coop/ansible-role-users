@@ -4,19 +4,18 @@
 
     # TODO Stop Apache?
 
-    - name: Chroot directories unmounted for Apache
-      mount:
-        path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
-        state: unmounted
+    - name: /var/www chroot directories unmounted for Apache
+      include_tasks: umount.yml
+      vars:
+        users_mount_point: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
       loop: "{{ users_apache_chroot_mount_dirs }}"
       loop_control:
         loop_var: dir
+        label: "{{ dir }}"
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
-
+ 
     - name: Chroot directories unmounted for Apache
-      mount:
-        path: "{{ path }}"
-        state: unmounted
+      include_tasks: umount.yml
       loop:
         - "{{ users_chroot_users_dir }}/www-data/usr/lib/apache2"
         - "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
@@ -27,8 +26,8 @@
         - "{{ users_chroot_users_dir }}/www-data/run/php"
         - "{{ users_chroot_users_dir }}/www-data"
       loop_control:
-        loop_var: path
-        label: "{{ path | basename }}"
+        loop_var: users_mount_point
+        label: "{{ users_mount_point | basename }}"
 
     - name: Apache chroot mounts absent from /etc/fstab
       blockinfile:
