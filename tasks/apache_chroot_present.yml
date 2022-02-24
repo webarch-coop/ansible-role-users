@@ -137,12 +137,12 @@
             loop_var: dir
 
         - name: Chroot /var/www directories mounted for Apache
-          mount:
-            src: "/var/www/{{ dir }}"
-            path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
-            fstype: ext4
-            opts: ro,nodev,nosuid,bind,private
-            state: mounted
+          include_tasks: mount.yml
+          vars:
+            users_mount_src: "/var/www/{{ dir }}"
+            users_mount_path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+            users_mount_opts: ro,nodev,nosuid,bind,private
+            users_mount_fstype: ext4
           loop: "{{ users_apache_chroot_mount_dirs }}"
           loop_control:
             loop_var: dir

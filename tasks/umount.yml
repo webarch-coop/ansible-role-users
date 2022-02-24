@@ -2,15 +2,15 @@
 - name: Check if a filesystem is mounted and unmount it when it is
   block:
 
-    - name: "Check if {{ users_mount_point }} is mounted"
-      command: "findmnt {{ users_mount_point }}"
+    - name: "Check if {{ users_mount_path }} is mounted"
+      command: "findmnt {{ users_mount_path }}"
       check_mode: false
       changed_when: false
       register: users_findmnt
       failed_when: users_findmnt.rc is not regex('^0|1$')
 
-    - name: "Disk {{ users_mount_point }} unmounted"
-      command: "umount -l {{ users_mount_point }}"
+    - name: "Disk {{ users_mount_path }} unmounted"
+      command: "umount -l {{ users_mount_path }}"
       when: users_findmnt.rc == 0
       register: users_umount
       changed_when: ( "not mounted" not in users_umount.stderr )

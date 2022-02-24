@@ -1,0 +1,35 @@
+---
+- name: Check if a filesystem is mounted and mount it when it is not
+  block:
+
+    - name: "Check if {{ users_mount_path }} exists"
+      stat:
+        path: "{{ users_mount_path }}"
+      check_mode: false
+      changed_when: false
+      register: users_mount_check
+
+    - name: Check if mounted and mount filesystem if not
+      block:
+
+        - name: "Check if {{ users_mount_path }} is mounted"
+          command: "findmnt {{ users_mount_path }}"
+          check_mode: false
+          changed_when: false
+          register: users_findmnt
+          failed_when: users_findmnt.rc is not regex('^0|1$')
+
+        - name: "Disk {{ users_mount_path }} mounted"
+          mount:
+            src: "{{ users_mount_src }}"
+            path: "{{ users_mount_path }}"
+            opts: "{{ users_mount_opts }}"
+            fstype: "{{ users_mount_fstype | default('ext4') }}"
+            state: mounted
+          when: users_findmnt.rc == 0
+
+      when: users_mount_check.stat.exists
+
+  tags:
+    - users
+...

@@ -7,7 +7,7 @@
     - name: /var/www chroot directories unmounted for Apache
       include_tasks: umount.yml
       vars:
-        users_mount_point: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+        users_mount_path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
       loop: "{{ users_apache_chroot_mount_dirs }}"
       loop_control:
         loop_var: dir
@@ -26,8 +26,8 @@
         - "{{ users_chroot_users_dir }}/www-data/run/php"
         - "{{ users_chroot_users_dir }}/www-data"
       loop_control:
-        loop_var: users_mount_point
-        label: "{{ users_mount_point | basename }}"
+        loop_var: users_mount_path
+        label: "{{ users_mount_path | basename }}"
 
     - name: Apache chroot mounts absent from /etc/fstab
       blockinfile:

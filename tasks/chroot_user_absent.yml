@@ -22,7 +22,7 @@
         - "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         - "{{ users_chroot_users_dir }}/{{ user.key }}"
       loop_control:
-        loop_var: users_mount_point
+        loop_var: users_mount_path
 
     - name: "Directory {{ users_chroot_users_dir }}/{{ user.key }} absent"
       file:
