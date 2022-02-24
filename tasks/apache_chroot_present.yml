@@ -31,7 +31,7 @@
 
           {{ users_basedir }} {{ users_chroot_users_dir }}/www-data{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
           {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}{% for dir in users_apache_chroot_mount_dirs %}
-          /var/www/{{ dir }} {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }} ro,nodev,nosuid,bind,private
+          /var/www/{{ dir }} {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private
           {% endfor %}{% endif %}
 
           # /var/www{{ users_chroot_users_dir }} {{ users_chroot_users_dir }}/www-data{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
