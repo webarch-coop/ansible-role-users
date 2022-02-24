@@ -37,6 +37,41 @@
         marker: "# {mark} APACHE CHROOT"
         insertafter: '^\/dev\/'
 
+    - name: Debug chroot directories to be mounted for Apache
+      debug:
+        msg:
+          - "src: {{ mnt.src }}"
+          - "path: {{ mnt.path }}"
+          - "opts: {{ mnt.opts }}"
+          - "fstype: ext4"
+          - "state: mounted"
+        verbosity: 2
+      loop:
+        - src: "{{ users_chroot_dir }}"
+          path: "{{ users_chroot_users_dir }}/www-data"
+          opts: ro,nosuid,bind,private
+        - src: "{{ users_basedir }}"
+          path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
+          opts: rw,nodev,nosuid,bind,private
+        - src: "{{ users_apache_chroot_phpfpm_dir }}"
+          path: "{{ users_chroot_users_dir }}/www-data{{ users_apache_chroot_phpfpm_dir }}"
+          opts: ro,nodev,nosuid,noexec,bind,private
+        - src: "/run/apache2"
+          path: "{{ users_chroot_users_dir }}/www-data/run/apache2"
+          opts: ro,nodev,nosuid,noexec,bind,private
+        - src: "/run/chroot"
+          path: "{{ users_chroot_users_dir }}/www-data/run/chroot"
+          opts: ro,nodev,nosuid,noexec,bind,private
+        - src: "/run/mysqld"
+          path: "{{ users_chroot_users_dir }}/www-data/run/mysqld"
+          opts: ro,nodev,nosuid,noexec,bind,private
+        - src: "/run/php"
+          path: "{{ users_chroot_users_dir }}/www-data/run/php"
+          opts: ro,nodev,nosuid,noexec,bind,private
+      loop_control:
+        loop_var: mnt
+        label: "{{ mnt.path | basename }}"
+
     - name: Chroot directories mounted for Apache
       mount:
         src: "{{ mnt.src }}"
@@ -70,7 +105,21 @@
         loop_var: mnt
         label: "{{ mnt.path | basename }}"
 
-    - name: Chroot directories mounted for Apache
+    - name: Debug chroot /var/www directories to be mounted for Apache
+      debug:
+        msg:
+          - "src: /var/www/{{ dir }}"
+          - "path: {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+          - "opts: ro,nodev,nosuid,bind,private"
+          - "fstype: ext4"
+          - "state: mounted"
+        verbosity: 2
+      loop: "{{ users_apache_chroot_mount_dirs }}"
+      loop_control:
+        loop_var: dir 
+      when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
+
+    - name: Chroot /var/www directories mounted for Apache
       mount:
         src: "/var/www/{{ dir }}"
         path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
