@@ -81,6 +81,7 @@
           file:
             src: "{{ users_chroot_users_dir | basename }}/{{ user.key }}"
             dest: "{{ users_apache_chroot_users_dir }}/{{ user.key }}"
+            state: link
             follow: false
             mode: 0777
             owner: root
