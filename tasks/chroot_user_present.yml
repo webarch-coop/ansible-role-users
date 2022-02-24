@@ -51,12 +51,12 @@
       when: users_chroot_users_home_mount.rc == 1
 
     - name: "Chroot directories mounted for {{ user.key }}"
-      mount:
-        src: "{{ mnt.src }}"
-        path: "{{ mnt.path }}"
-        opts: "{{ mnt.opts }}"
-        fstype: ext4
-        state: mounted
+      include_tasks: mount.yml
+      vars:
+        users_mount_src: "{{ mnt.src }}"
+        users_mount_path: "{{ mnt.path }}"
+        users_mount_opts: "{{ mnt.opts }}"
+        users_mount_fstype: ext4
       loop:
         - src: "{{ users_chroot_dir }}"
           path: "{{ users_chroot_users_dir }}/{{ user.key }}"
