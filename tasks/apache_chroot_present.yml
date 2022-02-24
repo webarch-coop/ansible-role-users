@@ -4,13 +4,13 @@
 
     - name: PHP-FPM socket symlinks base directory present
       file:
-        path: "/var/www{{ chroot_users_dir }}"
+        path: "{{ users_apache_chroot_phpfpm_dir }}"
         state: directory
         mode: 0755
 
-    - name: "{{ chroot_users_dir }} directory present in the {{ chroot_dir }} directory"
+    - name: "{{ users_chroot_users_dir }} directory present in the {{ users_chroot_dir }} directory"
       file:
-        path: "{{ chroot_dir }}{{ chroot_users_dir }}"
+        path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}"
         state: directory
         mode: 0755
 
@@ -22,38 +22,47 @@
         fstype: ext4
         state: mounted
       loop:
-        - src: "{{ chroot_dir | default('/chroot') }}"
-          path: "{{ chroot_users_dir }}/www-data"
+        - src: "{{ users_chroot_dir }}"
+          path: "{{ users_chroot_users_dir }}/www-data"
           opts: ro,nosuid,bind,private
         - src: "{{ users_basedir }}"
-          path: "{{ chroot_users_dir }}/www-data{{ users_basedir }}"
+          path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
           opts: rw,nodev,nosuid,bind,private
-        - src: /var/www
-          path: "{{ chroot_users_dir }}/www-data/var/www"
-          opts: rw,nodev,nosuid,bind,private
-        - src: "/var/www{{ chroot_users_dir }}"
-          path: "{{ chroot_users_dir }}/www-data{{ chroot_users_dir }}"
+        - src: "{{ users_apache_chroot_phpfpm_dir }}"
+          path: "{{ users_chroot_users_dir }}/www-data{{ users_apache_chroot_phpfpm_dir }}"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/apache2"
-          path: "{{ chroot_users_dir }}/www-data/run/apache2"
+          path: "{{ users_chroot_users_dir }}/www-data/run/apache2"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/chroot"
-          path: "{{ chroot_users_dir }}/www-data/run/chroot"
+          path: "{{ users_chroot_users_dir }}/www-data/run/chroot"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/mysqld"
-          path: "{{ chroot_users_dir }}/www-data/run/mysqld"
+          path: "{{ users_chroot_users_dir }}/www-data/run/mysqld"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/php"
-          path: "{{ chroot_users_dir }}/www-data/run/php"
+          path: "{{ users_chroot_users_dir }}/www-data/run/php"
           opts: ro,nodev,nosuid,noexec,bind,private
       loop_control:
         loop_var: mnt
         label: "{{ mnt.path | basename }}"
 
+    - name: Chroot directories mounted for Apache
+      mount:
+        src: "/var/www/{{ dir }}"
+        path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+        opts: ro,nodev,nosuid,bind,private
+        fstype: ext4
+        state: mounted
+      loop: "{{ users_apache_chroot_mount_dirs }}"
+      loop_control:
+        loop_var: dir 
+      when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
+
     - name: suEXEC chroot directory mounted for Apache
       mount:
         src: /usr/lib/apache2
-        path: "{{ chroot_users_dir }}/www-data/usr/lib/apache2"
+        path: "{{ users_chroot_users_dir }}/www-data/usr/lib/apache2"
         opts: ro,bind,private
         fstype: ext4
         state: mounted
@@ -63,16 +72,22 @@
       blockinfile:
         path: /etc/fstab
         block: |
-          {{ chroot_dir }} {{ chroot_users_dir }}/www-data ext4 ro,nosuid,bind,private 0 0
-          {% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}/usr/lib/apache2 {{ chroot_users_dir }}/www-data/usr/lib/apache2 ext4 ro,bind,private 0 0{% endif %}
+          {{ users_chroot_dir }} {{ users_chroot_users_dir }}/www-data ext4 ro,nosuid,bind,private 0 0
+          {% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}
+          /usr/lib/apache2 {{ users_chroot_users_dir }}/www-data/usr/lib/apache2 ext4 ro,bind,private 0 0
+          {% endif %}
 
-          {{ users_basedir }} {{ chroot_users_dir }}/www-data{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
-          /var/www {{ chroot_users_dir }}/www-data/var/www ext4 rw,nodev,nosuid,bind,private 0 0
-          /var/www{{ chroot_users_dir }} {{ chroot_users_dir }}/www-data{{ chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/apache2 {{ chroot_users_dir }}/www-data/run/apache2 ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/chroot {{ chroot_users_dir }}/www-data/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/mysqld {{ chroot_users_dir }}/www-data/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/php {{ chroot_users_dir }}/www-data/run/php ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          {{ users_basedir }} {{ users_chroot_users_dir }}/www-data{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
+          {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}{% for dir in users_apache_chroot_mount_dirs %}
+          /var/www/{{ dir }} {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }} ro,nodev,nosuid,bind,private
+          {% endfor %}{% endif %}
+
+          # /var/www{{ users_chroot_users_dir }} {{ users_chroot_users_dir }}/www-data{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          {{ users_apache_chroot_phpfpm_dir }} {{ users_chroot_users_dir }}/www-data{{ users_apache_chroot_phpfpm_dir }}
+          /run/apache2 {{ users_chroot_users_dir }}/www-data/run/apache2 ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/chroot {{ users_chroot_users_dir }}/www-data/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/mysqld {{ users_chroot_users_dir }}/www-data/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/php {{ users_chroot_users_dir }}/www-data/run/php ext4 ro,nodev,nosuid,noexec,bind,private 0 0
         marker: "# {mark} APACHE CHROOT"
         insertafter: '^\/dev\/'
 

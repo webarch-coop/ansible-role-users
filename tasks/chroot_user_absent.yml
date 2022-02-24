@@ -2,36 +2,36 @@
 - name: Remove chrooted user
   block:
 
-    - name: "Remove {{ user.key }} from {{ chroot_dir | default('/chroot') }}/etc/passwd"
+    - name: "Remove {{ user.key }} from {{ users_chroot_dir }}/etc/passwd"
       lineinfile:
-        path: "{{ chroot_dir | default('/chroot') }}/etc/passwd"
+        path: "{{ users_chroot_dir }}/etc/passwd"
         regexp: "^{{ user.key }}:"
         state: absent
 
-    - name: "Remove {{ user.key }} from {{ chroot_dir | default('/chroot') }}/etc/group"
+    - name: "Remove {{ user.key }} from {{ users_chroot_dir }}/etc/group"
       lineinfile:
-        path: "{{ chroot_dir | default('/chroot') }}/etc/group"
+        path: "{{ users_chroot_dir }}/etc/group"
         regexp: "^{{ user.key }}:"
         state: absent
 
     - name: Include tasks to unmount mounted filesystems
       include_tasks: umount.yml
       loop:
-        - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/chroot"
-        - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}/run/mysqld"
-        - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        - "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
+        - "{{ users_chroot_users_dir }}/{{ user.key }}/run/chroot"
+        - "{{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld"
+        - "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        - "{{ users_chroot_users_dir }}/{{ user.key }}"
       loop_control:
         loop_var: users_mount_point
 
-    - name: "Directory {{ chroot_users_dir | default('/users') }}/{{ user.key }} absent"
+    - name: "Directory {{ users_chroot_users_dir }}/{{ user.key }} absent"
       file:
-        path: "{{ chroot_users_dir | default('/users') }}/{{ user.key }}"
+        path: "{{ users_chroot_users_dir }}/{{ user.key }}"
         state: absent
 
-    - name: "Directory {{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} absent"
+    - name: "Directory {{ users_chroot_dir }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} absent"
       file:
-        path: "{{ chroot_dir | default('/chroot') }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        path: "{{ users_chroot_dir }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         state: absent
 
   tags:

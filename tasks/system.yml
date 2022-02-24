@@ -127,10 +127,21 @@
 
       when: ( users_phpfpm is defined ) and ( users_phpfpm )
 
-    - name: Check if a chroot exists
-      stat:
-        path: "{{ chroot_dir | default('/chroot') }}"
-      register: users_chroot_dir
+    - name: Chroot directory check tasks
+      block:
+
+        - name: Check if a chroot exists
+          stat:
+            path: "{{ users_chroot_dir }}"
+          register: users_chroot_dir_check
+          when: ( users_chroot_dir is defined ) and ( users_chroot_dir | length > 0 )
+
+        - name: Check if a chroot mount point exists
+          stat:
+            path: "{{ users_chroot_users_dir }}"
+          register: users_chroot_users_dir_check
+          when: ( users_chroot_users_dir is defined ) and ( users_chroot_users_dir | length > 0 )
+
       when: ( users_chroot is defined ) and ( users_chroot )
 
     - name: Quota tasks

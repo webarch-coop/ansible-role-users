@@ -29,7 +29,7 @@
 
     - name: "Directory for symlink to PHP socket absent for {{ user.key }}"
       file:
-        path: "/var/www{{ chroot_users_dir }}/{{ user.key }}"
+        path: "{{ users_apache_chroot_phpfpm_dir }}/{{ user.key }}"
         state: absent
       when: ( users_apache_chroot is not defined ) or ( not users_apache_chroot )
 

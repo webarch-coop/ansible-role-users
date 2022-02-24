@@ -5,6 +5,14 @@
 - name: "Check the variables for {{ user.key }}"
   block:
 
+    - name: Check that the username is not in the users_disallowed_usernames array
+      assert:
+        that:
+          - user.key != users_disallowed_username
+      loop: "{{ users_disallowed_usernames }}"
+      loop_control:
+        loop_var: users_disallowed_username
+
     - name: "Check state for {{ user.key }}"
       assert:
         that:
@@ -54,12 +62,19 @@
                   - users_chroot is defined
                   - users_chroot
 
-            # NOTE users_chroot_dir is defined via a task in system.yml
+            # NOTE users_chroot_dir_check is defined via a task in system.yml
             - name: "Check that users_chroot_dir is defined and the directory is present when {{ user.key }} is in the chroot group"
               assert:
                 that:
                   - users_chroot_dir is defined
-                  - users_chroot_dir.stat.exists
+                  - users_chroot_dir_check.stat.exists
+
+            # NOTE users_chroot_users_dir_check is defined via a task in system.yml
+            - name: "Check that users_chroot_users_dir is defined and the directory is present when {{ user.key }} is in the chroot group"
+              assert:
+                that:
+                  - users_chroot_users_dir is defined
+                  - users_chroot_users_dir_check.stat.exists
 
           when: ( "chroot" in user.value.users_groups )
 

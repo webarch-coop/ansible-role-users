@@ -6,18 +6,26 @@
 
     - name: Chroot directories unmounted for Apache
       mount:
+        path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+        state: unmounted
+      loop: "{{ users_apache_chroot_mount_dirs }}"
+      loop_control:
+        loop_var: dir
+      when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
+
+    - name: Chroot directories unmounted for Apache
+      mount:
         path: "{{ path }}"
         state: unmounted
       loop:
-        - "{{ chroot_users_dir }}/www-data/usr/lib/apache2"
-        - "{{ chroot_users_dir }}/www-data{{ users_basedir }}"
-        - "{{ chroot_users_dir }}/www-data/var/www"
-        - "{{ chroot_users_dir }}/www-data{{ chroot_users_dir }}"
-        - "{{ chroot_users_dir }}/www-data/run/apache2"
-        - "{{ chroot_users_dir }}/www-data/run/chroot"
-        - "{{ chroot_users_dir }}/www-data/run/mysqld"
-        - "{{ chroot_users_dir }}/www-data/run/php"
-        - "{{ chroot_users_dir }}/www-data"
+        - "{{ users_chroot_users_dir }}/www-data/usr/lib/apache2"
+        - "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
+        - "{{ users_chroot_users_dir }}/www-data{{ chroot_users_dir }}"
+        - "{{ users_chroot_users_dir }}/www-data/run/apache2"
+        - "{{ users_chroot_users_dir }}/www-data/run/chroot"
+        - "{{ users_chroot_users_dir }}/www-data/run/mysqld"
+        - "{{ users_chroot_users_dir }}/www-data/run/php"
+        - "{{ users_chroot_users_dir }}/www-data"
       loop_control:
         loop_var: path
         label: "{{ path | basename }}"
