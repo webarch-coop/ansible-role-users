@@ -123,8 +123,8 @@
       mount:
         src: "/var/www/{{ dir }}"
         path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
-        opts: ro,nodev,nosuid,bind,private
-        fstype: ext4
+        opts: "ro,nodev,nosuid,bind,private"
+        fstype: "ext4"
         state: mounted
       loop: "{{ users_apache_chroot_mount_dirs }}"
       loop_control:
