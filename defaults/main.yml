@@ -18,6 +18,7 @@ users_apache_chroot: "{{ apache_chroot | default(False) }}"
 users_apache_chroot_suexec: false
 users_apache_chroot_dir: "{{ apache_chroot_dir | default('/var/www/users/www-data') }}"
 users_apache_chroot_phpfpm_dir: /var/www/phpfpm
+users_apache_chroot_users_dir: "/var/www{{ users_basedir }}"
 # Set users_apache_chroot_mount_dirs to the directories in /var/www that should be
 # mounted read-only in the Apache chroot
 users_apache_chroot_mount_dirs:
@@ -25,9 +26,15 @@ users_apache_chroot_mount_dirs:
   - localhost
   - wsh
 users_disallowed_usernames:
+  - "{{ users_basedir | regex_replace('^\/') }}"
   - "{{ users_chroot_users_dir | basename }}"
-  - "{{ users_apache_chroot_mount_dirs }}"
   - "{{ users_apache_chroot_phpfpm_dir | basename }}"
+  - "{{ users_apache_chroot_mount_dirs }}"
+# Users home directories to be created as sub-directories of users_basedir
+# NOTE that you can set an individual users_home to override this, for example
+# for www-data set users_home: /var/www and for root set users_home: /root
+users_basedir: /home
+users_sites_dir: sites
 # Define users_matomo to true for servers with Matomo and automatic Matomo account
 # provisioning for users which have users_matomo_account set to True
 users_matomo: false
@@ -62,11 +69,6 @@ users_cron: false
 # the users_basedir variable to be a partition mounted with quota options
 users_quotaon: false
 users_state_dir: /root/users
-# Users home directories to be created as sub-directories of users_basedir
-# NOTE that you can set an individual users_home to override this, for example
-# for www-data set users_home: /var/www and for root set users_home: /root
-users_basedir: /home
-users_sites_dir: sites
 users_private_dirs:
   - backups
   - bin

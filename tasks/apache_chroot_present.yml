@@ -14,6 +14,12 @@
         state: directory
         mode: 0755
 
+    - name: "{{ users_basedir }} users symlinks base directory present"
+      file:
+        path: "{{ users_apache_chroot_users_dir }}"
+        state: directory
+        mode: 0755
+
     - name: PHP-FPM socket symlinks base directory present
       file:
         path: "{{ users_apache_chroot_phpfpm_dir }}"
@@ -35,6 +41,7 @@
           /usr/lib/apache2 {{ users_chroot_users_dir }}/www-data/usr/lib/apache2 ext4 ro,bind,private 0 0
           {% endif %}
 
+          {{ users_apache_chroot_users_dir }} {{ users_chroot_users_dir }}/www-data{{ users_basedir }} ext4 ro,nodev,nosuid,bind,private 0 0
           # {{ users_basedir }} {{ users_chroot_users_dir }}/www-data{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
           {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}{% for dir in users_apache_chroot_mount_dirs %}
           /var/www/{{ dir }} {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private
@@ -62,12 +69,15 @@
         - src: "{{ users_chroot_dir }}"
           path: "{{ users_chroot_users_dir }}/www-data"
           opts: ro,nosuid,bind,private
-        - src: "{{ users_basedir }}"
+        - src: "{{ users_apache_chroot_users_dir }}"
           path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
-          opts: rw,nodev,nosuid,bind,private
-        - src: "{{ users_apache_chroot_phpfpm_dir }}"
-          path: "{{ users_chroot_users_dir }}/www-data{{ users_apache_chroot_phpfpm_dir }}"
-          opts: ro,nodev,nosuid,noexec,bind,private
+          opts: ro,nodev,nosuid,bind,private
+        # - src: "{{ users_basedir }}"
+        #   path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
+        #   opts: rw,nodev,nosuid,bind,private
+        # - src: "{{ users_apache_chroot_phpfpm_dir }}"
+        #   path: "{{ users_chroot_users_dir }}/www-data{{ users_apache_chroot_phpfpm_dir }}"
+        #   opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/apache2"
           path: "{{ users_chroot_users_dir }}/www-data/run/apache2"
           opts: ro,nodev,nosuid,noexec,bind,private
@@ -95,6 +105,9 @@
         - src: "{{ users_chroot_dir }}"
           path: "{{ users_chroot_users_dir }}/www-data"
           opts: ro,nosuid,bind,private
+        - src: "{{ users_apache_chroot_users_dir }}"
+          path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
+          opts: ro,nodev,nosuid,bind,private
         # - src: "{{ users_basedir }}"
         #   path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
         #   opts: rw,nodev,nosuid,bind,private

@@ -77,6 +77,15 @@
     - name: Additional mount and symlinks when Apache is chrooted
       block:
 
+        - name: "Sym link present in {{ users_apache_chroot_users_dir }} for {{ user.key }}"
+          file:
+            src: "{{ users_chroot_users_dir | basename }}/{{ user.key }}"
+            dest: "{{ users_apache_chroot_users_dir }}/{{ user.key }}"
+            follow: false
+            mode: 0777
+            owner: root
+            group: root
+
         - name: "Directory for {{ users_basedir }}/{{ user.key }} mount present in the chroot"
           file:
             path: "{{ users_chroot_dir }}{{ users_chroot_users_dir | dirname }}{{ users_basedir }}/{{ user.key }}"
