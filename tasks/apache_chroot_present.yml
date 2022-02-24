@@ -35,7 +35,7 @@
           {% endfor %}{% endif %}
 
           # /var/www{{ users_chroot_users_dir }} {{ users_chroot_users_dir }}/www-data{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          {{ users_apache_chroot_phpfpm_dir }} {{ users_chroot_users_dir }}/www-data{{ users_apache_chroot_phpfpm_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          {{ users_apache_chroot_phpfpm_dir }} {{ users_apache_chroot_dir }}{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/apache2 {{ users_chroot_users_dir }}/www-data/run/apache2 ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/chroot {{ users_chroot_users_dir }}/www-data/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/mysqld {{ users_chroot_users_dir }}/www-data/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
