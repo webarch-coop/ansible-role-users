@@ -25,6 +25,7 @@ users_apache_chroot_mount_dirs:
   - localhost
   - wsh
 users_disallowed_usernames:
+  - "{{ users_chroot_users_dir | basename }}"
   - "{{ users_apache_chroot_mount_dirs }}"
   - "{{ users_apache_chroot_phpfpm_dir | basename }}"
 # Define users_matomo to true for servers with Matomo and automatic Matomo account
