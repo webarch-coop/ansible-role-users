@@ -11,12 +11,13 @@ users_update_strategy: changed
 # Define users_chroot to true for members of the chroot group to be chrooted
 users_chroot: false
 # chroot_dir: /chroot
-# chroot_users_dir: /users
+# chroot_users_dir: /var/www/users
 # Define users_apache to true for this role to manage the Apache VirtualHosts
 users_apache: false
 users_apache_chroot: "{{ apache_chroot | default(False) }}"
 users_apache_chroot_suexec: false
-users_apache_chroot_dir: "{{ apache_chroot_dir | default('/users/www-data') }}"
+users_apache_chroot_dir: "{{ apache_chroot_dir | default('/var/www/users/www-data') }}"
+users_apache_chroot_phpfpm_dir: /var/www/phpfpm
 # Define users_matomo to true for servers with Matomo and automatic Matomo account
 # provisioning for users which have users_matomo_account set to True
 users_matomo: false
