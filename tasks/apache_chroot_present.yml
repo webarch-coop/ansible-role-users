@@ -2,15 +2,21 @@
 - name: Apache chroot tasks
   block:
 
+    - name: "{{ users_chroot_users_dir }} directory present in the {{ users_chroot_dir }} directory"
+      file:
+        path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}"
+        state: directory
+        mode: 0755
+
     - name: PHP-FPM socket symlinks base directory present
       file:
         path: "{{ users_apache_chroot_phpfpm_dir }}"
         state: directory
         mode: 0755
 
-    - name: "{{ users_chroot_users_dir }} directory present in the {{ users_chroot_dir }} directory"
+    - name: PHP-FPM socket symlinks base directory present in the chroot
       file:
-        path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}"
+        path: "{{ users_chroot_dir }}{{ users_apache_chroot_phpfpm_dir }}"
         state: directory
         mode: 0755
 
@@ -123,8 +129,8 @@
       mount:
         src: "/var/www/{{ dir }}"
         path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
-        opts: "ro,nodev,nosuid,bind,private"
-        fstype: "ext4"
+        fstype: ext4
+        opts: ro,nodev,nosuid,bind,private
         state: mounted
       loop: "{{ users_apache_chroot_mount_dirs }}"
       loop_control:
