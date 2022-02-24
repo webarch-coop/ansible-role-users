@@ -18,7 +18,7 @@ users_apache_chroot: "{{ apache_chroot | default(False) }}"
 users_apache_chroot_suexec: false
 users_apache_chroot_dir: "{{ apache_chroot_dir | default('/var/www/users/www-data') }}"
 users_apache_chroot_phpfpm_dir: /var/www/phpfpm
-# Set users_apache_chroot_mount_dirs to the directories in /var/www that should be 
+# Set users_apache_chroot_mount_dirs to the directories in /var/www that should be
 # mounted read-only in the Apache chroot
 users_apache_chroot_mount_dirs:
   - html

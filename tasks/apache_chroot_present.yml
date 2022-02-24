@@ -116,7 +116,7 @@
         verbosity: 2
       loop: "{{ users_apache_chroot_mount_dirs }}"
       loop_control:
-        loop_var: dir 
+        loop_var: dir
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
 
     - name: Chroot /var/www directories mounted for Apache
@@ -128,7 +128,7 @@
         state: mounted
       loop: "{{ users_apache_chroot_mount_dirs }}"
       loop_control:
-        loop_var: dir 
+        loop_var: dir
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
 
     - name: suEXEC chroot directory mounted for Apache
