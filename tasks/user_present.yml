@@ -103,7 +103,7 @@
       when:
         - ( user.key != "root" )
         - ( users_chroot is defined ) and ( users_chroot )
-        - ( users_chroot_dir is defined ) and ( users_chroot_dir.stat.exists )
+        - ( users_chroot_dir is defined ) and ( users_chroot_dir_check.stat.exists )
         - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
 
     - name: "Include the PHP FPM user present tasks for {{ user.key }}"

@@ -2,7 +2,7 @@
 [{{ user.key }}]
 user = {{ user.key }} 
 group = {{ user.value.users_group | default(user.key) }}
-{% if users_chroot is defined and users_chroot and users_chroot_dir is defined and users_chroot_dir.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
+{% if users_chroot is defined and users_chroot and users_chroot_dir is defined and users_chroot_dir_check.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
 chroot = {{ users_chroot_users_dir }}/{{ user.key }}
 listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 access.log = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
