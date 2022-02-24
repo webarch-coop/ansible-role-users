@@ -19,7 +19,7 @@
 
         - name: "Directory for symlink to PHP socket present for {{ user.key }}"
           file:
-            path: "/var/www{{ chroot_users_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}"
+            path: "{{ users_apache_chroot_phpfpm_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}"
             state: directory
             mode: 0755
             owner: root
@@ -28,7 +28,7 @@
         - name: "Symlink to PHP socket present for {{ user.key }}"
           file:
             src: "{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
-            dest: "/var/www{{ chroot_users_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
+            dest: "{{ users_apache_chroot_phpfpm_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
             state: link
             follow: false
             mode: 0777

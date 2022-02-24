@@ -18,6 +18,10 @@ users_apache_chroot: "{{ apache_chroot | default(False) }}"
 users_apache_chroot_suexec: false
 users_apache_chroot_dir: "{{ apache_chroot_dir | default('/var/www/users/www-data') }}"
 users_apache_chroot_phpfpm_dir: /var/www/phpfpm
+users_disallowed_usernames:
+  - html
+  - localhost
+  - "{{ users_apache_chroot_phpfpm_dir | basename }}"
 # Define users_matomo to true for servers with Matomo and automatic Matomo account
 # provisioning for users which have users_matomo_account set to True
 users_matomo: false
