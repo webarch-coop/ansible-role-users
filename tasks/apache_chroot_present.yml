@@ -111,30 +111,42 @@
         loop_var: mnt
         label: "{{ mnt.path | basename }}"
 
-    - name: Debug chroot /var/www directories to be mounted for Apache
-      debug:
-        msg:
-          - "src: /var/www/{{ dir }}"
-          - "path: {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
-          - "opts: ro,nodev,nosuid,bind,private"
-          - "fstype: ext4"
-          - "state: mounted"
-        verbosity: 2
-      loop: "{{ users_apache_chroot_mount_dirs }}"
-      loop_control:
-        loop_var: dir
-      when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
+    - name: Sub-directories of /var/www configured in the Apache chroot
+      block:
 
-    - name: Chroot /var/www directories mounted for Apache
-      mount:
-        src: "/var/www/{{ dir }}"
-        path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
-        fstype: ext4
-        opts: ro,nodev,nosuid,bind,private
-        state: mounted
-      loop: "{{ users_apache_chroot_mount_dirs }}"
-      loop_control:
-        loop_var: dir
+        - name: Sub-directories of /var/www present in the chroot
+          file:
+            path: "{{ users_chroot_dir }}/{{ dir }}"
+            state: directory
+            mode: 0755
+          loop: "{{ users_apache_chroot_mount_dirs }}"
+          loop_control:
+            loop_var: dir
+
+        - name: Debug chroot /var/www directories to be mounted for Apache
+          debug:
+            msg:
+              - "src: /var/www/{{ dir }}"
+              - "path: {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+              - "opts: ro,nodev,nosuid,bind,private"
+              - "fstype: ext4"
+              - "state: mounted"
+            verbosity: 2
+          loop: "{{ users_apache_chroot_mount_dirs }}"
+          loop_control:
+            loop_var: dir
+
+        - name: Chroot /var/www directories mounted for Apache
+          mount:
+            src: "/var/www/{{ dir }}"
+            path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+            fstype: ext4
+            opts: ro,nodev,nosuid,bind,private
+            state: mounted
+          loop: "{{ users_apache_chroot_mount_dirs }}"
+          loop_control:
+            loop_var: dir
+
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
 
     - name: suEXEC chroot directory mounted for Apache
