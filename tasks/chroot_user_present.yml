@@ -79,7 +79,7 @@
 
         - name: "Sym link present in {{ users_apache_chroot_users_dir }} for {{ user.key }}"
           file:
-            src: "{{ users_chroot_users_dir | basename }}/{{ user.key }}"
+            src: "{{ users_chroot_users_dir }}/{{ user.key }}"
             dest: "{{ users_apache_chroot_users_dir }}/{{ user.key }}"
             state: link
             force: true
