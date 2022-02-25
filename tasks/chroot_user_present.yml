@@ -90,7 +90,7 @@
 
         - name: "Directory for {{ users_basedir }}/{{ user.key }} mount present in the chroot"
           file:
-            path: "{{ users_chroot_dir }}{{ users_chroot_users_dir | dirname }}{{ users_basedir }}/{{ user.key }}"
+            path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}/{{ user.key }}"
             owner: root
             group: root
             mode: "0750"
@@ -100,7 +100,7 @@
           include_tasks: mount.yml
           vars:
             users_mount_src: "{{ users_basedir }}/{{ user.key }}"
-            users_mount_path: "{{ users_apache_chroot_dir }}{{ users_basedir }}/{{ user.key }}"
+            users_mount_path: "{{ users_apache_chroot_dir }}{{ users_chroot_users_dir }}/{{ user.key }}"
             users_mount_opts: rw,nodev,nosuid,bind,private
             users_mount_fstype: ext4
 
