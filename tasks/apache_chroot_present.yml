@@ -45,7 +45,9 @@
           {% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}
           /usr/lib/apache2 {{ users_apache_chroot_dir }}/usr/lib/apache2 ext4 ro,bind,private 0 0
           {% endif %}
-          /var/lib/apache2/fcgid/sock 
+          {% if users_apache_fcgid_socket_path.stat.exists %} 
+          /var/lib/apache2/fcgid/sock {{ users_apache_chroot_dir }}/var/lib/apache2/fcgid/sock ext4 rw,nodev,nosuid,bind,private 0 0
+          {% endif %}
 
           {{ users_apache_chroot_users_dir }} {{ users_apache_chroot_dir }}{{ users_basedir }} ext4 ro,nodev,nosuid,bind,private 0 0
           # {{ users_basedir }} {{ users_apache_chroot_dir }}{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
