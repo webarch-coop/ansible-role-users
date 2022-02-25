@@ -27,7 +27,7 @@
             opts: "{{ users_mount_opts }}"
             fstype: "{{ users_mount_fstype | default('ext4') }}"
             state: mounted
-          when: users_findmnt.rc == 0
+          when: users_findmnt.rc == 1
 
       when: users_mount_check.stat.exists
 
