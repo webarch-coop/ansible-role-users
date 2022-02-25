@@ -8,6 +8,7 @@
       check_mode: false
       changed_when: false
       register: users_mount_check
+      failed_when: ( not users_mount_check.stat.exists ) or ( not users_mount_check.stat.isdir )
 
     - name: Check if mounted and mount filesystem if not
       block:
