@@ -85,14 +85,14 @@
             force: true
             follow: false
             mode: 0777
-            owner: root
-            group: root
+            owner: "{{ user.value.users_home_owner | default(user.key) }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
 
         - name: "Directory for {{ users_basedir }}/{{ user.key }} mount present in the chroot"
           file:
             path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}/{{ user.key }}"
-            owner: root
-            group: root
+            owner: "{{ user.value.users_home_owner | default(user.key) }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
             mode: "0750"
             state: directory
 
