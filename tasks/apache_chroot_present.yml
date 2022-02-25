@@ -32,27 +32,34 @@
         state: directory
         mode: 0755
 
+    - name: Check if /var/lib/apache2/fcgid/sock exists
+      stat:
+        path: /var/lib/apache2/fcgid/sock
+      register: users_apache_fcgid_socket_path
+
     - name: Apache chroot mounts present in /etc/fstab
       blockinfile:
         path: /etc/fstab
         block: |
-          {{ users_chroot_dir }} {{ users_chroot_users_dir }}/www-data ext4 ro,nosuid,bind,private 0 0
+          {{ users_chroot_dir }} {{ users_apache_chroot_dir }} ext4 ro,nosuid,bind,private 0 0
           {% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}
-          /usr/lib/apache2 {{ users_chroot_users_dir }}/www-data/usr/lib/apache2 ext4 ro,bind,private 0 0
+          /usr/lib/apache2 {{ users_apache_chroot_dir }}/usr/lib/apache2 ext4 ro,bind,private 0 0
           {% endif %}
+          /var/lib/apache2/fcgid/sock 
 
           {{ users_apache_chroot_users_dir }} {{ users_apache_chroot_dir }}{{ users_basedir }} ext4 ro,nodev,nosuid,bind,private 0 0
-          # {{ users_basedir }} {{ users_chroot_users_dir }}/www-data{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
+          # {{ users_basedir }} {{ users_apache_chroot_dir }}{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
           {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}{% for dir in users_apache_chroot_mount_dirs %}
-          /var/www/{{ dir }} {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private
+          /var/www/{{ dir }} {{ users_apache_chroot_dir }}/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private
           {% endfor %}{% endif %}
 
-          # /var/www{{ users_chroot_users_dir }} {{ users_chroot_users_dir }}/www-data{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          
+          # /var/www{{ users_chroot_users_dir }} {{ users_apache_chroot_dir }}{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           # {{ users_apache_chroot_phpfpm_dir }} {{ users_apache_chroot_dir }}{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/apache2 {{ users_chroot_users_dir }}/www-data/run/apache2 ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/chroot {{ users_chroot_users_dir }}/www-data/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/mysqld {{ users_chroot_users_dir }}/www-data/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          /run/php {{ users_chroot_users_dir }}/www-data/run/php ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/apache2 {{ users_apache_chroot_dir }}/run/apache2 ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/chroot {{ users_apache_chroot_dir }}/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/mysqld {{ users_apache_chroot_dir }}/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/php {{ users_apache_chroot_dir }}/run/php ext4 ro,nodev,nosuid,noexec,bind,private 0 0
         marker: "# {mark} APACHE CHROOT"
         insertafter: '^\/dev\/'
 
