@@ -30,6 +30,7 @@
             src: "{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
             dest: "{{ users_apache_chroot_phpfpm_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
             state: link
+            force: true
             follow: false
             mode: 0777
             owner: root
