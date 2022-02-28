@@ -47,7 +47,7 @@
             job: >
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
-              then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }}
+              then /usr/sbin/chroot {{ users_chroot_users_dir }}/{{ user.key }} sudo -u {{ user.key }}
               PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
               /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh 2>&1 |
@@ -64,7 +64,7 @@
             job: >
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
-              then /usr/sbin/chroot /users/{{ user.key }} sudo -u {{ user.key }}
+              then /usr/sbin/chroot {{ users_chroot_users_dir }}/{{ user.key }} sudo -u {{ user.key }}
               PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
               /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh 2>&1 |

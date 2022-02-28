@@ -14,32 +14,6 @@
         var: getent_group
         verbosity: 2
 
-    - name: Apache chroot symlink for PHP socket
-      block:
-
-        - name: "Directory for symlink to PHP socket present for {{ user.key }}"
-          file:
-            path: "{{ users_apache_chroot_phpfpm_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}"
-            state: directory
-            mode: 0755
-            owner: root
-            group: root
-
-        - name: "Symlink to PHP socket present for {{ user.key }}"
-          file:
-            src: "{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
-            dest: "{{ users_apache_chroot_phpfpm_dir }}/{{ user.key }}{{ users_basedir }}/{{ user.key }}/php-fpm.sock"
-            state: link
-            force: true
-            follow: false
-            mode: 0777
-            owner: root
-            group: root
-
-      when:
-        - ( users_apache_chroot is defined ) and ( users_apache_chroot )
-        - ( users_apache_chroot_dir is defined )
-
     - name: Users PHP FPM log directory present
       file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"

@@ -2,6 +2,14 @@
 - name: Apache chroot tasks
   block:
 
+    - name: "Users PHP FPM chrooted directory for mounting {{ users_basedir }} present"
+      file:
+        path: "{{ users_apache_chroot_users_basedir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0750
+
     - name: "{{ users_chroot_users_dir }} directory present in the {{ users_chroot_dir }} directory"
       file:
         path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}"

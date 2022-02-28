@@ -34,6 +34,7 @@
         mode: "0750"
         state: directory
 
+    # /chroots/USER/home/USER
     - name: "Check if {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
       command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       check_mode: false
@@ -74,33 +75,40 @@
         loop_var: mnt
         label: "{{ mnt.path }}"
 
-    - name: Additional mount and symlinks when Apache is chrooted
+    - name: Additional mount when Apache is chrooted
       block:
 
-        - name: "Sym link present in {{ users_apache_chroot_users_dir }} for {{ user.key }}"
+        # /var/www/users/USER
+        - name: "Check if {{ users_apache_chroot_users_basedir }}/{{ user.key }} is mounted"
+          command: "findmnt {{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+          check_mode: false
+          changed_when: false
+          register: users_apache_chroot_users_basedir_user_mount
+          failed_when: users_apache_chroot_users_basedir_user_mount.rc is not regex('^0|1$')
+ 
+        - name: "Directory for {{ users_apache_chroot_users_basedir }}/{{ user.key }} mount present"
           file:
-            src: "{{ users_chroot_users_dir }}/{{ user.key }}"
-            dest: "{{ users_apache_chroot_users_dir }}/{{ user.key }}"
-            state: link
-            force: true
-            follow: false
-            mode: 0777
-            owner: "{{ user.value.users_home_owner | default(user.key) }}"
-            group: "{{ user.value.users_home_group | default(user.key) }}"
-
-        - name: "Directory for {{ users_basedir }}/{{ user.key }} mount present in the chroot"
-          file:
-            path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}/{{ user.key }}"
+            path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
             owner: "{{ user.value.users_home_owner | default(user.key) }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
             mode: "0750"
             state: directory
+          when: users_apache_chroot_users_basedir_user_mount.rc == 1
 
-        - name: "{{ users_basedir }}/{{ user.key }} mounted in the Apache chroot"
+        - name: "{{ users_basedir }}/{{ user.key }} mounted on {{ users_apache_chroot_users_basedir }}/{{ user.key }}"
           include_tasks: mount.yml
           vars:
-            users_mount_src: "{{ users_basedir }}/{{ user.key }}"
-            users_mount_path: "{{ users_apache_chroot_dir }}{{ users_chroot_users_dir }}/{{ user.key }}"
+            users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            users_mount_path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+            users_mount_opts: rw,nodev,nosuid,bind,private
+            users_mount_fstype: ext4
+
+        # /chroots/www-data/var/www/users
+        - name: "{{ users_basedir }}/{{ user.key }} mounted on {{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for the Apache chroot"
+          include_tasks: mount.yml
+          vars:
+            users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            users_mount_path: "{{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
             users_mount_opts: rw,nodev,nosuid,bind,private
             users_mount_fstype: ext4
 
