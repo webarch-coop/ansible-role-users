@@ -22,24 +22,6 @@
         state: directory
         mode: 0755
 
-    - name: "{{ users_basedir }} users symlinks base directory present"
-      file:
-        path: "{{ users_apache_chroot_users_dir }}"
-        state: directory
-        mode: 0755
-
-    - name: PHP-FPM socket symlinks base directory present
-      file:
-        path: "{{ users_apache_chroot_phpfpm_dir }}"
-        state: directory
-        mode: 0755
-
-    - name: PHP-FPM socket symlinks base directory present in the chroot
-      file:
-        path: "{{ users_chroot_dir }}{{ users_apache_chroot_phpfpm_dir }}"
-        state: directory
-        mode: 0755
-
     - name: Check if /var/lib/apache2/fcgid/sock exists
       stat:
         path: /var/lib/apache2/fcgid/sock
