@@ -19,7 +19,7 @@ users_chroot_users_dir: "{{ chroot_users_dir | default('/chroots') }}"
 users_apache: false
 users_apache_chroot: "{{ apache_chroot | default(False) }}"
 users_apache_chroot_suexec: false
-users_apache_chroot_dir: "{{ apache_chroot_dir | default('/chroots/www-data') }}"
+users_apache_chroot_dir: "{{ apache_chroot_dir | default(users_chroot_users_dir + 'www-data') }}"
 # users_apache_chroot_users_basedir is the directory that will be used to mount
 # chrooted users home directories (it needs to be a sub-directory of /var/www for
 # suEXEC
