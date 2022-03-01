@@ -85,7 +85,7 @@
           changed_when: false
           register: users_apache_chroot_users_basedir_user_mount
           failed_when: users_apache_chroot_users_basedir_user_mount.rc is not regex('^0|1$')
- 
+
         - name: "Directory for {{ users_apache_chroot_users_basedir }}/{{ user.key }} mount present"
           file:
             path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
