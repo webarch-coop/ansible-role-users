@@ -11,6 +11,7 @@
         group: root
 
     - name: "Directory for Apache chroot to be mounted on present"
+      file:
         path: "{{ users_apache_chroot_dir }}"
         state: directory
         mode: 0750
