@@ -224,15 +224,27 @@
   <IfModule proxy_fcgi_module>
     {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
       {%- if "chroot" in user.value.users_groups %}
-    <Proxy "unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost">
-        {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
+        {%- if users_apache_chroot is defined and users_apache_chroot %}
+    <Proxy "unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://localhost">
+          {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
-        {%- elif user.value.users_apache_php_proxy_timeout is defined %}
+          {%- elif user.value.users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
-        {%- elif users_apache_php_proxy_timeout is defined %}
+          {%- elif users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ users_apache_php_proxy_timeout }}
-        {%- endif %}
+          {%- endif %}
     </Proxy>
+        {%- else %}
+    <Proxy "unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost">
+          {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
+      ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+          {%- elif user.value.users_apache_php_proxy_timeout is defined %}
+      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+          {%- elif users_apache_php_proxy_timeout is defined %}
+      ProxySet timeout={{ users_apache_php_proxy_timeout }}
+          {%- endif %}
+    </Proxy>
+        {%- endif %}
       {%- else %}
     <Proxy "unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost">
         {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
@@ -481,7 +493,11 @@
         <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
         {%- if "chroot" in user.value.users_groups %}
+          {%- if users_apache_chroot is defined and users_apache_chroot %}
+          SetHandler "proxy:unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://localhost"
+          {%- else %}
           SetHandler "proxy:unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
+          {%- endif %}
         {%- else %}
           SetHandler "proxy:unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost"
         {%- endif %}
