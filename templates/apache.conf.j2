@@ -373,7 +373,7 @@
     {%- else %}
   DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-    {%- end if %}
+    {%- endif %}
     {%- if vhost_config.users_apache_options is defined %}
     Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
     {%- elif users_apache_options is defined %}
