@@ -2,13 +2,21 @@
 - name: Check if a filesystem is mounted and mount it when it is not
   block:
 
+    - name: "Check if {{ users_mount_src }} exists"
+      stat:
+        path: "{{ users_mount_src }}"
+      check_mode: false
+      changed_when: false
+      register: users_mount_check
+      failed_when: ( not users_mount_check.stat.exists ) or ( not users_mount_check.stat.isdir )
+
     - name: "Check if {{ users_mount_path }} exists"
       stat:
         path: "{{ users_mount_path }}"
       check_mode: false
       changed_when: false
-      register: users_mount_check
-      failed_when: ( not users_mount_check.stat.exists ) or ( not users_mount_check.stat.isdir )
+      register: users_mount_path_check
+      failed_when: ( not users_mount_path_check.stat.exists ) or ( not users_mount_path_check.stat.isdir )
 
     - name: Check if mounted and mount filesystem if not
       block:
@@ -29,7 +37,7 @@
             state: mounted
           when: users_findmnt.rc == 1
 
-      when: users_mount_check.stat.exists
+      when: ( users_mount_path_check.stat.exists ) and ( users_mount_path_check.stat.exists )
 
   tags:
     - users
