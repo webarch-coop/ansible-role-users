@@ -134,13 +134,27 @@
           stat:
             path: "{{ users_chroot_dir }}"
           register: users_chroot_dir_check
-          when: ( users_chroot_dir is defined ) and ( users_chroot_dir | length > 0 )
+          # when: ( users_chroot_dir is defined ) and ( users_chroot_dir | length > 0 )
 
-        - name: Check if a chroot mount point exists
+        - name: "The {{ users_chroot_dir }} directory needs to exist when users_chroot is True"
+          assert:
+            that:
+              - users_chroot_dir_check.stat.exists
+
+        - name: Check if a parent directory for the chroot mount points exists
           stat:
             path: "{{ users_chroot_users_dir }}"
           register: users_chroot_users_dir_check
-          when: ( users_chroot_users_dir is defined ) and ( users_chroot_users_dir | length > 0 )
+          # when: ( users_chroot_users_dir is defined ) and ( users_chroot_users_dir | length > 0 )
+
+        - name: Parent directory for the chroot mount points present
+          file:
+            path: "{{ users_chroot_users_dir }}"
+            state: directory
+            mode: 0755
+            owner: root
+            group: root
+          when: not users_chroot_users_dir_check.stat.exists
 
       when: ( users_chroot is defined ) and ( users_chroot )
 
