@@ -6,21 +6,32 @@
       file:
         path: "{{ users_apache_chroot_users_basedir }}"
         state: directory
+        mode: 0750
         owner: root
         group: root
+
+    - name: "Directory for Apache chroot to be mounted on present"
+        path: "{{ users_apache_chroot_dir }}"
+        state: directory
         mode: 0750
+        owner: root
+        group: root
 
     - name: "{{ users_chroot_users_dir }} directory present in the {{ users_chroot_dir }} directory"
       file:
         path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}"
         state: directory
         mode: 0755
+        owner: root
+        group: root
 
     - name: "{{ users_chroot_users_dir | dirname }}{{ users_basedir }} directory present in the {{ users_chroot_dir }} directory"
       file:
         path: "{{ users_chroot_dir }}{{ users_chroot_users_dir | dirname }}{{ users_basedir }}"
         state: directory
         mode: 0755
+        owner: root
+        group: root
 
     - name: Check if /var/lib/apache2/fcgid/sock exists
       stat:
@@ -63,22 +74,22 @@
         verbosity: 2
       loop:
         - src: "{{ users_chroot_dir }}"
-          path: "{{ users_chroot_users_dir }}/www-data"
+          path: "{{ users_apache_chroot_dir }}"
           opts: ro,nosuid,bind,private
         # - src: "{{ users_basedir }}"
-        #   path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
+        #   path: "{{ users_apache_chroot_dir }}{{ users_basedir }}"
         #   opts: rw,nodev,nosuid,bind,private
         - src: "/run/apache2"
-          path: "{{ users_chroot_users_dir }}/www-data/run/apache2"
+          path: "{{ users_apache_chroot_dir }}/run/apache2"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/chroot"
-          path: "{{ users_chroot_users_dir }}/www-data/run/chroot"
+          path: "{{ users_apache_chroot_dir }}/run/chroot"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/mysqld"
-          path: "{{ users_chroot_users_dir }}/www-data/run/mysqld"
+          path: "{{ users_apache_chroot_dir }}/run/mysqld"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/php"
-          path: "{{ users_chroot_users_dir }}/www-data/run/php"
+          path: "{{ users_apache_chroot_dir }}/run/php"
           opts: ro,nodev,nosuid,noexec,bind,private
       loop_control:
         loop_var: mnt
@@ -93,22 +104,22 @@
         users_mount_fstype: ext4
       loop:
         - src: "{{ users_chroot_dir }}"
-          path: "{{ users_chroot_users_dir }}/www-data"
+          path: "{{ users_apache_chroot_dir }}"
           opts: ro,nosuid,bind,private
         # - src: "{{ users_basedir }}"
-        #   path: "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
+        #   path: "{{ users_apache_chroot_dir }}{{ users_basedir }}"
         #   opts: rw,nodev,nosuid,bind,private
         - src: "/run/apache2"
-          path: "{{ users_chroot_users_dir }}/www-data/run/apache2"
+          path: "{{ users_apache_chroot_dir }}/run/apache2"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/chroot"
-          path: "{{ users_chroot_users_dir }}/www-data/run/chroot"
+          path: "{{ users_apache_chroot_dir }}/run/chroot"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/mysqld"
-          path: "{{ users_chroot_users_dir }}/www-data/run/mysqld"
+          path: "{{ users_apache_chroot_dir }}/run/mysqld"
           opts: ro,nodev,nosuid,noexec,bind,private
         - src: "/run/php"
-          path: "{{ users_chroot_users_dir }}/www-data/run/php"
+          path: "{{ users_apache_chroot_dir }}/run/php"
           opts: ro,nodev,nosuid,noexec,bind,private
       loop_control:
         loop_var: mnt
@@ -130,7 +141,7 @@
           debug:
             msg:
               - "src: /var/www/{{ dir }}"
-              - "path: {{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+              - "path: {{ users_apache_chroot_dir }}/var/www/{{ dir }}"
               - "opts: ro,nodev,nosuid,bind,private"
               - "fstype: ext4"
               - "state: mounted"
@@ -143,7 +154,7 @@
           include_tasks: mount.yml
           vars:
             users_mount_src: "/var/www/{{ dir }}"
-            users_mount_path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
+            users_mount_path: "{{ users_apache_chroot_dir }}/var/www/{{ dir }}"
             users_mount_opts: ro,nodev,nosuid,bind,private
             users_mount_fstype: ext4
           loop: "{{ users_apache_chroot_mount_dirs }}"
@@ -155,7 +166,7 @@
     - name: suEXEC chroot directory mounted for Apache
       mount:
         src: /usr/lib/apache2
-        path: "{{ users_chroot_users_dir }}/www-data/usr/lib/apache2"
+        path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
         opts: ro,bind,private
         fstype: ext4
         state: mounted
