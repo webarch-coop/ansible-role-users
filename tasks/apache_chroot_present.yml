@@ -18,14 +18,6 @@
     #     owner: root
     #     group: root
 
-    - name: "{{ users_chroot_users_dir }} directory present in the {{ users_chroot_dir }} directory"
-      file:
-        path: "{{ users_chroot_dir }}{{ users_chroot_users_dir }}"
-        state: directory
-        mode: 0755
-        owner: root
-        group: root
-
     - name: "{{ users_chroot_users_dir | dirname }}{{ users_basedir }} directory present in the {{ users_chroot_dir }} directory"
       file:
         path: "{{ users_chroot_dir }}{{ users_chroot_users_dir | dirname }}{{ users_basedir }}"
