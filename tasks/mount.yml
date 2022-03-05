@@ -34,7 +34,7 @@
             path: "{{ users_mount_path }}"
             opts: "{{ users_mount_opts }}"
             fstype: "{{ users_mount_fstype | default('ext4') }}"
-            state: mounted
+            state: "{{ users_mount_state | default('mounted') }}"
           when: users_findmnt.rc == 1
 
       when: ( users_mount_path_check.stat.exists ) and ( users_mount_path_check.stat.exists )

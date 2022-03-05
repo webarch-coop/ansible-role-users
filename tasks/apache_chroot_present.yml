@@ -35,85 +35,125 @@
       blockinfile:
         path: /etc/fstab
         block: |
+          # Read only chroot mounted for Apache
           {{ users_chroot_dir }} {{ users_apache_chroot_dir }} ext4 ro,nosuid,bind,private 0 0
           {% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}
+          # suEXEC with suid mounted in the Apache chroot
           /usr/lib/apache2 {{ users_apache_chroot_dir }}/usr/lib/apache2 ext4 ro,bind,private 0 0
           {% endif %}
           {% if users_apache_fcgid_socket_path.stat.exists %}
+          # FastCGI socket directory for CGI mounted in the Apache chroot
           /var/lib/apache2/fcgid/sock {{ users_apache_chroot_dir }}/var/lib/apache2/fcgid/sock ext4 rw,nodev,nosuid,bind,private 0 0
           {% endif %}
-
           # {{ users_basedir }} {{ users_apache_chroot_dir }}{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
-          {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}{% for dir in users_apache_chroot_mount_dirs %}
+          {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}
+          # Readonly system DocumentRoot directories mounted in the Apache chroot
+          {% for dir in users_apache_chroot_mount_dirs %}
           /var/www/{{ dir }} {{ users_apache_chroot_dir }}/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private
-          {% endfor %}{% endif %}
-
-          # /var/www{{ users_chroot_users_dir }} {{ users_apache_chroot_dir }}{{ users_chroot_users_dir }} ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          {% endfor %}
+          {% endif %}
+          # Readonly transient state files mountred in the Apache chroot (are all of these needed?)
           /run/apache2 {{ users_apache_chroot_dir }}/run/apache2 ext4 ro,nodev,nosuid,noexec,bind,private 0 0
-          # /run/chroot {{ users_apache_chroot_dir }}/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
+          /run/chroot {{ users_apache_chroot_dir }}/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/mysqld {{ users_apache_chroot_dir }}/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/php {{ users_apache_chroot_dir }}/run/php ext4 ro,nodev,nosuid,noexec,bind,private 0 0
         marker: "# {mark} APACHE CHROOT"
         insertafter: '^\/dev\/'
 
-    - name: Debug chroot directories to be mounted for Apache
+    - name: Debug first set of chroot directories to be mounted for Apache
       debug:
         msg:
           - "src: {{ mnt.src }}"
           - "path: {{ mnt.path }}"
           - "opts: {{ mnt.opts }}"
           - "fstype: ext4"
-          - "state: mounted"
+          - "state: {{ mnt.state }}"
         verbosity: 2
       loop:
         - src: "{{ users_chroot_dir }}"
           path: "{{ users_apache_chroot_dir }}"
           opts: ro,nosuid,bind,private
-        # - src: "{{ users_basedir }}"
-        #   path: "{{ users_apache_chroot_dir }}{{ users_basedir }}"
-        #   opts: rw,nodev,nosuid,bind,private
+          state: mounted
+        - src: /usr/lib/apache2
+          path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
+          opts: ro,bind,private
+          state: "{% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}mounted{% else %}absent{% endif %}"
+        - src: /var/lib/apache2/fcgid/sock
+          path: "{{ users_apache_chroot_dir }}/var/lib/apache2/fcgid/sock"
+          opts: rw,nodev,nosuid,bind,private
+          state: "{% users_apache_fcgid_socket_path.stat.exists %}mounted{% else %}absent{% endif %}"
         - src: "/run/apache2"
           path: "{{ users_apache_chroot_dir }}/run/apache2"
           opts: ro,nodev,nosuid,noexec,bind,private
-        # - src: "/run/chroot"
-        #   path: "{{ users_apache_chroot_dir }}/run/chroot"
-        #   opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
+        - src: "/run/chroot"
+          path: "{{ users_apache_chroot_dir }}/run/chroot"
+          opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
         - src: "/run/mysqld"
           path: "{{ users_apache_chroot_dir }}/run/mysqld"
           opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
         - src: "/run/php"
           path: "{{ users_apache_chroot_dir }}/run/php"
           opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
       loop_control:
         loop_var: mnt
         label: "{{ mnt.path | basename }}"
 
-    - name: Chroot directories mounted for Apache
+    - name: Debug second set of chroot directories to be mounted for Apache
+      debug:
+        msg:
+          - "src: /var/www/{{ dir }}"
+          - "path: {{ users_apache_chroot_dir }}/var/www/{{ dir }}"
+          - "opts: ro,nodev,nosuid,bind,private"
+          - "fstype: ext4"
+          - "state: mounted"
+        verbosity: 2
+      loop: "{{ users_apache_chroot_mount_dirs }}"
+      loop_control:
+        loop_var: dir
+        label: "{{ dir }}"
+      when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
+
+    - name: First set of chroot directories mounted for Apache
       include_tasks: mount.yml
       vars:
         users_mount_src: "{{ mnt.src }}"
         users_mount_path: "{{ mnt.path }}"
         users_mount_opts: "{{ mnt.opts }}"
+        users_mount_state: "{{ mnt.state }}"
         users_mount_fstype: ext4
       loop:
         - src: "{{ users_chroot_dir }}"
           path: "{{ users_apache_chroot_dir }}"
           opts: ro,nosuid,bind,private
-        # - src: "{{ users_basedir }}"
-        #   path: "{{ users_apache_chroot_dir }}{{ users_basedir }}"
-        #   opts: rw,nodev,nosuid,bind,private
+          state: mounted
+        - src: /usr/lib/apache2
+          path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
+          opts: ro,bind,private
+          state: "{% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}mounted{% else %}absent{% endif %}"
+        - src: /var/lib/apache2/fcgid/sock
+          path: "{{ users_apache_chroot_dir }}/var/lib/apache2/fcgid/sock"
+          opts: rw,nodev,nosuid,bind,private
+          state: "{% if users_apache_fcgid_socket_path.stat.exists %}mounted{% else %}absent{% endif %}"
         - src: "/run/apache2"
           path: "{{ users_apache_chroot_dir }}/run/apache2"
           opts: ro,nodev,nosuid,noexec,bind,private
-        # - src: "/run/chroot"
-        #   path: "{{ users_apache_chroot_dir }}/run/chroot"
-        #   opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
+        - src: "/run/chroot"
+          path: "{{ users_apache_chroot_dir }}/run/chroot"
+          opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
         - src: "/run/mysqld"
           path: "{{ users_apache_chroot_dir }}/run/mysqld"
           opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
         - src: "/run/php"
           path: "{{ users_apache_chroot_dir }}/run/php"
           opts: ro,nodev,nosuid,noexec,bind,private
+          state: mounted
       loop_control:
         loop_var: mnt
         label: "{{ mnt.path | basename }}"
@@ -150,20 +190,22 @@
             users_mount_path: "{{ users_apache_chroot_dir }}/var/www/{{ dir }}"
             users_mount_opts: ro,nodev,nosuid,bind,private
             users_mount_fstype: ext4
+            users_mount_state: mounted
           loop: "{{ users_apache_chroot_mount_dirs }}"
           loop_control:
             loop_var: dir
+            label: "{{ dir }}"
 
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
 
-    - name: suEXEC chroot directory mounted for Apache
-      mount:
-        src: /usr/lib/apache2
-        path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
-        opts: ro,bind,private
-        fstype: ext4
-        state: mounted
-      when: ( users_apache_chroot_suexec is defined ) and ( users_apache_chroot_suexec )
+    # - name: suEXEC chroot directory mounted for Apache
+    #   mount:
+    #     src: /usr/lib/apache2
+    #     path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
+    #     opts: ro,bind,private
+    #     fstype: ext4
+    #     state: mounted
+    #   when: ( users_apache_chroot_suexec is defined ) and ( users_apache_chroot_suexec )
 
     - name: Apache www-data user suexec configuration in place
       template:
