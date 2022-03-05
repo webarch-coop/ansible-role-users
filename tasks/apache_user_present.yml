@@ -60,7 +60,7 @@
     owner: root
     # group: "{{ apache_user | default('www-data') }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    mode: 0750
+    mode: 0770
   tags:
     - users
 
