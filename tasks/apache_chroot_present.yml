@@ -45,14 +45,13 @@
           # FastCGI socket directory for CGI mounted in the Apache chroot
           /var/lib/apache2/fcgid/sock {{ users_apache_chroot_dir }}/var/lib/apache2/fcgid/sock ext4 rw,nodev,nosuid,bind,private 0 0
           {% endif %}
-          # {{ users_basedir }} {{ users_apache_chroot_dir }}{{ users_basedir }} ext4 rw,nodev,nosuid,bind,private 0 0
           {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}
           # Readonly system DocumentRoot directories mounted in the Apache chroot
           {% for dir in users_apache_chroot_mount_dirs %}
           /var/www/{{ dir }} {{ users_apache_chroot_dir }}/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private
           {% endfor %}
           {% endif %}
-          # Readonly transient state files mountred in the Apache chroot (are all of these needed?)
+          # Readonly transient state files mounted in the Apache chroot (are all of these needed?)
           /run/apache2 {{ users_apache_chroot_dir }}/run/apache2 ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/chroot {{ users_apache_chroot_dir }}/run/chroot ext4 ro,nodev,nosuid,noexec,bind,private 0 0
           /run/mysqld {{ users_apache_chroot_dir }}/run/mysqld ext4 ro,nodev,nosuid,noexec,bind,private 0 0
