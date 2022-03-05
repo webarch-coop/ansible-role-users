@@ -57,7 +57,7 @@
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}"
     state: directory
-    owner: "{{ user.key }}"
+    owner: root
     # group: "{{ apache_user | default('www-data') }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
