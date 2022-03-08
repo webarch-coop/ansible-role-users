@@ -58,6 +58,7 @@
         users_mount_path: "{{ mnt.path }}"
         users_mount_opts: "{{ mnt.opts }}"
         users_mount_fstype: ext4
+        users_mount_state: mounted
       loop:
         - src: "{{ users_chroot_dir }}"
           path: "{{ users_chroot_users_dir }}/{{ user.key }}"

@@ -3,11 +3,19 @@
 user = {{ user.key }} 
 group = {{ user.value.users_group | default(user.key) }}
 {% if users_chroot is defined and users_chroot and users_chroot_dir is defined and users_chroot_dir_check.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
+{% if users_apache_chroot is defined and users_apache_chroot %}
+chroot = {{ users_chroot_users_dir }}/{{ user.key }}
+listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
+access.log = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/logs/php-fpm.access.log
+slowlog = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/logs/php-fpm.slow.log
+php_admin_value[error_log] = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/logs/fpm-php.error.log
+{% else %}
 chroot = {{ users_chroot_users_dir }}/{{ user.key }}
 listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 access.log = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
 slowlog = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
 php_admin_value[error_log] = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
+{% endif %}
 {% else %}
 listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 access.log = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
@@ -23,11 +31,19 @@ listen.allowed_clients = 127.0.0.1
 ; Error log level. Possible values: alert, error, warning, notice, debug. Default value: notice. 
 php_admin_value[log_level] = {{ user.value.users_phpfpm_log_level | default('notice') }} 
 
+{% if users_apache_chroot is defined and users_apache_chroot %}
+env[TMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+env[TMPDIR] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+env[TEMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+
+chdir = {{ users_apache_chroot_users_basedir }}/{{ user.key }}
+{% else %}
 env[TMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 env[TMPDIR] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 env[TEMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 
 chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
+{% endif %}
 
 ; PHP settings passed with php_value or php_flag will overwrite php.ini values
 ; but defining disable_functions or disable_classes will not overwrite
@@ -72,17 +88,31 @@ php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ di
 {% if user.value.users_phpfpm_mysqli_allow_local_infile is defined and user.value.users_phpfpm_mysqli_allow_local_infile %}
 ; Matomo needs mysqli.allow_local_infile enabled
 php_admin_value[mysqli.allow_local_infile] = 1
+{% if users_apache_chroot is defined and users_apache_chroot %}
+php_admin_value[mysqli.local_infile_directory] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}
+{% else %}
 php_admin_value[mysqli.local_infile_directory] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
+{% endif %}
 {% else %}
 php_admin_value[mysqli.allow_local_infile] = 0
 {% endif %}
 
+{% if users_apache_chroot is defined and users_apache_chroot %}
+php_admin_value[session.save_path] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+php_admin_value[upload_tmp_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+php_admin_value[sys_temp_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+php_admin_value[soap.wsdl_cache_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+php_admin_value[uploadprogress.file.contents_template] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upload_contents_%s
+php_admin_value[uploadprogress.file.filename_template] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upt_%s.txt
+{% else %}
 php_admin_value[session.save_path] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[upload_tmp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[sys_temp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[soap.wsdl_cache_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
 php_admin_value[uploadprogress.file.contents_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upload_contents_%s
 php_admin_value[uploadprogress.file.filename_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt
+{% endif %}
+
 {% if user.value.users_phpfpm_sendmail_path is defined and user.value.users_phpfpm_sendmail_from is defined %}
 php_admin_value[sendmail_path] = {{ user.value.users_phpfpm_sendmail_path }} -f{{ user.value.users_phpfpm_sendmail_from }}
 php_admin_value[sendmail_from] = {{ user.value.users_phpfpm_sendmail_from }}
