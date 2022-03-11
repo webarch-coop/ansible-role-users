@@ -203,7 +203,7 @@
         - name: Symlink for /etc/alternatives/suexec present in the chroot
           file:
             src: /usr/lib/apache2/suexec-custom
-            dest: "{{ users_apache_chroot_dir }}/etc/alternatives/suexec"
+            dest: "{{ users_chroot_dir }}/etc/alternatives/suexec"
             state: link
             force: true
             follow: false
