@@ -197,22 +197,35 @@
 
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
 
-    # - name: suEXEC chroot directory mounted for Apache
-    #   mount:
-    #     src: /usr/lib/apache2
-    #     path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
-    #     opts: ro,bind,private
-    #     fstype: ext4
-    #     state: mounted
-    #   when: ( users_apache_chroot_suexec is defined ) and ( users_apache_chroot_suexec )
+    - name: suEXEC chnfiguration
+      block:
 
-    - name: Apache www-data user suexec configuration in place
-      template:
-        src: www-data.j2
-        dest: /etc/apache2/suexec/www-data
-        mode: 0644
-        owner: root
-        group: root
+        - name: Symlink for /etc/alternatives/suexec present in the chroot
+          file:
+            src: /usr/lib/apache2/suexec-custom
+            dest: "{{ users_apache_chroot_dir }}/usr/lib/apache2/suexec-custom"
+            state: link
+            follow: false
+            mode: 0777
+            owner: root
+            group: root
+
+        # - name: suEXEC chroot directory mounted for Apache
+        #   mount:
+        #     src: /usr/lib/apache2
+        #     path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
+        #     opts: ro,bind,private
+        #     fstype: ext4
+        #     state: mounted
+
+        - name: Apache www-data user suexec configuration in place
+          template:
+            src: www-data.j2
+            dest: /etc/apache2/suexec/www-data
+            mode: 0644
+            owner: root
+            group: root
+
       when: ( users_apache_chroot_suexec is defined ) and ( users_apache_chroot_suexec )
 
   tags:
