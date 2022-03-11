@@ -402,6 +402,8 @@
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+      Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
     {%- else %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
     {%- endif %}
@@ -437,6 +439,8 @@
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
       DirectoryIndex index.php index.html index.htm index.shtml
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+      DirectoryIndex index.cgi index.pl index.html index.htm index.shtml
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
       DirectoryIndex index.cgi index.pl index.html index.htm index.shtml
     {%- else %}
       DirectoryIndex index.html index.htm index.shtml
@@ -508,19 +512,55 @@
         </FilesMatch>
       </IfModule>
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-      <IfModule fcgid_module>
+      <IfModule cgid_module>
+        <IfModule setenvif_module>
+          SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+        </IfModule>
         <IfModule mime_module>
       {%- if user.value.users_cgi_extensions is defined %}
           <FilesMatch "\.{% for ext in user.value.users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
-            SetHandler fcgid-script
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
           </FilesMatch>
       {%- elif users_cgi_extensions is defined %}
           <FilesMatch "\.{% for ext in users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
-            SetHandler fcgid-script
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
           </FilesMatch>
       {%- else %}
           <FilesMatch "\.cgi$">
-            SetHandler fcgid-script
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+      {%- endif %}
+        </IfModule>
+      </IfModule>
+    {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+      <IfModule fcgid_module>
+        <IfModule setenvif_module>
+          SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+        </IfModule>
+        <IfModule mime_module>
+      {%- if user.value.users_cgi_extensions is defined %}
+          <FilesMatch "\.{% for ext in user.value.users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+      {%- elif users_cgi_extensions is defined %}
+          <FilesMatch "\.{% for ext in users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+      {%- else %}
+          <FilesMatch "\.cgi$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
           </FilesMatch>
       {%- endif %}
         </IfModule>
@@ -659,6 +699,9 @@
   LogLevel error
   ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
   CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combined
+  {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+  ScriptLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.cgi.log
+  {%- endif %}
 </VirtualHost>
 {%- endfor %}
 
