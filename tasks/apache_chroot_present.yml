@@ -40,6 +40,10 @@
           {% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}
           # suEXEC with suid mounted in the Apache chroot
           /usr/lib/apache2 {{ users_apache_chroot_dir }}/usr/lib/apache2 ext4 ro,bind,private 0 0
+          # Logs dir for suEXEC mounted in the Apache chroot
+          /var/log/apache2 {{ users_apache_chroot_dir }}/var/log/apache2 ext4 rw,nodev,nosuid,bind,private 0 0
+          # Apache suEXEC config mounted in the Apache chroot
+          /etc/apache2/suexec {{ users_apache_chroot_dir }}/etc/apache2/suexec ext4 ro,nodev,nosuid,bind,private 0 0
           {% endif %}
           {% if users_apache_fcgid_socket_path is defined and users_apache_fcgid_socket_path.stat.exists %}
           # FastCGI socket directory for CGI mounted in the Apache chroot
@@ -48,7 +52,7 @@
           {% if users_apache_chroot_mount_dirs is defined and users_apache_chroot_mount_dirs != [] %}
           # Readonly system DocumentRoot directories mounted in the Apache chroot
           {% for dir in users_apache_chroot_mount_dirs %}
-          /var/www/{{ dir }} {{ users_apache_chroot_dir }}/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private
+          /var/www/{{ dir }} {{ users_apache_chroot_dir }}/var/www/{{ dir }} ext4 ro,nodev,nosuid,bind,private 0 0
           {% endfor %}
           {% endif %}
           # Readonly transient state files mounted in the Apache chroot (are all of these needed?)
@@ -76,6 +80,14 @@
         - src: /usr/lib/apache2
           path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
           opts: ro,bind,private
+          state: "{% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}mounted{% else %}absent{% endif %}"
+        - src: /var/log/apache2
+          path: "{{ users_apache_chroot_dir }}/var/log/apache2"
+          opts: rw,nodev,nosuid,bind,private
+          state: "{% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}mounted{% else %}absent{% endif %}"
+        - src: /etc/apache2/suexec
+          path: "{{ users_apache_chroot_dir }}/etc/apache2/suexec"
+          opts: ro,nodev,nosuid,bind,private
           state: "{% if users_apache_chroot_suexec is defined and users_apache_chroot_suexec %}mounted{% else %}absent{% endif %}"
         - src: /var/lib/apache2/fcgid/sock
           path: "{{ users_apache_chroot_dir }}/var/lib/apache2/fcgid/sock"
@@ -199,6 +211,14 @@
 
     - name: suEXEC chnfiguration
       block:
+
+        - name: Mount point /etc/apache2/suexec present in the chroot
+          file:
+            path: "{{ users_chroot_dir }}/etc/apache/suexec"
+            state: directory
+            mode: 0755
+            owner: root
+            group: root
 
         - name: Symlink for /etc/alternatives/suexec present in the chroot
           file:
