@@ -2,6 +2,51 @@
 - name: Apache configuration
   block:
 
+    - name: Check loaded Apache modules
+      block:
+
+        - name: Register the loaded Apache modules
+          command: a2query -m
+          check_mode: false
+          changed_when: false
+          register: users_apache_modules_check
+
+      rescue:
+
+        - name: No mods enabled
+          set_fact:
+            users_apache_modules_loaded: []
+          when: ( "No module matches" in users_apache_modules_check.stderr )
+
+    - name: Set an array of loaded Apache modules
+      block:
+
+        - name: Debug the loaded modules
+          debug:
+            var: users_apache_modules_check.stdout_lines
+            verbosity: 2
+
+        - name: Set users_apache_modules_loaded to an empty array
+          set_fact:
+            users_apache_modules_loaded: []
+
+        - name: Set an array of the loaded modules
+          set_fact:
+            users_apache_modules_loaded: "{{ users_apache_modules_loaded + [ line.split(' ')[0] ] }}"
+          loop: "{{ users_apache_modules_check.stdout_lines }}"
+          loop_control:
+            loop_var: line
+            label: "{{ line }}"
+
+      when:
+        - users_apache_modules_check.stdout is defined
+        - users_apache_modules_check.stderr | length == 0
+
+    - name: Debug loaded modules
+      debug:
+        var: users_apache_modules_loaded
+        verbosity: 2
+
     - name: Debug Apache chroot variable
       debug:
         var: users_apache_chroot

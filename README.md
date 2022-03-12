@@ -358,6 +358,13 @@ DirectoryIndex index.html index.htm index.shtml
 AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=Override
 ```
 
+In addition there is support for `cgi` and `fcgi` together with Apache being
+chrooted and running suEXEC to ensure the the processes run as the user
+specified and have limited access to the host.
+
+Support for enabling several `users_apache_type`'s is to be implemended and the
+variable might be renamed to a more sensible `users_apache_handlers`.
+
 The arrays, `users_apache_options`, `users_apache_index` and
 `users_apache_override` can also be set by `VirtualHost` aand if they are these
 overrule the other settings for the `DocumentRoot` directory, see the [Apache

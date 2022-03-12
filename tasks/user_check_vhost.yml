@@ -52,10 +52,10 @@
 
       when: vhost.value.users_apache_server_aliases is defined
 
-    - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
+    - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
       assert:
         that:
-          - vhost.value.users_apache_type is regex("php|cgi|static")
+          - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
       when: vhost.value.users_apache_type is defined
 
     - name: "Check the attributes for SetEnv and UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -408,10 +408,10 @@
     - name: "Checks for the Apache DocumentRoot Directory for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
 
-        - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, cgi or static if it is defined"
+        - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
           assert:
             that:
-              - vhost.value.users_apache_type is regex("php|cgi|static")
+              - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
           when: vhost.value.users_apache_type is defined
 
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
