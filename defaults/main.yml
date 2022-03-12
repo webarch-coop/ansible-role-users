@@ -24,9 +24,6 @@ users_apache_chroot_dir: "{{ apache_chroot_dir | default(users_chroot_users_dir 
 # chrooted users home directories (it needs to be a sub-directory of /var/www for
 # suEXEC
 users_apache_chroot_users_basedir: /var/www/users
-# NOTE use of the next two variables to be removed
-# users_apache_chroot_phpfpm_dir: /var/www/phpfpm
-# users_apache_chroot_users_dir: "/var/www{{ users_basedir }}"
 # Set users_apache_chroot_mount_dirs to the directories in /var/www that should be
 # mounted read-only in the Apache chroot
 users_apache_chroot_mount_dirs:
@@ -128,6 +125,7 @@ users_apache_php_proxy_timeout: 300
 # processed as CGI, it can also be set at a users level
 users_cgi_extensions:
   - cgi
+  - pl
 # https://www.php.net/manual/en/install.fpm.configuration.php
 users_phpfpm_pm: dynamic
 users_phpfpm_pm_max_children: 3
