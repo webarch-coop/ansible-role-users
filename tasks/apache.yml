@@ -51,7 +51,7 @@
       assert:
         that:
           - ( "suexec" in users_apache_modules_loaded )
-        when: users_apache_chroot_suexec 
+        when: users_apache_chroot_suexec
 
     - name: Check that Apache proxy_fcgi is enabled when users_phpfpm is true
       assert:
