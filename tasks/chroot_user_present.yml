@@ -49,7 +49,7 @@
         group: root
         mode: "0750"
         state: directory
-      when: users_chroot_users_home_mount.rc == 1
+      when: users_chroot_users_mount.rc == 1
 
     # /chroots/USER/home/USER
     # - name: "Check if {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
