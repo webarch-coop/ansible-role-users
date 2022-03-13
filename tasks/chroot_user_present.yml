@@ -34,6 +34,23 @@
         mode: "0750"
         state: directory
 
+    # /chroots/USER
+    - name: "Check if {{ users_chroot_users_dir }}/{{ user.key }} is mounted"
+      command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"
+      check_mode: false
+      changed_when: false
+      register: users_chroot_users_mount
+      failed_when: users_chroot_users_mount.rc is not regex('^0|1$')
+
+    - name: "{{ users_chroot_users_dir }}/{{ user.key }} present"
+      file:
+        path: "{{ users_chroot_users_dir }}/{{ user.key }}"
+        owner: root
+        group: root
+        mode: "0750"
+        state: directory
+      when: users_chroot_users_home_mount.rc == 1
+
     # /chroots/USER/home/USER
     # - name: "Check if {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
     #   command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
@@ -44,7 +61,7 @@
 
     # - name: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
     #   file:
-    #     path: "{{ users_chroot_users_dir }}/{{ user.key }}"
+    #     path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     #     owner: root
     #     group: root
     #     mode: "0750"
