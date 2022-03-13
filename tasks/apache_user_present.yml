@@ -60,7 +60,7 @@
     mode: 0755
   when:
     - users_apache_chroot_suexec
-    - ( "suexec" in users_apache_mods_enabled )
+    - ( "suexec" in users_apache_modules_loaded )
   tags:
     - users
 

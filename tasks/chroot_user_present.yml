@@ -60,15 +60,19 @@
         users_mount_fstype: ext4
         users_mount_state: mounted
       loop:
+        # mount /chroot at /chroots/USER
         - src: "{{ users_chroot_dir }}"
           path: "{{ users_chroot_users_dir }}/{{ user.key }}"
           opts: ro,nosuid,bind,private
+        # mount /home/USER at /chroots/USER/home/USER
         - src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
           path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
           opts: rw,nodev,nosuid,bind,private
+        # mount /run/mysqld at /chroots/USER/run/mysqld
         - src: /run/mysqld
           path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld"
           opts: ro,nodev,nosuid,noexec,bind,private
+        # mount /run/chroot at /chroots/USER/run/chroot
         - src: "/run/chroot"
           path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/chroot"
           opts: ro,nodev,nosuid,noexec,bind,private
