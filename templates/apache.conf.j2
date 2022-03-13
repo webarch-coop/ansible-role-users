@@ -441,21 +441,21 @@
       {%- if user.value.users_phpfpm_extensions is defined -%}
         {%- for ext in user.value.users_phpfpm_extensions %} index.{{ ext }}{% endfor -%}
       {%- elif users_phpfpm_extensions is defined -%}
-        {%- for ext in users_phpfpm_extensions %}{{ ext }}{% endfor -%}
+        {%- for ext in users_phpfpm_extensions %} index.{{ ext }}{% endfor -%}
       {%- else %} index.php{% endif %} index.html index.htm index.shtml
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
       DirectoryIndex  
       {%- if user.value.users_cgi_extensions is defined -%}
         {%- for ext in user.value.users_cgi_extensions %} index.{{ ext }}{% endfor -%}
       {%- elif users_cgi_extensions is defined -%}
-        {%- for ext in users_cgi_extensions %}{{ ext }}{% endfor -%}
+        {%- for ext in users_cgi_extensions %} index.{{ ext }}{% endfor -%}
       {%- else %} index.cgi{% endif %} index.html index.htm index.shtml
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
       DirectoryIndex  
       {%- if user.value.users_cgi_extensions is defined -%}
         {%- for ext in user.value.users_cgi_extensions %} index.{{ ext }}{% endfor -%}
       {%- elif users_cgi_extensions is defined -%}
-        {%- for ext in users_cgi_extensions %}{{ ext }}{% endfor -%}
+        {%- for ext in users_cgi_extensions %} index.{{ ext }}{% endfor -%}
       {%- else %} index.cgi{% endif %} index.html index.htm index.shtml
     {%- else %}
       DirectoryIndex index.html index.htm index.shtml
