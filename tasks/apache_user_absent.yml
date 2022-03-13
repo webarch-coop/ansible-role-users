@@ -41,6 +41,11 @@
         loop_var: file
         label: "{{ file }}"
 
+    - name: "Apache suEXEC config for {{ user.key }} absent"
+      file:
+        path: "/etc/apache2/suexec/{{ user.key }}"
+        state: absent
+
     - name: "Certcheck crontab for {{ user.key }} absent"
       cron:
         name: "Cert check for {{ user.key }}.{{ ansible_fqdn }}"

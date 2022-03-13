@@ -53,6 +53,17 @@
   tags:
     - users
 
+- name: "Apache suEXEC config for {{ user.key }} present"
+  template:
+    src: suexec.j2
+    dest: "/etc/apache2/suexec/{{ user.key }}"
+    mode: 0755
+  when:
+    - users_apache_chroot_suexec
+    - ( "suexec" in users_apache_mods_enabled )
+  tags:
+    - users
+
 - name: "Apache {{ user.key }}/{{ users_sites_dir }} directory present"
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}"
