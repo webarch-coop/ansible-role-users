@@ -1,5 +1,5 @@
 ---
-- name: "Chrooted user {{ user.key }} present"
+- name: Chrooted user present
   block:
 
     - name: "Read {{ user.key }} entry from /etc/passwd"
@@ -26,76 +26,27 @@
         line: "{{ users_etc_group.stdout }}"
         state: present
 
-    - name: "Mount point {{ users_chroot_dir }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
-      file:
-        path: "{{ users_chroot_dir }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        owner: root
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-        mode: "0750"
-        state: directory
-
-    # /chroots/USER
-    - name: "Check if {{ users_chroot_users_dir }}/{{ user.key }} is mounted"
-      command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"
-      check_mode: false
-      changed_when: false
-      register: users_chroot_users_mount
-      failed_when: users_chroot_users_mount.rc is not regex('^0|1$')
-
-    - name: "{{ users_chroot_users_dir }}/{{ user.key }} present"
-      file:
-        path: "{{ users_chroot_users_dir }}/{{ user.key }}"
-        owner: root
-        group: root
-        mode: "0750"
-        state: directory
-      when: users_chroot_users_mount.rc == 1
-
-    # /chroots/USER/home/USER
-    # - name: "Check if {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} is mounted"
-    #   command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    #   check_mode: false
-    #   changed_when: false
-    #   register: users_chroot_users_home_mount
-    #   failed_when: users_chroot_users_home_mount.rc is not regex('^0|1$')
-
-    # - name: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} present"
-    #   file:
-    #     path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    #     owner: root
-    #     group: root
-    #     mode: "0750"
-    #     state: directory
-    #   when: users_chroot_users_home_mount.rc == 1
-
     - name: "Chroot directories present for {{ user.key }}"
       file:
-        path: "{{ mnt.path }}"
         type: directory
-        mode:  
-        users_mount_opts: "{{ mnt.opts }}"
-        users_mount_fstype: ext4
-        users_mount_state: mounted
+        path: "{{ dir.path }}"
+        mode:  "{{ dir.mode }}"
+        owner: "{{ dir.owner }}"
+        group: "{{ dir.group }}"
       loop:
-        # mount /chroot at /chroots/USER
-        - src: "{{ users_chroot_dir }}"
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}"
-          opts: ro,nosuid,bind,private
-        # mount /home/USER at /chroots/USER/home/USER
-        - src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-          opts: rw,nodev,nosuid,bind,private
-        # mount /run/mysqld at /chroots/USER/run/mysqld
-        - src: /run/mysqld
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld"
-          opts: ro,nodev,nosuid,noexec,bind,private
-        # mount /run/chroot at /chroots/USER/run/chroot
-        - src: "/run/chroot"
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/chroot"
-          opts: ro,nodev,nosuid,noexec,bind,private
+        # /chroots/USER
+        - path: "{{ users_chroot_users_dir }}/{{ user.key }}"
+          mode: 0750
+          owner: root
+          group: root
+        # /chroot/home/USER
+        - path: "{{ users_chroot_dir }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+          mode: "{{ user.value.users_home_mode | default('0750') }}"
+          owner: "{{ user.value.users_home_owner | default(user.key) }}"
+          group: "{{ user.value.users_home_group | default(user.key) }}"
       loop_control:
-        loop_var: mnt
-        label: "{{ mnt.path }}"
+        loop_var: dir 
+        label: "{{ dir.path }}"
 
     - name: "Chroot directories mounted for {{ user.key }}"
       include_tasks: mount.yml
@@ -125,45 +76,6 @@
       loop_control:
         loop_var: mnt
         label: "{{ mnt.path }}"
-
-    - name: Additional mount when Apache is chrooted
-      block:
-
-        # /var/www/users/USER
-        - name: "Check if {{ users_apache_chroot_users_basedir }}/{{ user.key }} is mounted"
-          command: "findmnt {{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-          check_mode: false
-          changed_when: false
-          register: users_apache_chroot_users_basedir_user_mount
-          failed_when: users_apache_chroot_users_basedir_user_mount.rc is not regex('^0|1$')
-
-        - name: "Directory for {{ users_apache_chroot_users_basedir }}/{{ user.key }} mount present"
-          file:
-            path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-            owner: "{{ user.value.users_home_owner | default(user.key) }}"
-            group: "{{ user.value.users_home_group | default(user.key) }}"
-            mode: "0750"
-            state: directory
-          when: users_apache_chroot_users_basedir_user_mount.rc == 1
-
-        - name: "{{ users_basedir }}/{{ user.key }} mounted on {{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-          include_tasks: mount.yml
-          vars:
-            users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-            users_mount_path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-            users_mount_opts: rw,nodev,nosuid,bind,private
-            users_mount_fstype: ext4
-
-        # /chroots/www-data/var/www/users
-        - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }} mounted on {{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for the Apache chroot"
-          include_tasks: mount.yml
-          vars:
-            users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-            users_mount_path: "{{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-            users_mount_opts: rw,nodev,nosuid,bind,private
-            users_mount_fstype: ext4
-
-      when: ( users_apache_chroot is defined ) and ( users_apache_chroot )
 
   tags:
     - users

@@ -58,33 +58,6 @@
   tags:
     - users
 
-- name: Additional mount when Apache is chrooted, the user has a users_apache_virtual_hosts dictionary and www-data is a member of the users group
-  block:
-
-    - name: "Mount point for users home present under {{ users_apache_chroot_users_basedir }}"
-      file:
-        path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-        state: directory
-        mode: "{{ user.value.users_home_mode | default('0750') }}"
-        owner: "{{ user.value.users_home_owner | default(user.key) }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-
-    - name: "Users home mounted under {{ users_apache_chroot_users_basedir }}"
-      include_tasks: mount.yml
-      vars:
-        users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        users_mount_path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-        users_mount_opts: rw,nodev,nosuid,bind,private
-        users_mount_fstype: ext4
-        users_mount_state: mounted
-
-  when:
-    - ( users_apache_chroot is defined ) and ( users_apache_chroot )
-    - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
-    - ( "www-data" in user.value.users_group_members )
-  tags:
-    - users
-
 - debug:
     msg: "name: {{ user.key }} | ssh dir: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh"
     verbosity: 1

@@ -88,8 +88,8 @@
             label: "{{ user.key }}"
           when:
             - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
-            - ( user.value.users_apache_virtual_hosts is defined )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+            - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
 
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
