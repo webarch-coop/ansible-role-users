@@ -28,7 +28,7 @@
 
     - name: "Chroot directories present for {{ user.key }}"
       file:
-        type: directory
+        state: directory
         path: "{{ dir.path }}"
         mode: "{{ dir.mode }}"
         owner: "{{ dir.owner }}"
