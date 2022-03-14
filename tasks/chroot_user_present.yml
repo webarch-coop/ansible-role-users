@@ -30,7 +30,7 @@
       file:
         type: directory
         path: "{{ dir.path }}"
-        mode:  "{{ dir.mode }}"
+        mode: "{{ dir.mode }}"
         owner: "{{ dir.owner }}"
         group: "{{ dir.group }}"
       loop:
@@ -45,7 +45,7 @@
           owner: "{{ user.value.users_home_owner | default(user.key) }}"
           group: "{{ user.value.users_home_group | default(user.key) }}"
       loop_control:
-        loop_var: dir 
+        loop_var: dir
         label: "{{ dir.path }}"
 
     - name: "Chroot directories mounted for {{ user.key }}"
