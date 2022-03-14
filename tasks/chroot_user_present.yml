@@ -36,7 +36,7 @@
       loop:
         # /chroots/USER
         - path: "{{ users_chroot_users_dir }}/{{ user.key }}"
-          mode: 0750
+          mode: "0750"
           owner: root
           group: root
         # /chroot/home/USER
