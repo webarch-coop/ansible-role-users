@@ -11,15 +11,6 @@
         owner: root
         group: root
 
-    # /chroots/www-data
-    - name: "Directory for Apache chroot to be mounted on present at {{ users_apache_chroot_dir }}"
-      file:
-        path: "{{ users_apache_chroot_dir }}"
-        state: directory
-        mode: 0750
-        owner: root
-        group: root
-
     # /chroot/var/www/users
     - name: "Directory for users home directories to be mounted under present in the chroot, {{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}"
       file:
@@ -61,6 +52,27 @@
             group: root
 
       when: ( users_apache_chroot_suexec ) and ( "suexec" in users_apache_modules_loaded )
+
+    - name: Check if Apache chroot is mounted and if it isn't ensure that the mount point for it exists
+      block:
+
+        # /chroots/www-data
+        - name: "Check if {{ users_apache_chroot_dir }} is mounted"
+          command: "findmnt {{ users_apache_chroot_dir }}"
+          check_mode: false
+          changed_when: false
+          register: users_findmnt
+          failed_when: users_findmnt.rc is not regex('^0|1$')
+
+        # /chroots/www-data
+        - name: "Directory for Apache chroot to be mounted on present at {{ users_apache_chroot_dir }}"
+          file:
+            path: "{{ users_apache_chroot_dir }}"
+            state: directory
+            mode: 0750
+            owner: root
+            group: root
+          when: users_findmnt.rc == 1
 
     - name: Apache chroot mounts present in /etc/fstab
       blockinfile:
