@@ -17,7 +17,7 @@
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}"
     state: directory
-    owner: "{{ vhost.key }}"
+    owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     mode: 0750
   tags:
