@@ -4,7 +4,7 @@
     src: suexec.j2
     dest: "/etc/apache2/suexec/{{ user.key }}"
     mode: 0750
-    user: root
+    owner: root
     group: root
   when:
     - ( users_apache_chroot_suexec is defined ) and ( users_apache_chroot_suexec )
