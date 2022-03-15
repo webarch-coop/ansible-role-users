@@ -39,6 +39,21 @@
   tags:
     - users
 
+- name: Check Apache status
+  command: service apache2 status
+  check_mode: false
+  changed_when: false
+  register: users_apache2_status
+  tags:
+    - users
+
+- name: Fail if Apache is not running
+  fail:
+    msg: "Apache is not running!"
+  when: users_apache2_status.rc == 3
+  tags:
+    - users
+
 # One cert per VirtualHost
 - name: "Let's Encrypt cert per vhost role included for {{ user.key }}"
   include_role:
