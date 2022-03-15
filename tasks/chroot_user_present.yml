@@ -105,7 +105,7 @@
             users_mount_state: mounted
 
         # /chroot/var/www/users/USER
-        - name: "Users directory present in the rw chroot under {{ users_apache_chroot_users_basedir }} for Apache chroot"
+        - name: "Users directory present at {{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
           file:
             path: "{{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
             state: directory
@@ -124,11 +124,11 @@
             users_mount_state: mounted
 
         # /chroots/USER/var/www/users/USER
-        - name: "Users home mounted rw at {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} for Apache chroot"
+        - name: "Users home mounted rw at {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
           include_tasks: mount.yml
           vars:
             users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-            users_mount_path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            users_mount_path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
             users_mount_opts: rw,nodev,nosuid,bind,private
             users_mount_fstype: ext4
             users_mount_state: mounted
