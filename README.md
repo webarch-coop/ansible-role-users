@@ -305,7 +305,33 @@ was not a boolean and could be set to a path, however this wasn't used so it
 was re-purposed) . Additional `Directory` sections can be added using
 `users_apache_directories` at a `VirtualHost` level.
 
-### Options
+### Chrooting Apache, PHP-FPM and SSH
+
+SSH and PHP-FPM users in the `chroot` group are chrooted to a a read-only
+chroot at `/chroots/USER` which has `/home/USER` mounted read-write at
+`/chroots/USER/home/USER`.
+
+Apache, unlike SSH and PHP-FPM, which can have a seperate chroot per user, has
+one chroot for the whole server, not one per user or `VirtualHost`, however
+when combined with `suEXEC` which allows the group and user that runs scripts
+via CGID or FastCGI to be set via `SuexecUserGroup` for CGI applications it is
+possible to use the Apache chroot isolate users running CGI from the
+environment in which other services are running.
+
+One restriction that `suEXEC` has is to only allow CGI to be run in
+sub-directories on `/var/www`, so to get around this when Apache is chrooted
+users home directories are also mounted under `/var/www/users` and under the
+same path in the Apache chroot and under the same path in the SSH / PHP-FPM
+chroots.
+
+The way this role has been designed to implement this is having a read-write
+chroot at `/chroot` which is then mounted at `/chroots/www-data` read-only and
+then on top of that `/home/USER` is mounted read-write at
+`/chroots/www-data/home/USER` and also at
+`/chroots/www-data/var/www/users/USER`.
+
+In addition some other directories are automatically mounted to get it all to
+work.  ### Options
 
 Server wide settings for `VirtualHosts` can be set like this (see the commented
 out variables in [defaults/main.yml](defaults/main.yml)):
