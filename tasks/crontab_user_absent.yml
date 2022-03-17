@@ -66,6 +66,11 @@
         label: "{{ job.name }}"
       when: ( users.value.users_cron_jobs is defined ) and ( users.value.users_cron_jobs != [] )
 
+    - name: "Crontab file absent from /var/spool for {{ user.key }}"
+      file:
+        path: "/var/spool/cron/crontabs/{{ user.key }}"
+        state: absent
+
   tags:
     - users
 ...

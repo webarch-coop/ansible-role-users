@@ -14,19 +14,12 @@
         regexp: "^{{ user.key }}:"
         state: absent
 
-    - name: Include tasks to unmount mounted filesystems when Apache is chrooted
+    - name: Include tasks to unmount mounted filesystems
       include_tasks: umount.yml
       loop:
         - "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
         - "{{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
         - "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-      loop_control:
-        loop_var: users_mount_path
-      when: ( users_apache_chroot is defined ) and ( users_apache_chroot )
-
-    - name: Include tasks to unmount mounted filesystems
-      include_tasks: umount.yml
-      loop:
         - "{{ users_chroot_users_dir }}/{{ user.key }}/run/chroot"
         - "{{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld"
         - "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
@@ -48,13 +41,11 @@
       file:
         path: "{{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
         state: absent
-      when: ( users_apache_chroot is defined ) and ( users_apache_chroot )
 
     - name: "Directory {{ users_apache_chroot_users_basedir }}/{{ user.key }} absent"
       file:
         path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
         state: absent
-      when: ( users_apache_chroot is defined ) and ( users_apache_chroot )
 
   tags:
     - users
