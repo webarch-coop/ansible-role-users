@@ -48,13 +48,13 @@
   tags:
     - users
 
-- name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
+- name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: directory
     mode: "{{ user.value.users_home_mode | default('0750') }}"
     owner: "{{ user.value.users_home_owner | default(user.key) }}"
-    group: "{{ user.value.users_home_group | default(user.key) }}"
+    group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
   tags:
     - users
 
@@ -66,9 +66,9 @@
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ dir }}"
     state: directory
-    mode: "{{ user.value.users_private_dirs_mode | default(users_private_dirs_mode) }}"
+    mode: "{{ user.value.users_private_dirs_mode | default(users_private_dirs_mode) | default('0700') }}"
     owner: "{{ user.key }}"
-    group: "{{ user.value.users_group | default(user.key) }}"
+    group: "{{ user.value.users_private_dirs_group | default(users_private_dirs_group) | default(user.value.users_group) | default(user.key) }}"
   when:
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
