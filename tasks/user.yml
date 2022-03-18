@@ -66,6 +66,8 @@
       - "mode: {{ user.value.users_private_dirs_mode | default(users_private_dirs_mode) | default('0700') }}"
       - "owner: {{ user.key }}"
       - "group: {{ user.value.users_private_dirs_group | default(users_private_dirs_group) | default(user.value.users_group) | default(user.key) }}"
+      - "modification_time: preserve"
+      - "access_time: preserve"
     verbosity: 2
   when:
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
@@ -84,6 +86,8 @@
     mode: "{{ user.value.users_private_dirs_mode | default(users_private_dirs_mode) | default('0700') }}"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_private_dirs_group | default(users_private_dirs_group) | default(user.value.users_group) | default(user.key) }}"
+    access_time: preserve
+    modification_time: preserve
   when:
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
@@ -91,6 +95,46 @@
   loop_control:
     loop_var: dir
     label: "{{ dir }}"
+  tags:
+    - users
+
+- name: "Debug private files present for {{ user.key }}"
+  debug:
+    msg:
+      - "path: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file }}"
+      - "state: touch"
+      - "mode: {{ user.value.users_private_files_mode | default(users_private_files_mode) | default('0700') }}"
+      - "owner: {{ user.key }}"
+      - "group: {{ user.value.users_private_files_group | default(users_private_files_group) | default(user.value.users_group) | default(user.key) }}"
+      - "access_time: preserve"
+      - "modification_time: preserve"
+    verbosity: 2
+  when:
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
+    - ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
+  loop: "{{ users_private_files }}"
+  loop_control:
+    loop_var: file
+    label: "{{ file }}"
+  tags:
+    - users
+
+- name: "Private files present for {{ user.key }}"
+  file:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file }}"
+    state: touch
+    mode: "{{ user.value.users_private_files_mode | default(users_private_files_mode) | default('0700') }}"
+    owner: "{{ user.key }}"
+    group: "{{ user.value.users_private_files_group | default(users_private_files_group) | default(user.value.users_group) | default(user.key) }}"
+    access_time: preserve
+    modification_time: preserve
+  when:
+    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
+    - ( users_private_dirs is defined ) and ( users_private_dirs[0] is defined )
+  loop: "{{ users_private_files }}"
+  loop_control:
+    loop_var: file
+    label: "{{ file }}"
   tags:
     - users
 
