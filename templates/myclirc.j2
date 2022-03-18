@@ -1,6 +1,8 @@
 # {{ ansible_managed }}
+
 [alias_dsn]
 {% for db in user.value.users_mariadb_databases %}
 {{ db }}="mysql://{{ user.key }}@localhost/{{ db }}"
 {% endfor %}
+
 # vim: syntax=dosini
