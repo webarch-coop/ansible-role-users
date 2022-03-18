@@ -74,15 +74,46 @@ users_cron: false
 users_quotaon: false
 users_state_dir: /root/users
 users_private_dirs:
-  - bin
+  - .ansible
+  - .cache
+  - .composer
+  - .config
+  - .console
+  - .drush
+  - .git
   - .gnupg
+  - .local
+  - .mysql
+  - .mutt
+  - .npm
+  - .ssh
+  - .vim
+  - .wp-cli
+  - .yarn
+  - bin
   - private
   - tmp
-  - .ssh
 users_private_dirs_mode: "0700"
 # users_private_dirs_group can be set here but it isn't clear what that might be good for
 # however setting it at a user level does have some uses cases like when one user needs access to
 # another users MySQL backups however chowning the ~/.ssh group might break SSH
+users_private_files:
+  - .bash_history
+  - .bash_logout
+  - .bashrc
+  - .mycli-audit.log
+  - .mycli.log
+  - .myclirc 
+  - .mysql/history
+  - .nanorc
+  - .profile
+  - .selected_editor
+  - .vimrc
+  - .wp-cli/config.yml
+  - .yarnrc
+users_private_files_mode: "0600"
+# users_private_files_group can be set here but it isn't clear what that might be good for
+# however setting it at a user level might have some use cases
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_headers:
