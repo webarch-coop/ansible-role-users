@@ -91,6 +91,15 @@
         loop_var: db
         label: "{{ db }}"
 
+    - name: "mycli config file ~/.myclirc generated for {{ user.key }}"
+      template:
+        src: myclirc.j2
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: 0400
+        force: true
+
     - name: "Set a variable for mysql_user db priv for {{ user.key }} using the default privileges"
       set_fact:
         users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in users_mariadb_database_privileges %}{{ p }}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
