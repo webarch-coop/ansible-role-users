@@ -102,6 +102,7 @@ users_private_files:
   - .bash_logout
   - .bashrc
   - .mycli-audit.log
+  - .mycli-history
   - .mycli.log
   - .myclirc
   - .mysql/history
