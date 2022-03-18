@@ -22,6 +22,7 @@
       - "groups: {{ user.value.users_groups | default([]) | join(',') or \ omit }}"
       - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit }}"
       - "home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+      - "email: {% if user.value.users_email is defined %}{{ user.value.users_email }}{% endif %}"
       - "shell: {{ user.value.users_shell | default('/bin/bash', true) }}"
       - "skeleton: {{ user.value.users_skel | default('') }}"
       - "system: {{ user.value.users_system | default('no', false) }}"
@@ -30,8 +31,12 @@
       - "home group: {{ user.value.users_home_group | default(user.key) }}"
       - "home mode: {{ user.value.users_home_mode | default('0700') }}"
       - "generate ssh key: {{ user.value.users_generate_ssh_key | default('false') }}"
-      # - "email: {{ user.value.users_email }}"
-    verbosity: 1
+      - "SSH public key URLs:{% if user.value.users_ssh_public_keys is defined %}{% for url in user.value.users_ssh_public_keys %} {{ url }}{% endfor %}{% endif %}"
+      - "private directories mode: {{ user.value.users_private_dirs_mode | default(users_private_dirs_mode) | default('0700') }}"
+      - "private directories group: {{ user.value.users_private_dirs_group | default(users_private_dirs_group) | default(user.value.users_group) | default(user.key) }}"
+      - "private files mode: {{ user.value.users_private_files_mode | default(users_private_files_mode) | default('0700') }}"
+      - "private files group: {{ user.value.users_private_files_group | default(users_private_files_group) | default(user.value.users_group) | default(user.key) }}"
+    verbosity: 2
 
 # TODO Check that the user doesn't already exist in getent_passwd
 - name: "User account for {{ user.key }} present"
@@ -76,8 +81,6 @@
   loop_control:
     loop_var: dir
     label: "{{ dir }}"
-  tags:
-    - users
 
 - name: "Private directories present for {{ user.key }}"
   file:
@@ -116,8 +119,6 @@
   loop_control:
     loop_var: file
     label: "{{ file }}"
-  tags:
-    - users
 
 - name: "Private files present for {{ user.key }}"
   file:

@@ -37,6 +37,7 @@
           - "quota_dir: {{ quota_dir }}"
           - "users_quotaon: {{ users_quotaon }}"
           - "user.value.users_quota: {{ user.value.users_quota }}"
+        verbosity: 2
       when:
         - quota_dir is defined
         - users_quotaon is defined
