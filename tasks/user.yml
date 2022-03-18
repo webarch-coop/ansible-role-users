@@ -28,7 +28,7 @@
       - "editor: {{ user.value.users_editor | default('vim', true) }}"
       - "home owner: {{ user.value.users_home_owner | default(user.key) }}"
       - "home group: {{ user.value.users_home_group | default(user.key) }}"
-      - "home mode: {{ user.value.users_home_mode | default(0700) }}"
+      - "home mode: {{ user.value.users_home_mode | default('0700') }}"
       - "generate ssh key: {{ user.value.users_generate_ssh_key | default('false') }}"
       # - "email: {{ user.value.users_email }}"
     verbosity: 1
@@ -99,7 +99,7 @@
   copy:
     src: "files/{{ user.value.users_editor }}/selected_editor"
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.selected_editor"
-    mode: 0644
+    mode: "0644"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
   when:
@@ -115,7 +115,7 @@
         src: "files/vim/vimrc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.vimrc"
         force: false
-        mode: 0644
+        mode: "0644"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
@@ -126,7 +126,7 @@
         line: 'export EDITOR="vim"'
         state: present
         create: true
-        mode: 0644
+        mode: "0644"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
       when:
@@ -137,7 +137,7 @@
         src: "files/nano/nanorc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.nanorc"
         force: false
-        mode: 0644
+        mode: "0644"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
@@ -148,7 +148,7 @@
         line: 'export EDITOR="nano"'
         state: present
         create: true
-        mode: 0644
+        mode: "0644"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
       when:
@@ -163,7 +163,7 @@
   template:
     src: gitconfig.j2
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.gitconfig"
-    mode: 0644
+    mode: "0644"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     force: false

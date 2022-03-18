@@ -38,7 +38,7 @@ users_disallowed_usernames:
 # for www-data set users_home: /var/www and for root set users_home: /root
 users_basedir: /home
 users_sites_dir: sites
-users_sites_dir_mode: 0750
+users_sites_dir_mode: "0750"
 # Define users_matomo to true for servers with Matomo and automatic Matomo account
 # provisioning for users which have users_matomo_account set to True
 users_matomo: false
@@ -79,7 +79,7 @@ users_private_dirs:
   - private
   - tmp
   - .ssh
-users_private_dirs_mode: 0700
+users_private_dirs_mode: "0700"
 # users_private_dirs_group can be set here but it isn't clear what that might be good for
 # however setting it at a user level does have some used cases like when one user needs access to 
 # another users MySQL backups 
