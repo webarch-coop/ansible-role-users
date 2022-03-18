@@ -38,6 +38,7 @@ users_disallowed_usernames:
 # for www-data set users_home: /var/www and for root set users_home: /root
 users_basedir: /home
 users_sites_dir: sites
+users_sites_dir_mode: 0750
 # Define users_matomo to true for servers with Matomo and automatic Matomo account
 # provisioning for users which have users_matomo_account set to True
 users_matomo: false
@@ -73,12 +74,12 @@ users_cron: false
 users_quotaon: false
 users_state_dir: /root/users
 users_private_dirs:
-  - backups
   - bin
   - .gnupg
   - private
   - tmp
   - .ssh
+users_private_dirs_mode: 0700
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_headers:

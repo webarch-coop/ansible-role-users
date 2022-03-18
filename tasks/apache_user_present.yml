@@ -19,7 +19,7 @@
     state: directory
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    mode: 0750
+    mode: "{{ user.value.users_sites_dir_mode | default(users_sites_dir_mode) }}" 
   tags:
     - users
 

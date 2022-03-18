@@ -66,7 +66,7 @@
   file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ dir }}"
     state: directory
-    mode: 0700
+    mode: "{{ user.value.users_private_dirs_mode | default(users_private_dirs_mode) }}"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
   when:
@@ -107,7 +107,7 @@
   tags:
     - users
 
-- name: Vim tasks
+- name: Nano and Vim tasks
   block:
 
     - name: "~/.vimrc present for {{ user.key }}"
@@ -131,14 +131,6 @@
         group: "{{ user.value.users_group | default(user.key) }}"
       when:
         - ( user.value.users_editor is defined ) and ( user.value.users_editor == "vim" )
-
-  when:
-    - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
-  tags:
-    - users
-
-- name: Nano tasks
-  block:
 
     - name: "~/.nanorc present for {{ user.key }}"
       copy:
@@ -181,4 +173,6 @@
     - ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
   tags:
     - users
+
+# TODO Generate README to document the account, MySQL, Apache etc.
 ...
