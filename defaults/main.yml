@@ -103,7 +103,7 @@ users_private_files:
   - .bashrc
   - .mycli-audit.log
   - .mycli.log
-  - .myclirc 
+  - .myclirc
   - .mysql/history
   - .nanorc
   - .profile
