@@ -54,9 +54,20 @@
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0400
+        mode: "0400"
         force: true
       no_log: true
+
+    - name: "Alias mycli via ~/.bash_aliases to set the MariaDB user"
+      lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_aliases"
+        regexp: '^alias mycli='
+        line: 'alias mycli="mycli -u "{{ user.key }}"'
+        state: present
+        create: true
+        mode: "0640"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: "The databases that {{ user.key }} has access to"
       command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
@@ -97,7 +108,7 @@
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0400
+        mode: "0400"
         force: true
 
     - name: "Set a variable for mysql_user db priv for {{ user.key }} using the default privileges"
@@ -155,7 +166,7 @@
             insertafter: EOF
             owner: root
             group: "{{ user.key }}"
-            mode: 0640
+            mode: "0640"
 
       when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd ) and ( not users_notify_mariadb_passwd_file.stat.exists )
 
@@ -165,7 +176,7 @@
         state: directory
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0700
+        mode: "0700"
 
   tags:
     - users

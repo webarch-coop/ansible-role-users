@@ -20,7 +20,7 @@
         state: directory
         owner: root
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0750
+        mode: "0750"
 
     - name: Users PHP FPM logs touched
       file:
@@ -30,7 +30,7 @@
         modification_time: preserve
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: 0600
+        mode: "0600"
       loop:
         - php-fpm.mail.log
         - php-fpm.slow.log
@@ -46,7 +46,7 @@
         dest: "/etc/logrotate.d/phpfpm_{{ user.key }}"
         owner: root
         group: root
-        mode: 0755
+        mode: "0755"
 
     - name: Check the PHP FPM pm variables
       include_role:
@@ -69,7 +69,7 @@
         src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
         remote_src: true
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
       when: users_phpfpm_pool_conf_check.stat.exists
@@ -78,7 +78,7 @@
       template:
         src: phpfpm_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
       register: users_phpfpm_pool_conf
@@ -106,7 +106,7 @@
             src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
             remote_src: true
-            mode: 0644
+            mode: "0644"
             owner: root
             group: root
 
@@ -115,7 +115,7 @@
             src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             remote_src: true
-            mode: 0644
+            mode: "0644"
             owner: root
             group: root
           when: users_phpfpm_pool_conf_check.stat.exists
@@ -139,7 +139,7 @@
       template:
         src: apache_localhost.conf.j2
         dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
       when:
@@ -149,7 +149,7 @@
       template:
         src: nginx_localhost.conf.j2
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
       when: ( "nginx" in ansible_facts.packages )
@@ -161,7 +161,7 @@
         line: 'alias php="php --php-ini ~/.php.ini"'
         state: present
         create: true
-        mode: 0644
+        mode: "0640"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
@@ -172,7 +172,7 @@
         line: 'sys_temp_dir = "/home/{{ user.key }}/tmp"'
         state: present
         create: true
-        mode: 0644
+        mode: "0640"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
@@ -183,7 +183,7 @@
         line: 'memory_limit = -1'
         state: present
         create: true
-        mode: 0644
+        mode: "0640"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
@@ -194,7 +194,7 @@
         line: 'apc.enable_cli = 1'
         state: present
         create: true
-        mode: 0644
+        mode: "0640"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
       when: ( "php-apcu" in ansible_facts.packages )
