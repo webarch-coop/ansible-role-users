@@ -62,7 +62,7 @@
       lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_aliases"
         regexp: '^alias mycli='
-        line: 'alias mycli="mycli -u "{{ user.key }}"'
+        line: 'alias mycli="mycli -u {{ user.key }}"'
         state: present
         create: true
         mode: "0640"
