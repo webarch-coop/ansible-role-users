@@ -1,0 +1,44 @@
+---
+- name: MariaDB tasks
+  block:
+
+    - name: Ensure that MariaDB user is present in /etc/passwd and /etc/group when a chroot is used
+      block:
+
+        - name: "Read mysql entry from /etc/passwd"
+          command: "grep ^mysql: /etc/passwd"
+          check_mode: false
+          changed_when: false
+          register: users_etc_passwd
+
+        - name: "mysql present in {{ users_chroot_dir }}/etc/passwd"
+          lineinfile:
+            path: "{{ users_chroot_dir }}/etc/passwd"
+            line: "{{ users_etc_passwd.stdout }}"
+            state: present
+            mode: "0644"
+            owner: root
+            group: root
+
+        - name: "Read mysql entry from /etc/group"
+          command: "grep ^mysql: /etc/group"
+          check_mode: false
+          changed_when: false
+          register: users_etc_group
+
+        - name: "mysql present in {{ users_chroot_dir }}/etc/group"
+          lineinfile:
+            path: "{{ users_chroot_dir }}/etc/group"
+            line: "{{ users_etc_group.stdout }}"
+            state: present
+            mode: "0644"
+            owner: root
+            group: root
+
+      when:
+        - ( users_chroot is defined ) and ( users_chroot )
+        - ( users_chroot_dir is defined )
+
+  tags:
+    - users
+...

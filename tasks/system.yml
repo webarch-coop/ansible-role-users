@@ -73,6 +73,12 @@
         - ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache )
 
+    - name: Include MariaDB tasks
+      include_tasks: mariadb.yml
+      when:
+        - ( "mariadb-server" in ansible_facts.packages )
+        - ( users_mariadb is defined ) and ( users_apache )
+
     - name: PHP FPM checks and tasks
       block:
 
