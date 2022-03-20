@@ -13,6 +13,9 @@
         path: "{{ users_chroot_dir }}/etc/passwd"
         line: "{{ users_etc_passwd.stdout }}"
         state: present
+        mode: "0644"
+        owner: root
+        group: root
 
     - name: "Read {{ user.key }} entry from /etc/group"
       command: "grep ^{{ user.key }}: /etc/group"
@@ -25,6 +28,9 @@
         path: "{{ users_chroot_dir }}/etc/group"
         line: "{{ users_etc_group.stdout }}"
         state: present
+        mode: "0644"
+        owner: root
+        group: root
 
     # /chroot/home/USER
     - name: "Chroot home directory present for {{ user.key }}"
