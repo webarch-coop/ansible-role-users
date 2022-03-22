@@ -719,7 +719,7 @@
     loop_var: vhost
     label: "{{ vhost.key }}"
   when: >
-    ( users_home_bin_path.stat.exists ) and
+    ( users_home_bin_path.stat.exists ) and ( user.value.users_system is not defined or not user.value.users_system ) and
     ( ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] ) or
     ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] ) )
   tags:

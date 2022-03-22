@@ -14,7 +14,9 @@
         mode: 0644
         owner: root
         group: root
-      when: users_home_bin_path.stat.exists
+      when:
+        - ( users_home_bin_path.stat.exists )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
 
     - name: "Check if {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min exists"
       stat:
@@ -27,7 +29,9 @@
         echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
       args:
         executable: "{{ users_bash }}"
-      when: not users_cron_min_file.stat.exists
+      when:
+        - ( users_home_bin_path.stat.exists )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
 
     - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       slurp:
@@ -80,7 +84,8 @@
             hour: "*"
 
       when:
-        - users_home_bin_path.stat.exists
+        - ( users_home_bin_path.stat.exists )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
         - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
 
     - name: Crontabs present for non-chrooted users
@@ -109,7 +114,8 @@
             hour: "*"
 
       when:
-        - users_home_bin_path.stat.exists
+        - ( users_home_bin_path.stat.exists )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
         - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
 
     - name: "USER env var added to {{ user.key }} crontab"
