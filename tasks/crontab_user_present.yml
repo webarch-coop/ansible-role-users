@@ -79,7 +79,9 @@
             minute: "{{ users_cron_min }}"
             hour: "*"
 
-      when: ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
+      when:
+        - users_home_bin_path.stat.exists
+        - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
 
     - name: Crontabs present for non-chrooted users
       block:
