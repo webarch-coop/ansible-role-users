@@ -106,7 +106,9 @@
             minute: "{{ users_cron_min }}"
             hour: "*"
 
-      when: ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
+      when:
+        - users_home_bin_path.stat.exists
+        - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
 
     - name: "USER env var added to {{ user.key }} crontab"
       cron:
