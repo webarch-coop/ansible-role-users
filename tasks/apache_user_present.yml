@@ -705,6 +705,13 @@
   tags:
     - users
 
+- name: Check if the user HOME bin directory exists
+  stat:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
+  register: users_home_bin_path
+  tags:
+    - users
+
 - name: "Include scripts role for {{ user.key }}"
   include_tasks: user_scripts.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
@@ -712,8 +719,9 @@
     loop_var: vhost
     label: "{{ vhost.key }}"
   when: >
-    ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] ) or
-    ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] )
+    ( users_home_bin_path.stat.exists ) and
+    ( ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] ) or
+    ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] ) )
   tags:
     - users
 
