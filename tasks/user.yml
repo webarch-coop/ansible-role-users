@@ -25,7 +25,7 @@
       - "email: {% if user.value.users_email is defined %}{{ user.value.users_email }}{% endif %}"
       - "shell: {{ user.value.users_shell | default('/bin/bash', true) }}"
       - "skeleton: {{ user.value.users_skel | default('') }}"
-      - "system: {{ user.value.users_system | default('no', false) }}"
+      - "system: {{ user.value.users_system | default('false', false) }}"
       - "editor: {{ user.value.users_editor | default('vim', true) }}"
       - "home owner: {{ user.value.users_home_owner | default(user.key) }}"
       - "home group: {{ user.value.users_home_group | default(user.key) }}"
