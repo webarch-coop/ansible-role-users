@@ -2,10 +2,10 @@
 - name: "Cron jobs for {{ user.key }}"
   block:
 
-    - name: Check if the user HOME directory exists
+    - name: Check if the user HOME bin directory exists
       stat:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-      register: users_home_path
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
+      register: users_home_bin_path
 
     - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md in place"
       copy:
@@ -14,7 +14,7 @@
         mode: 0644
         owner: root
         group: root
-      when: users_home_path.stat.exists
+      when: users_home_bin_path.stat.exists
 
     - name: "Check if {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min exists"
       stat:
