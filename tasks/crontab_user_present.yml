@@ -2,7 +2,7 @@
 - name: "Cron jobs for {{ user.key }}"
   block:
 
-    - name: Check if the user HOME bin directory exists
+    - name: Check if the ~/bin directory exists
       stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
       register: users_home_bin_path
@@ -125,14 +125,6 @@
         value: "{{ user.key }}"
         user: "{{ user.key }}"
 
-    - name: "TMPDIR env var added to {{ user.key }} crontab"
-      cron:
-        env: true
-        name: TMPDIR
-        value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        user: "{{ user.key }}"
-        insertafter: USER
-
     - name: "PATH env var added to {{ user.key }} crontab"
       cron:
         env: true
@@ -140,6 +132,7 @@
         value: "/usr/local/bin:/usr/bin:/bin"
         user: "{{ user.key }}"
         insertafter: TMPDIR
+        state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
 
     - name: "MAILTO env var added to {{ user.key }} crontab"
       cron:
@@ -148,7 +141,21 @@
         value: "{{ user.value.users_email }}"
         user: "{{ user.key }}"
         insertafter: PATH
-      when: ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
+        state: "{% if user.value.users_email is defined and user.value.users_email | length > 0 %}present{% else %}absent{% endif %}"
+
+    - name: Check if the ~/tmp directory exists
+      stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+      register: users_home_tmp_path
+
+    - name: "TMPDIR env var added to {{ user.key }} crontab"
+      cron:
+        env: true
+        name: TMPDIR
+        value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+        user: "{{ user.key }}"
+        insertafter: USER
+        state: "{% if users_home_tmp_path.stat.exists %}present{% else %}absent{% endif %}"
 
     - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
       cron:
@@ -159,6 +166,7 @@
         minute: "{{ users_cron_min }}"
         hour: "{{ users_cron_tmpdir_hour }}"
       when:
+        - ( users_home_tmp_path.stat.exists )
         - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
         - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean )
 
@@ -173,16 +181,31 @@
         - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
         - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
 
-    - name: "Daily MariaDB dump cron job in place for users with databases"
-      cron:
-        name: "Nightly MySQL database backup for {{ user.key }}"
-        job: "/usr/local/bin/mysql-backup-user {{ user.key }}"
-        user: "{{ user.key }}"
-        minute: "{{ users_cron_min }}"
-        hour: "{{ users_cron_mysqldump_hour | default('04') }}"
-      when:
-        - ( users_mariadb is defined ) and ( users_mariadb )
-        - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+    - name: MariaDB CRON tasks
+      block:
+
+        - name: Check if /usr/local/bin/mysql-backup-user exists
+          stat:
+            path: /usr/local/bin/mysql-backup-user
+          register: users_mysql_backup_script
+
+        - name: Check if ~/.my.cnf exists
+          stat:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
+          register: users_home_mycnf_path
+
+        - name: "Daily MariaDB dump cron job in place for users with databases"
+          cron:
+            name: "Nightly MySQL database backup for {{ user.key }}"
+            job: "/usr/local/bin/mysql-backup-user {{ user.key }}"
+            user: "{{ user.key }}"
+            minute: "{{ users_cron_min }}"
+            hour: "{{ users_cron_mysqldump_hour | default('04') }}"
+          when:
+            - ( users_mysql_backup_script.stat.exists ) and ( users_home_mycnf_path.stat.exists )
+            - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+
+      when: ( users_mariadb is defined ) and ( users_mariadb )
 
     - name: Cron jobs defined at a user level
       block:

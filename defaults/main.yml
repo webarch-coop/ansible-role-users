@@ -45,6 +45,8 @@ users_matomo: false
 # Define users_mariadb to true for this role to create MariaDB user and
 # databases
 users_mariadb: false
+# The following script is available here https://git.coop/webarch/scripts/-/blob/master/bin/mysql-backup-user
+users_backup_script: /usr/local/bin/mysql-backup-user
 # MySQL user privileges copied from
 # https://www.a2hosting.com/kb/developer-corner/mysql/mysql-user-privileges-on-shared-servers
 users_mariadb_database_privileges:
