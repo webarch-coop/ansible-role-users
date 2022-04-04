@@ -188,6 +188,18 @@
         database: passwd
         split: ':'
 
+    - name: Debug matomo_user
+      debug:
+        var: matomo_user
+        verbosity: 2
+      when: matomo_user is defined
+
+    - name: Debug getent_passwd.keys()
+      debug:
+        var: getent_passwd.keys()
+        verbosity: 2
+      when: getent_passwd.keys() is defined
+
     - name: "Matomo site tasks for {{ user.key }}"
       block:
 
@@ -196,18 +208,6 @@
             path: "{{ matomo_html }}/config/config.ini.php"
           check_mode: false
           register: user_matomo_config
-
-        - name: Debug matomo_user
-          debug:
-            var: matomo_user
-            verbosity: 2
-          when: matomo_user is defined
-
-        - name: Debug getent_passwd.keys()
-          debug:
-            var: getent_passwd.keys()
-            verbosity: 2
-          when: getent_passwd.keys() is defined
 
         - name: If Matomo is installed
           block:
