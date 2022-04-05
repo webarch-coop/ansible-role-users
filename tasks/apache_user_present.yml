@@ -197,7 +197,7 @@
     - name: Debug getent_passwd.keys()
       debug:
         var: getent_passwd.keys()
-        verbosity: 2
+        verbosity: 3
       when: getent_passwd.keys() is defined
 
     - name: "Matomo site tasks for {{ user.key }}"
@@ -612,7 +612,7 @@
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "flarum" )
 
-    - name: "Include MediaWiki role for {{ user.key }}"
+    - name: "Include MediaWiki role for {{ user.key }} with Matomo configuration"
       include_role:
         name: mediawiki
       vars:
@@ -649,7 +649,48 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
-      when: ( vhost.value.users_cms == "mediawiki" )
+      when:
+        - ( vhost.value.users_cms == "mediawiki" )
+        - ( users_matomo is defined ) and ( not users_matomo )
+
+    - name: "Include MediaWiki role for {{ user.key }} without Matomo configuration"
+      include_role:
+        name: mediawiki
+      vars:
+        mediawiki_user: "{{ user.key }}"
+        mediawiki_group: "{{ user.value.users_group | default(user.key) }}"
+        mediawiki_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        mediawiki_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+        mediawiki_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+        mediawiki_version: "{{ vhost.value.mediawiki_version }}"
+        mediawiki_version_patch: "{{ vhost.value.mediawiki_version_patch }}"
+        mediawiki_url: "{{ vhost.value.mediawiki_url | default('https://' + vhost.value.users_apache_server_name) }}"
+        mediawiki_wikiname: "{{ vhost.value.mediawiki_wikiname | default(MediaWiki) }}"
+        mediawiki_domain: "{{ vhost.value.mediawiki_domain | default(vhost.value.users_apache_server_name) }}"
+        mediawiki_locale: "{{ vhost.value.mediawiki_locale | default('en') }}"
+        mediawiki_dbname: "{% if vhost.value.mediawiki_dbname is defined %}{{ vhost.value.mediawiki_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+        mediawiki_dbuser: "{{ vhost.value.mediawiki_dbuser | default(user.key) }}"
+        mediawiki_dbpass: "{{ users_mariadb_password }}"
+        mediawiki_dbprefix: "{{ vhost.value.mediawiki_dbprefix | default('') }}"
+        mediawiki_admin_user: "{{ vhost.value.mediawiki_admin_user | default(user.key) }}"
+        mediawiki_admin_email: "{{ vhost.value.mediawiki_admin_email | default(user.value.users_email) }}"
+        mediawiki_password_sender: "{{ vhost.value.mediawiki_password_sender | default(user.key + '@' + inventory_hostname) }}"
+        mediawiki_notify: "{{ vhost.value.mediawiki_notify | default(true) | bool }}"
+        mediawiki_notify_from: "{{ users_notify_from }}"
+        mediawiki_notify_reply_to: "{{ users_notify_reply_to }}"
+        mediawiki_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+        mediawiki_notify_headers: "{{ users_notify_headers }}"
+        mediawiki_notify_signature: "{{ users_notify_signature }}"
+        mediawiki_logo: "{{ vhost.value.mediawiki_logo | default('$wgResourceBasePath/resources/assets/mediawiki.png') }}"
+        mediawiki_favicon: "{{ vhost.value.mediawiki_favicon | default('/favicon.ico') }}"
+        mediawiki_apple_touch_icon: "{{ vhost.value.mediawiki_apple_touch_icon | default('/apple-touch.png') }}"
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+      when:
+        - ( vhost.value.users_cms == "mediawiki" )
+        - ( users_matomo is not defined ) or ( not users_matomo )
 
     - name: "Include Matomo role for {{ user.key }}"
       include_role:
