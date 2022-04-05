@@ -5,6 +5,7 @@
     - name: Packages present
       apt:
         pkg:
+          - bash-completion
           - bc
           - bind9-dnsutils
           - bsd-mailx
