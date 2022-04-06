@@ -61,12 +61,17 @@
         - user.value.users_email is defined
         - user.value.users_email | length > 0
 
-    - name: "Crontab tasks for user {{ user.key }}"
+    - name: "Crontab tasks present for user {{ user.key }}"
       include_tasks: crontab_user_present.yml
       when:
         # - ( user.key != "root" )
         # - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
         - ( users_cron is defined ) and ( users_cron )
+        - ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
+
+    - name: "Crontab tasks absent for user {{ user.key }} as they have no email address"
+      include_tasks: crontab_user_absent.yml
+      when: ( user.value.users_email is not defined ) or ( user.value.users_email | length == 0 )
 
     - name: "Create or remove a .forward file for {{ user.key }}"
       block:
