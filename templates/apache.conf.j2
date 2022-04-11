@@ -24,6 +24,9 @@
 </VirtualHost>
 # {{ vhost_config.users_apache_server_name }} port 443
 # {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
+<IfModule md_module>
+  MDomain {{ vhost_config.users_apache_server_name }}
+</IfModule>
 <VirtualHost *:443>
   ServerName {{ vhost_config.users_apache_server_name }}
   {%- if vhost_config.users_apache_server_aliases is defined %}
