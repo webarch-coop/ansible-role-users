@@ -2,22 +2,22 @@
 [{{ user.key }}]
 user = {{ user.key }} 
 group = {{ user.value.users_group | default(user.key) }}
-; {% if users_chroot is defined and users_chroot and users_chroot_dir is defined and users_chroot_dir_check.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
-; chroot = {{ users_chroot_users_dir }}/{{ user.key }}
-; {% if users_apache_chroot is defined and users_apache_chroot %}
-; listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
-; {% else %}
-; listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-; {% endif %}
-; access.log = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
-; slowlog = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
-; php_admin_value[error_log] = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
-; {% else %}
+{#  {% if users_chroot is defined and users_chroot and users_chroot_dir is defined and users_chroot_dir_check.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %} #}
+{#  chroot = {{ users_chroot_users_dir }}/{{ user.key }} #}
+{#  {% if users_apache_chroot is defined and users_apache_chroot %} #}
+{#  listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock #}
+{#  {% else %} #}
+{#  listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock #}
+{#  {% endif %} #}
+{#  access.log = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log #}
+{#  slowlog = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log #}
+{#  php_admin_value[error_log] = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log #}
+{#  {% else %} #}
 listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
 access.log = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
 slowlog = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
 php_admin_value[error_log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
-; {% endif %}
+{#  {% endif %} #}
 listen.owner = root
 listen.group = {{ user.key }}
 listen.mode = 0660
