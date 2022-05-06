@@ -125,24 +125,6 @@
         value: "{{ user.key }}"
         user: "{{ user.key }}"
 
-    - name: "PATH env var added to {{ user.key }} crontab"
-      cron:
-        env: true
-        name: PATH
-        value: "/usr/local/bin:/usr/bin:/bin"
-        user: "{{ user.key }}"
-        insertafter: TMPDIR
-        state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
-
-    - name: "MAILTO env var added to {{ user.key }} crontab"
-      cron:
-        env: true
-        name: MAILTO
-        value: "{{ user.value.users_email }}"
-        user: "{{ user.key }}"
-        insertafter: PATH
-        state: "{% if user.value.users_email is defined and user.value.users_email | length > 0 %}present{% else %}absent{% endif %}"
-
     - name: Check if the ~/tmp directory exists
       stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
@@ -180,6 +162,24 @@
       when:
         - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
         - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
+
+    - name: "PATH env var added to {{ user.key }} crontab"
+      cron:
+        env: true
+        name: PATH
+        value: "/usr/local/bin:/usr/bin:/bin"
+        user: "{{ user.key }}"
+        insertafter: TMPDIR
+        state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
+
+    - name: "MAILTO env var added to {{ user.key }} crontab"
+      cron:
+        env: true
+        name: MAILTO
+        value: "{{ user.value.users_email }}"
+        user: "{{ user.key }}"
+        insertafter: PATH
+        state: "{% if user.value.users_email is defined and user.value.users_email | length > 0 %}present{% else %}absent{% endif %}"
 
     - name: MariaDB CRON tasks
       block:
