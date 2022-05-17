@@ -626,14 +626,14 @@
       RemoveHandler {% for ext in users.value.users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
       {%- elif users_phpfpm_extensions is defined %}
       RemoveHandler {% for ext in users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
-      {% else %}
+      {%- else %}
       RemoveHandler .php
       {%- endif %}
       {%- if users.value.users_phpfpm_extensions is defined %}
       <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
       {%- elif users_phpfpm_extensions is defined %}
       <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
-      {% else %}
+      {%- else %}
       <FilesMatch "\.php$">
       {%- endif %}
       <If "-f %{REQUEST_FILENAME}">
