@@ -11,7 +11,7 @@
 
     - name: Array set for available shells
       set_fact:
-        users_shells: "{{ users_shells | default([]) }} + [ '{{ shell }}' ]"
+        users_shells: "{{ users_shells }} + [ '{{ shell }}' ]"
       when: ( shell is not regex('^#') ) and ( shell | length > 0 )
       loop: "{{ ( users_shells_b64encoded['content'] | b64decode ).split('\n') | list }}"
       loop_control:
