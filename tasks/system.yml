@@ -9,6 +9,10 @@
       changed_when: false
       register: users_shells_b64encoded
 
+    - name: Set an empty array for the shells
+      set_fact:
+        users_shells: []
+
     - name: Array set for available shells
       set_fact:
         users_shells: "{{ users_shells }} + [ '{{ shell }}' ]"
