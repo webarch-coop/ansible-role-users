@@ -52,6 +52,22 @@
 
       when: vhost.value.users_apache_server_aliases is defined
 
+    - name: users_apache_allow_encoded_slashes checks
+      block:
+
+        - name: "Check that users_apache_allow_encoded_slashes for {{ vhost.key }} VirtualHost for {{ user.key }} is a boolean or a string"
+          assert:
+            that:
+              - vhost.value.users_apache_allow_encoded_slashes | type_debug is regex('bool|str|AnsibleUnicode|AnsibleUnsafeText$')
+
+        - name: "Check that users_apache_allow_encoded_slashes for {{ vhost.key }} VirtualHost for {{ user.key }} is NoDecode when a string"
+          assert:
+            that:
+              - vhost.value.users_apache_allow_encoded_slashes == "NoDecode"
+          when: type_debug is regex('str|AnsibleUnicode|AnsibleUnsafeText$')
+
+      when: vhost.value.users_apache_allow_encoded_slashes is defined
+
     - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
       assert:
         that:

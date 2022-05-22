@@ -120,6 +120,9 @@
   {%- endif %}
     Header always set Permissions-Policy "interest-cohort=()"
   </IfModule>
+  {%- if vhost_config.users_apache_allow_encoded_slashes is defined %}
+  AllowEncodedSlashes {{ vhost_config.users_apache_allow_encoded_slashes }}
+  {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
   <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
@@ -668,11 +671,11 @@
       {%- endif %}
     {%- endif %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
-      {%- if proxy.path is defined and proxy.url is defined %}
-    ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
-      {%- endif %}
       {%- if proxy.preserve_host is defined %}
     ProxyPreserveHost {% if proxy.preserve_host %}On{% else %}Off{% endif %}
+      {%- endif %}
+      {%- if proxy.path is defined and proxy.url is defined %}
+    ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
       {%- endif %}
       {%- if proxy.add_headers is defined %}
     ProxyAddHeaders {% if proxy.add_headers %}On{% else %}Off{% endif %}
@@ -694,7 +697,7 @@
         {%- endfor %}
       {%- endif %}
       {%- if proxy.reverse is defined and proxy.reverse %}
-    ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url }}"
+    ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url | regex_replace('[ ].*$') }}"
       {%- endif %}
       {%- if proxy.htauth is defined and proxy.htauth %}
     <Proxy "{{ proxy.url }}">
