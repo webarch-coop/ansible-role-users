@@ -489,7 +489,7 @@
             that:
               - proxy.pathmatch is defined
               - proxy.url is defined
-              - proxy.url is regex('^([!])|(https?:\/\/.*)$')
+              - proxy.url is regex('^([!])|(https?:\/\/.*)|(wss?:\/\/.*)$')
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
