@@ -9,9 +9,10 @@
       changed_when: false
       register: users_shells_b64encoded
 
-    - name: Set an empty array for the shells
+    - name: Create an array for the shells including /usr/sbin/nologin
       set_fact:
-        users_shells: []
+        users_shells:
+          - /usr/sbin/nologin
 
     - name: Array set for available shells
       set_fact:
