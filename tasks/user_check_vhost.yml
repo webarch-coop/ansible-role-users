@@ -64,7 +64,7 @@
           assert:
             that:
               - vhost.value.users_apache_allow_encoded_slashes == "NoDecode"
-          when: type_debug is regex('str|AnsibleUnicode|AnsibleUnsafeText$')
+          when: vhost.value.users_apache_allow_encoded_slashes | type_debug is regex('str|AnsibleUnicode|AnsibleUnsafeText$')
 
       when: vhost.value.users_apache_allow_encoded_slashes is defined
 
