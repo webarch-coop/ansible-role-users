@@ -103,13 +103,13 @@
     - name: "Check that flarum_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.flarum_autoupdate ) or ( not vhost.value.wordpress_notify )
+          - ( vhost.value.flarum_autoupdate | bool ) or ( not vhost.value.flarum_autoupdate | bool )
       when: vhost.value.flarum_autoupdate is defined
 
     - name: "Check that flarum_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
-          - ( vhost.value.flarum_notify ) or ( not vhost.value.wordpress_notify )
+          - ( vhost.value.flarum_notify | bool ) or ( not vhost.value.flarum_notify | bool )
       when: vhost.value.flarum_notify is defined
 
     - name: "Check that flarum_mail_from is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
