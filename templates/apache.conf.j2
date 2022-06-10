@@ -721,11 +721,13 @@
   {%- endif %}
   CustomLog /var/log/apache2/{{ user.key }}_access.log bandwidth
   LogLevel error
-  ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
-  CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combined
-  {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-  ScriptLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.cgi.log
-  {%- endif %}
+  <IfFile {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs>
+    ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
+    CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combined
+    {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    ScriptLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.cgi.log
+    {%- endif %}
+  </IfFile>
 </VirtualHost>
 {%- endfor %}
 
