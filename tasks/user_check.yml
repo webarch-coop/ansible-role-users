@@ -17,7 +17,7 @@
       assert:
         that:
           - user.value.users_state | length
-          - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" )
+          - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" ) or ( user.value.users_state == "ignore" 
         quiet: true
       when: user.value.users_state is defined
 

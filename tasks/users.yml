@@ -48,8 +48,10 @@
 
         - name: Run checks on users
           include_tasks: user_check.yml
-          when:
-            - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
+          when: >
+            ( user.value.users_state is not defined ) or
+            ( user.value.users_state != "absent" ) or
+            ( user.value.users_state != "ignore" )
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
