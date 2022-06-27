@@ -154,7 +154,7 @@
         - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
           set_fact:
             users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
-          wheb: user.value.users_state != "ignore"
+          when: user.value.users_state != "ignore"
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
