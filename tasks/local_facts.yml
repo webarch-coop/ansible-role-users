@@ -58,7 +58,5 @@
         verbosity: 2
 
   tags:
-    - nodejs
-    - nodejs_apt
-    - nodejs_apt_local_facts
+    - users
 ...
