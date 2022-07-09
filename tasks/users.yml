@@ -222,7 +222,8 @@
           include_tasks: user_absent.yml
           when:
             - ( user.key is defined ) and ( user.key in users_update )
-            - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" ) and ( user.value.users_state != "ignore" )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
+            - ( user.value.users_state != "ignore" ) and ( user.value.users_state != "present" )
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
@@ -232,7 +233,8 @@
           include_tasks: user_check.yml
           when:
             - ( user.key is defined ) and ( user.key in users_update )
-            - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+            - ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
@@ -242,7 +244,8 @@
           include_tasks: user_present.yml
           when:
             - ( user.key is defined ) and ( user.key in users_update )
-            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" ) or ( user.value.users_state != "ignore" )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
+            - ( user.value.users_state != "ignore" ) and ( user.value.users_state != "absent" )
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
@@ -255,7 +258,7 @@
               set_fact:
                 users_in_phpfpm_and_chroot_group: "{{ users_in_phpfpm_and_chroot_group | default('') }} {{ user.key }}"
               when:
-                - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" ) or ( user.value.users_state != "ignore" )
+                - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
                 - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
                 - ( "phpfpm" in user.value.users_groups ) and ( "chroot" in user.value.users_groups )
                 - user.key != "root"
