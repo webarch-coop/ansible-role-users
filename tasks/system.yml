@@ -2,6 +2,13 @@
 - name: System checks
   block:
 
+    - name: Include local fact tasks if variables are not defined
+      ansible.builtin.include_tasks: local_facts.yml
+      when: >
+        ( ansible_local.dpkg.arch is not defined ) or
+        ( ansible_local.gpg.version is not defined ) or
+        ( ansible_local.bash.path is not defined )
+
     - name: Check which shells are present
       slurp:
         src: /etc/shells
@@ -23,16 +30,9 @@
         loop_var: shell
         label: "{{ shell }}"
 
-    - name: Variable set for path to last Bash shell
+    - name: Set a fact for the path to Bash
       set_fact:
-        users_bash: "{{ shell }}"
-      when:
-        - users_bash is not defined
-        - shell is regex('\/bash$')
-      loop: "{{ users_shells }}"
-      loop_control:
-        loop_var: shell
-        label: "{{ shell }}"
+        users_bash: "{{ ansible_local.bash.path }}"
 
     - name: Print available shells and the path for Bash
       debug:
