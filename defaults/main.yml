@@ -89,6 +89,7 @@ users_private_dirs:
   - .mutt
   - .npm
   - .ssh
+  - .terminfo
   - .vim
   - .wp-cli
   - .yarn
