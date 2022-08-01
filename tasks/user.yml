@@ -50,6 +50,7 @@
     skeleton: "{{ user.value.users_skel | default('') }}"
     generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
     system: "{{ user.value.users_system | default('no', false) }}"
+  when: user.key != "root"
   tags:
     - users
 
