@@ -93,6 +93,10 @@ php_admin_value[mysqli.local_infile_directory] = {{ user.value.users_home | defa
 php_admin_value[mysqli.allow_local_infile] = 0
 {% endif %}
 
+{% if user.value.users_phpfpm_output_buffering is defined %}
+php_admin_value[output_buffering = {{ user.value.users_phpfpm_output_buffering }}
+{% endif %}
+
 {% if users_apache_chroot is defined and users_apache_chroot %}
 php_admin_value[session.save_path] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
 php_admin_value[upload_tmp_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp

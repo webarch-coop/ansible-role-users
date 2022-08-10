@@ -86,6 +86,7 @@
           template:
             src: forward.j2
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
+            mode: 0640
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
           when: ( users_forward ) and ( user.value.users_email is defined and user.value.users_email | length > 0 )

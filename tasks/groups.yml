@@ -1,5 +1,6 @@
 ---
-- debug:
+- name: Debug group
+  debug:
     msg: "user={{ user }} group={{ group }}"
   loop: "{{ user.value.users_groups }}"
   loop_control:

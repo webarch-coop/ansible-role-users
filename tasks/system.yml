@@ -46,7 +46,8 @@
         database: group
         split: ':'
 
-    - debug:
+    - name: Debug getent_group
+      debug:
         var: getent_group
         verbosity: 2
 
@@ -55,7 +56,8 @@
         database: passwd
         split: ':'
 
-    - debug:
+    - name: Debug getent_passwd
+      debug:
         var: getent_passwd
         verbosity: 2
 
@@ -176,6 +178,7 @@
           file:
             path: "{{ quota_dir }}/quota_user.csv"
             state: touch
+            mode: 0600
             access_time: preserve
             modification_time: preserve
           check_mode: false
