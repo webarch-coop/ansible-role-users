@@ -94,7 +94,7 @@ php_admin_value[mysqli.allow_local_infile] = 0
 {% endif %}
 
 {% if user.value.users_phpfpm_output_buffering is defined %}
-php_admin_value[output_buffering = {{ user.value.users_phpfpm_output_buffering }}
+php_admin_value[output_buffering] = {{ user.value.users_phpfpm_output_buffering }}
 {% endif %}
 
 {% if users_apache_chroot is defined and users_apache_chroot %}
