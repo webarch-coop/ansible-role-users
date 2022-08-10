@@ -41,6 +41,10 @@ env[TEMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }
 chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
 {% endif %}
 
+{% if user.value.users_phpfpm_output_buffering is defined %}
+php_admin_value[output_buffering] = {% if user.value.users_phpfpm_output_buffering == 0 %}Off{% else %}{ user.value.users_phpfpm_output_buffering }}{% endif %}
+{% endif %}
+
 ; PHP settings passed with php_value or php_flag will overwrite php.ini values
 ; but defining disable_functions or disable_classes will not overwrite
 ; previously defined php.ini values, but will append the new value instead. 
@@ -91,10 +95,6 @@ php_admin_value[mysqli.local_infile_directory] = {{ user.value.users_home | defa
 {% endif %}
 {% else %}
 php_admin_value[mysqli.allow_local_infile] = 0
-{% endif %}
-
-{% if user.value.users_phpfpm_output_buffering is defined %}
-php_admin_value[output_buffering] = {{ user.value.users_phpfpm_output_buffering }}
 {% endif %}
 
 {% if users_apache_chroot is defined and users_apache_chroot %}
