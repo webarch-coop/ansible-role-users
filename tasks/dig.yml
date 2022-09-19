@@ -25,10 +25,18 @@
         users_host_ipv4s: "{{ [ users_host_ipv4s | default(None) ] + [ users_ipv4 ] }}"
       when:
         - ansible_version.full is version('2.13.0', '>=')
+        - users_host_ipv4s | length > 0
         - users_ipv4 is regex('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')
       loop: "{{ users_host_ipv4.stdout_lines }}"
       loop_control:
         loop_var: users_ipv4
+
+    - name: Make the users_ipv4_hosts equal users_host_ipv4 for Ansible >= 2.13
+      set_fact:
+        users_host_ipv4s: "{{ users_host_ipv4.stdout_lines | list }}"
+      when:
+        - ansible_version.full is version('2.13.0', '>=')
+        - users_host_ipv4s | length == 0
 
     - name: Debug users_host_ipv4s
       debug:
