@@ -494,7 +494,10 @@
         nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
+        # For Ansible < 2.13
+        # nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
+        # For Ansible >= 2.13
+        nextcloud_trusted_hosts: "{{ [ vhost.value.users_apache_server_aliases | default(None) ] + [ vhost.value.users_apache_server_name ] }}"
         nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
         nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
         nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
@@ -541,7 +544,10 @@
         nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
+        # For Ansible < 2.13
+        # nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
+        # For Ansible >= 2.13
+        nextcloud_trusted_hosts: "{{ [ vhost.value.users_apache_server_aliases | default(None) ] + [ vhost.value.users_apache_server_name ] }}"
         nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
         nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
         nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
