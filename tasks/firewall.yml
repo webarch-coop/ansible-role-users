@@ -32,7 +32,7 @@
           loop_control:
             loop_var: host
 
-        - name: Set a fact for the IPv$ addresses of the Munin servers
+        - name: Set a fact for the IPv4 addresses of the Munin servers
           set_fact:
             munin_servers_ipv4s: "{{ users_host_ipv4s }}"
 
