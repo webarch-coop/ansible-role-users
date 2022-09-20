@@ -21,10 +21,23 @@
         users_shells:
           - /usr/sbin/nologin
 
-    - name: Array set for available shells
+    - name: Array set for available shells for Ansible < 2.13
       set_fact:
         users_shells: "{{ users_shells }} + [ '{{ shell }}' ]"
-      when: ( shell is not regex('^#') ) and ( shell | length > 0 )
+      when:
+        - ( ansible_version.full is version('2.13.0', '<') )
+        - ( shell is not regex('^#') ) and ( shell | length > 0 )
+      loop: "{{ ( users_shells_b64encoded['content'] | b64decode ).split('\n') | list }}"
+      loop_control:
+        loop_var: shell
+        label: "{{ shell }}"
+
+    - name: Array set for available shells for Ansible >= 2.13
+      set_fact:
+        users_shells: "{{ users_shells | default([]) + [ {{ shell }} ] }}"
+      when:
+        - ( ansible_version.full is version('2.13.0', '>=') )
+        - ( shell is not regex('^#') ) and ( shell | length > 0 )
       loop: "{{ ( users_shells_b64encoded['content'] | b64decode ).split('\n') | list }}"
       loop_control:
         loop_var: shell

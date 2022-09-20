@@ -14,10 +14,21 @@
   tags:
     - users
 
-- name: "{{ user.key }} needs adding"
+- name: "{{ user.key }} needs adding for Ansible < 2.13"
   set_fact:
     users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
-  when: not users_current_state.stat.exists
+  when:
+    - ansible_version.full is version('2.13.0', '<')
+    - not users_current_state.stat.exists | bool
+  tags:
+    - users
+
+- name: "{{ user.key }} needs adding for Ansible >= 2.13"
+  set_fact:
+    users_update: "{{ users_update | default([]) + [ {{ user.key }} ] }}"
+  when:
+    - ansible_version.full is version('2.13.0', '>=')
+    - not users_current_state.stat.exists | bool
   tags:
     - users
 
@@ -29,11 +40,22 @@
   tags:
     - users
 
-- name: "{{ user.key }} needs updating"
+- name: "{{ user.key }} needs updating for Ansible < 2.13"
   set_fact:
     users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
   when:
-    - users_current_state.stat.exists
+    - ansible_version.full is version('2.13.0', '<')
+    - users_current_state.stat.exists | bool
+    - users_current_state.stat.checksum != users_proposed_state.stat.checksum
+  tags:
+    - users
+
+- name: "{{ user.key }} needs updating for Ansible >= 2.13"
+  set_fact:
+    users_update: "{{ users_update | default([]) + [ {{ user.key }} ] }}"
+  when:
+    - ansible_version.full is version('2.13.0', '>=')
+    - users_current_state.stat.exists | bool
     - users_current_state.stat.checksum != users_proposed_state.stat.checksum
   tags:
     - users

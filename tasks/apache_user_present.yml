@@ -382,7 +382,7 @@
         - ( vhost.value.users_cms == "wordpress" )
         - ( users_matomo is not defined ) or ( not users_matomo )
 
-    - name: "Include Drupal role for {{ user.key }}"
+    - name: "Include Drupal role for {{ user.key }} for Ansible < 2.13"
       include_role:
         name: drupal
       vars:
@@ -413,7 +413,44 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
-      when: ( vhost.value.users_cms == "drupal" )
+      when:
+        - ( ansible_version.full is version('2.13.0', '<') )
+        - ( vhost.value.users_cms == "drupal" )
+
+    - name: "Include Drupal role for {{ user.key }} for Ansible >= 2.13"
+      include_role:
+        name: drupal
+      vars:
+        drupal_user: "{{ user.key }}"
+        drupal_group: "{{ user.value.users_group | default(user.key) }}"
+        drupal_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+        drupal_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        drupal_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+        drupal_docroot_mode: "0750"
+        drupal_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [ {{ vhost.value.users_apache_server_name }} ] }}"
+        drupal_url: "{{ vhost.value.drupal_url | default('https://' + vhost.value.users_apache_server_name) }}"
+        drupal_title: "{{ vhost.value.drupal_title | default(vhost.value.users_apache_server_name) }}"
+        drupal_locale: "{{ vhost.value.drupal_locale | default('en') }}"
+        drupal_dbname: "{% if vhost.value.drupal_dbname is defined %}{{ vhost.value.drupal_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+        drupal_dbuser: "{{ vhost.value.drupal_dbuser | default(user.key) }}"
+        drupal_dbpass: "{{ users_mariadb_password }}"
+        drupal_dbprefix: "{{ vhost.value.drupal_dbprefix | default('') }}"
+        drupal_admin_user: "{{ vhost.value.drupal_admin_user | default(user.key) }}"
+        drupal_admin_email: "{{ vhost.value.drupal_admin_email | default(user.value.users_email) }}"
+        drupal_autoupdate: "{{ vhost.value.drupal_autoupdate | default(false) | bool }}"
+        drupal_notify: "{{ vhost.value.drupal_notify | default(true) | bool }}"
+        drupal_notify_from: "{{ users_notify_from }}"
+        drupal_notify_reply_to: "{{ users_notify_reply_to }}"
+        drupal_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+        drupal_notify_headers: "{{ users_notify_headers }}"
+        drupal_notify_signature: "{{ users_notify_signature }}"
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+      when:
+        - ( ansible_version.full is version('2.13.0', '>=') )
+        - ( vhost.value.users_cms == "drupal" )
 
     - name: "Include Kimai role for {{ user.key }}"
       include_role:
@@ -579,7 +616,7 @@
         - ( vhost.value.users_cms == "nextcloud" )
         - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
 
-    - name: "Include Flarum role for {{ user.key }}"
+    - name: "Include Flarum role for {{ user.key }} for Ansible < 2.13"
       include_role:
         name: flarum
       vars:
@@ -614,7 +651,48 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
-      when: ( vhost.value.users_cms == "flarum" )
+      when:
+        - ( ansible_version.full is version('2.13.0', '<') )
+        - ( vhost.value.users_cms == "flarum" )
+
+    - name: "Include Flarum role for {{ user.key }} for Ansible >= 2.13"
+      include_role:
+        name: flarum
+      vars:
+        flarum_user: "{{ user.key }}"
+        flarum_group: "{{ user.value.users_group | default(user.key) }}"
+        flarum_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+        flarum_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        flarum_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+        flarum_version: "{{ vhost.value.flarum_version }}"
+        flarum_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [ {{ vhost.value.users_apache_server_name }} ] }}"
+        flarum_url: "{{ vhost.value.flarum_url | default('https://' + vhost.value.users_apache_server_name) }}"
+        flarum_title: "{{ vhost.value.flarum_title | default(vhost.value.users_apache_server_name) }}"
+        flarum_description: "{{ vhost.value.flarum_description | default('A web based discussion board') }}"
+        flarum_welcome_title: "{{ vhost.value.flarum_welcome_title | default('Flarum discussion board') }}"
+        flarum_welcome_message: "{{ vhost.value.flarum_welcome_message | default('A forum hosted by Webarchitects Co-operative') }}"
+        flarum_locale: "{{ vhost.value.flarum_locale | default('en') }}"
+        flarum_dbname: "{% if vhost.value.flarum_dbname is defined %}{{ vhost.value.flarum_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+        flarum_dbuser: "{{ vhost.value.flarum_dbuser | default(user.key) }}"
+        flarum_dbpass: "{{ users_mariadb_password }}"
+        flarum_dbprefix: "{{ vhost.value.flarum_dbprefix | default('') }}"
+        flarum_admin_user: "{{ vhost.value.flarum_admin_user | default(user.key) }}"
+        flarum_admin_email: "{{ vhost.value.flarum_admin_email | default(user.value.users_email) }}"
+        flarum_autoupdate: "{{ vhost.value.flarum_autoupdate | default(false) }}"
+        flarum_mail_from: "{{ vhost.value.flarum_mail_from | default(user.key + '@' + inventory_hostname) }}"
+        flarum_notify: "{{ vhost.value.flarum_notify | default(true) | bool }}"
+        flarum_notify_from: "{{ users_notify_from }}"
+        flarum_notify_reply_to: "{{ users_notify_reply_to }}"
+        flarum_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+        flarum_notify_headers: "{{ users_notify_headers }}"
+        flarum_notify_signature: "{{ users_notify_signature }}"
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+      when:
+        - ( ansible_version.full is version('2.13.0', '>=') )
+        - ( vhost.value.users_cms == "flarum" )
 
     - name: "Include MediaWiki role for {{ user.key }} with Matomo configuration"
       include_role:

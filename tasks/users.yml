@@ -153,10 +153,23 @@
     - name: Set users to update to all
       block:
 
-        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
+        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all on Ansible < 2.13
           set_fact:
             users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
-          when: user.value.users_state != "ignore"
+          when:
+            - ansible_version.full is version('2.13.0', '<')
+            - user.value.users_state != "ignore"
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all on Ansible >= 2.13
+          set_fact:
+            users_update: "{{ users_update | default([]) + [ user.key ] }}"
+          when:
+            - ansible_version.full is version('2.13.0', '>=')
+            - user.value.users_state != "ignore"
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
