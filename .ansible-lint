@@ -1,5 +1,9 @@
 ---
 # https://docs.ansible.com/ansible-lint/rules/default_rules.html
+warn_list:
+  - jinja[invalid]
+  - schema[meta]
+  - schema[tasks]
 skip_list:
   # All names should start with an uppercase letter
   - name[casing]

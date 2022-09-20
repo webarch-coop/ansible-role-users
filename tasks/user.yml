@@ -1,13 +1,13 @@
 ---
 - name: "Set a fact for the {{ user.key }} users own group as a list"
-  set_fact:
+  ansible.builtin.set_fact:
     users_own_group:
       - "{{ user.key }}"
   tags:
     - users
 
 - name: "Set a fact for the {{ user.key }} users groups which includes the users own group, as a list"
-  set_fact:
+  ansible.builtin.set_fact:
     users_all_groups:
       - "{{ user.value.users_groups | default(omit) + users_own_group }}"
   when: ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
@@ -15,7 +15,7 @@
     - users
 
 - name: "Print debugging info for {{ user.key }}"
-  debug:
+  ansible.builtin.debug:
     msg:
       - "name: {{ user.key }}"
       - "group: {{ user.value.users_group | default(user.key) }}"
@@ -40,7 +40,7 @@
 
 # TODO Check that the user doesn't already exist in getent_passwd
 - name: "User account for {{ user.key }} present"
-  user:
+  ansible.builtin.user:
     name: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
     groups: "{{ users_all_groups | default([]) | join(',') or \ omit }}"
@@ -55,7 +55,7 @@
     - users
 
 - name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
-  file:
+  ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: directory
     mode: "{{ user.value.users_home_mode | default('0750') }}"
@@ -65,7 +65,7 @@
     - users
 
 - name: "Debug private directories present for {{ user.key }}"
-  debug:
+  ansible.builtin.debug:
     msg:
       - "path: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ dir }}"
       - "state: directory"
@@ -84,7 +84,7 @@
     label: "{{ dir }}"
 
 - name: "Private directories present for {{ user.key }}"
-  file:
+  ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ dir }}"
     state: directory
     mode: "{{ user.value.users_private_dirs_mode | default(users_private_dirs_mode) | default('0700') }}"
@@ -103,7 +103,7 @@
     - users
 
 - name: "Debug private files present for {{ user.key }}"
-  debug:
+  ansible.builtin.debug:
     msg:
       - "path: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file }}"
       - "state: touch"
@@ -122,7 +122,7 @@
     label: "{{ file }}"
 
 - name: "Private files present for {{ user.key }}"
-  file:
+  ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file }}"
     state: touch
     mode: "{{ user.value.users_private_files_mode | default(users_private_files_mode) | default('0700') }}"
@@ -141,13 +141,13 @@
     - users
 
 - name: "SSH public keys present for {{ user.key }}"
-  include_tasks: ssh.yml
+  ansible.builtin.include_tasks: ssh.yml
   when: ( user.value.users_ssh_public_keys is defined ) and ( user.value.users_ssh_public_keys != [] )
   tags:
     - users
 
 - name: "Generate SSH ECDSA keypair for {{ user.key }}"
-  command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "ansible-generated on {{ ansible_hostname }}"
+  ansible.builtin.command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "ansible-generated on {{ ansible_hostname }}"
   args:
     creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
   become: true
@@ -157,7 +157,7 @@
     - users
 
 - name: "Set default editor for {{ user.key }}"
-  copy:
+  ansible.builtin.copy:
     src: "files/{{ user.value.users_editor }}/selected_editor"
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.selected_editor"
     mode: "0644"
@@ -172,7 +172,7 @@
   block:
 
     - name: "~/.vimrc present for {{ user.key }}"
-      copy:
+      ansible.builtin.copy:
         src: "files/vim/vimrc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.vimrc"
         force: false
@@ -181,7 +181,7 @@
         group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: "vim set to be default editor for {{ user.key }}"
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
         regexp: '^export EDITOR'
         line: 'export EDITOR="vim"'
@@ -194,7 +194,7 @@
         - ( user.value.users_editor is defined ) and ( user.value.users_editor == "vim" )
 
     - name: "~/.nanorc present for {{ user.key }}"
-      copy:
+      ansible.builtin.copy:
         src: "files/nano/nanorc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.nanorc"
         force: false
@@ -203,7 +203,7 @@
         group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: "nano set to be default editor for {{ user.key }}"
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
         regexp: '^export EDITOR'
         line: 'export EDITOR="nano"'
@@ -221,7 +221,7 @@
     - users
 
 - name: ".gitconfig in place for {{ user.key }}"
-  template:
+  ansible.builtin.template:
     src: gitconfig.j2
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.gitconfig"
     mode: "0644"

@@ -3,7 +3,7 @@
   block:
 
     - name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
-      stat:
+      ansible.builtin.stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
       register: users_mycnf
 
@@ -11,12 +11,12 @@
       block:
 
         - name: "Generate a random password for {{ user.key }} MariaDB account as ~/.my.cnf doesn't exist"
-          command: "pwgen -n {{ 24 | random(14) }} 1"
+          ansible.builtin.command: "pwgen -n {{ 24 | random(14) }} 1"
           no_log: true
           register: users_mariadb_password_gen
 
         - name: "Set a fact for the mariadb_password for {{ user.key }}"
-          set_fact:
+          ansible.builtin.set_fact:
             users_mariadb_password: "{{ users_mariadb_password_gen.stdout | trim | quote }}"
           no_log: true
 
@@ -26,14 +26,14 @@
       block:
 
         - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
-          command: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client"
+          ansible.builtin.command: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client"
           changed_when: false
           check_mode: false
           register: users_my_print_defaults
           no_log: true
 
         - name: Set a fact for the mariadb_password
-          set_fact:
+          ansible.builtin.set_fact:
             users_mariadb_password: "{{ line | regex_replace('^--password=') | trim }}"
           when: line is regex('^--password=')
           loop: "{{ users_my_print_defaults.stdout_lines }}"
@@ -44,12 +44,12 @@
       when: users_mycnf.stat.exists
 
     - name: Fail when MariaDB password not set
-      fail:
+      ansible.builtin.fail:
         msg: "The mariadb_password appears not to be set"
       when: ( users_mariadb_password is not defined ) or ( users_mariadb_password | length == 0 )
 
     - name: "mariadb_password written to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
-      template:
+      ansible.builtin.template:
         src: my.cnf.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
         owner: "{{ user.key }}"
@@ -59,7 +59,7 @@
       no_log: true
 
     - name: "Alias mycli via ~/.bash_aliases to set the MariaDB user"
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_aliases"
         regexp: '^alias mycli='
         line: 'alias mycli="mycli -u {{ user.key }}"'
@@ -70,17 +70,17 @@
         group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: "The databases that {{ user.key }} has access to"
-      command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
+      ansible.builtin.command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
       changed_when: false
       check_mode: false
       register: users_mariadb_list
 
     - name: "Set a fact for the databases to delete for {{ user.key }}"
-      set_fact:
+      ansible.builtin.set_fact:
         users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(user.value.users_mariadb_databases) }}"
 
     - name: "Databases absent for {{ user.key }}"
-      mysql_db:
+      community.mysql.mysql_db:
         name: "{{ db }}"
         state: absent
         login_user: root
@@ -92,7 +92,7 @@
         label: "{{ db }}"
 
     - name: "Databases present for {{ user.key }}"
-      mysql_db:
+      community.mysql.mysql_db:
         name: "{{ db }}"
         state: present
         login_user: root
@@ -103,7 +103,7 @@
         label: "{{ db }}"
 
     - name: "mycli config file ~/.myclirc generated for {{ user.key }}"
-      template:
+      ansible.builtin.template:
         src: myclirc.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
         owner: "{{ user.key }}"
@@ -112,21 +112,21 @@
         force: true
 
     - name: "Set a variable for mysql_user db priv for {{ user.key }} using the default privileges"
-      set_fact:
+      ansible.builtin.set_fact:
         users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in users_mariadb_database_privileges %}{{ p }}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
       when: user.value.users_mariadb_database_privileges is not defined
 
     - name: "Set a variable for mysql_user db priv for {{ user.key }} when they have privileges defined"
-      set_fact:
+      ansible.builtin.set_fact:
         users_mariadb_priv: "{% if user.value.users_mariadb_databases[0] is defined %}{% for db in user.value.users_mariadb_databases %}{{ db }}.*:{% for p in user.value.users_mariadb_database_privileges %}{{ p }}{% if not loop.last %},{% endif %}{% endfor %}{% if not loop.last %}/{% endif %}{% endfor %}{% else %}*.*:USAGE{% endif %}"
       when: ( user.value.users_mariadb_database_privileges is defined ) and ( user.value.users_mariadb_database_privileges != [] )
 
     - name: "Print db priv for {{ user.key }}"
-      debug:
+      ansible.builtin.debug:
         var: users_mariadb_priv
 
     - name: "MariaDB {{ user.key }} user present"
-      mysql_user:
+      community.mysql.mysql_user:
         name: "{{ user.key }}"
         password: "{{ users_mariadb_password }}"
         priv: "{{ users_mariadb_priv }}"
@@ -137,7 +137,7 @@
       no_log: "{% if ansible_verbosity != 0 %}false{% else %}true{% endif %}"
 
     - name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
-      stat:
+      ansible.builtin.stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd"
       register: users_notify_mariadb_passwd_file
       when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd )
@@ -146,7 +146,7 @@
       block:
 
         - name: "Password notification email sent to {{ user.value.users_email }}"
-          mail:
+          ansible.builtin.mail:
             from: "{{ users_notify_from | default('Webarchitects') | quote }} <root@{{ inventory_hostname }}>"
             to: "{{ user.value.users_name | default(user.key) | quote }} <{{ user.value.users_email }}>"
             subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ user.key }} on {{ inventory_hostname }}"
@@ -159,7 +159,7 @@
           when: ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
 
         - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
-          lineinfile:
+          ansible.builtin.lineinfile:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd"
             line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
             create: true
@@ -172,7 +172,7 @@
       when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd ) and ( not users_notify_mariadb_passwd_file.stat.exists )
 
     - name: Directory present for database backups
-      file:
+      ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private/mysql-backups"
         state: directory
         owner: "{{ user.key }}"
