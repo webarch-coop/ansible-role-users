@@ -142,7 +142,8 @@
       register: users_notify_mariadb_passwd_file
       when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd )
 
-    - block:
+    - name: Notify password
+      block:
 
         - name: "Password notification email sent to {{ user.value.users_email }}"
           mail:

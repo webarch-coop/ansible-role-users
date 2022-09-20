@@ -34,7 +34,7 @@
 
     - name: Array set for available shells for Ansible >= 2.13
       set_fact:
-        users_shells: "{{ users_shells | default([]) + [ {{ shell }} ] }}"
+        users_shells: "{{ users_shells | default([]) + [ shell ] }}"
       when:
         - ( ansible_version.full is version('2.13.0', '>=') )
         - ( shell is not regex('^#') ) and ( shell | length > 0 )

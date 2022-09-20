@@ -6,7 +6,8 @@
   tags:
     - users
 
-- block:
+- name: Notify password
+  block:
 
     - name: "Random passwd for {{ user.key }} generated"
       command: "pwgen -n {{ 24 | random(14) }} 1"

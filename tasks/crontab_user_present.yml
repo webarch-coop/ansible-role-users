@@ -1,5 +1,5 @@
 ---
-- name: "Cron jobs for {{ user.key }}"
+- name: Cron jobs
   block:
 
     - name: Check if the ~/bin directory exists

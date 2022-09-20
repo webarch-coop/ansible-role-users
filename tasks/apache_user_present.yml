@@ -84,7 +84,7 @@
 
     - name: "Set fact for subjectAltNames for {{ user.key }}"
       set_fact:
-        subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases|default([]) %}{{ subject_alt_names | list }}"
+        subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases | default([]) %}{{ subject_alt_names | list }}"
       check_mode: true
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
