@@ -3,6 +3,7 @@
 # ERROR! 'version' is not a valid attribute for a RoleMetadata
 # version: 2
 galaxy_info:
+  standalone: true
   role_name: users
   namespace: chriscroome
   author: Chris Croome
