@@ -1,4 +1,5 @@
 ---
+version: 2
 galaxy_info:
   role_name: users
   namespace: chriscroome
