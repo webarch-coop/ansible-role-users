@@ -25,7 +25,7 @@
         password: "{{ users_passwd_hash.stdout }}"
 
     - name: "Password notification email sent to {{ user.value.users_email }}"
-      ansible.builtin.mail:
+      community.general.mail:
         from: "{{ users_notify_from | default('Webarchitects') | quote }} <root@{{ inventory_hostname }}>"
         to: "{{ user.value.users_name | default(user.key) | quote }} <{{ user.value.users_email }}>"
         subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] SFTP / SSH Password for {{ user.key }} on {{ inventory_hostname }}"

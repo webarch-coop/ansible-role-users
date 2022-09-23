@@ -6,6 +6,8 @@
 
     - name: "Check that the user {{ member }} exists"
       command: "getent passwd {{ member }}"
+      changed_when: false
+      check_mode: false
       register: users_user_check
 
     - name: "Users that have membership of {{ user.value.users_group | default(user.key) }} group"
