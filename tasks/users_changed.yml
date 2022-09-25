@@ -26,9 +26,10 @@
   tags:
     - users
 
-- name: Set an empty users_update arrays
+- name: Set an empty users_update array for Ansible < 2.13
   set_fact:
     users_update: []
+  when: ansible_version.full is version('2.13.0', '<')
   tags:
     - users
 
