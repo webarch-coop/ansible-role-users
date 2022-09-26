@@ -8,7 +8,6 @@
           - bash-completion
           - bc
           - bind9-dnsutils
-          - bsd-mailx
           - curl
           - mutt
           - python3-dnspython
