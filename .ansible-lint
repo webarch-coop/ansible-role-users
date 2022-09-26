@@ -1,10 +1,11 @@
 ---
 # https://docs.ansible.com/ansible-lint/rules/default_rules.html
-warn_list:
+skip_list:
   - jinja[invalid]
+  - key-order[task]
+  - name[template]
   - schema[meta]
   - schema[tasks]
-skip_list:
   # All names should start with an uppercase letter
   - name[casing]
   # Jinja2 variables and filters should have spaces before and after

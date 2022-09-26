@@ -7,44 +7,52 @@
   block:
 
     - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d directory present"
-      file:
+      ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
         state: directory
         mode: 0700
         owner: "{{ user.key }}"
         group: "{{ user.value.users_home_group | default(user.key) }}"
+      register: user_ssh_authorized_keys_d
 
-    - name: "SSH public keys downloaded for {{ user.key }}"
-      get_url:
-        url: "{{ key_url }}"
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
-        mode: 0600
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-        force: true
-      loop: "{{ user.value.users_ssh_public_keys }}"
-      loop_control:
-        loop_var: key_url
-        index_var: key_idex
-        label: "{{ key_url }}"
+    - name: SSH keys present when ~/.ssh/authorized_keys.d exists
+      block:
 
-    - name: "Assemble all the ~/authorized_keys_d/authorized_keys_* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
-      assemble:
-        src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
-        remote_src: true
-        mode: 0600
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-        validate: ssh-keygen -lf %s
+        - name: "SSH public keys downloaded for {{ user.key }}"
+          ansible.builtin.get_url:
+            url: "{{ key_url }}"
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
+            mode: 0600
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
+            force: true
+          loop: "{{ user.value.users_ssh_public_keys }}"
+          loop_control:
+            loop_var: key_url
+            index_var: key_idex
+            label: "{{ key_url }}"
 
-    - name: "SSH README.md in place for {{ user.key }}"
-      template:
-        src: SSH_README.md.j2
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
-        mode: 0600
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
+        - name: "Assemble all the ~/authorized_keys_d/authorized_keys_* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
+          ansible.builtin.assemble:
+            src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
+            remote_src: true
+            mode: 0600
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
+            validate: ssh-keygen -lf %s
+
+        - name: "SSH README.md in place for {{ user.key }}"
+          ansible.builtin.template:
+            src: SSH_README.md.j2
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
+            mode: 0600
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
+
+      when:
+        - user_ssh_authorized_keys_d.state is defined
+        - user_ssh_authorized_keys_d.state == "directory"
 
   tags:
     - users
