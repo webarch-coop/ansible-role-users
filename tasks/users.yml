@@ -9,6 +9,7 @@
           - bc
           - bind9-dnsutils
           - curl
+          - jq
           - mutt
           - python3-dnspython
           - python3-passlib
