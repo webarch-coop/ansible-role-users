@@ -8,7 +8,7 @@
 # the users_update_groups array is defined then only users in these groups will
 # be updated. If it is set to "check" then the users: YAML is checked only.
 users_update_strategy: changed
-# Define users_chroot to true for members of the chroot group to be chrooted
+# Define users_cusers_chroot hroot to true for members of the chroot group to be chrooted
 users_chroot: false
 # users_chroot_dir is the path to the rw chroot files
 users_chroot_dir: "{{ chroot_dir | default('/chroot') }}"
