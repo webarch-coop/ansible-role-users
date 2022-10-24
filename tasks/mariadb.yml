@@ -6,13 +6,13 @@
       block:
 
         - name: "Read mysql entry from /etc/passwd"
-          command: "grep ^mysql: /etc/passwd"
+          ansible.builtin.command: "grep ^mysql: /etc/passwd"
           check_mode: false
           changed_when: false
           register: users_etc_passwd
 
         - name: "mysql present in {{ users_chroot_dir }}/etc/passwd"
-          lineinfile:
+          ansible.builtin.lineinfile:
             path: "{{ users_chroot_dir }}/etc/passwd"
             line: "{{ users_etc_passwd.stdout }}"
             state: present
@@ -21,13 +21,13 @@
             group: root
 
         - name: "Read mysql entry from /etc/group"
-          command: "grep ^mysql: /etc/group"
+          ansible.builtin.command: "grep ^mysql: /etc/group"
           check_mode: false
           changed_when: false
           register: users_etc_group
 
         - name: "mysql present in {{ users_chroot_dir }}/etc/group"
-          lineinfile:
+          ansible.builtin.lineinfile:
             path: "{{ users_chroot_dir }}/etc/group"
             line: "{{ users_etc_group.stdout }}"
             state: present

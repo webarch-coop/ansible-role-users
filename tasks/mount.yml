@@ -3,7 +3,7 @@
   block:
 
     - name: "Check if {{ users_mount_src }} exists"
-      stat:
+      ansible.builtin.stat:
         path: "{{ users_mount_src }}"
       check_mode: false
       changed_when: false
@@ -11,7 +11,7 @@
       failed_when: ( not users_mount_check.stat.exists ) or ( not users_mount_check.stat.isdir )
 
     - name: "Check if {{ users_mount_path }} exists"
-      stat:
+      ansible.builtin.stat:
         path: "{{ users_mount_path }}"
       check_mode: false
       changed_when: false
@@ -22,14 +22,14 @@
       block:
 
         - name: "Check if {{ users_mount_path }} is mounted"
-          command: "findmnt {{ users_mount_path }}"
+          ansible.builtin.command: "findmnt {{ users_mount_path }}"
           check_mode: false
           changed_when: false
           register: users_findmnt
           failed_when: users_findmnt.rc is not regex('^0|1$')
 
         - name: "Disk {{ users_mount_path }} mounted"
-          mount:
+          ansible.posix.mount:
             src: "{{ users_mount_src }}"
             path: "{{ users_mount_path }}"
             opts: "{{ users_mount_opts }}"

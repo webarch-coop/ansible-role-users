@@ -3,11 +3,11 @@
   block:
 
     - name: "The databases that {{ user.key }} has access to"
-      command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
+      ansible.builtin.command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
       register: users_mariadb_list
 
     - name: "Databases absent for {{ user.key }}"
-      mysql_db:
+      community.mysql.mysql_db:
         name: "{{ db }}"
         state: absent
         login_user: root
@@ -19,7 +19,7 @@
         label: "{{ db }}"
 
     - name: "MariaDB user {{ user.key }} absent"
-      mysql_user:
+      community.mysql.mysql_user:
         name: "{{ user.key }}"
         state: absent
         login_user: root

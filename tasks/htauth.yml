@@ -3,7 +3,7 @@
   block:
 
     - name: Debug vhost
-      debug:
+      ansible.builtin.debug:
         msg:
           - "user.value.users.home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
           - "vhost.key: {{ vhost.key }}"
@@ -11,7 +11,7 @@
         verbosity: 2
 
     - name: Debug users_apache_htauth_users loop
-      debug:
+      ansible.builtin.debug:
         msg:
           - "htauth.name: {{ htauth.name }}"
           - "htauth.password: {{ htauth.password | default(omit) }}"
@@ -23,7 +23,7 @@
         label: "{{ htauth.name }}"
 
     - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd directory present"
-      file:
+      ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd"
         state: directory
         owner: root
@@ -31,7 +31,7 @@
         mode: "0750"
 
     - name: "HTTP Authentication usernames and passwords for {{ vhost.value.users_apache_server_name }}"
-      htpasswd:
+      community.general.htpasswd:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.value.users_apache_server_name }}"
         name: "{{ htauth.name }}"
         password: "{{ htauth.password }}"

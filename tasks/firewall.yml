@@ -3,7 +3,7 @@
   block:
 
     - name: Firewall packages present
-      apt:
+      ansible.builtin.apt:
         pkg:
           - iptables
           - iptables-persistent
@@ -16,16 +16,16 @@
       block:
 
         - name: Set users_hosts to an empty array
-          set_fact:
+          ansible.builtin.set_fact:
             users_host_ipv4s: []
 
         - name: Debug groups.munin_servers
-          debug:
+          ansible.builtin.debug:
             var: groups.munin_servers
             verbosity: 2
 
         - name: Get Munin servers IP addresses
-          include: dig.yml
+          ansible.builtin.include_tasks: dig.yml
           vars:
             users_host: "{{ host }}"
           loop: "{{ groups.munin_servers }}"
@@ -33,11 +33,11 @@
             loop_var: host
 
         - name: Set a fact for the IPv4 addresses of the Munin servers
-          set_fact:
+          ansible.builtin.set_fact:
             munin_servers_ipv4s: "{{ users_host_ipv4s }}"
 
         - name: Debug munin_servers_ipv4s
-          debug:
+          ansible.builtin.debug:
             var: munin_servers_ipv4s
             verbosity: 2
 
@@ -47,16 +47,16 @@
       block:
 
         - name: Set users_hosts to an empty array
-          set_fact:
+          ansible.builtin.set_fact:
             users_host_ipv4s: []
 
         - name: Debug groups.icinga_master_nodes
-          debug:
+          ansible.builtin.debug:
             var: groups.icinga_master_nodes
             verbosity: 2
 
         - name: Get Icinga servers IP addresses
-          include: dig.yml
+          ansible.builtin.include_tasks: dig.yml
           vars:
             users_host: "{{ host }}"
           loop: "{{ groups.icinga_master_nodes }}"
@@ -64,11 +64,11 @@
             loop_var: host
 
         - name: Set a fact for the IPv$ addresses of the Icinga servers
-          set_fact:
+          ansible.builtin.set_fact:
             icinga_servers_ipv4s: "{{ users_host_ipv4s }}"
 
         - name: Debug icinga_servers_ipv4s
-          debug:
+          ansible.builtin.debug:
             var: icinga_servers_ipv4s
             verbosity: 2
 
@@ -76,7 +76,7 @@
 
 
     - name: IPv4 iptables rules in place
-      template:
+      ansible.builtin.template:
         src: rules.v4.j2
         dest: /etc/iptables/rules.v4
         mode: 0644
@@ -85,14 +85,14 @@
         backup: true
 
     - name: IPv4 iptables rules restored
-      shell: |
+      ansible.builtin.shell: |
         set -e -o pipefail
         iptables-restore < /etc/iptables/rules.v4
       args:
         executable: "{{ users_bash }}"
 
     - name: fail2ban restarted
-      service:
+      ansible.builtin.service:
         name: fail2ban
         state: restarted
 

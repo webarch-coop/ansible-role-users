@@ -3,36 +3,36 @@
   block:
 
     - name: "User groups present for {{ user.key }}"
-      include_tasks: groups.yml
+      ansible.builtin.include_tasks: groups.yml
       when:
         - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
 
     - name: "User group present for {{ user.key }}"
-      group:
+      ansible.builtin.group:
         name: "{{ user.key }}"
         state: present
 
     - name: "Users group members present for {{ user.key }}"
-      include: group_members.yml
+      ansible.builtin.include_tasks: group_members.yml
       when: ( user.value.users_group_members is defined ) and ( user.value.users_group_members != [] )
 
     - name: Get all groups
-      getent:
+      ansible.builtin.getent:
         database: group
         split: ':'
 
     - name: "User account present for {{ user.key }}"
-      include_tasks: user.yml
+      ansible.builtin.include_tasks: user.yml
 
     - name: "MariaDB accounts and databases created and passwords read or set for {{ user.key }}"
-      include_tasks: mariadb_user_present.yml
+      ansible.builtin.include_tasks: mariadb_user_present.yml
       when:
         - user.key != "root"
         - ( users_mariadb is defined ) and ( users_mariadb )
         - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
 
     - name: Debug quota settings
-      debug:
+      ansible.builtin.debug:
         msg:
           - "quota_dir: {{ quota_dir }}"
           - "users_quotaon: {{ users_quotaon }}"
@@ -44,7 +44,7 @@
         - user.value.users_quota is defined
 
     - name: "Quotas set for {{ user.key }}"
-      include_tasks: quota.yml
+      ansible.builtin.include_tasks: quota.yml
       when:
         - user.key != "root"
         - quota_dir is defined
@@ -53,7 +53,7 @@
         - user.value.users_quota | length > 0
 
     - name: "Set passwds and notify user {{ user.key }}"
-      include_tasks: notify_passwd.yml
+      ansible.builtin.include_tasks: notify_passwd.yml
       when:
         - user.key != "root"
         - user.value.users_notify_passwd is defined
@@ -62,7 +62,7 @@
         - user.value.users_email | length > 0
 
     - name: "Crontab tasks present for user {{ user.key }}"
-      include_tasks: crontab_user_present.yml
+      ansible.builtin.include_tasks: crontab_user_present.yml
       when:
         # - ( user.key != "root" )
         # - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
@@ -70,20 +70,20 @@
         - ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
 
     - name: "Crontab tasks absent for user {{ user.key }} as they have no email address"
-      include_tasks: crontab_user_absent.yml
+      ansible.builtin.include_tasks: crontab_user_absent.yml
       when: ( user.value.users_email is not defined ) or ( user.value.users_email | length == 0 )
 
     - name: "Create or remove a .forward file for {{ user.key }}"
       block:
 
         - name: "Email address for user absent so no .forward for {{ user.key }}"
-          file:
+          ansible.builtin.file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
             state: absent
           when: ( not users_forward ) or ( user.value.users_email is not defined or user.value.users_email | length == 0 )
 
         - name: "Email address in .forward for {{ user.key }}"
-          template:
+          ansible.builtin.template:
             src: forward.j2
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
             mode: 0640
@@ -94,7 +94,7 @@
       when: users_forward is defined
 
     - name: "Create a .muttrc for {{ user.key }} user if it doesn't exist"
-      template:
+      ansible.builtin.template:
         src: muttrc.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.muttrc"
         force: false
@@ -106,7 +106,7 @@
         - ( users_muttrc is defined ) and ( users_muttrc )
 
     - name: "Include the chroot present users tasks for {{ user.key }}"
-      include_tasks: chroot_user_present.yml
+      ansible.builtin.include_tasks: chroot_user_present.yml
       when:
         - ( user.key != "root" )
         - ( users_chroot is defined ) and ( users_chroot )
@@ -114,7 +114,7 @@
         - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
 
     - name: "Include the PHP FPM user present tasks for {{ user.key }}"
-      include_tasks: phpfpm_user_present.yml
+      ansible.builtin.include_tasks: phpfpm_user_present.yml
       when:
         - ( user.key != "root" )
         # This following check fails with object of type 'float' has no len()
@@ -125,7 +125,7 @@
       block:
 
         - name: Get all users
-          getent:
+          ansible.builtin.getent:
             database: passwd
             split: ':'
 
@@ -133,7 +133,7 @@
           block:
 
             - name: "Stat {{ matomo_html }}/config/config.ini.php"
-              stat:
+              ansible.builtin.stat:
                 path: "{{ matomo_html }}/config/config.ini.php"
               check_mode: false
               register: user_matomo_config
@@ -142,7 +142,7 @@
               block:
 
                 - name: Include Matomo version check tasks
-                  include_role:
+                  ansible.builtin.include_role:
                     name: matomo
                     tasks_from: check_version.yml
 
@@ -150,12 +150,12 @@
                   block:
 
                     - name: Include admin user authentication checks
-                      include_role:
+                      ansible.builtin.include_role:
                         name: matomo
                         tasks_from: check_auth.yml
 
                     - name: "Matomo accounts for user {{ user.key }} present"
-                      include_tasks: matomo_user_present.yml
+                      ansible.builtin.include_tasks: matomo_user_present.yml
                       when: ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
 
                   when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
@@ -173,17 +173,17 @@
         - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
 
     - name: "Include Apache config tasks present for user {{ user.key }}"
-      include_tasks: apache_user_present.yml
+      ansible.builtin.include_tasks: apache_user_present.yml
       when:
         - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
         - ( users_apache is defined ) and ( users_apache )
         - ( user.value.users_apache_virtual_hosts is defined )
 
     - name: "Include daily script tasks for {{ user.key }}"
-      include_tasks: user_scripts.yml
+      ansible.builtin.include_tasks: user_scripts.yml
 
     - name: "User state files updated for {{ user.key }}"
-      include_tasks: user_updated.yml
+      ansible.builtin.include_tasks: user_updated.yml
 
   tags:
     - users
