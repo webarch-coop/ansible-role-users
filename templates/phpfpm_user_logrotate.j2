@@ -17,8 +17,8 @@
         postrotate
                 /usr/lib/php/php{{ users_phpfpm_version }}-fpm-reopenlogs
                 chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
-                chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
                 chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
                 chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
+                chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
         endscript
 }

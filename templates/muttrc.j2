@@ -3,7 +3,7 @@ set tmpdir="~/tmp"
 set folder="~/.mutt"
 set postponed="~/.mutt/drafts"
 set record="+sent"
-# The sendmail configuration below can be commented and the three commented lines after it
+# The sendmail configuration below can be commented and the four commented lines after it
 # uncommented in order to send unauthenticated email via SMTP on localhost:25 via Mutt
 {% if user.value.users_phpfpm_sendmail_path is defined and user.value.users_phpfpm_sendmail_from is defined %}
 set sendmail="{{ user.value.users_phpfpm_sendmail_path }} -f{{ user.value.users_phpfpm_sendmail_from }}"
@@ -15,6 +15,7 @@ set sendmail="/usr/sbin/sendmail -f{{ user.value.users_phpfpm_sendmail_from }}"
 set sendmail="/usr/sbin/sendmail -f{{ user.key }}@{{ inventory_hostname }}"
 {% endif %}
 # set smtp_url=smtp://localhost:25/
+# ssl_verify_host=no
 # set ssl_starttls=no
 # set ssl_force_tls=no
 set hostname="{{ inventory_hostname }}"
