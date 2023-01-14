@@ -61,7 +61,7 @@
     tasks_from: letsencrypt
   vars:
     common_name: "{{ vhost.value.users_apache_server_name }}"
-    subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) }}"
+    subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | sort }}"
     reloadcmd: "service apache2 reload"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
@@ -72,39 +72,15 @@
     - users
 
 # One cert per user
-- name: "Let's Encrypt one cert per user tasks for {{ user.key }}"
-  block:
-
-    - name: "Set {{ user.key }}.{{ inventory_hostname }} for commonName and ensure subjectAltNames is an empty array"
-      set_fact:
-        common_name: "{{ user.key }}.{{ inventory_hostname }}"
-        subject_alt_names: []
-        reloadcmd: "service apache2 reload"
-      check_mode: true
-
-    - name: "Set fact for subjectAltNames for {{ user.key }}"
-      set_fact:
-        subject_alt_names: "{% set subject_alt_names = subject_alt_names + [ vhost.value.users_apache_server_name ] + vhost.value.users_apache_server_aliases | default([]) %}{{ subject_alt_names | list }}"
-      check_mode: true
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost.key }}"
-
-    - name: "Debug subjectAltNames and commonName for cert for {{ user.key }}"
-      debug:
-        msg:
-          - "subject_alt_names is set to: {{ subject_alt_names }}"
-          - "common_name is set to: {{ common_name }}"
-        verbosity: 1
-
-    - name: "Let's Encrypt cert role included for {{ user.key }}"
-      include_role:
-        name: acmesh
-        tasks_from: letsencrypt
-      when: not ansible_check_mode
-
-  when: ( users_cert is defined ) and ( users_cert == 'user' )
+- name: "Let's Encrypt cert per user role included for {{ user.key }}"
+  include_role:
+    name: acmesh
+    tasks_from: letsencrypt
+  vars:
+    common_name: "{{ user.key }}.{{ inventory_hostname }}"
+    subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | sort }}"
+    reloadcmd: "service apache2 reload"
+  when: ( users_cert is defined ) and ( users_cert == 'user' ) and ( not ansible_check_mode )
   tags:
     - users
 
