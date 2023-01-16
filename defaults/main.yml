@@ -154,7 +154,7 @@ users_private_files:
     mode: "0600"
     state: touch
   - path: .selected_editor
-    mode: "0640"
+    mode: "0600"
     state: touch
   - path: .ssh
     mode: "0700"

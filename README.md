@@ -635,9 +635,21 @@ Apache ProxyPass documentation](https://httpd.apache.org/docs/2.4/mod/mod_proxy.
         users_apache_locations:
           - location: /push/
             proxy_pass: http://127.0.0.1:7867/
-            proxy_pass_reverse: http://127.0.0.1:7867/
+            reverse: true
           - location: /push/ws
             proxy_pass: ws://127.0.0.1:7867/ws
+```
+
+Results in:
+
+```apache
+  <Location "/push/" >
+    ProxyPass "http://127.0.0.1:7867/"
+    ProxyPassReverse "http://127.0.0.1:7867/
+  </Location>
+  <Location "/push/ws" >
+    ProxyPass "ws://127.0.0.1:7867/ws"
+  </Location>
 ```
 
 ### Directories
