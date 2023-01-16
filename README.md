@@ -628,6 +628,18 @@ An `Alias` can also be used in a `Location`:
             alias: /home/foo/sites/www/staticfiles
 ```
 
+And `ProxyPass` and `ProxyPassReverse` can be used in a `Location`, see [the
+Apache ProxyPass documentation](https://httpd.apache.org/docs/2.4/mod/mod_proxy.html#proxypass):
+
+```yml
+        users_apache_locations:
+          - location: /push/
+            proxy_pass: http://127.0.0.1:7867/
+            proxy_pass_reverse: http://127.0.0.1:7867/
+          - location: /push/ws
+            proxy_pass: ws://127.0.0.1:7867/ws
+```
+
 ### Directories
 
 The `users_apache_directories` variable can be used at a `VirtualHost` level to

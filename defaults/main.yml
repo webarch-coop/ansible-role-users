@@ -75,49 +75,114 @@ users_cron: false
 # the users_basedir variable to be a partition mounted with quota options
 users_quotaon: false
 users_state_dir: /root/users
-users_private_dirs:
-  - .ansible
-  - .cache
-  - .composer
-  - .config
-  - .console
-  - .drush
-  - .git
-  - .gnupg
-  - .local
-  - .mysql
-  - .mutt
-  - .npm
-  - .ssh
-  - .terminfo
-  - .vim
-  - .wp-cli
-  - .yarn
-  - bin
-  - private
-  - tmp
-users_private_dirs_mode: "0700"
-# users_private_dirs_group can be set here but it isn't clear what that might be good for
-# however setting it at a user level does have some uses cases like when one user needs access to
-# another users MySQL backups however chowning the ~/.ssh group might break SSH
+# users_private_files, the owner and group defaults to the user and the users
+# group unless specified.
 users_private_files:
-  - .bash_history
-  - .bash_logout
-  - .bashrc
-  - .mycli-audit.log
-  - .mycli-history
-  - .mycli.log
-  - .myclirc
-  - .mysql/history
-  - .nanorc
-  - .profile
-  - .selected_editor
-  - .vimrc
-  - .wp-cli/config.yml
-  - .yarnrc
-users_private_files_mode: "0600"
-# users_private_files_group can be set here but it isn't clear what that might be good for
-# however setting it at a user level might have some use cases
+  - path: .ansible
+    mode: "0700"
+    state: directory
+  - path: .bash_aliases
+    mode: "0600"
+    state: touch
+  - path: .bash_history
+    mode: "0600"
+    state: touch
+  - path: .bash_logout
+    mode: "0600"
+    state: touch
+  - path: .bashrc
+    mode: "0600"
+    state: touch
+  - path: bin
+    mode: "0700"
+    state: directory
+  - path: .cache
+    mode: "0700"
+    state: directory
+  - path: .composer
+    mode: "0700"
+    state: directory
+  - path: .console
+    mode: "0700"
+    state: directory
+  - path: .config
+    mode: "0700"
+    state: directory
+  - path: .drush
+    mode: "0700"
+    state: directory
+  - path: .git
+    mode: "0700"
+    state: directory
+  - path: .gnupg
+    mode: "0700"
+    state: directory
+  - path: .local
+    mode: "0700"
+    state: directory
+  - path: .mycli-audit.log
+    mode: "0600"
+    state: touch
+  - path: .mycli-history
+    mode: "0600"
+    state: touch
+  - path: .mycli.log
+    mode: "0600"
+    state: touch
+  - path: .myclirc
+    mode: "0400"
+    state: touch
+  - path: .mysql
+    mode: "0700"
+    state: directory
+  - path: .mysql/history
+    mode: "0600"
+    state: touch
+  - path: .mutt
+    mode: "0700"
+    state: directory
+  - path: .nanorc
+    mode: "0600"
+    state: touch
+  - path: .npm
+    mode: "0700"
+    state: directory
+  - path: private
+    mode: "0700"
+    state: directory
+  - path: .profile
+    mode: "0600"
+    state: touch
+  - path: .selected_editor
+    mode: "0640"
+    state: touch
+  - path: .ssh
+    mode: "0700"
+    state: directory
+  - path: tmp
+    mode: "0700"
+    state: directory
+  - path: .terminfo
+    mode: "0700"
+    state: directory
+  - path: .vim
+    mode: "0700"
+    state: directory
+  - path: .vimrc
+    mode: "0600"
+    state: touch
+  - path: .wp-cli
+    mode: "0700"
+    state: directory
+  - path: .wp-cli/config.yml
+    mode: "0600"
+    state: touch
+  - path: .yarn
+    mode: "0700"
+    state: directory
+  - path: .yarnrc
+    mode: "0600"
+    state: touch
 users_notify_from: "Webarchitects <root@{{ inventory_hostname }}>"
 users_notify_reply_to: "Webarchitects <support@webarchitects.coop>"
 users_notify_headers:

@@ -2,13 +2,13 @@
 - name: Webarchitects Ansible User Role
   block:
 
-  - name: Debug the users dictionary
-    debug:
-      var: users
-      verbosity: 2
+    - name: Debug the users dictionary
+      debug:
+        var: users
+        verbosity: 2
 
-  - name: Include the users tasks when the users dictionary is defined
-    include_tasks: users.yml
+    - name: Include the users tasks when the users dictionary is defined
+      include_tasks: users.yml
 
   when: ( users is defined ) and ( users | length > 0 )
   tags:
