@@ -159,7 +159,7 @@
         {%- elif loc.proxy_pass is defined %}
     ProxyPass "{{ loc.proxy_pass }}"
           {%- if loc.reverse is defined and loc.reverse | bool %}
-    ProxyPassReverse "{{ loc.proxy_pass }}
+    ProxyPassReverse "{{ loc.proxy_pass }}"
           {%- endif %}
         {%- elif loc.redirect is defined %}
     Redirect "{{ loc.redirect }}"
