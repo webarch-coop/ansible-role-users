@@ -1,28 +1,18 @@
 ---
-# https://docs.ansible.com/ansible-lint/rules/default_rules.html
+# https://ansible-lint.readthedocs.io/rules/
 skip_list:
+  - args[module]
+  - command-instead-of-module
+  - deprecated-command-syntax
+  - fqcn-builtins
   - jinja[invalid]
   - key-order[task]
+  - name[casing]
   - name[template]
+  - no-changed-when
+  - no-handler
   - schema[meta]
   - schema[tasks]
-  # All names should start with an uppercase letter
-  - name[casing]
-  # Jinja2 variables and filters should have spaces before and after
   - var-spacing
-  # Use FQCN for builtin actions.
-  - fqcn-builtins
-  # Lines should be no longer than 160 chars
-  - "204"
-  # Commands should not change things if nothing needs doing
-  - "301"
-  # chown used in place of argument owner to file module
-  - "302"
-  # Using command rather than module
-  - "303"
-  # Shells that use pipes should set the pipefail option
-  # - "306"
-  # Tasks that run when changed should likely be handlers
-  - "503"
 # vim: syntax=yaml
 ...
