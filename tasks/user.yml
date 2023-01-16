@@ -45,7 +45,7 @@
     shell: "{{ user.value.users_shell | default('/bin/bash', true) }}"
     skeleton: "{{ user.value.users_skel | default('') }}"
     generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
-    system: "{{ user.value.users_system | default('no', false) }}"
+    system: "{{ user.value.users_system | default('false') }}"
   when: user.key != "root"
   tags:
     - users
@@ -72,6 +72,7 @@
       - "modification_time: preserve"
     verbosity: 2
   when:
+    - user.key != "root"
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_files is defined ) and ( users_private_files[0] is defined )
   loop: "{{ users_private_files }}"
@@ -79,7 +80,7 @@
     loop_var: file
     label: "{{ file.path }}"
 
-- name: "Private direct9ories and files present for {{ user.key }}"
+- name: "Private directories and files present for {{ user.key }}"
   ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file.path }}"
     state: "{{ file.state }}"
@@ -89,6 +90,7 @@
     access_time: preserve
     modification_time: preserve
   when:
+    - user.key != "root"
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_files is defined ) and ( users_private_files[0] is defined )
   loop: "{{ users_private_files }}"
@@ -118,7 +120,7 @@
   ansible.builtin.copy:
     src: "files/{{ user.value.users_editor }}/selected_editor"
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.selected_editor"
-    mode: "0644"
+    mode: "0600"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
   when:
@@ -134,7 +136,7 @@
         src: "files/vim/vimrc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.vimrc"
         force: false
-        mode: "0644"
+        mode: "0600"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
@@ -145,7 +147,7 @@
         line: 'export EDITOR="vim"'
         state: present
         create: true
-        mode: "0644"
+        mode: "0600"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
       when:
@@ -156,7 +158,7 @@
         src: "files/nano/nanorc"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.nanorc"
         force: false
-        mode: "0644"
+        mode: "0400"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
@@ -167,7 +169,7 @@
         line: 'export EDITOR="nano"'
         state: present
         create: true
-        mode: "0644"
+        mode: "0400"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
       when:
@@ -182,10 +184,10 @@
   ansible.builtin.template:
     src: gitconfig.j2
     dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.gitconfig"
-    mode: "0644"
+    force: false
+    mode: "0400"
     owner: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    force: false
   when:
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( user.value.users_name is defined ) and ( user.value.users_name | length > 0 )
