@@ -161,7 +161,7 @@
         line: 'alias php="php --php-ini ~/.php.ini"'
         state: present
         create: true
-        mode: "0640"
+        mode: "0600"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
 
