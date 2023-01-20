@@ -30,8 +30,8 @@
       args:
         executable: "{{ users_bash }}"
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( not users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
 
     - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       slurp:
