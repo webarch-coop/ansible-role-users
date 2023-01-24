@@ -90,6 +90,9 @@ users_private_files:
   - path: .bash_logout
     mode: "0600"
     state: touch
+  - path: .bash_profile
+    mode: "0600"
+    state: touch
   - path: .bashrc
     mode: "0600"
     state: touch
