@@ -61,7 +61,7 @@
     tasks_from: letsencrypt
   vars:
     common_name: "{{ vhost.value.users_apache_server_name }}"
-    subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | sort }}"
+    subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | reject('regex', '^[*][.]') | sort }}"
     reloadcmd: "service apache2 reload"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
@@ -78,7 +78,7 @@
     tasks_from: letsencrypt
   vars:
     common_name: "{{ user.key }}.{{ inventory_hostname }}"
-    subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | sort }}"
+    subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | reject('regex', '^[*][.]') | sort }}"
     reloadcmd: "service apache2 reload"
   when: ( users_cert is defined ) and ( users_cert == 'user' ) and ( not ansible_check_mode )
   tags:
