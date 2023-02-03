@@ -6,7 +6,7 @@
     - name: "Check authtype is set to None, Basic, Digest or Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       assert:
         that:
-          - loc.authtype is regex("^(?i)None|Basic|Digest|Form$")
+          - loc.authtype is regex("(?i)^None|Basic|Digest|Form$")
       when: loc.authtype is defined
 
     # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
