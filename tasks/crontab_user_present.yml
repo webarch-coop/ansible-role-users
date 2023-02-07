@@ -18,20 +18,14 @@
         - ( users_home_bin_path.stat.exists )
         - ( user.value.users_system is not defined ) or ( not user.value.users_system )
 
-    - name: "Check if {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min exists"
-      stat:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-      register: users_cron_min_file
-
-    - name: "Generate {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+    - name: "Cron minute file {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
       shell: |
         set -e -o pipefail
         echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
       args:
         executable: "{{ users_bash }}"
-      when:
-        - ( not users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+        creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      when: ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
 
     - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       slurp:
