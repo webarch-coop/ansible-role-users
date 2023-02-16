@@ -48,7 +48,7 @@
         insertafter: EOF
         owner: root
         group: "{{ user.key }}"
-        mode: 0640
+        mode: "0640"
 
   when: not users_notify_passwd_file.stat.exists | bool
   tags:

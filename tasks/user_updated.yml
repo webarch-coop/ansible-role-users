@@ -11,7 +11,7 @@
     src: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     dest: "{{ users_state_dir }}/previous/{{ user.key }}.yml"
     remote_src: true
-    mode: 0600
+    mode: "0600"
     owner: root
     group: root
   when: ( users_current_state_file is defined ) and ( users_current_state_file.stat.exists )
@@ -23,7 +23,7 @@
     src: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
     dest: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     remote_src: true
-    mode: 0600
+    mode: "0600"
     owner: root
     group: root
   tags:

@@ -54,7 +54,7 @@
       file:
         path: "{{ users_chroot_users_dir }}/{{ user.key }}"
         state: directory
-        mode: 0755
+        mode: "0755"
         owner: root
         group: root
       when: users_findmnt.rc == 1

@@ -3,7 +3,7 @@
   template:
     src: suexec.j2
     dest: "/etc/apache2/suexec/{{ user.key }}"
-    mode: 0750
+    mode: "0750"
     owner: root
     group: root
   when:

@@ -139,7 +139,7 @@
           file:
             path: /etc/apache2/localhost.d
             state: directory
-            mode: 0755
+            mode: "0755"
             owner: root
             group: root
           when: ( "apache2" in ansible_facts.packages )
@@ -148,7 +148,7 @@
           file:
             path: /etc/nginx/localhost.d
             state: directory
-            mode: 0755
+            mode: "0755"
             owner: root
             group: root
           when: ( "nginx" in ansible_facts.packages )
@@ -179,7 +179,7 @@
           file:
             path: "{{ users_chroot_users_dir }}"
             state: directory
-            mode: 0755
+            mode: "0755"
             owner: root
             group: root
           when: not users_chroot_users_dir_check.stat.exists
@@ -193,7 +193,7 @@
           file:
             path: "{{ quota_dir }}/quota_user.csv"
             state: touch
-            mode: 0600
+            mode: "0600"
             access_time: preserve
             modification_time: preserve
           check_mode: false
@@ -230,7 +230,7 @@
       file:
         path: "{{ users_state_dir }}/{{ dir }}"
         state: directory
-        mode: 0700
+        mode: "0700"
         owner: root
         group: root
       loop:
@@ -244,7 +244,7 @@
       template:
         src: user_state.yml.j2
         dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
-        mode: 0600
+        mode: "0600"
         owner: root
         group: root
       check_mode: false

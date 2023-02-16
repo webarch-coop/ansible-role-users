@@ -29,7 +29,7 @@
         src: "/etc/apache2/sites-available/{{ user.key }}.conf"
         dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
         remote_src: true
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
       when: users_apache_conf_check.stat.exists
@@ -40,7 +40,7 @@
         dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
         trim_blocks: false
         lstrip_blocks: true
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
       register: users_apache_conf
@@ -103,7 +103,7 @@
             src: "/etc/apache2/sites-available/{{ user.key }}.conf"
             dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
             remote_src: true
-            mode: 0644
+            mode: "0644"
             owner: root
             group: root
 
@@ -117,7 +117,7 @@
             src: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
             dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
             remote_src: true
-            mode: 0644
+            mode: "0644"
             owner: root
             group: root
           when: users_apache_conf_backup_check.stat.exists

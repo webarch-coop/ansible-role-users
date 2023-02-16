@@ -10,7 +10,7 @@
       ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
         state: directory
-        mode: 0700
+        mode: "0700"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_home_group | default(user.key) }}"
       register: user_ssh_authorized_keys_d
@@ -22,7 +22,7 @@
           ansible.builtin.get_url:
             url: "{{ key_url }}"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
-            mode: 0600
+            mode: "0600"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
             force: true
@@ -37,7 +37,7 @@
             src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
             remote_src: true
-            mode: 0600
+            mode: "0600"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
             validate: ssh-keygen -lf %s
@@ -46,7 +46,7 @@
           ansible.builtin.template:
             src: SSH_README.md.j2
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
-            mode: 0600
+            mode: "0600"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
 

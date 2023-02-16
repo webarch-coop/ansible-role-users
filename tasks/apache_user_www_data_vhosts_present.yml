@@ -25,7 +25,7 @@
     dest: "/etc/apache2/sites-available/{{ vhost.key }}.conf"
     trim_blocks: false
     lstrip_blocks: true
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"

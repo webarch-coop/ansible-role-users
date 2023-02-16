@@ -83,7 +83,7 @@
         dest: /etc/logrotate.d/apache_users_logrotate
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
 
     - name: Cron job to delete Apache logs when older than 30 days
       cron:

@@ -79,7 +79,7 @@
       ansible.builtin.template:
         src: rules.v4.j2
         dest: /etc/iptables/rules.v4
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
         backup: true

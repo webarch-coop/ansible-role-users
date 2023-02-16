@@ -11,7 +11,7 @@
       copy:
         src: files/CRON_README.md
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md"
-        mode: 0644
+        mode: "0644"
         owner: root
         group: root
       when:
