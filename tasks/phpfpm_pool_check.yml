@@ -1,0 +1,79 @@
+---
+# https://www.php.net/manual/en/install.fpm.configuration.php
+- name: Check that the PHP-FPM pool pm servers and children limits are sane
+  block:
+
+    - name: Set variables for checks
+      ansible.builtin.set_fact:
+        users_check_php_pm: "{{ user.value.users_phpfpm_pm | default('dynamic') }}"
+        users_check_php_pm_max_children: "{{ user.value.users_phpfpm_max_children | default('2') | int }}"
+        users_check_php_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') | int }}"
+        users_check_php_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') | int }}"
+        users_check_php_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') | int }}"
+
+    - name: Print variables for debugging
+      ansible.builtin.debug:
+        msg:
+          - "users_check_php_pm is a {{ users_check_php_pm | type_debug }} with the value: {{ users_check_php_pm }}"
+          - "users_check_php_pm_start_servers is a {{ users_check_php_pm_start_servers | type_debug }} with the value: {{ users_check_php_pm_start_servers }}"
+          - "users_check_php_pm_max_children is a {{ users_check_php_pm_max_children | type_debug }} with the value {{ users_check_php_pm_max_children }}"
+          - "users_check_php_pm_min_spare_servers is a {{ users_check_php_pm_min_spare_servers | type_debug }} with the value {{ users_check_php_pm_min_spare_servers }}"
+          - "users_check_php_pm_max_spare_servers is a {{ users_check_php_pm_max_spare_servers | type_debug }} with the value: {{ users_check_php_pm_max_spare_servers }}"
+        verbosity: 2
+
+    - name: Ensure that pm is set to static, ondemand or dynamic
+      ansible.builtin.assert:
+        that:
+          - users_check_php_pm is regex("^static|ondemand|dynamic$")
+
+    - name: Ensure that pm.max_children is defined, numeric and is greater than 1
+      ansible.builtin.assert:
+        that:
+          - users_check_php_pm_max_children is defined
+          - ( users_check_php_pm_max_children | string ) is regex("^[0-9]+$")
+          - ( users_check_php_pm_max_children | int ) >= 1
+
+    - name: Conditional pm dynamic pool checks
+      block:
+
+        - name: Ensure that pm.start_servers, pm.min_spare_servers and pm.max_spare_servers are defined and numeric
+          ansible.builtin.assert:
+            that:
+              - users_check_php_pm_start_servers is defined
+              - ( users_check_php_pm_start_servers | string ) is regex("^[0-9]+$")
+              - users_check_php_pm_min_spare_servers is defined
+              - ( users_check_php_pm_min_spare_servers | string ) is regex("^[0-9]+$")
+              - users_check_php_pm_max_spare_servers is defined
+              - ( users_check_php_pm_max_spare_servers | string ) is regex("^[0-9]+$")
+
+        - name: Ensure that pm.max_children, pm.start_servers, pm.min_spare_servers and pm.max_spare_servers are greater than or equal to 1
+          ansible.builtin.assert:
+            that:
+              - users_check_php_pm_max_children | int >= 1
+              - users_check_php_pm_start_servers | int >= 1
+              - users_check_php_pm_min_spare_servers | int >= 1
+              - users_check_php_pm_max_spare_servers | int >= 1
+
+        - name: Ensure that pm.max_children is greater than or equal to pm.start_servers, pm.min_spare_servers and pm.max_spare_servers
+          ansible.builtin.assert:
+            that:
+              - users_check_php_pm_max_children | int >= users_check_php_pm_start_servers | int
+              - users_check_php_pm_max_children | int >= users_check_php_pm_min_spare_servers | int
+              - users_check_php_pm_max_children | int >= users_check_php_pm_max_spare_servers | int
+
+        - name: Ensure that pm.start_servers is be greater than pm.min_spare_servers and less than or equal to pm.max_spare_servers
+          ansible.builtin.assert:
+            that:
+              - users_check_php_pm_start_servers | int >= users_check_php_pm_min_spare_servers | int
+              - users_check_php_pm_start_servers | int <= users_check_php_pm_max_spare_servers | int
+
+        - name: Ensure that pm.max_spare_servers is greater than pm.min_spare_servers
+          ansible.builtin.assert:
+            that:
+              - users_check_php_pm_max_spare_servers | int >= users_check_php_pm_min_spare_servers | int
+
+      when: users_check_php_pm == "dynamic"
+
+  tags:
+    - users
+...

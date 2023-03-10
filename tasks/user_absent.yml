@@ -25,8 +25,6 @@
 
 - name: "Include PHP FPM user absent tasks for {{ user.key }}"
   include_tasks: phpfpm_user_absent.yml
-  when:
-    - ( users_phpfpm_version is defined ) and ( users_phpfpm_version | length > 0 )
   tags:
     - users
 

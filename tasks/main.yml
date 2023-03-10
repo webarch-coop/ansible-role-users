@@ -3,12 +3,12 @@
   block:
 
     - name: Debug the users dictionary
-      debug:
+      ansible.builtin.debug:
         var: users
         verbosity: 2
 
     - name: Include the users tasks when the users dictionary is defined
-      include_tasks: users.yml
+      ansible.builtin.include_tasks: users.yml
 
   when: ( users is defined ) and ( users | length > 0 )
   tags:

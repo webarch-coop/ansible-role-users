@@ -1,21 +1,33 @@
 ---
-# TODO Include Tasks to check PHP FPM variables
-#
 - name: "PHP FPM config present for {{ user.key }}"
   block:
 
+    - name: Set a fact for the users PHP version
+      ansible.builtin.set_fact:
+        users_phpfpm_version: "{{ users_phpfpm_version | default(users_phpfpm_default_version) }}"
+
     - name: Debug users_phpfpm_version
-      debug:
+      ansible.builtin.debug:
         var: users_phpfpm_version
         verbosity: 2
 
+    - name: Debug users_phpfpm_versions
+      ansible.builtin.debug:
+        var: users_phpfpm_versions
+        verbosity: 2
+
+    - name: Debug users_phpfpm_default_version
+      ansible.builtin.debug:
+        var: users_phpfpm_default_version
+        verbosity: 2
+
     - name: Debug getent_group
-      debug:
+      ansible.builtin.debug:
         var: getent_group
         verbosity: 2
 
     - name: Users PHP FPM log directory present
-      file:
+      ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
         state: directory
         owner: root
@@ -23,7 +35,7 @@
         mode: "0750"
 
     - name: Users PHP FPM logs touched
-      file:
+      ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/{{ log }}"
         state: touch
         access_time: preserve
@@ -41,7 +53,7 @@
         label: "{{ log }}"
 
     - name: Users PHP FPM log rotation config in place
-      template:
+      ansible.builtin.template:
         src: phpfpm_user_logrotate.j2
         dest: "/etc/logrotate.d/phpfpm_{{ user.key }}"
         owner: root
@@ -49,23 +61,15 @@
         mode: "0755"
 
     - name: Check the PHP FPM pm variables
-      include_role:
-        name: php
-        tasks_from: pool_check.yml
-      vars:
-        php_pm: "{{ user.value.users_phpfpm_pm | default('dynamic') }}"
-        php_pm_max_children: "{{ user.value.users_phpfpm_max_children | default('2') | int }}"
-        php_pm_start_servers: "{{ user.value.users_phpfpm_pm_start_servers | default('1') | int }}"
-        php_pm_min_spare_servers: "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') | int }}"
-        php_pm_max_spare_servers: "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') | int }}"
+      ansible.builtin.include_tasks: phpfpm_pool_check.yml
 
     - name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf exists"
-      stat:
+      ansible.builtin.stat:
         path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
       register: users_phpfpm_pool_conf_check
 
     - name: "Copy /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-      copy:
+      ansible.builtin.copy:
         src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
         remote_src: true
@@ -75,7 +79,7 @@
       when: users_phpfpm_pool_conf_check.stat.exists
 
     - name: "PHP FPM pool.d file present for {{ user.key }}"
-      template:
+      ansible.builtin.template:
         src: phpfpm_user.conf.j2
         dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
         mode: "0644"
@@ -87,11 +91,11 @@
       block:
 
         - name: "PHP FPM pool.d configtest for {{ user.key }}"
-          command: "php-fpm{{ users_phpfpm_version }} --test"
+          ansible.builtin.command: "php-fpm{{ users_phpfpm_version }} --test"
           register: users_phpfpm_pool_configtest
 
         - name: "PHP FPM restarted for changes for {{ user.key }}"
-          service:
+          ansible.builtin.service:
             name: "php{{ users_phpfpm_version }}-fpm"
             state: restarted
           when:
@@ -102,7 +106,7 @@
       rescue:
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, saving failed config"
-          copy:
+          ansible.builtin.copy:
             src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
             remote_src: true
@@ -111,7 +115,7 @@
             group: root
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so reverting changes"
-          copy:
+          ansible.builtin.copy:
             src: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
             dest: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             remote_src: true
@@ -121,13 +125,13 @@
           when: users_phpfpm_pool_conf_check.stat.exists
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
-          file:
+          ansible.builtin.file:
             path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             state: absent
           when: not users_phpfpm_pool_conf_check.stat.exists
 
         - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
-          fail:
+          ansible.builtin.fail:
             msg:
               - "php-fpm{{ users_phpfpm_version }} --test failed for {{ user.key }} and as a result php-fpm has not been restarted and no changes that would prevent a restart have been left in place, you need to check the YAML for this user."
               - "The broken config is available in /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
@@ -136,7 +140,7 @@
       when: users_phpfpm_pool_conf.changed
 
     - name: Users Apache PHP FPM localhost.d file present
-      template:
+      ansible.builtin.template:
         src: apache_localhost.conf.j2
         dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
         mode: "0644"
@@ -146,7 +150,7 @@
         - '"apache2" in ansible_facts.packages'
 
     - name: Users Nginx PHP FPM localhost.d file present
-      template:
+      ansible.builtin.template:
         src: nginx_localhost.conf.j2
         dest: "/etc/nginx/localhost.d/{{ item }}.conf"
         mode: "0644"
@@ -155,7 +159,7 @@
       when: ( "nginx" in ansible_facts.packages )
 
     - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_aliases"
         regexp: '^alias php='
         line: 'alias php="php --php-ini ~/.php.ini"'
@@ -166,7 +170,7 @@
         group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: Users ~/.php.ini file present and sys_temp_dir set to ~/tmp
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
         regexp: '^sys_temp_dir = '
         line: 'sys_temp_dir = "/home/{{ user.key }}/tmp"'
@@ -177,7 +181,7 @@
         group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: Users ~/.php.ini file present and memory_limit set to -1
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
         regexp: '^memory_limit = '
         line: 'memory_limit = -1'
@@ -188,7 +192,7 @@
         group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: Users ~/.php.ini file present and apc.enable_cli set to 1
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
         regexp: '^apc.enable_cli = '
         line: 'apc.enable_cli = 1'

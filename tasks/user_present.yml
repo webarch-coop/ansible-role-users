@@ -117,8 +117,6 @@
       ansible.builtin.include_tasks: phpfpm_user_present.yml
       when:
         - ( user.key != "root" )
-        # This following check fails with object of type 'float' has no len()
-        # - ( users_phpfpm_version is defined ) and ( users_phpfpm_version | length > 0 )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
 
     - name: "Matomo login account tasks for {{ user.key }}"
