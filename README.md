@@ -474,17 +474,31 @@ See the [Apache SetEnvIf documentation](https://httpd.apache.org/docs/current/mo
 
 ### Header and RequestHeader
 
-The `users_apache_headers` array can be used to set `Header` and
-`RequestHeader` directives, at a `VirtualHost` level, for example:
+The `users_apache_headers` array can be used to set [Header](https://httpd.apache.org/docs/current/mod/mod_headers.html#header) and [RequestHeader](https://httpd.apache.org/docs/current/mod/mod_headers.html#requestheader) directives, at a `VirtualHost` level, for example:
 
 ```yml
         users_apache_headers:
           - type: request
-            action: setifempty
-            argument: X-Forwarded-Proto https
+            action: set
+            expr: "Content-Security-Policy: default-src 'self'"
           - type: request
             action: setifempty
-            argument: X-Forwarded-Host %{THE_HOST}e
+            arg: X-Forwarded-Proto https
+          - type: request
+            action: setifempty
+            arg: X-Forwarded-Host %{THE_HOST}e
+```
+
+The `response` header type accepts an optional condition, `con`, an action, `action` and an expression, `expr`, for example
+
+```
+Header {% if header.con is defined %}{{ header.con }} {% endif %}{{ header.action }} {{ header.expr }}
+```
+
+The `request` type accepts an action, `action` and an argument, `arg`:
+
+```
+RequestHeader {{ header.action }} {{ header.arg }}
 ```
 
 ### Alias and Redirect
