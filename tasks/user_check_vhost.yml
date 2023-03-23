@@ -74,11 +74,24 @@
           - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
       when: vhost.value.users_apache_type is defined
 
-    - name: Check that users_php_socket_name contains only contains letters, numbers dots, underscores and dashes, when defined
-      ansible.builtin.assert:
-        that:
-          - vhost.value.users_php_socket_name is regex('^[0-9a-z_.-]{1,30}$')
-      when: vhost.value.users_php_socket_name is defined
+    - name: Check that users_apache_php_socket_path exists and is a socket and the user is not chrooted
+      block:
+
+        - name: "Stat {{ users_apache_php_socket_path }}"
+          ansible.builtin.stat:
+            path: "{{ users_apache_php_socket_path }}"
+            register: users_apache_php_socket_path_check
+
+        - name: Setting users_apache_php_socket_path is not supported for chrooted users or chrooted Apache and the socket must exist
+          ansible.builtin.assert:
+            that:
+              - users_apache_php_socket_path_check.stat.exists | bool
+              - users_apache_php_socket_path_check.stat.issock is defined
+              - users_apache_php_socket_path_check.stat.issock | bool
+              - ( "chroot" not in user.value.users_groups )
+              - ( users_apache_chroot is not defined ) or ( not users_apache_chroot | bool )
+
+      when: vhost.value.users_apache_php_socket_path is defined
 
     - name: "Check the attributes for SetEnv and UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:

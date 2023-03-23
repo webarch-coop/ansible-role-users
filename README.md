@@ -899,7 +899,7 @@ apc.enable_cli = 1
 
 Setting `memory_limit = -1` overides the default of 128M, this is required for the Nextcloud CLI updater.
 
-By default for users in the `phpfpm` group the PHP socket is chreated in the `$HOME` directory as `~/php-fpm.sock`, this ca be overridden per Virtual host by setting `users_php_socket_name` to a file names that contains only numbers, letters, underscores, dots and dashes.
+By default, for users in the `phpfpm` group, the PHP socket is created in the `$HOME` directory as `~/php-fpm.sock`, the use of this path by the Apache configuratoon can be overridden when Apache is not chrooted and the users is not chrooted, per `VirtualHost` by setting `users_apache_php_socket_path` to a path to another socket _however_ this variable is not used by this roles PHP tasks, the socket configuration needs to be done by the [PHP role](https://git.coop/webarch/php).
 
 ### Example Apache VirtualHost 
 
@@ -909,7 +909,7 @@ If a user has a set of variables like this:
     users_apache_virtual_hosts:
       default:
         users_apache_type: php
-        users_php_socket_name: php-fpm8.2.sock
+        users_apache_php_socket_path: /run/php/php8.2-fpm.sock
         users_apache_nophp_dirs:
           - wp-content/uploads
         users_apache_server_name: wordpress.example.org
