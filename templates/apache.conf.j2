@@ -291,8 +291,8 @@
       ProxySet timeout={{ users_apache_php_proxy_timeout }}
         {%- endif %}
     </Proxy>
-    {%- elif users_phpfpm_version is defined %}
-    <Proxy "unix:/run/php/php{{ users_phpfpm_version }}-fpm.sock|fcgi://localhost">
+    {%- elif users_phpfpm_system_version is defined %}
+    <Proxy "unix:/run/php/php{{ users_phpfpm_system_version }}-fpm.sock|fcgi://localhost">
         {%- if vhost_config.users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
         {%- elif user.value.users_apache_php_proxy_timeout is defined %}
@@ -302,7 +302,7 @@
         {%- endif %}
     </Proxy>
     {%- else -%}
-    # Something went wrong the users_phpfpm_version variable needs to be 
+    # Something went wrong the users_phpfpm_system_version variable needs to be 
     # set to the PHP version in order for SetHandler path to the socket 
     # to be set for the www-data user
     {%- endif %}
@@ -562,7 +562,7 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
           <If "-f %{REQUEST_FILENAME}">
       {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
             SetHandler "proxy:fcgi://{{ user.key }}"
-      {%- elif users_phpfpm_version is defined %}
+      {%- elif users_phpfpm_system_version is defined %}
             SetHandler "proxy:fcgi://localhost"
       {%- endif %}
           </If>

@@ -4,52 +4,73 @@
 
     - name: Set a fact for the users PHP version
       ansible.builtin.set_fact:
-        users_phpfpm_version: "{{ users_phpfpm_version | default(users_phpfpm_default_version) }}"
+        users_phpfpm_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
 
     - name: Debug users_phpfpm_version
       ansible.builtin.debug:
         var: users_phpfpm_version
         verbosity: 2
 
-    - name: "PHP FPM files for {{ user.key }} absent"
-      file:
+    - name: Debug users_phpfpm_versions
+      ansible.builtin.debug:
+        var: users_phpfpm_versions
+        verbosity: 2
+
+    - name: Debug users_phpfpm_default_version
+      ansible.builtin.debug:
+        var: users_phpfpm_default_version
+        verbosity: 2
+
+    - name: Debug getent_group
+      ansible.builtin.debug:
+        var: getent_group
+        verbosity: 2
+
+    - name: "Include tasks to remove any PHP-FPM pool.d files for {{ user.key }}"
+      ansible.builtin.include_tasks: phpfpm_pool_file_absent.yml
+      loop: "{{ users_phpfpm_versions }}"
+      loop_control:
+        loop_var: users_phpfpm_ver
+        label: "{{ users_phpfpm_ver }}"
+
+    - name: "PHP-FPM backup files absent for {{ user.key }}"
+      ansible.builtin.file:
+        path: "/etc/php/{{ users_phpfpm_ver }}/fpm/pool.d/.{{ user.key }}.conf.bak"
+        state: absent
+      loop: "{{ users_phpfpm_versions }}"
+      loop_control:
+        loop_var: users_phpfpm_ver
+        label: "{{ users_phpfpm_ver }}"
+
+    - name: "PHP-FPM broken conf files absent for {{ user.key }}"
+      ansible.builtin.file:
+        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
+        state: absent
+      loop: "{{ users_phpfpm_versions }}"
+      loop_control:
+        loop_var: users_phpfpm_ver
+        label: "{{ users_phpfpm_ver }}"
+
+    - name: "All versions of PHP FPM pool.d files absent for {{ user.key }}"
+      ansible.builtin.file:
+        path: "/etc/php/{{ users_phpfpm_ver }}/fpm/pool.d/{{ user.key }}.conf"
+        state: absent
+      loop: "{{ users_phpfpm_versions }}"
+      loop_control:
+        loop_var: users_phpfpm_ver
+        label: "{{ users_phpfpm_ver }}"
+
+    - name: "Localhost and logrotate files absent for {{ user.key }}"
+      ansible.builtin.file:
         path: "{{ file }}"
         state: absent
       loop:
-        - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.bak"
-        - "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
         - "/etc/apache2/localhost.d/{{ user.key }}.conf"
         - "/etc/nginx/localhost.d/{{ user.key }}.conf"
         - "/etc/logrotate.d/phpfpm_{{ user.key }}"
       loop_control:
         loop_var: file
         label: "{{ file }}"
-
-    - name: "Check if /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf is present"
-      stat:
-        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-      register: users_phpfpm_pool_file
-
-    - name: "PHP FPM pool.d file for {{ user.key }} absent"
-      file:
-        path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
-        state: absent
-      register: users_phpfpm_pool_absent
-
-    - name: PHP FPM conditional restart
-      block:
-
-        - name: "PHP FPM pool.d configtest for {{ user.key }} absent"
-          command: "php-fpm{{ users_phpfpm_version }} --test"
-          register: users_phpfpm_pool_configtest
-
-        - name: "PHP FPM restarted for {{ user.key }} absent"
-          service:
-            name: "php{{ users_phpfpm_version }}-fpm"
-            state: restarted
-          when: '"test is successful" in users_phpfpm_pool_configtest.stderr'
-
-      when: ( users_phpfpm_pool_file is defined ) and ( users_phpfpm_pool_file.stat.exists )
 
   tags:
     - users

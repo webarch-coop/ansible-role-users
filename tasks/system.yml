@@ -138,10 +138,10 @@
         - name: Check the values of the list of users_phpfpm_versions
           ansible.builtin.assert:
             that:
-              - users_phpfpm_version is regex('^[0-9]{1,2}[.][0-9]$')
+              - users_phpfpm_ver is regex('^[0-9]{1,2}[.][0-9]$')
           loop: "{{ users_phpfpm_versions }}"
           loop_control:
-            loop_var: users_phpfpm_version
+            loop_var: users_phpfpm_ver
 
         - name: Query the version of PHP using update-alternatives --query php
           ansible.builtin.command: update-alternatives --query php
@@ -153,12 +153,12 @@
 
         - name: Set a fact for the PHP-FPM versions and the default version
           ansible.builtin.set_fact:
-            users_phpfpm_alternatives: "{{ users_update_alternatives_query_php.stdout | string | community.general.jc('--update-alt-q') }}"
-            users_phpfpm_default_version: "{{ users_update_alternatives_query_php.stdout | string | community.general.jc('--update-alt-q') | community.general.json_query('max_by(alternatives, &priority).alternative') | regex_replace('^[/]usr[/]bin[/]php') }}"
+            users_phpfpm_alternatives: "{{ users_update_alternatives_query_php.stdout | string | community.general.jc('update-alt-q') }}"
+            users_phpfpm_default_version: "{{ users_update_alternatives_query_php.stdout | string | community.general.jc('update-alt-q') | community.general.json_query('max_by(alternatives, &priority).alternative') | regex_replace('^[/]usr[/]bin[/]php') }}"
 
         - name: Debug PHP default version
           ansible.builtin.debug:
-            var: users_phpfpm_default
+            var: users_phpfpm_default_version
 
         - name: Legacy /etc/logrotate.d/phpfpm_users_logrotate absent
           ansible.builtin.file:

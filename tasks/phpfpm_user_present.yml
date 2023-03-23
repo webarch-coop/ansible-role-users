@@ -2,14 +2,10 @@
 - name: "PHP FPM config present for {{ user.key }}"
   block:
 
-    - name: Set a fact for the users PHP version
-      ansible.builtin.set_fact:
-        users_phpfpm_version: "{{ users_phpfpm_version | default(users_phpfpm_default_version) }}"
-
-    - name: Debug users_phpfpm_version
+    - name: Debug getent_group
       ansible.builtin.debug:
-        var: users_phpfpm_version
-        verbosity: 2
+        var: getent_group
+        verbosity: 3
 
     - name: Debug users_phpfpm_versions
       ansible.builtin.debug:
@@ -21,10 +17,32 @@
         var: users_phpfpm_default_version
         verbosity: 2
 
-    - name: Debug getent_group
+    - name: "Set a fact for the PHP version for {{ user.key }}"
+      ansible.builtin.set_fact:
+        users_phpfpm_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+        users_phpfpm_version_list:
+          - "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+
+    - name: Debug users_phpfpm_version
       ansible.builtin.debug:
-        var: getent_group
+        var: users_phpfpm_version
         verbosity: 2
+
+    - name: "Set a fact for the versions of PHP that are present but not the version used by {{ user.key }}"
+      ansible.builtin.set_fact:
+        users_phpfpm_versions_absent: "{{ users_phpfpm_versions | difference(users_phpfpm_version_list) }}"
+
+    - name: Debug users_phpfpm_versions_absent
+      ansible.builtin.debug:
+        var: users_phpfpm_versions_absent
+        verbosity: 2
+
+    - name: "Include tasks to remove PHP-FPM pool.d files for PHP versions other than the default one for {{ user.key }}"
+      ansible.builtin.include_tasks: phpfpm_pool_file_absent.yml
+      loop: "{{ users_phpfpm_versions_absent }}"
+      loop_control:
+        loop_var: users_phpfpm_ver
+        label: "{{ users_phpfpm_ver }}"
 
     - name: Users PHP FPM log directory present
       ansible.builtin.file:

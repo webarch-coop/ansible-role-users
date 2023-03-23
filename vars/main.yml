@@ -1,5 +1,0 @@
----
-# Paths for local_facts scripts
-apt_dpkg: /usr/bin/dpkg
-apt_gpg: /usr/bin/gpg
-...
