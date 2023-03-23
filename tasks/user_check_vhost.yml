@@ -3,19 +3,19 @@
   block:
 
     - name: "Check the DocumentRoot for the {{ vhost.key }} VirtualHost for {{ user.key }} contains valid characters"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.key is regex("^[a-zA-Z0-9/_.-]*$")
         fail_msg: "Only letters, numbers, underscores, dashes and forward slashes can be present in the DocumentRoot path"
 
     - name: "Check that users_apache_vhost_docroot is a boolean if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_vhost_docroot | type_debug == "bool"
       when: vhost.value.users_apache_vhost_docroot is defined
 
     - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_server_name is defined
           - vhost.value.users_apache_server_name | type_debug is not regex('^dict|list|int|bool$')
@@ -23,7 +23,7 @@
           - vhost.value.users_apache_server_name | length
 
     - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName that resolves to a IPv4 address"
-      include_tasks: user_check_domain.yml
+      ansible.builtin.include_tasks: user_check_domain.yml
       vars:
         users_domain: "{{ vhost.value.users_apache_server_name }}"
         users_reverse_proxy: "{% if vhost.value.users_apache_remoteip is defined %}{{ vhost.value.users_apache_remoteip }}{% endif %}"
@@ -33,14 +33,14 @@
       block:
 
         - name: "Check that the ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_apache_server_aliases | length
               - vhost.value.users_apache_server_aliases | type_debug == "list"
               - vhost.value.users_apache_server_aliases[0] is defined
 
         - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has ServerAlias' that resolve to IPv4 addresses"
-          include_tasks: user_check_domain.yml
+          ansible.builtin.include_tasks: user_check_domain.yml
           vars:
             users_domain: "{{ domain }}"
             users_reverse_proxy: "{% if vhost.value.users_apache_remoteip is defined %}{{ vhost.value.users_apache_remoteip }}{% endif %}"
@@ -56,12 +56,12 @@
       block:
 
         - name: "Check that users_apache_allow_encoded_slashes for {{ vhost.key }} VirtualHost for {{ user.key }} is a boolean or a string"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_apache_allow_encoded_slashes | type_debug is regex('bool|str|AnsibleUnicode|AnsibleUnsafeText$')
 
         - name: "Check that users_apache_allow_encoded_slashes for {{ vhost.key }} VirtualHost for {{ user.key }} is NoDecode when a string"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_apache_allow_encoded_slashes == "NoDecode"
           when: vhost.value.users_apache_allow_encoded_slashes | type_debug is regex('str|AnsibleUnicode|AnsibleUnsafeText$')
@@ -69,16 +69,22 @@
       when: vhost.value.users_apache_allow_encoded_slashes is defined
 
     - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
       when: vhost.value.users_apache_type is defined
+
+    - name: Check that users_php_socket_name contains only contains letters, numbers dots, underscores and dashes, when defined
+      ansible.builtin.assert:
+        that:
+          - vhost.value.users_php_socket_name is regex('^[0-9a-z_.-]{1,30}$')
+      when: vhost.value.users_php_socket_name is defined
 
     - name: "Check the attributes for SetEnv and UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
 
         - name: "Check that the set attribute for SetEnv and UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }} is a boolean if defined"
-          assert:
+          ansible.builtin.assert:
             that: setenv.set | type_debug == "bool"
           loop: "{{ vhost.value.users_apache_set_env }}"
           loop_control:
@@ -86,7 +92,7 @@
           when: setenv.set is defined
 
         - name: "Check that the env attribute for UnsetEnv for {{ vhost.key }} VirtualHost for {{ user.key }} is defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
           loop: "{{ vhost.value.users_apache_set_env }}"
@@ -95,7 +101,7 @@
           when: ( setenv.set is defined ) and ( not setenv.set )
 
         - name: "Check that the set attributes for SetEnv for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
               - ( setenv.value is defined ) and ( setenv.regex | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
@@ -110,7 +116,7 @@
       block:
 
         - name: "Check that the attributes for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( setenv.attribute is defined ) and ( setenv.attribute | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
               - ( setenv.regex is defined ) and ( setenv.regex | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
@@ -120,7 +126,7 @@
             loop_var: setenv
 
         - name: "Check that the case attribute for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }} is a boolean if defined"
-          assert:
+          ansible.builtin.assert:
             that: setenv.env | type_debug == "bool"
           loop: "{{ vhost.value.users_apache_set_env_if }}"
           loop_control:
@@ -133,7 +139,7 @@
       block:
 
         - name: "Check that the header type is set to either request or response for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - header.type is defined
               - header.type is regex('^request|response$')
@@ -142,7 +148,7 @@
             loop_var: header
 
         - name: "Checks for RequestHeader for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - header.action is defined
               - header.action is regex('add|append|edit[*]?|merge|set|setifempty|unset')
@@ -153,7 +159,7 @@
           when: header.type == "request"
 
         - name: "Checks for Header for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - header.action is defined
               - header.action is regex('add|append|echo|edit[*]?|merge|set|setifempty|unset|note')
@@ -166,19 +172,19 @@
       when: users_apache_headers is defined
 
     - name: "Check that users_apache_robots is set to deny is defined for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_robots == "deny"
       when: vhost.value.users_apache_robots is defined
 
     - name: "Check that users_apache_remoteip for {{ vhost.key }} VirtualHost for {{ user.key }} is set to cloudflare if it is defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_remoteip is regex("cloudflare")
       when: vhost.value.users_apache_remoteip is defined
 
     - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_expires is regex('^medium|strict|forever$')
       when: vhost.value.users_apache_expires is defined
@@ -187,7 +193,7 @@
       block:
 
         - name: "Check the users_apache_htauth_users names for {{ vhost.key }} VirtualHost for {{ user.key }} are valid if defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - htuser.name is defined
               - htuser.name is regex("^[a-zA-Z0-9_-]*$")
@@ -197,7 +203,7 @@
             label: "{{ htuser.name }}"
 
         - name: "Check that the users_apache_htauth_users passwords for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - htuser.password is defined
           when: ( htuser.state is not defined ) or ( htuser.state == "present" )
@@ -207,7 +213,7 @@
             label: "{{ htuser.name }}"
 
         - name: "Check that users_apache_htauth_users state is set to present or absent for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - htuser.state is regex("present|absent")
           when: htuser.state is defined
@@ -222,7 +228,7 @@
       block:
 
         - name: "Check the value of the status if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - redirect.status is regex('^301|302|303|410|permanent|temp|seeother|gone$')
           loop: "{{ vhost.value.users_apache_redirects }}"
@@ -231,7 +237,7 @@
           when: redirect.status is defined
 
         - name: "Check that attributes for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( redirect.path is defined and redirect.url is defined ) or ( redirect.regex_path is defined and redirect.url is defined )
           loop: "{{ vhost.value.users_apache_redirects }}"
@@ -242,7 +248,7 @@
             ( redirect.status is not defined )
 
         - name: "Check values of the URL if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - redirect.url is regex('^https?:\/\/.*$')
           loop: "{{ vhost.value.users_apache_redirects }}"
@@ -251,7 +257,7 @@
           when: redirect.url is defined
 
         - name: "Check values of the path if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - redirect.path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
               - redirect.path is regex('^\/.*$')
@@ -261,7 +267,7 @@
           when: redirect.path is defined
 
         - name: "Check values of the regular expression path if defined for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - redirect.regex_path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
           loop: "{{ vhost.value.users_apache_redirects }}"
@@ -275,7 +281,7 @@
       block:
 
         - name: "Check that attributes for Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( alias.url is defined and alias.path is defined ) or ( alias.regex_url is defined and alias.regex_path is defined )
           loop: "{{ vhost.value.users_apache_alias }}"
@@ -283,7 +289,7 @@
             loop_var: alias
 
         - name: "Checks for Alias directive URL and path {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - alias.url is regex('^[\/].*')
               - alias.path is regex('^[\/].*')
@@ -295,7 +301,7 @@
             - alias.path is defined
 
         - name: "Checks for Alias directive regular expression alias and path {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - alias.regex_url | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
               - alias.regex_path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
@@ -312,7 +318,7 @@
       block:
 
         - name: "Check that the users_apache_rewrite array contains conditions or rules when it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( rewrite.cond is defined ) or ( rewrite.rule is defined )
           loop: "{{ vhost.value.users_apache_rewrite }}"
@@ -320,7 +326,7 @@
             loop_var: rewrite
 
         - name: "Check that the users_apache_rewrite array conditions for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - rewrite.cond | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
           when: rewrite.cond is defined
@@ -329,7 +335,7 @@
             loop_var: rewrite
 
         - name: "Check that the users_apache_rewrite array rules for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - rewrite.rule | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
           when: rewrite.rule is defined
@@ -343,13 +349,13 @@
       block:
 
         - name: "Check that the locations for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_apache_locations | length
               - vhost.value.users_apache_locations[0] is defined
 
         - name: "Loop through the users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-          include_tasks: user_check_vhost_location.yml
+          ansible.builtin.include_tasks: user_check_vhost_location.yml
           loop: "{{ vhost.value.users_apache_locations }}"
           loop_control:
             loop_var: loc
@@ -358,24 +364,24 @@
       when: vhost.value.users_apache_locations is defined
 
     - name: "The users_daily_scripts array should be defined at at user level for {{ user.key }} not at a VirtualHost level"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_daily_scripts is not defined
 
     - name: "The users_hourly_scripts array should be defined at at user level for {{ user.key }} not at a VirtualHost level"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_hourly_scripts is not defined
 
     - name: "Check that the users_apache_nophp_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_nophp_dirs | length
           - vhost.value.users_apache_nophp_dirs[0] is defined
       when: vhost.value.users_apache_nophp_dirs is defined
 
     - name: "Check that the users_apache_deny_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_deny_dirs | length
           - vhost.value.users_apache_deny_dirs[0] is defined
@@ -385,12 +391,12 @@
       block:
 
         - name: "Check that users_apache_directories for {{ vhost.key }} VirtualHost for {{ user.key }} is a dictionary if it is defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost_config.users_apache_directories | type_debug == "dict"
 
         - name: "Check that no old variables are used in the users_apache_directories dictionary for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.path is not defined
               - dir.options is not defined
@@ -402,7 +408,7 @@
             label: "{{ dir.key }}"
 
         - name: "Check that the users_apache_directories keys, which are relative paths, for {{ vhost.key }} VirtualHost for {{ user.key }} contain valid characters"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.key is not regex("^[\/].*$")
               - dir.key is regex("^[a-zA-Z0-9/_.-]*$")
@@ -413,7 +419,7 @@
             label: "{{ dir.key }}"
 
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: user_check_vhost_dir.yml
+          ansible.builtin.include_tasks: user_check_vhost_dir.yml
           loop: "{{ vhost_config.users_apache_directories | dict2items }}"
           loop_control:
             loop_var: dir
@@ -425,13 +431,13 @@
       block:
 
         - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
           when: vhost.value.users_apache_type is defined
 
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: user_check_vhost_dir.yml
+          ansible.builtin.include_tasks: user_check_vhost_dir.yml
           vars:
             dir: "{{ vhost.value | dict2items }}"
 
@@ -441,12 +447,12 @@
       block:
 
         - name: "Check that users_apache_proxy_pass is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_apache_proxy_pass | type_debug == "list"
 
         - name: "Check preserve_host is a boolean for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - proxy.preserve_host | type_debug == "bool"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
@@ -455,7 +461,7 @@
           when: proxy.preserve_host is defined
 
         - name: "Check add_headers is a boolean for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - proxy.add_headers | type_debug == "bool"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
@@ -464,7 +470,7 @@
           when: proxy.add_headers is defined
 
         - name: "Check that either a path and URL or regular expression and URL are defined for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( proxy.path is defined and proxy.url is defined ) or ( proxy.pathmatch and proxy.url is defined )
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
@@ -473,7 +479,7 @@
           when: ( proxy.url is defined ) and ( proxy.path is defined )
 
         - name: "Check that path and URL appear valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - proxy.path is defined
               - proxy.path is regex('^(unix:\/.*)|(\/.*)$')
@@ -485,7 +491,7 @@
           when: ( proxy.url is defined ) and ( proxy.path is defined )
 
         - name: "Check that pathmatch and URL are valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - proxy.pathmatch is defined
               - proxy.url is defined
@@ -496,7 +502,7 @@
           when: ( proxy.url is defined ) and ( proxy.pathmatch is defined )
 
         - name: "Check that proxy.reverse is a boolean if defined for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - proxy.reverse | type_debug == "bool"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
@@ -505,7 +511,7 @@
           when: ( proxy.reverse is defined )
 
         - name: "Check that proxy.rewrite_rules are defined when proxy.rewrite_conditions are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - proxy.rewrite_rules is defined
               - proxy.rewrite_rules | type_debug == "list"
@@ -515,7 +521,7 @@
           when: proxy.rewrite_conditions is defined
 
         - name: "Check that proxy.rewrite_rules are a list if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - proxy.rewrite_rules | type_debug == "list"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
@@ -529,12 +535,12 @@
       block:
 
         - name: "Check that users_apache_error_docs is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_apache_error_docs | type_debug == "list"
 
         - name: "Check that the code and path values for users_apache_error_docs are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - doc.code is defined
               - doc.code is regex('^4|5[0-9][0-9]$')
@@ -549,44 +555,44 @@
       block:
 
         - name: "Check that users_cms is set to mediawiki, flarum, moodle, nextcloud, kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.users_cms is regex("mediawiki|flarum|moodle|nextcloud|kimai|drupal|wordpress|matomo|phpmyadmin")
 
         - name: "Drupal checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_drupal.yml
+          ansible.builtin.include_tasks: cms_check_drupal.yml
           when: vhost.value.users_cms == "drupal"
 
         - name: "Kimai checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_kimai.yml
+          ansible.builtin.include_tasks: cms_check_kimai.yml
           when: vhost.value.users_cms == "kimai"
 
         - name: "Matomo checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_matomo.yml
+          ansible.builtin.include_tasks: cms_check_matomo.yml
           when: vhost.value.users_cms == "matomo"
 
         - name: "Nextcloud checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_nextcloud.yml
+          ansible.builtin.include_tasks: cms_check_nextcloud.yml
           when: vhost.value.users_cms == "nextcloud"
 
         - name: "phpMyAdmin checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_phpmyadmin.yml
+          ansible.builtin.include_tasks: cms_check_phpmyadmin.yml
           when: vhost.value.users_cms == "phpmyadmin"
 
         - name: "WordPress checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_wordpress.yml
+          ansible.builtin.include_tasks: cms_check_wordpress.yml
           when: vhost.value.users_cms == "wordpress"
 
         - name: "MediaWiki checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_mediawiki.yml
+          ansible.builtin.include_tasks: cms_check_mediawiki.yml
           when: vhost.value.users_cms == "mediawiki"
 
         - name: "Flarum checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_flarum.yml
+          ansible.builtin.include_tasks: cms_check_flarum.yml
           when: vhost.value.users_cms == "flarum"
 
         - name: "Moodle checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          include_tasks: cms_check_moodle.yml
+          ansible.builtin.include_tasks: cms_check_moodle.yml
           when: vhost.value.users_cms == "moodle"
 
       when: vhost.value.users_cms is defined
