@@ -156,7 +156,7 @@
           assert:
             that:
               - header.action is defined
-              - header.action is regex('add|append|echo|edit[*]?|merge|set|setifempty|unset|note')
+              - header.action is regex('^add|append|echo|edit[*]?|merge|set|setifempty|unset|note$')
               - header.expr is defined
           loop: "{{ vhost.value.users_apache_headers }}"
           loop_control:
