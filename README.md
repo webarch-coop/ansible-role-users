@@ -101,7 +101,7 @@ To use this role you need to use Ansible Galaxy to install it into another
 repository under `galaxy/roles/users` by adding a `requirements.yml` file in
 that repo that contains:
 
-```yml
+```yaml
 ---
 - name: users
   src: https://git.coop/webarch/users.git
@@ -114,7 +114,7 @@ the [quota role](https://git.coop/webarch/quota) and make sure that `quota_dir`
 is set to a mount point for a partition, for example have a seperate `/home`
 partition.
 
-```yml
+```yaml
 ---
 - name: quota
   src: https://git.coop/webarch/quota.git
@@ -147,7 +147,7 @@ ansible-galaxy install -r requirements.yml --force
 
 The other repo should also contain a `users.yml` file that contains:
 
-```yml
+```yaml
 ---
 - name: Add user accounts
   become: yes
@@ -206,7 +206,7 @@ The other repo should also contain a `users.yml` file that contains:
 
 And a `hosts.yml` file that contains lists of servers, for example:
 
-```yml
+```yaml
 ---
 all:
   children:
@@ -254,7 +254,7 @@ Tasks can be added to the Bash scripts using the `users_hourly_scripts` and
 `users_daily_scripts` arrays at a user level, or they can be manually added not
 using Ansible by users, for example to archive Matomo stats on an hourly basis:
 
-```yml
+```yaml
     users_hourly_scripts:
       - "cd ~/sites/default && php console --no-ansi -qn core:archive --force-all-websites > ~/private/matomo-archive.log"
       - "cd ~/sites/default && php console --no-ansi -qn core:run-scheduled-tasks > ~/private/matomo-archive.log"
@@ -268,7 +268,7 @@ Also many features of the [Ansible cron
 module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html)
 cane used used via a `users_cron_jobs` array set at the users level, for example:
 
-```yml
+```yaml
     users_cron_jobs:
       - name: printenv
         job: printenv
@@ -338,7 +338,7 @@ work.  ### Options
 Server wide settings for `VirtualHosts` can be set like this (see the commented
 out variables in [defaults/main.yml](defaults/main.yml)):
 
-```yml
+```yaml
 users_apache_options:
   - -Indexes
   - +SymlinksIfOwnerMatch
@@ -401,7 +401,7 @@ template for the details](templates/apache.conf.j2).
 Basic authentication can be set on the `DocumentRoot` directory, for example
 for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 
-```yml
+```yaml
         users_apache_auth_name: Private
         users_apache_auth_type: Basic
         users_apache_require:
@@ -422,7 +422,7 @@ variables, at a server or `VirtualHost` level, via [the
 `UnsetEnv`](https://httpd.apache.org/docs/current/mod/mod_env.html#unsetenv)
 Apache directives, for example:
 
-```yml
+```yaml
         users_apache_env:
           - env: FOO
             value: bar
@@ -446,7 +446,7 @@ and [the
 `SetEnvIfNoCase`](https://httpd.apache.org/docs/current/mod/mod_setenvif.html#setenvifnocase)
 Apache directives, for example:
 
-```yml
+```yaml
         users_apache_set_env_if:
           - attribute: Host
             regex: "^(.*)$"
@@ -476,7 +476,7 @@ See the [Apache SetEnvIf documentation](https://httpd.apache.org/docs/current/mo
 
 The `users_apache_headers` array can be used to set [Header](https://httpd.apache.org/docs/current/mod/mod_headers.html#header) and [RequestHeader](https://httpd.apache.org/docs/current/mod/mod_headers.html#requestheader) directives, at a `VirtualHost` level, for example:
 
-```yml
+```yaml
         users_apache_headers:
           - type: request
             action: set
@@ -511,7 +511,7 @@ and
 [`RedirectTemp`](https://httpd.apache.org/docs/current/mod/mod_alias.html#redirecttemp)
 directives, for example:
 
-```yml
+```yaml
         users_apache_redirects:
           - path: /service
             url: http://foo2.example.com/service
@@ -531,7 +531,7 @@ The `users_apache_alias` array can be used to generate
 [`AliasMatch`](https://httpd.apache.org/docs/current/mod/mod_alias.html#aliasmatch)
 directives, for example: 
 
-```yml
+```yaml
         users_apache_alias:
           - url: /image
             path: /ftp/pub/image
@@ -546,7 +546,7 @@ directives, for example:
 The `users_apache_rewrite` array can be used to set `RewriteCond` and
 `RewriteRule` directives, for example:
 
-```yml
+```yaml
         users_apache_rewrite_rules:
           - cond: %{HTTP_USER_AGENT} DavClnt
           - rule: ^$ /remote.php/webdav/ [L,R=302]
@@ -580,7 +580,7 @@ To generate:
 The `users_apache_locations` array can be used to apply HTTP Authentication to
 URL paths, for example:
 
-```yml
+```yaml
         users_apache_locations:
           - authname: WordPress Login
             location: /wp-login.php
@@ -603,7 +603,7 @@ passwords, these are written to `~/.htpasswd/` in one file per
 `users_apache_server_name`, the optional `state` variables can be set to absent
 to remove users, for example:
 
-```yml
+```yaml
         users_apache_htauth_users:
           - name: foo
             password: bar
@@ -616,7 +616,7 @@ If the `authtype` is set to `None` then `AuthUserFile` isn't set and then a
 addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require),
 for example:
 
-```yml
+```yaml
         users_apache_locations:
           - authname: Drupal Login
             location: /user/login
@@ -629,14 +629,14 @@ for example:
 It is also possible to set `Redirect`, see [the Apache
 Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
 
-```yml
+```yaml
         users_apache_locations:
           - location: old-site/
             redirect: https://example.org/
 ```
 
 An `Alias` can also be used in a `Location`:
-```yml
+```yaml
         users_apache_locations:
           - location: /static
             alias: /home/foo/sites/www/staticfiles
@@ -645,7 +645,7 @@ An `Alias` can also be used in a `Location`:
 And `ProxyPass` and `ProxyPassReverse` can be used in a `Location`, see [the
 Apache ProxyPass documentation](https://httpd.apache.org/docs/2.4/mod/mod_proxy.html#proxypass):
 
-```yml
+```yaml
         users_apache_locations:
           - location: /push/
             proxy_pass: http://127.0.0.1:7867/
@@ -683,7 +683,7 @@ by setting `users_apache_vhost_docroot` to `False`.
 This is handy when some directories are needed for static
 content and `Alias` and also a proxy, for example:
 
-```yml
+```yaml
     users_apache_virtual_hosts:
       api:
         users_apache_type: static
@@ -739,7 +739,7 @@ Configure a reverse proxy, for example for a [Nextcloud notify_push
 server](https://github.com/nextcloud/notify_push#apache) like this you can
 specify:
 
-```yml
+```yaml
         users_apache_proxy_pass:
           - path: /push/ws
             url: ws://127.0.0.1:7867/ws
@@ -761,7 +761,7 @@ proxy](https://docs.rocket.chat/installing-and-updating/manual-installation/conf
 to a [Rocket.Chat server installed using
 snaps](https://docs.rocket.chat/installing-and-updating/snaps):
 
-```yml
+```yaml
         users_apache_proxy_pass:
           - path: /
             url: http://127.0.0.1:3000/
@@ -788,7 +788,7 @@ For an
 [ONLYOFFICE](https://github.com/biva/documentation/blob/biva/admin_manual/configuration_server/onlyoffice_configuration.rst)
 server:
 
-```yml
+```yaml
         
         users_apache_set_env_if:
           - attribute: Host
@@ -814,7 +814,7 @@ server:
 
 A reverse proxy to an applicaton that doesn't have any user authentication can be configured to use HTTP Authentication, for example for [Mailcatcher](https://git.coop/webarch/mailcatcher):
 
-```yml
+```yaml
         users_apache_proxy_pass:
           - path: /
             url: http://127.0.0.1:1080/
@@ -837,7 +837,7 @@ By default the reverse proxy doesn't proxy error documents served from `/wsh`:
 If an `users_apache_filesmatch` array specified at the `VirtualHost` level with
 a list of `regex` like this:
 
-```yml
+```yaml
         users_apache_filesmatch:
           - regex: '^license\.txt$'
           - regex: '^readme\.html$'
@@ -847,7 +847,7 @@ a list of `regex` like this:
 Then access to these files will be denied, unless one of more `require` items
 are listed, for example:
 
-```yml
+```yaml
         users_apache_filesmatch:
           - regex: '^xmlrpc\.php$'
             require:
@@ -878,7 +878,7 @@ Some specific PHP variables include the `users_apache_nophp_dirs` array, this
 can be used to list directories that PHP cannot be used in, for example
 directories where users can upload files, for example:
 
-```yml
+```yaml
         users_apache_nophp_dirs:
           - wp-content/uploads
 ```
@@ -899,14 +899,17 @@ apc.enable_cli = 1
 
 Setting `memory_limit = -1` overides the default of 128M, this is required for the Nextcloud CLI updater.
 
+By default for users in the `phpfpm` group the PHP socket is chreated in the `$HOME` directory as `~/php-fpm.sock`, this ca be overridden per Virtual host by setting `users_php_socket_name` to a file names that contains only numbers, letters, underscores, dots and dashes.
+
 ### Example Apache VirtualHost 
 
 If a user has a set of variables like this:
 
-```yml
+```yaml
     users_apache_virtual_hosts:
       default:
         users_apache_type: php
+        users_php_socket_name: php-fpm8.2.sock
         users_apache_nophp_dirs:
           - wp-content/uploads
         users_apache_server_name: wordpress.example.org
