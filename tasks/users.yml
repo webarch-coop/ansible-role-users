@@ -27,7 +27,7 @@
         loop_var: user
         label: "{{ user.key }}"
 
-    - name: Check user variables using meta/user_argument_specs.yml
+    - name: Check individual user variables using meta/user_argument_specs.yml
       ansible.builtin.validate_argument_spec:
         argument_spec: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | from_yaml }}"
         provided_arguments: "{{ user.value }}"
@@ -43,8 +43,6 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
-
-    - fail:
 
     - name: System setup and checks
       ansible.builtin.include_tasks: system.yml

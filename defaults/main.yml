@@ -20,7 +20,7 @@ users_chroot_dir: "{{ chroot_dir | default('/chroot') }}"
 users_chroot_users_dir: "{{ chroot_users_dir | default('/chroots') }}"
 # Define users_apache to true for this role to manage the Apache VirtualHosts
 users_apache: false
-users_apache_chroot: "{{ apache_chroot | default(False) }}"
+users_apache_chroot: "{{ apache_chroot | default(false) }}"
 users_apache_chroot_suexec: false
 users_apache_chroot_dir: "{{ apache_chroot_dir | default(users_chroot_users_dir + '/www-data') }}"
 # users_apache_chroot_users_basedir is the directory that will be used to mount
@@ -35,7 +35,9 @@ users_apache_chroot_mount_dirs:
   - wsh
 users_disallowed_usernames:
   - "{{ users_basedir | regex_replace('^\/') }}"
-  - "{{ users_apache_chroot_mount_dirs }}"
+  - html
+  - localhost
+  - wsh
 # Users home directories to be created as sub-directories of users_basedir
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root
@@ -236,14 +238,6 @@ users_apache_php_proxy_timeout: 300
 users_cgi_extensions:
   - cgi
   - pl
-# Users ~/.pip.ini file
-# https://www.php.net/manual/en/install.fpm.configuration.php
-users_phpfpm_pm: dynamic
-users_phpfpm_pm_max_children: 3
-users_phpfpm_pm_start_servers: 2
-users_phpfpm_pm_min_spare_servers: 1
-users_phpfpm_pm_max_spare_servers: 1
-users_phpfpm_request_terminate_timeout: 360
 # The users_phpfpm_extensions array is for a list of files extensions to be
 # processed for PHP commands, it can also be set at a users level
 users_phpfpm_extensions:

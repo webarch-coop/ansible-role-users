@@ -2,15 +2,36 @@
 - name: Webarchitects Ansible User Role
   block:
 
-    - name: Debug the users dictionary
+    - name: Debug the hostvars variable names that start with users_
       ansible.builtin.debug:
-        var: users
+        var: usersvarnames
+        verbosity: 3
+
+    - name: Debug the hostvars variable names that start with users_
+      ansible.builtin.debug:
+        var: usershostvars
         verbosity: 2
 
-    - name: Include the users tasks when the users dictionary is defined
-      ansible.builtin.include_tasks: users.yml
+    - name: Check user_ variables using meta/argument_specs.yml
+      ansible.builtin.validate_argument_spec:
+        argument_spec: "{{ (lookup('ansible.builtin.file', 'meta/argument_specs.yml') | from_yaml )['argument_specs']['main']['options'] }}"
+        provided_arguments: "{{ usershostvars }}"
 
-  when: ( users is defined ) and ( users | length > 0 )
+    - fail:
+
+    - name: The users dictionary is required
+      block:
+
+        - name: Debug the users dictionary
+          ansible.builtin.debug:
+            var: users
+            verbosity: 2
+
+        - name: Include the users tasks when the users dictionary is defined
+          ansible.builtin.include_tasks: users.yml
+
+      when: ( users is defined ) and ( users | length > 0 )
+
   tags:
     - users
 ...

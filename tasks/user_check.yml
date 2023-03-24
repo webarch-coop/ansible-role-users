@@ -294,17 +294,6 @@
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
         - user.value.users_phpfpm_version is defined
 
-    # https://www.php.net/manual/en/install.fpm.configuration.php
-    - name: "Check that users_phpfpm_pm is defined if {{ user.key }} is in the phpfpm group"
-      ansible.builtin.assert:
-        that:
-          - user.value.users_phpfpm_pm is defined
-          - user.value.users_phpfpm_pm is regex("^static|ondemand|dynamic$")
-        quiet: true
-      when:
-        - ( "phpfpm" in getent_group )
-        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-
     - name: "Check that users_phpfpm_log_level is set to a valid value if defined if {{ user.key }} is in the phpfpm group"
       ansible.builtin.assert:
         that:
