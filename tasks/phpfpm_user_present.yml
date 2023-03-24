@@ -28,6 +28,13 @@
         var: users_phpfpm_version
         verbosity: 2
 
+    - name: "Set facts for PHP package names for version {{ users_phpfpm_version }}"
+      ansible.builtin.set_fact:
+        users_phpapcu_pkg: "php{{ users_phpfpm_version }}-apcu"
+        users_phpcli_pkg: "php{{ users_phpfpm_version }}-cli"
+        users_phpdev_pkg: "php{{ users_phpfpm_version }}-dev"
+        users_phpdbg_pkg: "php{{ users_phpfpm_version }}-phpdbg"
+
     - name: "Set a fact for the versions of PHP that are present but not the version used by {{ user.key }}"
       ansible.builtin.set_fact:
         users_phpfpm_versions_absent: "{{ users_phpfpm_versions | difference(users_phpfpm_version_list) }}"
@@ -179,14 +186,14 @@
     - name: PHP CLI configuration requires the CLI package to be installed
       ansible.builtin.assert:
         that:
-          - ( "php{{ users_phpfpm_version }}-cli" in ansible_facts.packages() )
+          - users_phpcli_pkg in ansible_facts.packages()
 
     # https://github.com/oerdnj/deb.sury.org/wiki/Managing-Multiple-Versions
     - name: PHP CLI configuration present
       block:
 
         - name: Users php symlink in place
-          absible.builtin.file:
+          ansible.builtin.file:
             state: link
             src: "/usr/bin/php{{ users_phpfpm_version }}"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/php"
@@ -196,7 +203,7 @@
             group: "{{ user.value.users_group | default(user.key) }}"
 
         - name: Users php-config symlink in place
-          absible.builtin.file:
+          ansible.builtin.file:
             state: link
             src: "/usr/bin/php{{ users_phpfpm_version }}-config"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/php-config"
@@ -204,10 +211,10 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: ( "php{{ users_phpfpm_version }}-dev" in ansible_facts.packages() )
+          when: users_phpdev_pkg in ansible_facts.packages()
 
         - name: Users phpdbg symlink in place
-          absible.builtin.file:
+          ansible.builtin.file:
             state: link
             src: "/usr/bin/php{{ users_phpfpm_version }}dbg"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/phpdbg"
@@ -215,10 +222,10 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: ( "php{{ users_phpfpm_version }}-phpdbg" in ansible_facts.packages() )
+          when: users_phpdbg_pkg in ansible_facts.packages()
 
         - name: Users phpize symlink in place
-          absible.builtin.file:
+          ansible.builtin.file:
             state: link
             src: "/usr/bin/php{{ users_phpfpm_version }}ize"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/phpize"
@@ -226,7 +233,7 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: ( "php{{ users_phpfpm_version }}-dev" in ansible_facts.packages() )
+          when: users_phpdev_pkg in ansible_facts.packages()
 
         - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
           ansible.builtin.lineinfile:
@@ -272,9 +279,9 @@
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: ( "php{{ users_phpfpm_version }}-apcu" in ansible_facts.packages() )
+          when: users_phpapcu_pkg in ansible_facts.packages()
 
-      when: ( "php{{ users_phpfpm_version }}-cli" in ansible_facts.packages() )
+      when: users_phpcli_pkg in ansible_facts.packages() )
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
