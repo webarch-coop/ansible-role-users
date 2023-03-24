@@ -2,9 +2,9 @@
 - name: "Cron jobs absent for {{ user.key }}"
   block:
 
-    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md absent"
+    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md absent"
       file:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md"
         state: absent
 
     - name: "Daily cron jobs for {{ user.key }} absent"

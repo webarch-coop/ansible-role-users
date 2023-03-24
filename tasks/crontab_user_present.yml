@@ -2,15 +2,15 @@
 - name: Cron jobs
   block:
 
-    - name: Check if the ~/bin directory exists
+    - name: Check if the users bin directory exists
       stat:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
       register: users_home_bin_path
 
-    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md in place"
+    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md in place"
       copy:
         src: files/CRON_README.md
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md"
         mode: "0644"
         owner: root
         group: root
@@ -49,12 +49,12 @@
             cron_file: "chroot_cron_daily_{{ user.key }}"
             user: root
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh | wc -l) -gt 0 ];
               then /usr/sbin/chroot {{ users_chroot_users_dir }}/{{ user.key }} sudo -u {{ user.key }}
-              PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
+              PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh 2>&1 |
+              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh 2>&1 |
               mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ user.key }} account on {{ inventory_hostname }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
@@ -66,12 +66,12 @@
             cron_file: "chroot_cron_hourly_{{ user.key }}"
             user: root
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh | wc -l) -gt 0 ];
               then /usr/sbin/chroot {{ users_chroot_users_dir }}/{{ user.key }} sudo -u {{ user.key }}
-              PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
+              PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh 2>&1 |
+              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh 2>&1 |
               mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ user.key }} account on {{ inventory_hostname }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
@@ -90,9 +90,9 @@
             name: "Daily cron jobs"
             user: "{{ user.key }}"
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
-              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh; fi
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh | wc -l) -gt 0 ];
+              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh; fi
             minute: "{{ users_cron_min }}"
             hour: "{{ users_cron_daily_hour | default('05') }}"
 
@@ -101,9 +101,9 @@
             name: "Hourly cron jobs"
             user: "{{ user.key }}"
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
-              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh; fi
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh | wc -l) -gt 0 ];
+              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh; fi
             minute: "{{ users_cron_min }}"
             hour: "*"
 

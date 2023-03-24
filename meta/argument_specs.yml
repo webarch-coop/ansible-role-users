@@ -22,6 +22,10 @@ argument_specs:
         type: bool
         required: true
         description: Configure Apache VirtualHosts for users.
+      users_home_bin:
+        type: str
+        required: true
+        description: A sub-directory of $HOME for users scripts.
       users_private_files:
         type: list
         required: true
