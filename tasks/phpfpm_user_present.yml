@@ -176,50 +176,105 @@
         group: root
       when: ( "nginx" in ansible_facts.packages )
 
-    - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
-      ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_aliases"
-        regexp: '^alias php='
-        line: 'alias php="php --php-ini ~/.php.ini"'
-        state: present
-        create: true
-        mode: "0600"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
+    - name: PHP CLI configuration requires the CLI package to be installed
+      ansible.builtin.assert:
+        that:
+          - ( "php{{ users_phpfpm_version }}-cli" in ansible_facts.packages() )
 
-    - name: Users ~/.php.ini file present and sys_temp_dir set to ~/tmp
-      ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-        regexp: '^sys_temp_dir = '
-        line: 'sys_temp_dir = "/home/{{ user.key }}/tmp"'
-        state: present
-        create: true
-        mode: "0640"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
+    # https://github.com/oerdnj/deb.sury.org/wiki/Managing-Multiple-Versions
+    - name: PHP CLI configuration present
+      block:
 
-    - name: Users ~/.php.ini file present and memory_limit set to -1
-      ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-        regexp: '^memory_limit = '
-        line: 'memory_limit = -1'
-        state: present
-        create: true
-        mode: "0640"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
+        - name: Users php symlink in place
+          absible.builtin.file:
+            state: link
+            src: "/usr/bin/php{{ users_phpfpm_version }}"
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/php"
+            mode: "0777"
+            follow: false
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
 
-    - name: Users ~/.php.ini file present and apc.enable_cli set to 1
-      ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-        regexp: '^apc.enable_cli = '
-        line: 'apc.enable_cli = 1'
-        state: present
-        create: true
-        mode: "0640"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
-      when: ( "php-apcu" in ansible_facts.packages )
+        - name: Users php-config symlink in place
+          absible.builtin.file:
+            state: link
+            src: "/usr/bin/php{{ users_phpfpm_version }}-config"
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/php-config"
+            mode: "0777"
+            follow: false
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+          when: ( "php{{ users_phpfpm_version }}-dev" in ansible_facts.packages() )
+
+        - name: Users phpdbg symlink in place
+          absible.builtin.file:
+            state: link
+            src: "/usr/bin/php{{ users_phpfpm_version }}dbg"
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/phpdbg"
+            mode: "0777"
+            follow: false
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+          when: ( "php{{ users_phpfpm_version }}-phpdbg" in ansible_facts.packages() )
+
+        - name: Users phpize symlink in place
+          absible.builtin.file:
+            state: link
+            src: "/usr/bin/php{{ users_phpfpm_version }}ize"
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/phpize"
+            mode: "0777"
+            follow: false
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+          when: ( "php{{ users_phpfpm_version }}-dev" in ansible_facts.packages() )
+
+        - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
+          ansible.builtin.lineinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_aliases"
+            regexp: '^alias php='
+            line: 'alias php="php --php-ini ~/.php.ini"'
+            state: present
+            create: true
+            mode: "0600"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        # The following three lineinfiles could be updated to use community.general.ini_file
+        - name: Users ~/.php.ini file present and sys_temp_dir set to ~/tmp
+          ansible.builtin.lineinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            regexp: '^sys_temp_dir = '
+            line: 'sys_temp_dir = "/home/{{ user.key }}/tmp"'
+            state: present
+            create: true
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and memory_limit set to -1
+          ansible.builtin.lineinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            regexp: '^memory_limit = '
+            line: 'memory_limit = -1'
+            state: present
+            create: true
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and apc.enable_cli set to 1
+          ansible.builtin.lineinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            regexp: '^apc.enable_cli = '
+            line: 'apc.enable_cli = 1'
+            state: present
+            create: true
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+          when: ( "php{{ users_phpfpm_version }}-apcu" in ansible_facts.packages() )
+
+      when: ( "php{{ users_phpfpm_version }}-cli" in ansible_facts.packages() )
 
   when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
