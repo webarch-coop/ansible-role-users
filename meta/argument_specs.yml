@@ -280,13 +280,13 @@ argument_specs:
         required: true
         description: The strategy to use for updating users when this role is run.
         choices:
-         - all
-         - apache
-         - changed
-         - check
-         - firewall
-         - groups
-         - phpfpm
-         - quotas
-         - sshkeys
+          - all
+          - apache
+          - changed
+          - check
+          - firewall
+          - groups
+          - phpfpm
+          - quotas
+          - sshkeys
 ...
