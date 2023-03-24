@@ -1,4 +1,4 @@
-# {{ ansible_managed }} 
+# {{ ansible_managed }}
 
 {%- for vhost,vhost_config in user.value.users_apache_virtual_hosts.items() %}
 
@@ -94,7 +94,7 @@
         {%- else %}
     SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
         {% endif %}
-      {%- endfor %} 
+      {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_set_env_if is defined %}
       {%- for setenv in vhost_config.users_apache_set_env_if %}
@@ -103,7 +103,7 @@
         {%- else %}
     SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
         {% endif %}
-      {%- endfor %} 
+      {%- endfor %}
     {%- endif %}
   </IfModule>
   {%- endif %}
@@ -129,7 +129,7 @@
   {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
-  <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" > 
+  <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" >
       {%- if loc.authtype is defined and loc.authtype == "None" %}
     # No AuthUserFile for this Location as AuthType is None
       {%- elif loc.authtype is not defined and loc.alias is defined %}
@@ -150,7 +150,7 @@
     AuthType {% if loc.authtype is defined %}{{ loc.authtype }}{% else %}Basic{% endif %}
         {%- if loc.require is defined %}{% for req in loc.require %}
     Require {{ req }}
-          {%- endfor %}{% else %}     
+          {%- endfor %}{% else %}
     Require valid-user
         {%- endif %}
       {%- else %}
@@ -204,8 +204,8 @@
   {%- endif %}
   {%- if vhost_config.users_apache_alias is defined or vhost_config.users_apache_redirects is defined %}
   <IfModule alias_module>
-    {%- if vhost_config.users_apache_redirects is defined %} 
-      {%- for redirect in vhost_config.users_apache_redirects %} 
+    {%- if vhost_config.users_apache_redirects is defined %}
+      {%- for redirect in vhost_config.users_apache_redirects %}
         {%- if redirect.regex_path is defined and redirect.url is defined %}
     RedirectMatch {% if redirect.status is defined %} {{ redirect.status }}{% endif %} "{{ redirect.regex_path }}" "{{ redirect.url }}"
         {%- elif redirect.regex_path is defined and redirect.status is defined and redirect.status is regex('^410|gone$') %}
@@ -302,8 +302,8 @@
         {%- endif %}
     </Proxy>
     {%- else -%}
-    # Something went wrong the users_phpfpm_system_version variable needs to be 
-    # set to the PHP version in order for SetHandler path to the socket 
+    # Something went wrong the users_phpfpm_system_version variable needs to be
+    # set to the PHP version in order for SetHandler path to the socket
     # to be set for the www-data user
     {%- endif %}
   </IfModule>
@@ -356,7 +356,7 @@
       SSILastModified {% if users_apache_ssi_modified %}on{% else %}off{% endif %}
        {%- endif %}
        {%- if dir_config.users_apache_index is defined %}
-      DirectoryIndex{% for file in dir_config.users_apache_index %} {{ file }}{% endfor %} 
+      DirectoryIndex{% for file in dir_config.users_apache_index %} {{ file }}{% endfor %}
        {%- else %}
       DirectoryIndex index.html index.htm
        {%- endif %}
@@ -367,7 +367,7 @@
        {%- endif %}
        {%- if dir_config.users_apache_add_output_filters is defined %}
          {%- for filter in dir_config.users_apache_add_output_filters %}
-      AddOutputFilter {{ filter }}   
+      AddOutputFilter {{ filter }}
          {%- endfor %}
        {%- endif %}
        {%- if dir_config.users_apache_add_type is defined %}
@@ -397,7 +397,7 @@
             {%- if users_apache_chroot is defined and users_apache_chroot %}
 i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost.users_apache_server_name }}"
             {%- else %}
-      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"  
+      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"
             {%- endif %}
           {%- endif %}
         {%- else %}
@@ -473,25 +473,25 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
       SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
     {%- endif %}
     {%- if vhost_config.users_apache_index is defined %}
-      DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %} 
+      DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %}
     {%- elif users_apache_index is defined %}
       DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-      DirectoryIndex 
+      DirectoryIndex
       {%- if user.value.users_phpfpm_extensions is defined -%}
         {%- for ext in user.value.users_phpfpm_extensions %} index.{{ ext }}{% endfor -%}
       {%- elif users_phpfpm_extensions is defined -%}
         {%- for ext in users_phpfpm_extensions %} index.{{ ext }}{% endfor -%}
       {%- else %} index.php{% endif %} index.html index.htm index.shtml
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-      DirectoryIndex  
+      DirectoryIndex
       {%- if user.value.users_cgi_extensions is defined -%}
         {%- for ext in user.value.users_cgi_extensions %} index.{{ ext }}{% endfor -%}
       {%- elif users_cgi_extensions is defined -%}
         {%- for ext in users_cgi_extensions %} index.{{ ext }}{% endfor -%}
       {%- else %} index.cgi{% endif %} index.html index.htm index.shtml
     {%- elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
-      DirectoryIndex  
+      DirectoryIndex
       {%- if user.value.users_cgi_extensions is defined -%}
         {%- for ext in user.value.users_cgi_extensions %} index.{{ ext }}{% endfor -%}
       {%- elif users_cgi_extensions is defined -%}
@@ -515,17 +515,17 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
     {%- endif %}
     {%- if users_apache_add_output_filters is defined %}
       {%- for filter in users_apache_add_output_filters %}
-      AddOutputFilter {{ filter }}   
+      AddOutputFilter {{ filter }}
       {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_add_output_filters is defined %}
       {%- for filter in vhost_config.users_apache_add_output_filters %}
-      AddOutputFilter {{ filter }}   
+      AddOutputFilter {{ filter }}
       {%- endfor %}
     {%- endif %}
     {%- if users_apache_add_type is defined %}
       {%- for mimetype in users_apache_add_type %}
-      AddType "{{ mimetype.type }}" .{{ mimetype.ext }}   
+      AddType "{{ mimetype.type }}" .{{ mimetype.ext }}
       {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_add_type is defined %}
@@ -630,9 +630,9 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
       AuthType "{{ vhost_config.users_apache_auth_type }}"
       {%- if vhost_config.users_apache_auth_type == "Basic" %}
         {%- if users_apache_chroot is defined and users_apache_chroot %}
-      AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"  
+      AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
         {%- else %}
-      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"  
+      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
         {%- endif %}
       {%- endif %}
     {%- else %}

@@ -8,8 +8,8 @@
 # the users_update_groups array is defined then only users in these groups will
 # be updated. If it is set to "check" then the users: YAML is checked only.
 users_update_strategy: changed
-# ~/bin is hardcoded in lots of places, these should be updated to use users_home_bin and
-# at some point this might be updated to default to .local/bin, this is a path relative to $HOME
+# users_home_bin is a path relative to $HOME, it should not start with a slash
+# ~/bin was hardcoded in lots of places, at some point it might be updated to default to .local/bin
 users_home_bin: bin
 # Define users_cusers_chroot hroot to true for members of the chroot group to be chrooted
 users_chroot: false

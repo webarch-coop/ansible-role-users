@@ -11,6 +11,33 @@
         ( ansible_local.gpg.version is not defined ) or
         ( ansible_local.bash.path is not defined )
 
+    - name: Packages present
+      ansible.builtin.apt:
+        pkg:
+          - bash-completion
+          - bc
+          - bind9-dnsutils
+          - curl
+          - jq
+          - mutt
+          - python3-dnspython
+          - python3-passlib
+          - pwgen
+          - slay
+          - texlive
+          - vim
+          - whois
+        state: present
+
+    - name: Debian Stretch and Jessie Python 2 packages present
+      ansible.builtin.apt:
+        pkg:
+          - python-dns
+          - python-dnspython
+          - python-passlib
+        state: present
+      when: ansible_distribution_release is regex('jessie|stretch')
+
     - name: Check which shells are present
       ansible.builtin.slurp:
         src: /etc/shells

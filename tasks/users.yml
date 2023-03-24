@@ -2,33 +2,6 @@
 - name: Users tasks
   block:
 
-    - name: Packages present
-      ansible.builtin.apt:
-        pkg:
-          - bash-completion
-          - bc
-          - bind9-dnsutils
-          - curl
-          - jq
-          - mutt
-          - python3-dnspython
-          - python3-passlib
-          - pwgen
-          - slay
-          - texlive
-          - vim
-          - whois
-        state: present
-
-    - name: Debian Stretch and Jessie Python 2 packages present
-      ansible.builtin.apt:
-        pkg:
-          - python-dns
-          - python-dnspython
-          - python-passlib
-        state: present
-      when: ansible_distribution_release is regex('jessie|stretch')
-
     - name: Check that usernames are between 2 and 17 ascii letters, numbers and dashes
       ansible.builtin.assert:
         that:
@@ -39,6 +12,39 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
+
+    - name: Debug meta/user_argument_specs.yml
+      ansible.builtin.debug:
+        msg: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | from_yaml }}"
+        verbosity: 2
+
+    - name: Debug users dict
+      ansible.builtin.debug:
+        var: user.value
+        verbosity: 2
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: Check user variables using meta/user_argument_specs.yml
+      ansible.builtin.validate_argument_spec:
+        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | from_yaml }}"
+        provided_arguments: "{{ user.value }}"
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
+      ansible.builtin.include_tasks: validate_vhost.yml
+      when: user.value.users_apache_virtual_hosts is defined
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - fail:
 
     - name: System setup and checks
       ansible.builtin.include_tasks: system.yml

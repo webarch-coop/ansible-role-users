@@ -1,0 +1,157 @@
+---
+users_apache_virtual_hosts:
+  type: dict
+  required: false
+  description: A dictionary of Apache VirtualHosts.
+users_daily_scripts:
+  type: list
+  elements: str
+  required: false
+  description: A list of Bash command lines to run daily.
+users_editor:
+  type: str
+  required: false
+  description: The users editor.
+  choices:
+    - nano
+    - vim
+users_email:
+  type: str
+  required: false
+  description: The users email address.
+users_group_members:
+  type: list
+  elements: str
+  required: false
+  description: A list of users who are in this users group, this grants them access to group readable paths.
+users_groups:
+  type: list
+  elements: str
+  required: false
+  description: A list additional groups that the users is a member of.
+users_home:
+  type: str
+  required: false
+  description: Path of the users $HOME directory.
+users_home_mode:
+  type: str
+  required: false
+  description: The quoted octal mode for the the home directory.
+users_home_owner:
+  type: str
+  required: false
+  description: The owner of the users HOME directory.
+users_mariadb_databases:
+  type: list
+  elements: str
+  required: false
+  description: A list of MariaDB databases for this user.
+users_mariadb_database_privileges:
+  type: list
+  elements: str
+  required: false
+  description: A list of MariaDB databases privileges for this user.
+  choices:
+    - ALTER
+    - ALTER ROUTINE
+    - CREATE
+    - CREATE ROUTINE
+    - CREATE TEMPORARY TABLES
+    - CREATE VIEW
+    - DELETE
+    - DROP
+    - EXECUTE
+    - INDEX
+    - INSERT
+    - LOCK TABLES
+    - REFERENCES
+    - SELECT
+    - SHOW VIEW
+    - TRIGGER
+    - UPDATE
+users_mariadb_notify_passwd:
+  type: bool
+  required: false
+  description: Send a email to the user containing their MariaDB password.
+users_matomo_account:
+  type: bool
+  required: false
+  description: Matomo account for this user present.
+users_matomo_notify_passwd:
+  type: bool
+  required: false
+  description: Send a email to the user containing their Matomo password.
+users_name:
+  type: str
+  required: false
+  description: The name of the user.
+users_notify_passwd:
+  type: bool
+  required: false
+  description: Send a email to the user containing their password.
+users_phpfpm_disable_functions:
+  type: list
+  elements: str
+  required: false
+  descripion: List for php_admin_value[disable_functions].
+users_phpfpm_enable_open_basedir:
+  type: bool
+  required: false
+  description: PHP-FPM open_basedir.
+users_phpfpm_max_children:
+  type: int
+  required: false
+  description: PHP-FPM process manager max children, pm.max_children.
+users_phpfpm_mysqli_allow_local_infile:
+  type: bool
+  required: false
+  description: PHP-FPM php_admin_value[mysqli.allow_local_infile].
+users_phpfpm_open_basedir:
+  type: list
+  elements: str
+  required: false
+  descripion: A list of directories in which PHP is allowed to run, php_admin_value[open_basedir].
+users_phpfpm_pm:
+  type: str
+  required: false
+  description: PHP-FPM process manager.
+  choices:
+    - dynamic
+    - ondemand
+    - static
+users_phpfpm_version:
+  type: str
+  required: false
+  description: The verson of PHP.
+users_quota:
+  type: str
+  required: false
+  description: The disk quota.
+users_shell:
+  type: str
+  required: false
+  description: The users shell.
+users_skel:
+  type: str
+  required: false
+  description: A path to the skel files to be used when creating the user.
+users_ssh_public_keys:
+  type: list
+  elements: str
+  required: false
+  description: A list of URLs for of SSH public keys to be added to ~/.ssh/authorized_keys.
+users_state:
+  type: str
+  required: false
+  description: The state for the user.
+  choices:
+    - absent
+    - ignore
+    - present
+users_system:
+  type: bool
+  required: false
+  description: A system user.
+
+
+...

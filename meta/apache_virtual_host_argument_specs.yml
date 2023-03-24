@@ -1,0 +1,295 @@
+---
+matomo_autoupdate:
+  type: bool
+  required: false
+  description: Automatically update Matomo.
+matomo_dbname:
+  type: str
+  required: false
+  description: The name of the Matomo database.
+matomo_first_site_name:
+  type: str
+  required: false
+  description: The name of the first Matomo site.
+matomo_first_site_url:
+  type: str
+  required: false
+  description: The URL of the first Matomo site.
+matomo_first_user:
+  type: str
+  required: false
+  description: The username for the first Matomo user.
+matomo_first_user_email:
+  type: str
+  required: false
+  description: The email address for the first Matomo user.
+matomo_notify_passwd:
+  type: bool
+  required: false
+  description: Send a email with the Matomo user account password.
+matomo_version:
+  type: str
+  required: false
+  description: The version number of Matomo to install.
+mediawiki_admin_email:
+  type: str
+  required: false
+  description: An email address for the MediaWiki admin user.
+mediawiki_admin_user:
+  type: str
+  required: false
+  description: A username for the MediaWiki admin user.
+mediawiki_dbname:
+  type: str
+  required: false
+  description: The database to use for MediaWiki.
+mediawiki_locale:
+  type: str
+  required: false
+  description: The MediaWiki locale.
+mediawiki_notify:
+  type: bool
+  required: false
+  description: Send a email with the MediaWiki admin account password.
+mediawiki_semver:
+  type: str
+  required: false
+  description: The MediaWiki semantic version number.
+mediawiki_wikiname:
+  type: str
+  required: false
+  description: The MediaWiki $wgSitename.
+users_apache_auth_name:
+  type: str
+  required: false
+  description: The Apache Directory AuthName.
+users_apache_auth_type:
+  type: str
+  required: false
+  description: The Apache Directory AuthType.
+  choices:
+    - Basic
+    - Digest
+    - Form
+    - None
+users_apache_expires:
+  type: str
+  required: false
+  description: The name of the Apache expires conf file to include.
+  choices:
+    - forever
+    - medium
+    - strict
+users_apache_deny_dirs:
+  type: list
+  elements: str
+  required: false
+  description: A list of DocumentRoot sub-directories to which public access is denied.
+users_apache_filesmatch:
+  type: list
+  elements: dict
+  required: false
+  options:
+    regex:
+      type: str
+      required: true
+      description: A regular Expression to use for the Apache FilesMatch directive.
+    require:
+      type: list
+      elements: str
+      required: false
+      description: A list of strings for the Apache Require directive within FilesMatch, each item will result in one Require directive being generated.
+users_apache_htauth_users:
+  type: list
+  elements: dict
+  required: false
+  description: A list of users, passwords and their state for HTTP Authentication.
+  options:
+    name:
+      type: str
+      required: false
+      description: The HTTP Authentication username.
+    password:
+      type: str
+      required: false
+      description: The HTTP Authentication username.
+    state:
+      type: str
+      required: false
+      description: The HTTP Authentication state.
+      choices:
+        - absent
+        - present
+users_apache_index:
+  type: list
+  elements: str
+  required: false
+  description: A list of files names for the Apache DirectoryIndex.
+users_apache_locations:
+  type: list
+  elements: dict
+  required: false
+  description: A list of Apache Locations.
+  options:
+    authname:
+      type: str
+      required: false
+      description: An Apache AuthName for the Location.
+    authtype:
+      type: str
+      required: false
+      description: The HTTP Authentication type.
+      choices:
+        - Basic
+        - Digest
+        - Form
+        - None
+    location:
+      type: str
+      required: true
+      description: The Apache Location directive path relative to the DocmentRoot.
+    redirect:
+      type: str
+      required: false
+      description: A URL to redirect requests to when they match the parents Location directive.
+    require:
+      type: list
+      elements: str
+      required: false
+      description: A list of strings for the Apache Require directive, each item will result in one Require directive being generated.
+users_apache_nophp_dirs:
+  type: list
+  elements: str
+  required: false
+  description: A list of DocumentRoot sub-directories which PHP cannot be run in.
+users_apache_options:
+  type: list
+  elements: str
+  required: false
+  description: A list of Apache Directory Options.
+users_apache_require:
+  type: list
+  elements: str
+  required: false
+  description: A list of strings for the Apache Require directive, each item will result in one Require directive being generated.
+users_apache_robots:
+  type: str
+  required: false
+  description: When set to deny include Apache directives to add a crwaler denying robots.txt files to the VirtualHost.
+  choices:
+    - deny
+users_apache_server_aliases:
+  type: list
+  elements: str
+  required: false
+  description: A list of ServerAlias for the Apache VirtualHost.
+users_apache_server_name:
+  type: str
+  required: true
+  description: The domain name for the Apache ServerName.
+users_apache_sts:
+  type: list
+  elements: str
+  required: false
+  description: A list of rules for the Apache Strict-Transport-Security Header.
+users_apache_type:
+  type: str
+  required: false
+  description: The type of Apache VirtualHost.
+  choices:
+    - cgi
+    - fcgi
+    - php
+    - static
+users_cms:
+  type: str
+  required: false
+  description: The name of the content management system to be installed.
+  choices:
+    - drupal
+    - flarum
+    - kimai
+    - matomo
+    - mediawiki
+    - moodle
+    - nextcloud
+    - phpmyadmin
+    - wordpress
+wordpress_admin_email:
+  type: str
+  required: false
+  description: The email address for the first WordPress admin account.
+wordpress_admin_user:
+  type: str
+  required: false
+  description: The username for the first WordPress admin account.
+wordpress_autoupdate:
+  type: bool
+  required: false
+  description: Automatically update WordPress.
+wordpress_dbname:
+  type: str
+  required: false
+  description: The database name to use for WordPress.
+wordpress_dbprefix:
+  type: str
+  required: false
+  description: The database prefix to use for WordPress.
+wordpress_dbuser:
+  type: str
+  required: false
+  description: The database username to use for WordPress.
+wordpress_locale:
+  type: str
+  required: false
+  description: The WordPress locale.
+wordpress_notify:
+  type: bool
+  required: false
+  description: Send a email with the WordPress admin account password.
+wordpress_packages:
+  type: list
+  elements: dict
+  required: false
+  description: A list of WordPress packages to install.
+  options:
+    name:
+      type: str
+      required: true
+      description: The WordPress package name to install.
+    version:
+      type: str
+      required: true
+      description: The WordPress package version to install.
+wordpress_plugins:
+  type: list
+  elements: dict
+  required: false
+  description: A list of WordPress plugins to configure.
+  options:
+    name:
+      type: str
+      required: true
+      description: The name of the WordPress plugin.
+    status:
+      type: list
+      elements: str
+      required: true
+      description: The status of the WordPress plugin.
+      choices:
+        - absent
+        - active
+        - inactive
+    version:
+      type: str
+      required: false
+      description: the version of the WordPress plugin.
+wordpress_title:
+  type: str
+  required: false
+  description: The title of the WordPress site.
+wordpress_url:
+  type: str
+  required: false
+  description: the URL of the WordPress site.
+...

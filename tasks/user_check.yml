@@ -1,14 +1,12 @@
 ---
-# quiet: true can be added when 2.8 is in use see
-# https://docs.ansible.com/ansible/latest/modules/assert_module.html
-
-- name: "Check the variables for {{ user.key }}"
+- name: Check the user variables
   block:
 
     - name: Check that the username is not in the users_disallowed_usernames array
       ansible.builtin.assert:
         that:
           - user.key != users_disallowed_username
+        quiet: true
       loop: "{{ users_disallowed_usernames }}"
       loop_control:
         loop_var: users_disallowed_username
@@ -286,13 +284,6 @@
 
       when: user.value.users_mariadb_database_privileges is defined
 
-    # An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml)
-    # is needed here because of this issue
-    # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
-    - name: "Include the loop for VirtualServer's for {{ user.key }}"
-      ansible.builtin.include_tasks: user_check_vhosts.yml
-      when: user.value.users_apache_virtual_hosts is defined
-
     - name: Check that user.value.users_phpfpm_version is in users_phpfpm_versions when defined
       ansible.builtin.assert:
         that:
@@ -473,6 +464,13 @@
       loop_control:
         loop_var: job
       when: user.value.users_cron_jobs is defined
+
+    # An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml)
+    # is needed here because of this issue
+    # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
+    - name: "Include the loop for Apache VirtualHosts for {{ user.key }}"
+      ansible.builtin.include_tasks: user_check_vhosts.yml
+      when: user.value.users_apache_virtual_hosts is defined
 
   tags:
     - users

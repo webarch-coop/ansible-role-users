@@ -1,29 +1,20 @@
 ---
-# The contents of this file cannot be in user_check.yml because of this issue
-# https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
-- name: Apache VirtualHost checks
+- name: Validate Apache VirtualHost variables
   block:
 
     - name: "Debug the VirtualServer's for {{ user.key }}"
       ansible.builtin.debug:
-        msg: "VirtualServer: {{ vhost | to_nice_yaml }}"
+        var: vhost
         verbosity: 2
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost }}"
-
-    - name: Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml
-      ansible.builtin.validate_argument_spec:
-        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/apache_virtual_host_argument_specs.yml') | from_yaml }}"
-        provided_arguments: "{{ vhost.value }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
 
-    - name: "Loop thought the VirtualHosts for {{ user.key }}"
-      ansible.builtin.include_tasks: user_check_vhost.yml
+    - name: Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml
+      ansible.builtin.validate_argument_spec:
+        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/apache_virtual_host_argument_specs.yml') | from_yaml }}"
+        provided_arguments: "{{ vhost.value }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
