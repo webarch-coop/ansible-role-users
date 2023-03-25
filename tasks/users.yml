@@ -93,7 +93,7 @@
             loop_var: user
             label: "{{ user.key }}"
           when:
-            - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
+            - ( user.key != "root" ) and ( "apache2" in ansible_local.dpkg.installed )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
             - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
 

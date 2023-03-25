@@ -68,6 +68,18 @@ mediawiki_wikiname:
   type: str
   required: false
   description: The MediaWiki $wgSitename.
+phpmyadmin_dbname:
+  type: str
+  required: false
+  description: The phpMyAdmin database name.
+phpmyadmin_lang:
+  type: str
+  required: false
+  description: The phpMyAdmin language code.
+phpmyadmin_version:
+  type: str
+  required: false
+  description: The phpMyAdmin version.
 users_apache_auth_name:
   type: str
   required: false
@@ -236,6 +248,20 @@ wordpress_autoupdate:
   type: bool
   required: false
   description: Automatically update WordPress.
+wordpress_config:
+  type: list
+  elements: dict
+  required: false
+  description: A list of WordPress configuration.
+  options:
+    name:
+      type: str
+      required: true
+      description: The WordPress configuration name.
+    value:
+      type: str
+      required: true
+      description: The WordPress configuration value.
 wordpress_dbname:
   type: str
   required: false
@@ -256,6 +282,20 @@ wordpress_notify:
   type: bool
   required: false
   description: Send a email with the WordPress admin account password.
+wordpress_options:
+  type: list
+  elements: dict
+  required: false
+  description: A list of WordPress options.
+  options:
+    option_name:
+      type: str
+      required: true
+      description: The WordPress option name.
+    option_value:
+      type: str
+      required: true
+      description: The WordPress option value.
 wordpress_packages:
   type: list
   elements: dict

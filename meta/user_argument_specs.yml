@@ -161,6 +161,4 @@ users_system:
   type: bool
   required: false
   description: A system user.
-
-
 ...

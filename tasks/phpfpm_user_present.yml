@@ -171,8 +171,7 @@
         mode: "0644"
         owner: root
         group: root
-      when:
-        - '"apache2" in ansible_facts.packages'
+      when: ( "apache2" in ansible_facts.packages )
 
     - name: Users Nginx PHP FPM localhost.d file present
       ansible.builtin.template:
@@ -186,7 +185,7 @@
     - name: PHP CLI configuration requires the CLI package to be installed
       ansible.builtin.assert:
         that:
-          - users_phpcli_pkg in ansible_facts.packages()
+          - users_phpcli_pkg in ansible_local.dpkg.installed
 
     # https://github.com/oerdnj/deb.sury.org/wiki/Managing-Multiple-Versions
     - name: PHP CLI configuration present
@@ -211,7 +210,7 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: users_phpdev_pkg in ansible_facts.packages()
+          when: users_phpdev_pkg in ansible_local.dpkg.installed
 
         - name: Users phpdbg symlink in place
           ansible.builtin.file:
@@ -222,7 +221,7 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: users_phpdbg_pkg in ansible_facts.packages()
+          when: users_phpdbg_pkg in ansible_local.dpkg.installed
 
         - name: Users phpize symlink in place
           ansible.builtin.file:
@@ -233,7 +232,7 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: users_phpdev_pkg in ansible_facts.packages()
+          when: users_phpdev_pkg in ansible_local.dpkg.installed
 
         - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
           ansible.builtin.lineinfile:
@@ -279,11 +278,10 @@
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: users_phpapcu_pkg in ansible_facts.packages()
+          when: users_phpapcu_pkg in ansible_local.dpkg.installed
 
-      when: users_phpcli_pkg in ansible_facts.packages() )
+      when: users_phpcli_pkg in ansible_local.dpkg.installed
 
-  when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group )
   tags:
     - users
 ...

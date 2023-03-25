@@ -1,5 +1,7 @@
 ---
 # This is included from group_members.yml
+#
+# TODO Update this to use facts and a module and not report changes where there are none
 
 - name: "Check that the {{ member }} user exists"
   block:

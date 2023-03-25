@@ -47,6 +47,11 @@ argument_specs:
         type: str
         required: false
         description: The directory used to mount chrooted users home directories, it needs to be a sub-directory of /var/www for suEXEC.
+      users_apache_modules_loaded:
+        type: list
+        elements: str
+        required: false
+        description: A list of modules loaded by Apache.
       users_apache_php_proxy_timeout:
         type: int
         required: false
@@ -224,6 +229,10 @@ argument_specs:
           - dynamic
           - ondemand
           - static
+      users_phpfpm_request_terminate_timeout:
+        type: int
+        required: false
+        description: The default PHP-FPM request_terminate_timeout to use in users pool.d files.
       users_private_files:
         type: list
         required: true

@@ -2,15 +2,6 @@
 - name: System checks
   block:
 
-    - name: Include apt role local fact tasks if variables are not defined
-      ansible.builtin.include_role:
-        name: apt
-        tasks_from: local_facts.yml
-      when: >-
-        ( ansible_local.dpkg.arch is not defined ) or
-        ( ansible_local.gpg.version is not defined ) or
-        ( ansible_local.bash.path is not defined )
-
     - name: Packages present
       ansible.builtin.apt:
         pkg:
@@ -28,15 +19,17 @@
           - vim
           - whois
         state: present
+      register: users_pkgs_installed
 
-    - name: Debian Stretch and Jessie Python 2 packages present
-      ansible.builtin.apt:
-        pkg:
-          - python-dns
-          - python-dnspython
-          - python-passlib
-        state: present
-      when: ansible_distribution_release is regex('jessie|stretch')
+    - name: Include apt role local fact tasks if variables are not defined
+      ansible.builtin.include_role:
+        name: apt
+        tasks_from: local_facts.yml
+      when: >-
+        ( users_pkgs_installed.changed | bool ) or
+        ( ( ansible_local.dpkg.arch is not defined ) or
+        ( ansible_local.gpg.version is not defined ) or
+        ( ansible_local.bash.path is not defined ) )
 
     - name: Check which shells are present
       ansible.builtin.slurp:
@@ -111,21 +104,16 @@
       ansible.builtin.package_facts:
         manager: apt
 
-    - name: Fail if ansible_facts.packages is not defined or empty
-      ansible.builtin.fail:
-        msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
-      when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
-
     - name: Include Apache tasks
       ansible.builtin.include_tasks: apache.yml
       when:
-        - ( "apache2" in ansible_facts.packages )
+        - ( "apache2" in ansible_local.dpkg.installed )
         - ( users_apache is defined ) and ( users_apache )
 
     - name: Include MariaDB tasks
       ansible.builtin.include_tasks: mariadb.yml
       when:
-        - ( "mariadb-server" in ansible_facts.packages )
+        - ( "mariadb-server" in ansible_local.dpkg.installed )
         - ( users_mariadb is defined ) and ( users_apache )
 
     - name: PHP FPM checks and tasks
@@ -134,16 +122,16 @@
         - name: Check that php-fpm is installed
           ansible.builtin.assert:
             that: >-
-              ( "php5.6-fpm" in ansible_facts.packages ) or
-              ( "php7.0-fpm" in ansible_facts.packages ) or
-              ( "php7.1-fpm" in ansible_facts.packages ) or
-              ( "php7.2-fpm" in ansible_facts.packages ) or
-              ( "php7.3-fpm" in ansible_facts.packages ) or
-              ( "php7.4-fpm" in ansible_facts.packages ) or
-              ( "php8.0-fpm" in ansible_facts.packages ) or
-              ( "php8.1-fpm" in ansible_facts.packages ) or
-              ( "php8.2-fpm" in ansible_facts.packages ) or
-              ( "php-fpm" in ansible_facts.packages )
+              ( "php5.6-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.0-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.1-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.2-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.3-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.4-fpm" in ansible_local.dpkg.installed ) or
+              ( "php8.0-fpm" in ansible_local.dpkg.installed ) or
+              ( "php8.1-fpm" in ansible_local.dpkg.installed ) or
+              ( "php8.2-fpm" in ansible_local.dpkg.installed ) or
+              ( "php-fpm" in ansible_local.dpkg.installed )
 
         - name: Query the version of PHP using phpquery -V
           ansible.builtin.command: phpquery -V
@@ -199,7 +187,7 @@
             mode: "0755"
             owner: root
             group: root
-          when: ( "apache2" in ansible_facts.packages )
+          when: ( "apache2" in ansible_local.dpkg.installed )
 
         - name: /etc/nginx/localhost.d present
           ansible.builtin.file:
@@ -208,7 +196,7 @@
             mode: "0755"
             owner: root
             group: root
-          when: ( "nginx" in ansible_facts.packages )
+          when: ( "nginx" in ansible_local.dpkg.installed )
 
       when: ( users_phpfpm is defined ) and ( users_phpfpm | bool )
 

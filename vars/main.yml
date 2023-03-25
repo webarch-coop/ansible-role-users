@@ -2,4 +2,5 @@
 # https://docs.ansible.com/ansible/latest/playbook_guide/complex_data_manipulation.html
 usersvarnames: "{{ q('varnames', '^users_') }}"
 usershostvars: "{{ dict(usersvarnames | list | zip(q('vars', *usersvarnames))) }}"
+users_apache_modules_loaded: []
 ...
