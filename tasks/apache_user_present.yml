@@ -887,6 +887,7 @@
       include_role:
         name: phpmyadmin
       vars:
+        phpmyadmin: true
         phpmyadmin_user: "{{ user.key }}"
         phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
         phpmyadmin_dbname: "{% if vhost.value.phpmyadmin_dbname is defined %}{{ vhost.value.phpmyadmin_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
@@ -895,15 +896,13 @@
         phpmyadmin_dbhost: localhost
         phpmyadmin_dbport: 3306
         phpmyadmin_dbsocket: /var/run/mysqld/mysqld.sock
-        phpmyadmin_url: "https://{{ vhost.value.users_apache_server_name }}/"
         phpmyadmin_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         phpmyadmin_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
         phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
         phpmyadmin_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         phpmyadmin_version: "{{ vhost.value.phpmyadmin_version }}"
         phpmyadmin_lang: "{{ vhost.value.phpmyadmin_lang | default('en') }}"
-        phpmyadmin_env:
-          PATH: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin:/usr/local/bin:/usr/bin:/bin"
+        phpmyadmin_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -912,7 +911,7 @@
 
   when:
     - ( vhost.value.users_cms is defined )
-    - ( users_mariadb is defined ) and ( users_mariadb )
+    - ( users_mariadb is defined ) and ( users_mariadb | bool )
     - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
   tags:
     - users
