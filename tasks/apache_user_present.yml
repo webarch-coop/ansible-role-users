@@ -902,6 +902,8 @@
         phpmyadmin_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         phpmyadmin_version: "{{ vhost.value.phpmyadmin_version }}"
         phpmyadmin_lang: "{{ vhost.value.phpmyadmin_lang | default('en') }}"
+        phpmyadmin_env:
+          PATH: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin:/usr/local/bin:/usr/bin:/bin"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
