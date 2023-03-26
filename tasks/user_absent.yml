@@ -12,7 +12,7 @@
 - name: "Include Apache config tasks absent user for {{ user.key }}"
   include_tasks: apache_user_absent.yml
   when:
-    - ( "apache2" in ansible_facts.packages )
+    - ( "apache2" in ansible_local.dpkg.installed )
     - ( users_apache is defined ) and ( users_apache )
   tags:
     - users

@@ -30,6 +30,7 @@
           set_fact:
             users_apache_modules_loaded: []
 
+        # TODO Replace this loop with map https://git.coop/-/snippets/111
         - name: Set an array of the loaded modules
           set_fact:
             users_apache_modules_loaded: "{{ users_apache_modules_loaded + [ line.split(' ')[0] ] }}"
