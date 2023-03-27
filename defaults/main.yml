@@ -246,13 +246,13 @@ users_phpfpm_extensions:
 users_phpfpm_enable_open_basedir: false
 # PHP expands $pool to the pool name and in this case it is the same as the username
 users_phpfpm_open_basedir:
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}/"
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp/"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp"
   - /usr/share/php
-# The MediaWiki file includes/shell/Command.php uses/bin/bash
+# The MediaWiki file includes/shell/Command.php uses /bin/bash
 users_phpfpm_open_basedir_mediawiki:
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}/"
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp/"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp"
   - /usr/share/php
   - /bin
 # users_phpfpm_disable_functions values are appended, they do not overwrite
