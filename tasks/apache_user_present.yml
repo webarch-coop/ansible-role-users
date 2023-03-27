@@ -903,6 +903,8 @@
         phpmyadmin_version: "{{ vhost.value.phpmyadmin_version }}"
         phpmyadmin_lang: "{{ vhost.value.phpmyadmin_lang | default('en') }}"
         phpmyadmin_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+        phpmyadmin_env:
+          PATH: "{% if users_apache_chroot is defined and users_apache_chroot | bool %}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/bin{% else %}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin{% endif %}:/usr/local/bin:/usr/bin:/bin"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
