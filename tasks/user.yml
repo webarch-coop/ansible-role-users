@@ -50,16 +50,38 @@
   tags:
     - users
 
-- name: Bash ~/.bash_profile present for users with skel set to www
-  ansible.builtin.copy:
-    src: .bashrc
-    dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.bashrc"
-    mode: "0600"
-    owner: "{{ user.value.users_home_owner | default(user.key) }}"
-    group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+- name: Enforce env vars for users with a skel set to /usr/local/etc/skel.d/www
+  block:
+
+    - name: Bash ~/.bash_profile present for users with skel set to /usr/local/etc/skel.d/www
+      ansible.builtin.copy:
+        src: .bash_profile
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.bash_profile"
+        mode: "0600"
+        owner: "{{ user.value.users_home_owner | default(user.key) }}"
+        group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+
+    - name: Remove comment above line in ~/.bashrc that caused duplicate paths in PATH
+      ansible.builtin.lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.bashrc"
+        line: "# Add ~/bin to $PATH"
+        state: absent
+        mode: "0600"
+        owner: "{{ user.value.users_home_owner | default(user.key) }}"
+        group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+
+    - name: Remove line in ~/.bashrc that caused duplicate paths in PATH
+      ansible.builtin.lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.bashrc"
+        line: 'export PATH="${HOME}/bin:${PATH}"'
+        state: absent
+        mode: "0600"
+        owner: "{{ user.value.users_home_owner | default(user.key) }}"
+        group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+
   when:
     - user.value.users_skel is defined
-    - user.value.users_skel == "www"
+    - user.value.users_skel == "/usr/local/etc/skel.d/www"
   tags:
     - users
 
