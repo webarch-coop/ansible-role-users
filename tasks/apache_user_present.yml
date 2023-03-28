@@ -531,8 +531,8 @@
         nextcloud_notify_signature: "{{ users_notify_signature }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
         nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
+        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default('absent') }}"
+        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default('absent') }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -579,8 +579,8 @@
         nextcloud_notify_signature: "{{ users_notify_signature }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
         nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
+        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default('absent') }}"
+        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default('absent') }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -631,8 +631,8 @@
         nextcloud_notify_signature: "{{ users_notify_signature }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
         nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
+        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default('absent') }}"
+        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default('absent') }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -680,8 +680,8 @@
         nextcloud_notify_signature: "{{ users_notify_signature }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
         nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
+        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default('absent') }}"
+        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default('absent') }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost

@@ -68,6 +68,127 @@ mediawiki_wikiname:
   type: str
   required: false
   description: The MediaWiki $wgSitename.
+nextcloud_admin_email:
+  type: str
+  required: false
+  description: Nextcloud admin email address.
+nextcloud_app_disable:
+  type: list
+  elements: str
+  required: false
+  description: A list of Nextcloud apps to disable.
+nextcloud_app_enable:
+  type: list
+  elements: str
+  required: false
+  description: A list of Nextcloud apps to enable.
+nextcloud_app_install:
+  type: list
+  elements: str
+  required: false
+  description: A list of Nextcloud apps to install.
+nextcloud_app_remove:
+  type: list
+  elements: str
+  required: false
+  description: A list of Nextcloud apps to remove.
+nextcloud_autoupdate:
+  type: bool
+  required: false
+  description: Automatically update Nextcloud.
+nextcloud_admin_user:
+  type: str
+  required: false
+  description: Nextcloud admin username.
+nextcloud_cron:
+  type: str
+  required: false
+  description: Nextcloud cron method.
+  choices:
+    - ajax
+    - cron
+nextcloud_dbname:
+  type: str
+  required: false
+  description: Nextcloud database name.
+nextcloud_dbprefix:
+  type: str
+  required: false
+  description: Nextcloud database prefix.
+nextcloud_dbuser:
+  type: str
+  required: false
+  description: Nextcloud database username.
+nextcloud_default_phone_region:
+  type: str
+  required: false
+  description: Nextcloud ISO_3166-1 phone region code.
+nextcloud_domain:
+  type: str
+  required: false
+  description: Nextcloud domain name.
+nextcloud_group:
+  type: str
+  required: false
+  description: Nextcloud group.
+nextcloud_locale:
+  type: str
+  required: false
+  description: Nextcloud language code.
+nextcloud_mail_domain:
+  type: str
+  required: false
+  description: Nextcloud outgoing email address domain name, the part after @.
+nextcloud_mail_from_address:
+  type: str
+  required: false
+  description: Nextcloud outgoing email address username, the part before @.
+nextcloud_memcache_distributed:
+  type: str
+  required: false
+  description: Nextcloud distributed cache.
+  choices:
+    - absent
+    - redis
+nextcloud_memcache_local:
+  type: str
+  required: false
+  description: Nextcloud distributed cache.
+  choices:
+    - apcu
+    - absent
+    - redis
+nextcloud_memcache_locking:
+  type: str
+  required: false
+  description: Nextcloud memcache locking.
+  choices:
+    - absent
+    - redis
+nextcloud_notify:
+  type: bool
+  required: false
+  description: Send a email with the admin login details when installing.
+nextcloud_onlyoffice_documentserver:
+  type: str
+  required: false
+  description: Domain name of the ONLYOFFICE document server.
+nextcloud_title:
+  type: str
+  required: false
+  description: Nextcloud title.
+nextcloud_url:
+  type: str
+  required: false
+  description: Nextcloud URL.
+nextcloud_user:
+  type: str
+  required: false
+  description: Nextcloud user.
+nextcloud_version:
+  type: str
+  required: false
+  description: Nextcloud version.
 phpmyadmin_dbname:
   type: str
   required: false
@@ -169,6 +290,10 @@ users_apache_locations:
       type: str
       required: true
       description: The Apache Location directive path relative to the DocmentRoot.
+    proxy_pass:
+      type: str
+      required: true
+      description: A ProxyPass URL to use within the Location directive.
     redirect:
       type: str
       required: false
@@ -178,6 +303,10 @@ users_apache_locations:
       elements: str
       required: false
       description: A list of strings for the Apache Require directive, each item will result in one Require directive being generated.
+    reverse:
+      type: bool
+      required: false
+      description: Enable ProxyPassReverse using the same URL as used for ProxyPass within the Location directive.
 users_apache_nophp_dirs:
   type: list
   elements: str
@@ -188,6 +317,11 @@ users_apache_options:
   elements: str
   required: false
   description: A list of Apache Directory Options.
+users_apache_override:
+  type: list
+  elements: str
+  required: false
+  description: A list of Apache AllowOverride settings.
 users_apache_require:
   type: list
   elements: str

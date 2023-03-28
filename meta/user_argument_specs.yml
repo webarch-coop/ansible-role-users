@@ -42,6 +42,10 @@ users_home:
   type: str
   required: false
   description: Path of the users $HOME directory.
+users_home_group:
+  type: str
+  required: false
+  description: The users $HOME directory group.
 users_home_mode:
   type: str
   required: false
@@ -128,6 +132,18 @@ users_phpfpm_pm:
     - dynamic
     - ondemand
     - static
+users_phpfpm_pm_max_spare_servers:
+  type: int
+  required: false
+  description: The PHP-FPM pool max spare servers.
+users_phpfpm_pm_start_servers:
+  type: int
+  required: false
+  description: The PHP-FPM pool start servers.
+users_phpfpm_sendmail_from:
+  type: str
+  required: false
+  description: The users From email header.
 users_phpfpm_version:
   type: str
   required: false
