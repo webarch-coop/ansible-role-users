@@ -173,6 +173,10 @@ nextcloud_onlyoffice_documentserver:
   type: str
   required: false
   description: Domain name of the ONLYOFFICE document server.
+nextcloud_php_version:
+  type: str
+  required: false
+  description: The version of PHP that Nextcloud is set to use.
 nextcloud_title:
   type: str
   required: false
