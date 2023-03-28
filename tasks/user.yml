@@ -53,31 +53,45 @@
 - name: Enforce env vars for users with a skel set to /usr/local/etc/skel.d/www
   block:
 
+    - name: Check if ~/.bash_profile is present
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_profile"
+      register: users_bash_profile
+
+    - name: Debug users_bash_profile
+      ansible.builtin.debug:
+        var: users_bash_profile
+        verbosity: 2
+
     - name: Bash ~/.bash_profile present for users with skel set to /usr/local/etc/skel.d/www
       ansible.builtin.copy:
         src: .bash_profile
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.bash_profile"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_profile"
         mode: "0600"
-        owner: "{{ user.value.users_home_owner | default(user.key) }}"
-        group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+      when: >-
+        ( not users_bash_profile.stat.exists | bool ) or
+        ( ( users_bash_profile.stat.size is defined ) and
+        ( users_bash_profile.stat.size == 0 ) )
 
     - name: Remove comment above line in ~/.bashrc that caused duplicate paths in PATH
       ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.bashrc"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
         line: "# Add ~/bin to $PATH"
         state: absent
         mode: "0600"
-        owner: "{{ user.value.users_home_owner | default(user.key) }}"
-        group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: Remove line in ~/.bashrc that caused duplicate paths in PATH
       ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.bashrc"
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
         line: 'export PATH="${HOME}/bin:${PATH}"'
         state: absent
         mode: "0600"
-        owner: "{{ user.value.users_home_owner | default(user.key) }}"
-        group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
 
   when:
     - user.value.users_skel is defined
