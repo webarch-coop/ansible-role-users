@@ -233,6 +233,10 @@ argument_specs:
         type: int
         required: false
         description: The default PHP-FPM request_terminate_timeout to use in users pool.d files.
+      users_private_dirs_mode:
+        type: str
+        required: false
+        description: The octal mode as a string for the users private directory.
       users_private_files:
         type: list
         required: true
