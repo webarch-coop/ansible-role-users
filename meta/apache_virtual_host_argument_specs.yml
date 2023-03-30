@@ -326,6 +326,23 @@ users_apache_override:
   elements: str
   required: false
   description: A list of Apache AllowOverride settings.
+users_apache_proxy_pass:
+  type: list
+  elements: dict
+  description: Apache ProxyPass list.
+  options:
+    path:
+      type: str
+      required: true
+      description: The path of the file or directory relative to the users HOME.
+    reverse:
+      type: bool
+      required: false
+      description: Enable ProxyPassReverse.
+    url:
+      type: str
+      required: true
+      description: Apache URL string for ProxyPass.
 users_apache_require:
   type: list
   elements: str

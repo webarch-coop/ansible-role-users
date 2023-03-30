@@ -532,8 +532,8 @@ users_phpfpm_disable_functions_nextcloud:
   - proc_nice
   - proc_open
   - proc_terminate
-  # The shell_exec function is used by Matomo
-  - shell_exec
+  # The shell_exec function is used by Matomo and Nextcloud for the serverinfo
+  # - shell_exec
   - show_source
   - socket_create
   - symlink
