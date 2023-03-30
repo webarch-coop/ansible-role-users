@@ -284,6 +284,11 @@
 
       when: user.value.users_mariadb_database_privileges is defined
 
+    - name: Debug users_phpfpm_versions
+      ansible.builtin.debug:
+        var: users_phpfpm_versions
+        verbosity: 2
+
     - name: Check that user.value.users_phpfpm_version is in users_phpfpm_versions when defined
       ansible.builtin.assert:
         that:
