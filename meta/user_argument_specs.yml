@@ -148,6 +148,10 @@ users_phpfpm_version:
   type: str
   required: false
   description: The verson of PHP.
+users_private_dirs_mode:
+  type: str
+  required: false
+  description: The octal mode as a string for the users private directory.
 users_quota:
   type: str
   required: false
