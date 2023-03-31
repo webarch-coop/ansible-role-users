@@ -503,7 +503,6 @@
       vars:
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
         nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
@@ -552,7 +551,6 @@
       vars:
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
         nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
@@ -601,7 +599,6 @@
       vars:
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
         nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
@@ -651,7 +648,6 @@
       vars:
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
         nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
