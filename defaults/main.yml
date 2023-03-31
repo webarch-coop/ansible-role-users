@@ -44,6 +44,7 @@ users_disallowed_usernames:
 users_basedir: /home
 users_sites_dir: sites
 users_sites_dir_mode: "0750"
+users_firewall: false
 # Define users_matomo to true for servers with Matomo and automatic Matomo account
 # provisioning for users which have users_matomo_account set to True
 users_matomo: false
