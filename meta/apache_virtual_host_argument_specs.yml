@@ -296,7 +296,7 @@ users_apache_locations:
       description: The Apache Location directive path relative to the DocmentRoot.
     proxy_pass:
       type: str
-      required: true
+      required: false
       description: A ProxyPass URL to use within the Location directive.
     redirect:
       type: str

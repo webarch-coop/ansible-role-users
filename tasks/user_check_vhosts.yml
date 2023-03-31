@@ -13,15 +13,14 @@
         loop_var: vhost
         label: "{{ vhost }}"
 
-    # TODO add this back!
-    # - name: Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml
-    #   ansible.builtin.validate_argument_spec:
-    #     argument_spec: "{{ lookup('ansible.builtin.file', 'meta/apache_virtual_host_argument_specs.yml') | from_yaml }}"
-    #     provided_arguments: "{{ vhost.value }}"
-    #   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-    #   loop_control:
-    #     loop_var: vhost
-    #     label: "{{ vhost.key }}"
+    - name: Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml
+      ansible.builtin.validate_argument_spec:
+        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/apache_virtual_host_argument_specs.yml') | from_yaml }}"
+        provided_arguments: "{{ vhost.value }}"
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
 
     - name: "Loop thought the VirtualHosts for {{ user.key }}"
       ansible.builtin.include_tasks: user_check_vhost.yml
