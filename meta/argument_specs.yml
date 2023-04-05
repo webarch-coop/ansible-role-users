@@ -288,6 +288,11 @@ argument_specs:
         type: str
         required: true
         description: The path to use for the directory that is used to record the users state.
+      users_update_groups:
+        type: list
+        elements: str
+        required: false
+        description: Update the users who are members of one or more of the groups.
       users_update_strategy:
         type: str
         required: true

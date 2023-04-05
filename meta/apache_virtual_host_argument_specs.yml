@@ -8,14 +8,321 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
+drupal_admin_email:
+  type: str
+  required: false
+  description: Drupal admin email address.
+drupal_admin_user:
+  type: str
+  required: false
+  description: Drupal username.
+drupal_autoupdate:
+  type: bool
+  required: false
+  description: Drupal automatic updates.
+drupal_dbname:
+  type: str
+  required: false
+  description: Drupal database name.
+drupal_dbuser:
+  type: str
+  required: false
+  description: Drupal database user.
+drupal_dbpass:
+  type: str
+  required: false
+  description: Drupal database user password.
+drupal_dbprefix:
+  type: str
+  required: false
+  description: Drupal database table prefix.
+drupal_docroot:
+  type: str
+  required: false
+  description: Drupal Apache DocumentRoot.
+drupal_docroot_mode:
+  type: str
+  required: false
+  description: Drupal Apache DocumentRoot directory octal mode.
+drupal_group:
+  type: str
+  required: false
+  description: Drupal users group.
+drupal_home:
+  type: str
+  required: false
+  description: Drupal user home directory.
+drupal_locale:
+  type: str
+  required: false
+  description: Drupal locale.
+drupal_notify:
+  type: str
+  required: false
+  description: Drupal send account notification on install.
+drupal_notify_from:
+  type: str
+  required: false
+  description: Drupal notify from email address.
+drupal_notify_headers:
+  type: str
+  required: false
+  description: Drupal notify email headers.
+drupal_notify_reply_to:
+  type: str
+  required: false
+  description: Drupal notify reply-to email address.
+drupal_notify_signature:
+  type: str
+  required: false
+  description: Drupal notify email signature.
+drupal_notify_subject_tag:
+  type: str
+  required: false
+  description: Drupal notify subject tag.
+drupal_title:
+  type: str
+  required: false
+  description: Drupal site title.
+drupal_tmp:
+  type: str
+  required: false
+  description: Drupal temp directory.
+drupal_trusted_hosts:
+  type: list
+  elements: str
+  required: false
+  description: Drupal trusted hosts.
+drupal_url:
+  type: str
+  required: false
+  description: Drupal website URL.
+drupal_user:
+  type: str
+  required: false
+  description: Drupal user.
+
+flarum_admin_email:
+  type: str
+  required: false
+  description: Flarum admin email address.
+flarum_admin_user:
+  type: str
+  required: false
+  description: Flarum admin user name.
+flarum_autoupdate:
+  type: bool
+  required: false
+  description: Flarum automatic updates.
+flarum_dbname:
+  type: str
+  required: false
+  description: Flarum database name.
+flarum_dbpass:
+  type: str
+  required: false
+  description: Flarum databased user password.
+flarum_dbprefix:
+  type: str
+  required: false
+  description: Flarum database table prefix.
+flarum_dbuser:
+  type: str
+  required: false
+  description: Flarum database user name.
+flarum_description:
+  type: str
+  required: false
+  description: Flarum site description.
+flarum_docroot:
+  type: str
+  required: false
+  description: Flarum Apache DocumentRoot directory.
+flarum_group:
+  type: str
+  required: false
+  description: Flarum group.
+flarum_home:
+  type: str
+  required: false
+  description: Flarum home directory.
+flarum_locale:
+  type: str
+  required: false
+  description: Flarum locale.
+flarum_mail_from:
+  type: str
+  required: false
+  description: Flarum email from address.
+flarum_notify:
+  type: bool
+  required: false
+  description: Flarum send notification emmail on account creation.
+flarum_notify_from:
+  type: str
+  required: false
+  description: Flarum notification from email address.
+flarum_notify_headers:
+  type: str
+  required: false
+  description: Flarum notification email headers.
+flarum_notify_reply_to:
+  type: str
+  required: false
+  description: Flarum notification reply-to email address.
+flarum_notify_signature:
+  type: str
+  required: false
+  description: Flarum notification email signature.
+flarum_notify_subject_tag:
+  type: str
+  required: false
+  description: Flarum notification subject tag.
+flarum_title:
+  type: str
+  required: false
+  description: Flarum site title.
+flarum_tmp:
+  type: str
+  required: false
+  description: Flarum temp directory.
+flarum_trusted_hosts:
+  type: list
+  elements: str
+  required: false
+  description: Flarum list of trusted hosts.
+flarum_url:
+  type: str
+  required: false
+  description: Flarum site URL.
+flarum_user:
+  type: str
+  required: false
+  description: Flarum user.
+flarum_version:
+  type: str
+  required: false
+  description: Flarum version.
+flarum_welcome_message:
+  type: str
+  required: false
+  description: Flarum site welcome message.
+flarum_welcome_title:
+  type: str
+  required: false
+  description: Flarum site title.
+kimai_admin_email:
+  type: str
+  required: false
+  description: Kimai admin email address.
+kimai_admin_user:
+  type: str
+  required: false
+  description: Kimai admin username.
+kimai_dbname:
+  type: str
+  required: false
+  description: Kimai database name.
+kimai_dbpass:
+  type: str
+  required: false
+  description: Kimai database user password.
+kimai_dbuser:
+  type: str
+  required: false
+  description: Kimai database user name.
+kimai_docroot:
+  type: str
+  required: false
+  description: Kimai Apache DocumentRoot directory.
+kimai_docroot_mode:
+  type: str
+  required: false
+  description: Kimai Apache DocumentRoot directory octal mode.
+kimai_group:
+  type: str
+  required: false
+  description: Kimai group.
+kimai_home:
+  type: str
+  required: false
+  description: Kimai home directory.
+kimai_locale:
+  type: str
+  required: false
+  description: Kimai locale.
+kimai_notify:
+  type: bool
+  required: false
+  description: Kimai send notification of admin password to admin user on install.
+kimai_notify_from:
+  type: str
+  required: false
+  description: Kimai notificationm from email address.
+kimai_notify_headers:
+  type: str
+  required: false
+  description: Kimai notification email headers.
+kimai_notify_reply_to:
+  type: str
+  required: false
+  description: Kimai notification reply-to email address.
+kimai_notify_subject_tag:
+  type: str
+  required: false
+  description: Kimai notification subject tag.
+kimai_private:
+  type: str
+  required: false
+  description: Kimai private directory.
+kimai_notify_signature:
+  type: str
+  required: false
+  description: Kimai notification email signature.
+kimai_tmp:
+  type: str
+  required: false
+  description: Kimai temp directory.
+kimai_url:
+  type: str
+  required: false
+  description: Kimai instance URL.
+kimai_user:
+  type: str
+  required: false
+  description: Kimai user.
+kimai_version:
+  type: str
+  required: false
+  description: Kimai version.
 matomo_autoupdate:
   type: bool
   required: false
   description: Automatically update Matomo.
+matomo_bin:
+  type: str
+  required: false
+  description: Matomo bin directory.
 matomo_dbname:
   type: str
   required: false
   description: The name of the Matomo database.
+matomo_db_host:
+  type: str
+  required: false
+  description: Matomo database host.
+matomo_db_pass:
+  type: str
+  required: false
+  description: Matomo database user password.
+matomo_db_prefix:
+  type: str
+  required: false
+  description: Matomo database table prefix.
+matomo_db_username:
+  type: str
+  required: false
+  description: Matomo database user name.
 matomo_first_site_name:
   type: str
   required: false
@@ -32,10 +339,54 @@ matomo_first_user_email:
   type: str
   required: false
   description: The email address for the first Matomo user.
+matomo_group:
+  type: str
+  required: false
+  description: Matomo group.
+matomo_home:
+  type: str
+  required: false
+  description: Matomo home directory.
+matomo_html:
+  type: str
+  required: false
+  description: Matomo Apache DocumentRoot.
+matomo_logs:
+  type: str
+  required: false
+  description: Matomo private directory for log files.
+matomo_notify_from:
+  type: str
+  required: false
+  description: Matomo notification from email address.
+matomo_notify_headers:
+  type: str
+  required: false
+  description: Matomo notification email headers.
+matomo_notify_reply_to:
+  type: str
+  required: false
+  description: Matomo notification reply-to email address.
+matomo_notify_subject_tag:
+  type: str
+  required: false
+  description: Matomo notification subject tag.
 matomo_notify_passwd:
   type: bool
   required: false
-  description: Send a email with the Matomo user account password.
+  description: Matomo send password notification to the first user account when installing.
+matomo_private:
+  type: str
+  required: false
+  description: Matomo private directory.
+matomo_user:
+  type: str
+  required: false
+  description: Matomo user.
+matomo_url:
+  type: str
+  required: false
+  description: Matomo URL.
 matomo_version:
   type: str
   required: false
@@ -48,26 +399,207 @@ mediawiki_admin_user:
   type: str
   required: false
   description: A username for the MediaWiki admin user.
+mediawiki_apple_touch_icon:
+  type: str
+  required: false
+  description: Mediawiki path relative to the DocumentRoot for the Apple touch icon.
 mediawiki_dbname:
   type: str
   required: false
   description: The database to use for MediaWiki.
+mediawiki_dbpass:
+  type: str
+  required: false
+  description: Mediawiki database password.
+mediawiki_dbprefix:
+  type: str
+  required: false
+  description: Mediawiki database table prefix.
+mediawiki_dbuser:
+  type: str
+  required: false
+  description: Mediawiki database user name.
+mediawiki_docroot:
+  type: str
+  required: false
+  description: Mediawiki Apache DocumentRoot directory.
+mediawiki_domain:
+  type: str
+  required: false
+  description: Mediawiki domain name.
+mediawiki_favicon:
+  type: str
+  required: false
+  description: Mediawiki path relative to the DocumentRoot for the favicon.
+mediawiki_group:
+  type: str
+  required: false
+  description: Mediawiki group.
 mediawiki_locale:
   type: str
   required: false
   description: The MediaWiki locale.
+mediawiki_logo:
+  type: str
+  required: false
+  description: Mediawiki path relative to the DocumentRoot for the logo.
 mediawiki_notify:
   type: bool
   required: false
   description: Send a email with the MediaWiki admin account password.
+mediawiki_notify_from:
+  type: str
+  required: false
+  description: Mediawiki notification from email address.
+mediawiki_notify_headers:
+  type: str
+  required: false
+  description: Mediawiki notification email headers.
+mediawiki_notify_reply_to:
+  type: str
+  required: false
+  description: Mediawiki notification reply-to email address.
+mediawiki_notify_signature:
+  type: str
+  required: false
+  description: Mediawiki notification email singature.
+mediawiki_notify_subject_tag:
+  type: str
+  required: false
+  description: Mediawiki notification email subject tag.
+mediawiki_password_sender:
+  type: str
+  required: false
+  description: Mediawiki password sender email address.
+mediawiki_private:
+  type: str
+  required: false
+  description: Mediawiki private directory.
 mediawiki_semver:
   type: str
   required: false
   description: The MediaWiki semantic version number.
+mediawiki_url:
+  type: str
+  required: false
+  description: Mediawiki URL.
 mediawiki_wikiname:
   type: str
   required: false
   description: The MediaWiki $wgSitename.
+mediawiki_user:
+  type: str
+  required: false
+  description: Mediawiki user.
+moodle_admin_email:
+  type: str
+  required: false
+  description: Moodle admin email address.
+moodle_admin_user:
+  type: str
+  required: false
+  description: Moodle admin user anme.
+moodle_autoupdate:
+  type: bool
+  required: false
+  description: Moodle automatic updates.
+moodle_cron:
+  type: str
+  required: false
+  description: Moodle crontab.
+moodle_data:
+  type: str
+  required: false
+  description: Moodle data directory.
+moodle_dbname:
+  type: str
+  required: false
+  description: Moodle database name.
+moodle_dbpass:
+  type: str
+  required: false
+  description: Moodle database password.
+moodle_dbprefix:
+  type: str
+  required: false
+  description: Moodle database table prefix.
+moodle_dbuser:
+  type: str
+  required: false
+  description: Moodle databasae user name.
+moodle_docroot:
+  type: str
+  required: false
+  description: Moodle Apache DocuemntRoot directory.
+moodle_domain:
+  type: str
+  required: false
+  description: Moodle domain name.
+moodle_fullname:
+  type: str
+  required: false
+  description: Moodle site full name.
+moodle_group:
+  type: str
+  required: false
+  description: Moodle group.
+moodle_home:
+  type: str
+  required: false
+  description: Moodle home directory.
+moodle_locale:
+  type: str
+  required: false
+  description: Moodle locale.
+moodle_notify:
+  type: bool
+  required: false
+  description: Moodle send notification of admin account login when installing.
+moodle_notify_from:
+  type: str
+  required: false
+  description: Moodle notification from email address.
+moodle_notify_headers:
+  type: str
+  required: false
+  description: Moodle notification email headers.
+moodle_notify_reply_to:
+  type: str
+  required: false
+  description: Moodle notification reply-to email address.
+moodle_notify_signature:
+  type: str
+  required: false
+  description: Moodle notification email signature.
+moodle_notify_subject_tag:
+  type: str
+  required: false
+  description: Moodle notification subject tag.
+moodle_shortname:
+  type: str
+  required: false
+  description: Moodle short name.
+moodle_tmp:
+  type: str
+  required: false
+  description: Moodle temp directory.
+moodle_trusted_hosts:
+  type: list
+  elements: str
+  required: false
+  description: Moodle trusted hosts.
+moodle_url:
+  type: str
+  required: false
+  description: Moodle URL.
+moodle_user:
+  type: str
+  required: false
+  description: Moodle user.
+moodle_version:
+  type: str
+  required: false
+  description: Moodle version.
 nextcloud_admin_email:
   type: str
   required: false
@@ -193,14 +725,66 @@ nextcloud_version:
   type: str
   required: false
   description: Nextcloud version.
+phpmyadmin:
+  type: bool
+  required: false
+  description: Run the tasks in the phpmyuadmin role.
+phpmyadmin_dbhost:
+  type: str
+  required: false
+  description: The phpMyAdmin database host.
 phpmyadmin_dbname:
   type: str
   required: false
   description: The phpMyAdmin database name.
+phpmyadmin_dbpass:
+  type: str
+  required: false
+  description: The phpMyAdmin database user anme password.
+phpmyadmin_dbport:
+  type: int
+  required: false
+  description: The phpMyAdmin database port number.
+phpmyadmin_dbsocket:
+  type: str
+  required: false
+  description: The phpMyAdmin database socket path.
+phpmyadmin_dbuser:
+  type: str
+  required: false
+  description: The phpMyAdmin database user.
+phpmyadmin_docroot:
+  type: str
+  required: false
+  description: The phpMyAdmin Apache DocumentRoot directory.
+phpmyadmin_env:
+  type: dict
+  required: false
+  description: The phpMyAdmin environment dictionary.
+phpmyadmin_group:
+  type: str
+  required: false
+  description: The phpMyAdmin group.
+phpmyadmin_home:
+  type: str
+  required: false
+  description: The phpMyAdmin home directory.
 phpmyadmin_lang:
   type: str
   required: false
   description: The phpMyAdmin language code.
+phpmyadmin_private:
+  type: str
+  required: false
+  description: The phpMyAdmin private directory.
+phpmyadmin_tmp:
+  type: str
+  required: false
+  description: The phpMyAdmin temp directory.
+phpmyadmin_user:
+  type: str
+  required: false
+  description: The phpMyAdmin user.
 phpmyadmin_version:
   type: str
   required: false
