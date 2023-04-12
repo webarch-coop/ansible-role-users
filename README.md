@@ -543,6 +543,8 @@ directives, for example:
 
 ### Rewrite
 
+TODO This isn't currently implemented!
+
 The `users_apache_rewrite` array can be used to set `RewriteCond` and
 `RewriteRule` directives, for example:
 

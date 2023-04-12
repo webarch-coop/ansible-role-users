@@ -713,7 +713,7 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
   <IfModule proxy_module>
     # In reverse proxy or gateway configuration, ProxyRequests should be set to Off
     ProxyRequests Off
-    # Enable error documents under /wsh to be served rather than proxying error responses
+    # Server Apache error documents rather than proxy errors
     ProxyErrorOverride On
     {%- if apache_conf_enabled is defined %}
       {%- if "webarch" in apache_conf_enabled %}
