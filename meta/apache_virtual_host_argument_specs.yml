@@ -967,6 +967,16 @@ users_apache_proxy_pass:
       type: bool
       required: false
       description: ProxyPreserveHost directive.
+    rewrite_conditions:
+      type: list
+      elements: str
+      required: false
+      description: RewriteCond directives.
+    rewrite_rules:
+      type: list
+      elements: str
+      required: false
+      description: RewriteRule directives.
     reverse:
       type: bool
       required: false
