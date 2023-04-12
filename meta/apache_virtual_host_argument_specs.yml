@@ -829,6 +829,42 @@ users_apache_filesmatch:
       elements: str
       required: false
       description: A list of strings for the Apache Require directive within FilesMatch, each item will result in one Require directive being generated.
+users_apache_headers:
+  type: list
+  elements: dict
+  required: false
+  description: A list to configure Apache Header and RequestHeader directives.
+  options:
+    action:
+      type: str
+      required: false
+      description: The Apache header action.
+      choices:
+        - add
+        - append
+        - echo
+        - edit
+        - 'edit*'
+        - merge
+        - set
+        - setifempty
+        - unset
+        - note
+    arg:
+      type: str
+      required: false
+      description: The Apache header argument.
+    expr:
+      type: str
+      required: false
+      description: The Apache header expression.
+    type:
+      type: str
+      required: true
+      description: The Apache header type.
+      choices:
+        - request
+        - response
 users_apache_htauth_users:
   type: list
   elements: dict
@@ -915,6 +951,10 @@ users_apache_proxy_pass:
   elements: dict
   description: Apache ProxyPass list.
   options:
+    add_headers:
+      type: bool
+      required: false
+      descriptionm: Enable or disable Apache ProxyAddHeaders.
     path:
       type: str
       required: true
@@ -947,6 +987,28 @@ users_apache_server_name:
   type: str
   required: true
   description: The domain name for the Apache ServerName.
+users_apache_set_env_if:
+  type: list
+  elements: dict
+  required: false
+  description: Set Apache SetEnvIf and SetEnvIfNoCase directives.
+  options:
+    attribute:
+      type: str
+      required: false
+      description: An HTTP request header field.
+    env:
+      type: str
+      required: false
+      description: The name of an environment variable in the list of those associated with the request.
+    case:
+      type: bool
+      required: false
+      description: Enable case-insensitive regular expression matching.
+    regex:
+      type: bool
+      required: false
+      description: A regular expression for the SetEnvIf / SetEnvIfNoCase directive.
 users_apache_sts:
   type: list
   elements: str

@@ -89,7 +89,7 @@
   <IfModule setenvif_module>
     {%- if users_apache_set_env_if is defined %}
       {%- for setenv in users_apache_set_env_if %}
-        {%- if setenv.case is not defined or setenv.case is defined and setenv.case %}
+        {%- if setenv.case is not defined or setenv.case is defined and setenv.case | bool %}
     SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
         {%- else %}
     SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
@@ -730,7 +730,7 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
     ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
       {%- endif %}
       {%- if proxy.add_headers is defined %}
-    ProxyAddHeaders {% if proxy.add_headers %}On{% else %}Off{% endif %}
+    ProxyAddHeaders {% if proxy.add_headers | bool %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.pathmatch is defined and proxy.url is defined %}
     ProxyPassMatch "{{ proxy.pathmatch }}" "{{ proxy.url }}"

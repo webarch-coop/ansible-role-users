@@ -435,7 +435,7 @@ Will generate:
 ```apache
 SetEnv FOO bar
 UnsetEnv BAZ
-``` 
+```
 
 ### SetEnvIf
 
@@ -557,7 +557,6 @@ The `users_apache_rewrite` array can be used to set `RewriteCond` and
           - rule: ^(?:build|tests|config|lib|3rdparty|templates)/.* - [R=404,L]
           - rule: ^\.well-known/(?!acme-challenge|pki-validation) /index.php [QSA,L]
           - rule: ^(?:\.(?!well-known)|autotest|occ|issue|indie|db_|console).* - [R=404,L]
-         
 ```
 
 To generate:
@@ -789,7 +788,6 @@ For an
 server:
 
 ```yaml
-        
         users_apache_set_env_if:
           - attribute: Host
             regex: "^(.*)$"
