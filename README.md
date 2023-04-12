@@ -1,4 +1,4 @@
-# Webarchitects Ansible Debian Users Role 
+# Webarchitects Ansible Debian Users Role
 
 [![pipeline status](https://git.coop/webarch/users/badges/master/pipeline.svg)](https://git.coop/webarch/users/-/commits/master)
 
@@ -24,7 +24,7 @@ when their state is either *"present"* or *"absent"*, if their state is set to
 
 The reason for this is since running all the tasks in this role for all the
 users takes a long time and usually runs a lot of tasks that won't make
-changes. 
+changes.
 
 In order to keep track of the users state, on the server (so that updates can
 be applied from different places), YAML files for each user are written to
@@ -37,7 +37,7 @@ dictionary, will be updated.
 Alternative update strategies can be specified by setting the
 `users_update_strategy` variable to a few optional values as explained below.
 
-### Update all users 
+### Update all users
 
 ```bash
 ansible-playbook wsh.yml --extra-vars "users_update_strategy=all"
@@ -142,7 +142,7 @@ galaxy/roles
 To pull this repo in run:
 
 ```bash
-ansible-galaxy install -r requirements.yml --force 
+ansible-galaxy install -r requirements.yml --force
 ```
 
 The other repo should also contain a `users.yml` file that contains:
@@ -193,10 +193,10 @@ The other repo should also contain a `users.yml` file that contains:
           - operator
         users_editor: vim
         users_ssh_public_keys:
-          - https://git.coop/chris.keys 
+          - https://git.coop/chris.keys
       fred:
         users_state: absent
-    
+
   hosts:
     - users_servers
 
@@ -222,7 +222,7 @@ all:
 Then it can be run as follows:
 
 ```bash
-ansible-playbook users.yml 
+ansible-playbook users.yml
 ```
 
 ## Debugging
@@ -294,7 +294,7 @@ Then the `~/.ssh/authorized_keys.d/authorized_keys_*` files are assembled to
 `~/.ssh/authorized_keys`, (inless this file name is overridden from the
 default, see the users_ssh_authorized_keys_file_name variable) this means if
 you want to add additional keys then you can simply add them to this directory,
-with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`. 
+with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`.
 
 ## Apache
 
@@ -413,7 +413,7 @@ for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 The same `users_apache_htauth_users` array is used for the usernaes and
 passwords as documented below.
 
-### SetEnv 
+### SetEnv
 
 The `users_apache_env` array can be used to set and remove environmental
 variables, at a server or `VirtualHost` level, via [the
@@ -529,7 +529,7 @@ directives, for example:
 The `users_apache_alias` array can be used to generate
 [`Alias`](https://httpd.apache.org/docs/current/mod/mod_alias.html#alias) and
 [`AliasMatch`](https://httpd.apache.org/docs/current/mod/mod_alias.html#aliasmatch)
-directives, for example: 
+directives, for example:
 
 ```yaml
         users_apache_alias:
@@ -899,7 +899,7 @@ Setting `memory_limit = -1` overides the default of 128M, this is required for t
 
 By default, for users in the `phpfpm` group, the PHP socket is created in the `$HOME` directory as `~/php-fpm.sock`, the use of this path by the Apache configuratoon can be overridden when Apache is not chrooted and the users is not chrooted, per `VirtualHost` by setting `users_apache_php_socket_path` to a path to another socket _however_ this variable is not used by this roles PHP tasks, the socket configuration needs to be done by the [PHP role](https://git.coop/webarch/php).
 
-### Example Apache VirtualHost 
+### Example Apache VirtualHost
 
 If a user has a set of variables like this:
 

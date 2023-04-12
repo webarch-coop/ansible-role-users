@@ -724,7 +724,7 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
     {%- endif %}
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
       {%- if proxy.preserve_host is defined %}
-    ProxyPreserveHost {% if proxy.preserve_host %}On{% else %}Off{% endif %}
+    ProxyPreserveHost {% if proxy.preserve_host | bool %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.path is defined and proxy.url is defined %}
     ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
