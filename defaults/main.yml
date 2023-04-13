@@ -90,6 +90,9 @@ users_private_files:
   - path: .bash_aliases
     mode: "0600"
     state: touch
+  - path: .bash_completion
+    mode: "0600"
+    state: touch
   - path: .bash_history
     mode: "0600"
     state: touch
