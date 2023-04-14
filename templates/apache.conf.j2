@@ -110,9 +110,9 @@
   <IfModule headers_module>
   {%- if vhost_config.users_apache_headers is defined %}
     {%- for header in vhost_config.users_apache_headers %}
-      {% if header.type == "request" %}
+      {%- if header.type == "request" %}
     RequestHeader {{ header.action }} {{ header.arg }}
-      {% elif header.type == "response" %}
+      {%- elif header.type == "response" %}
     Header {% if header.con is defined %}{{ header.con }} {% endif %}{{ header.action }} {{ header.expr }}
       {%- endif %}
     {%- endfor %}
@@ -780,7 +780,7 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
   <IfFile {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs>
     ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
     CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combined
-    {% if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+    {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
     ScriptLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.cgi.log
     {%- endif %}
   </IfFile>
