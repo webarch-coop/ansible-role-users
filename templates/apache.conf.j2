@@ -715,6 +715,13 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
     ProxyRequests Off
     # Server Apache error documents rather than proxy errors
     ProxyErrorOverride On
+      {%- if proxy.add_headers is defined %}
+    ProxyAddHeaders {% if proxy.add_headers | bool %}On{% else %}Off{% endif %}
+      {%- endif %}
+    {%- for proxy in vhost_config.users_apache_proxy_pass %}
+      {%- if proxy.preserve_host is defined %}
+    ProxyPreserveHost {% if proxy.preserve_host | bool %}On{% else %}Off{% endif %}
+      {%- endif %}
     {%- if apache_conf_enabled is defined %}
       {%- if "webarch" in apache_conf_enabled %}
     ProxyPass "/wsh/" "!"
@@ -722,15 +729,8 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
     ProxyPass "/mc3/" "!"
       {%- endif %}
     {%- endif %}
-    {%- for proxy in vhost_config.users_apache_proxy_pass %}
-      {%- if proxy.preserve_host is defined %}
-    ProxyPreserveHost {% if proxy.preserve_host | bool %}On{% else %}Off{% endif %}
-      {%- endif %}
       {%- if proxy.path is defined and proxy.url is defined %}
     ProxyPass "{{ proxy.path }}" "{{ proxy.url }}"
-      {%- endif %}
-      {%- if proxy.add_headers is defined %}
-    ProxyAddHeaders {% if proxy.add_headers | bool %}On{% else %}Off{% endif %}
       {%- endif %}
       {%- if proxy.pathmatch is defined and proxy.url is defined %}
     ProxyPassMatch "{{ proxy.pathmatch }}" "{{ proxy.url }}"
