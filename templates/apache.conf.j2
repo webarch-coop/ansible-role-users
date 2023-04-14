@@ -748,7 +748,7 @@ i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpa
     RewriteRule {{ rule }}
         {%- endfor %}
       {%- endif %}
-      {%- if proxy.reverse is defined and proxy.reverse %}
+      {%- if proxy.reverse is defined and proxy.reverse | bool and proxy.path is defined and proxy.url is defined %}
     ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url | regex_replace('[ ].*$') }}"
       {%- endif %}
       {%- if proxy.htauth is defined and proxy.htauth %}
