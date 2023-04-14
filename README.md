@@ -515,7 +515,7 @@ directives, for example:
         users_apache_redirects:
           - path: /service
             url: http://foo2.example.com/service
-            status: 301
+            status: "301"
           - path: /one
             url: http://example.com/two
             status: permanent
@@ -542,8 +542,6 @@ directives, for example:
 ```
 
 ### Rewrite
-
-TODO This isn't currently implemented!
 
 The `users_apache_rewrite` array can be used to set `RewriteCond` and
 `RewriteRule` directives, for example:
@@ -733,6 +731,192 @@ And this will generate:
 ```
 
 If no Directories are required use `users_apache_directories: []`.
+
+The following variables can be used to control the content of the `Directory` directive:
+
+#### users_apache_add_output_filters
+
+A list of [AddOutputFilter directives](https://httpd.apache.org/docs/current/mod/mod_mime.html#addoutputfilter), for example:
+
+```yaml
+        users_apache_add_output_filters:
+          - INCLUDES;DEFLATE shtml
+```
+
+Will generate:
+
+```apache
+    AddOutputFilter INCLUDES;DEFLATE shtml
+```
+
+#### users_apache_add_type
+
+A list of MIME types and extensions for [AddType](https://httpd.apache.org/docs/current/mod/mod_mime.html#addtype), for example:
+
+```yaml
+        users_apache_add_type:
+          - ext: bar
+            type: text/plain
+```
+
+Will generate:
+
+```apache
+    AddType text/plain .bar
+```
+
+Note that the dot before the file extensions is added automatically.
+
+#### users_apache_auth_name
+
+A [AuthName](https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authname), for example:
+
+```yaml
+        users_apache_auth_name: Authentication Required
+```
+
+```apache
+      AuthName Authentication Required
+```
+
+#### users_apache_auth_type
+
+A [AuthType](https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype), when set to `Basic` a [AuthUserFile](https://httpd.apache.org/docs/2.4/mod/mod_authn_file.html#authuserfile) directive is automatically added to point to the htpasswd for for the VirtualHost, for example:
+
+```yaml
+        users_apache_auth_type: Basic
+```
+
+```apache
+      AuthType Basic
+      AuthUserFile: /home/example/.htpasswd/foo
+```
+
+The other options, `Digest` and `Form` and `None` can be used but they don't add any additional directives.
+
+#### users_apache_expires
+
+Set `users_apache_expires` to one of these values:
+
+* forever
+* medium
+* strict
+
+For one of the [Apache role](https://git.coop/webarch/apache) templates to be added as a `IncludeOptional` for the `Directory`:
+
+* [expires-forever.conf](https://git.coop/webarch/apache/-/blob/master/templates/expires-forever.conf.j2)
+* [expires-medium.conf)](https://git.coop/webarch/apache/-/blob/master/templates/expires-medium.conf.j2)
+* [expires-strict.conf](https://git.coop/webarch/apache/-/blob/master/templates/expires-strict.conf.j2)
+
+#### users_apache_filesmatch
+
+A list of[FilesMatch](https://httpd.apache.org/docs/2.4/mod/core.html#filesmatch) and [Require]() directives for example:
+
+```yaml
+        users_apache_filesmatch:
+          - regex: "^(?<sitename>[^/]+)"
+            require:
+              - "ldap-group cn=%{env:MATCH_SITENAME},ou=combined,o=Example"
+```
+
+```apache
+<FilesMatch "^(?<sitename>[^/]+)">
+    Require ldap-group cn=%{env:MATCH_SITENAME},ou=combined,o=Example
+</FilesMatch>
+```
+
+If `require` is omitted then it will default to `Require all denied`.
+
+#### users_apache_header_name
+
+A values for the [HeaderName](https://httpd.apache.org/docs/current/mod/mod_autoindex.html#headername), for example:
+
+```yaml
+        users_apache_header_name: HEADER.html
+```
+
+```apache
+HeaderName HEADER.html
+```
+
+#### users_apache_index
+
+A list of file names for the [DirectoryIndex](https://httpd.apache.org/docs/2.4/mod/mod_dir.html#directoryindex) directive, for example:
+
+```yaml
+        users_apache_index:
+          - index.htm
+          - index.html
+          - index.php
+```
+
+```apache
+DirectoryIndex index.htm index.html index.php
+```
+
+#### users_apache_index_head_insert
+
+Text for the [IndexHeadInsert](https://httpd.apache.org/docs/2.4/mod/mod_autoindex.html#indexheadinsert) directive, for example:
+
+```yaml
+        users_apache_head_insert: '<link rel=\"sitemap\" href=\"/sitemap.html\">'
+```
+
+```apache
+IndexHeadInsert '<link rel=\"sitemap\" href=\"/sitemap.html\">'
+```
+
+#### users_apache_index_options
+
+A list of options for the [IndexOptions](https://httpd.apache.org/docs/2.4/mod/mod_autoindex.html#indexoptions), for example:
+
+```yaml
+        users_apache_index_options:
+          - +ScanHTMLTitles
+          - -IconsAreLinks
+          - FancyIndexing
+```
+
+```apache
+IndexOptions +ScanHTMLTitles -IconsAreLinks FancyIndexing
+```
+
+#### users_apache_options
+#### users_apache_override
+#### users_apache_readme_name
+
+A values for the [ReadmeName](https://httpd.apache.org/docs/current/mod/mod_autoindex.html#readmename), for example:
+
+```yaml
+        users_apache_readme_name: FOOTER.html
+```
+
+```apache
+ReadmeName FOOTER.html
+```
+
+#### users_apache_require
+
+A list of requirements for the Apache [Require](https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require) directive, for example:
+
+```yaml
+        users_apache_require:
+          - ip 10 172.20 192.168.2
+          - method http-method GET HEAD
+```
+
+```apache
+Require ip 10 172.20 192.168.2
+Require method http-method GET HEAD
+```
+
+#### users_apache_ssi_legacy
+
+A boolean, enable the [SSILegacyExprParser](https://httpd.apache.org/docs/2.4/mod/mod_include.html#ssilegacyexprparser).
+
+#### users_apache_ssi_modified
+
+A boolean, enable [SSILastModified](https://httpd.apache.org/docs/2.4/mod/mod_include.html#ssilastmodified).
 
 ### Reverse Proxy
 

@@ -101,7 +101,6 @@ drupal_user:
   type: str
   required: false
   description: Drupal user.
-
 flarum_admin_email:
   type: str
   required: false
@@ -789,6 +788,35 @@ phpmyadmin_version:
   type: str
   required: false
   description: The phpMyAdmin version.
+users_apache_add_output_filters:
+  type: list
+  elements: str
+  required: false
+  description: Apache AddOutputFilter directives.
+users_apache_add_type:
+  type: list
+  elements: dict
+  required: false
+  description: A list of MIME types and files extensions for the Apache AddType directive.
+  options:
+    ext:
+      type: str
+      required: true
+      description: The filename extension, not including the leading dot.
+    type:
+      type: str
+      required: true
+      description: The MIME type for the file extension.
+users_apache_alias:
+  type: list
+users_apache_allow_encoded_slashes:
+  type: str
+  required: false
+  description: Allow URLs which contain encoded path separators (%2F for / and additionally %5C for \ on accordant systems) to be used in the path info.
+  choices:
+    - "On"
+    - "Off"
+    - NoDecode
 users_apache_auth_name:
   type: str
   required: false
@@ -796,12 +824,92 @@ users_apache_auth_name:
 users_apache_auth_type:
   type: str
   required: false
-  description: The Apache Directory AuthType.
+  description: The Apache AuthType Directive.
   choices:
     - Basic
     - Digest
     - Form
     - None
+users_apache_deny_dirs:
+  type: list
+  elements: str
+  required: false
+  description: A list of DocumentRoot sub-directories to which public access is denied.
+users_apache_directories:
+  type: dict
+  required: false
+  description: A dictionary of directories and their configuration.
+users_apache_env:
+  type: list
+  elements: dict
+  description: Set and remove environmental variables.
+  options:
+    env:
+      type: str
+      required: true
+      description: The SetEnv environmental variables name to set or remove.
+    set:
+      type: bool
+      required: false
+      description: Set or unset an environmental variable.
+    value:
+      type: str
+      required: true
+      description: The value for the SetEnv directive.
+users_apache_error_docs:
+  type: list
+  required: false
+  description: Apache ErrorDocument directives.
+  options:
+    code:
+      type: int
+      required: true
+      description: The HTTP error code.
+      choices:
+        - 400
+        - 401
+        - 402
+        - 403
+        - 404
+        - 405
+        - 406
+        - 407
+        - 408
+        - 409
+        - 410
+        - 411
+        - 412
+        - 413
+        - 414
+        - 415
+        - 416
+        - 417
+        - 418
+        - 421
+        - 422
+        - 423
+        - 424
+        - 425
+        - 426
+        - 428
+        - 429
+        - 431
+        - 451
+        - 500
+        - 501
+        - 502
+        - 503
+        - 504
+        - 505
+        - 506
+        - 507
+        - 508
+        - 510
+        - 511
+    path:
+      type: str
+      required: true
+      description: Error message, path or URL for the error document.
 users_apache_expires:
   type: str
   required: false
@@ -810,11 +918,6 @@ users_apache_expires:
     - forever
     - medium
     - strict
-users_apache_deny_dirs:
-  type: list
-  elements: str
-  required: false
-  description: A list of DocumentRoot sub-directories to which public access is denied.
 users_apache_filesmatch:
   type: list
   elements: dict
@@ -829,6 +932,10 @@ users_apache_filesmatch:
       elements: str
       required: false
       description: A list of strings for the Apache Require directive within FilesMatch, each item will result in one Require directive being generated.
+users_apache_header_name:
+  type: str
+  required: false
+  description: The HeaderName directive sets the name of the file that will be inserted at the top of the index listing
 users_apache_headers:
   type: list
   elements: dict
@@ -886,11 +993,25 @@ users_apache_htauth_users:
       choices:
         - absent
         - present
+users_apache_include_optional:
+  type: list
+  elements: str
+  required: false
+  description: A list of other Apache configuration files to include if they exist.
 users_apache_index:
   type: list
   elements: str
   required: false
-  description: A list of files names for the Apache DirectoryIndex.
+  description: A list of file names for the Apache DirectoryIndex.
+users_apache_index_head_insert:
+  type: str
+  required: false
+  description: A string to insert in the <head> section of the HTML generated for the index page.
+users_apache_index_options:
+  type: list
+  elements: str
+  required: false
+  description: A list of options for the IndexOptions directive.
 users_apache_locations:
   type: list
   elements: dict
@@ -946,6 +1067,14 @@ users_apache_override:
   elements: str
   required: false
   description: A list of Apache AllowOverride settings.
+users_apache_php_proxy_timeout:
+  type: int
+  required: false
+  description: Value for the ProxySet timeout.
+users_apache_php_socket_path:
+  type: str
+  required: false
+  description: Path to the Proxy socket.
 users_apache_proxy_pass:
   type: list
   elements: dict
@@ -985,11 +1114,57 @@ users_apache_proxy_pass:
       type: str
       required: true
       description: Apache URL string for ProxyPass.
+users_apache_readme_name:
+  type: str
+  required: false
+  description: The ReadmeName directive sets the name of the file that will be inserted at the bottom of the index listing.
+users_apache_redirects:
+  type: list
+  elements: dict
+  required: false
+  description: A list of HTTP redirects.
+  options:
+    path:
+      type: str
+      required: false
+      description: The path to redirect.
+    regex_path:
+      type: str
+      required: false
+      description: A regular extression to match the path to redirect.
+    status:
+      type: str
+      required: false
+      description: The redirect status.
+    url:
+      type: str
+      required: false
+      description: The URL to redirect to.
+users_apache_remoteip:
+  type: str
+  required: false
+  description: Optionally include RemoteIPHeader configuration.
+  choices:
+    - cloudflare
 users_apache_require:
   type: list
   elements: str
   required: false
   description: A list of strings for the Apache Require directive, each item will result in one Require directive being generated.
+users_apache_rewrite:
+  type: list
+  elements: str
+  required: false
+  description: A list of Apache RewriteCond and RewriteRule directives.
+  options:
+    cond:
+      type: str
+      required: false
+      description: The value for the RewriteCond directive.
+    rule:
+      type: str
+      required: false
+      description: The value for the RewriteRule directive.
 users_apache_robots:
   type: str
   required: false
@@ -1027,6 +1202,14 @@ users_apache_set_env_if:
       type: str
       required: false
       description: A regular expression for the SetEnvIf / SetEnvIfNoCase directive.
+users_apache_ssi_legacy:
+  type: bool
+  required: false
+  description: Enable the SSILegacyExprParser.
+users_apache_ssi_modified:
+  type: bool
+  required: false
+  description: Enable SSILastModified.
 users_apache_sts:
   type: list
   elements: str
@@ -1041,6 +1224,10 @@ users_apache_type:
     - fcgi
     - php
     - static
+users_apache_vhost_docroot:
+  type: bool
+  required: false
+  description: Omit a DocuemntRoot from the Apache configuration.
 users_cms:
   type: str
   required: false

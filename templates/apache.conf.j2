@@ -346,14 +346,14 @@
       ReadmeName {{ users_apache_readme_name is defined }}
        {%- endif %}
        {%- if dir_config.users_apache_ssi_legacy is defined %}
-      SSILegacyExprParser {% if dir_config.users_apache_ssi_legacy %}on{% else %}off{% endif %}
+      SSILegacyExprParser {% if dir_config.users_apache_ssi_legacy | bool %}on{% else %}off{% endif %}
        {%- elif users_apache_ssi_legacy is defined %}
-      SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
+      SSILegacyExprParser {% if users_apache_ssi_legacy | bool %}on{% else %}off{% endif %}
        {%- endif %}
        {%- if dir_config.users_apache_ssi_modified is defined %}
-      SSILastModified {% if dir_config.users_apache_ssi_modified %}on{% else %}off{% endif %}
+      SSILastModified {% if dir_config.users_apache_ssi_modified | bool %}on{% else %}off{% endif %}
        {%- elif users_apache_ssi_modified is defined %}
-      SSILastModified {% if users_apache_ssi_modified %}on{% else %}off{% endif %}
+      SSILastModified {% if users_apache_ssi_modified | bool %}on{% else %}off{% endif %}
        {%- endif %}
        {%- if dir_config.users_apache_index is defined %}
       DirectoryIndex{% for file in dir_config.users_apache_index %} {{ file }}{% endfor %}
@@ -395,13 +395,15 @@
       AuthType "{{ dir_config.users_apache_auth_type }}"
           {%- if dir_config.users_apache_auth_type == "Basic" %}
             {%- if users_apache_chroot is defined and users_apache_chroot %}
-i     AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost.users_apache_server_name }}"
+      AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost.users_apache_server_name }}"
             {%- else %}
       AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost.users_apache_server_name }}"
             {%- endif %}
           {%- endif %}
-        {%- else %}
+        {%- elif dir_config.users_apache_auth_type is not defined or dir_config.users_apache_auth_type == "None" %}
       AuthType "None"
+        {% else %}
+      AuthType "{{ dir_config.users_apache_auth_type }}"
         {%- endif %}
         {%- if dir_config.users_apache_require is defined and dir_config.users_apache_require != [] %}
           {%- for req in dir_config.users_apache_require %}
