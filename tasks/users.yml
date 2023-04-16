@@ -76,6 +76,7 @@
           ansible.builtin.meta: end_play
 
       when:
+        - ( users_firewall is defined ) and ( users_firewall )
         - ( users_update_strategy is defined ) and ( users_update_strategy == "firewall" )
 
     - name: Set an empty users_update array

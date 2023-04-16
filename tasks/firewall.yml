@@ -74,7 +74,6 @@
 
       when: ( icinga_master_nodes is defined ) and ( icinga_master_nodes != [] )
 
-
     - name: IPv4 iptables rules in place
       ansible.builtin.template:
         src: rules.v4.j2
