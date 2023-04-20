@@ -69,12 +69,6 @@ ansible-playbook users.yml --extra-vars "users_update_strategy=apache"
 ansible-playbook users.yml --extra-vars "users_update_strategy=quotas"
 ```
 
-### Only update the firewall rules
-
-```bash
-ansible-playbook users.yml --extra-vars "users_update_strategy=firewall"
-```
-
 ### Only update users PHP-FPM pool.d files
 
 ```bash

@@ -66,18 +66,6 @@
 
       when: ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
 
-    - name: Update the firewall rules only
-      block:
-
-        - name: Update firewall
-          ansible.builtin.include_tasks: firewall.yml
-
-        - name: End as checks completed
-          ansible.builtin.meta: end_play
-
-      when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "firewall" )
-
     - name: Set an empty users_update array
       ansible.builtin.set_fact:
         users_update: []
@@ -339,11 +327,6 @@
             ( users_repquota_md5sum_before is defined and users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout )
 
       when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
-
-    - name: Firewall tasks included
-      ansible.builtin.include_tasks: firewall.yml
-      when:
-        - ( users_firewall is defined ) and ( users_firewall )
 
     - name: List the updated users
       ansible.builtin.debug:

@@ -115,10 +115,6 @@ argument_specs:
         elements: str
         required: false
         description: A list of strings that cannot be used as usernames.
-      users_firewall:
-        type: bool
-        required: true
-        description: Configure the firewall.
       users_forward:
         type: bool
         required: true
@@ -302,7 +298,6 @@ argument_specs:
           - apache
           - changed
           - check
-          - firewall
           - groups
           - phpfpm
           - quotas
