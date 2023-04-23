@@ -83,7 +83,7 @@
         dest: "/etc/logrotate.d/phpfpm_{{ user.key }}"
         owner: root
         group: root
-        mode: "0755"
+        mode: "0644"
 
     - name: Check the PHP FPM pm variables
       ansible.builtin.include_tasks: phpfpm_pool_check.yml
