@@ -83,7 +83,17 @@
         dest: "/etc/logrotate.d/phpfpm_{{ user.key }}"
         owner: root
         group: root
-        mode: "0755"
+        mode: "0644"
+
+    - name: Stat PHP FPM log rotation config
+      ansible.builtin.stat:
+        path: "/etc/logrotate.d/phpfpm_{{ user.key }}"
+      register: users_phpfpm_logrotate
+
+    - name: Check PHP FPM log rotation config
+      ansible.builtin.command: "/usr/sbin/logrotate -d /etc/logrotate.d/phpfpm_{{ user.key }}"
+      check_mode: false
+      changed_when: false
 
     - name: Check the PHP FPM pm variables
       ansible.builtin.include_tasks: phpfpm_pool_check.yml
