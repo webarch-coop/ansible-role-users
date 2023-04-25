@@ -74,6 +74,7 @@ users_mariadb_database_privileges:
     - DELETE
     - DROP
     - EXECUTE
+    - GRANT
     - INDEX
     - INSERT
     - LOCK TABLES
