@@ -102,8 +102,8 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0644"
       when:
-        - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
-        - ( users_muttrc is defined ) and ( users_muttrc )
+        - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system | bool )
+        - ( users_muttrc is defined ) and ( users_muttrc | bool )
 
     - name: "Include the chroot present users tasks for {{ user.key }}"
       ansible.builtin.include_tasks: chroot_user_present.yml

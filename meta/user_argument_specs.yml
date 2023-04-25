@@ -28,6 +28,14 @@ users_email:
   type: str
   required: false
   description: The users email address.
+users_forward:
+  type: bool
+  required: false
+  description: Users ~/.forward file present.
+users_generate_ssh_key:
+  type: bool
+  required: false
+  description: Users generate SSH keypair.
 users_group_members:
   type: list
   elements: str
@@ -95,6 +103,10 @@ users_matomo_notify_passwd:
   type: bool
   required: false
   description: Send a email to the user containing their Matomo password.
+users_muttrc:
+  type: bool
+  required: false
+  description: Users ~/.muttrc present.
 users_name:
   type: str
   required: false
@@ -137,6 +149,10 @@ users_phpfpm_pm_max_spare_servers:
   type: int
   required: false
   description: The PHP-FPM pool max spare servers.
+users_phpfpm_pm_min_spare_servers:
+  type: int
+  required: false
+  description: The PHP-FPM pool min spare servers.
 users_phpfpm_pm_start_servers:
   type: int
   required: false
