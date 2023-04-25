@@ -77,10 +77,10 @@
     - name: Check that users_apache_php_socket_path exists and is a socket and the user is not chrooted
       block:
 
-        - name: "Stat {{ users_apache_php_socket_path }}"
+        - name: "Stat {{ vhost.value.users_apache_php_socket_path }}"
           ansible.builtin.stat:
-            path: "{{ users_apache_php_socket_path }}"
-            register: users_apache_php_socket_path_check
+            path: "{{ vhost.value.users_apache_php_socket_path }}"
+          register: users_apache_php_socket_path_check
 
         - name: Setting users_apache_php_socket_path is not supported for chrooted users or chrooted Apache and the socket must exist
           ansible.builtin.assert:
