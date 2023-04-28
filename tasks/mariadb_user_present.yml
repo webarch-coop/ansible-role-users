@@ -102,7 +102,29 @@
         loop_var: db
         label: "{{ db }}"
 
-    - name: "mycli config file ~/.myclirc generated for {{ user.key }}"
+    - name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
+      register: users_myclirc_conf
+
+    - name: "Edit myclir config file ~/.myclirc for {{ user.key }}"
+      community.general.ini_file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
+        section: alias_dsn
+        option: "{{ users_db }}"
+        value: "mysql://{{ user.key }}@localhost/{{ users_db }}"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0640"
+      loop: "{{ user.value.users_mariadb_databases }}"
+      loop_control:
+        loop_var: users_db
+      when:
+        - users_myclirc_conf.stat.exists | bool
+        - user.value.users_mariadb_databases is defined
+        - user.value.users_mariadb_databases != []
+
+    - name: "Template mycli config file ~/.myclirc for {{ user.key }}"
       ansible.builtin.template:
         src: myclirc.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
@@ -110,6 +132,10 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0400"
         force: true
+      when:
+        - not users_myclirc_conf.stat.exists | bool
+        - user.value.users_mariadb_databases is defined
+        - user.value.users_mariadb_databases != []
 
     - name: "Set a variable for mysql_user db priv for {{ user.key }} using the default privileges"
       ansible.builtin.set_fact:
