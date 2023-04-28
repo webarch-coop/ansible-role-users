@@ -130,7 +130,7 @@
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: "0400"
+        mode: "0640"
         force: true
       when:
         - not users_myclirc_conf.stat.exists | bool
