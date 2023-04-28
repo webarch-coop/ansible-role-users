@@ -267,8 +267,8 @@
     </Proxy>
         {%- endif %}
       {%- else %}
-        {% if users_apache_php_socket_path is defined %}
-    <Proxy "unix:{{ users_apache_php_socket_path }}|fcgi://{{ user.key }}">
+        {%- if vhost_config.users_apache_php_socket_path is defined %}
+    <Proxy "unix:{{ vhost_config.users_apache_php_socket_path }}|fcgi://{{ user.key }}">
         {%- else %}
     <Proxy "unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://{{ user.key }}">
         {%- endif %}

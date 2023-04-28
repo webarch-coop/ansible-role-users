@@ -109,7 +109,7 @@
   tags:
     - users
 
-- name: "Debug private files touched for {{ user.key }}"
+- name: "Debug private files touched for non-sudoer {{ user.key }}"
   ansible.builtin.debug:
     msg:
       - "path: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file.path }}"
@@ -122,6 +122,7 @@
     verbosity: 2
   when:
     - user.key != "root"
+    - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "sudo" not in user.value.users_groups )
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_files is defined ) and ( users_private_files[0] is defined )
   loop: "{{ users_private_files }}"
@@ -129,7 +130,7 @@
     loop_var: file
     label: "{{ file.path }}"
 
-- name: "Private directories and files present for {{ user.key }}"
+- name: "Private directories and files present for non-sudoer {{ user.key }}"
   ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file.path }}"
     state: "{{ file.state }}"
@@ -140,6 +141,7 @@
     modification_time: preserve
   when:
     - user.key != "root"
+    - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "sudo" not in user.value.users_groups )
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_files is defined ) and ( users_private_files[0] is defined )
   loop: "{{ users_private_files }}"
