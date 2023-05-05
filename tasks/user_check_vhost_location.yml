@@ -6,14 +6,14 @@
       ansible.builtin.assert:
         that:
           - ( loc.location is defined ) or ( loc.match is defined )
-        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     # https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype
     - name: "Check authtype is set to None, Basic, Digest or Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       ansible.builtin.assert:
         that:
           - loc.authtype is regex("(?i)^None|Basic|Digest|Form$")
-        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: loc.authtype is defined
 
     # https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require
@@ -25,13 +25,13 @@
             that:
               - loc.require | length
               - loc.require[0] is defined
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
           ansible.builtin.assert:
             that:
               - req is regex("(?i)[not]?all granted|[not]?all denied|[not]?env .*|[not]?method .*|[not]?expr .*|[not]?user .*|[not]?group .*|[not]?valid-user|[not]?ip .*|local")
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ loc.require }}"
           loop_control:
             loop_var: req
@@ -44,7 +44,7 @@
         that:
           - loc.redirect | length
           - loc.redirect is regex("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
-        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: loc.redirect is defined
 
   tags:
