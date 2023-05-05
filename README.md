@@ -659,6 +659,22 @@ Results in:
   </Location>
 ```
 
+If `match` is set rather than `location` then a `LocationMatch` directive is generated, for example:
+
+```yaml
+        users_apache_locations:
+          - match: ^/$
+            redirect: https://example.org/welcome/
+```
+
+Results in:
+
+```apache
+  <LocationMatch "^/$">
+    Redirect https://example.org/welcome/
+  </LocationMatch>
+```
+
 ### Directories
 
 The `users_apache_directories` variable can be used at a `VirtualHost` level to

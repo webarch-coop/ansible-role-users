@@ -1033,8 +1033,12 @@ users_apache_locations:
         - None
     location:
       type: str
-      required: true
-      description: The Apache Location directive path relative to the DocmentRoot.
+      required: false
+      description: An Apache Location directive path relative to the DocmentRoot.
+    match:
+      type: str
+      required: false
+      description: An Apache LocationMatch regular expression relative to the DocmentRoot.
     proxy_pass:
       type: str
       required: false

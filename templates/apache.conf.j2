@@ -129,7 +129,11 @@
   {%- endif %}
   {%- if vhost_config.users_apache_locations is defined -%}
     {%- for loc in vhost_config.users_apache_locations %}
-  <Location "{% if loc.location is defined %}{{ loc.location }}{% else %}/{% endif %}" >
+      {%- if loc.match is defined %}
+  <LocationMatch "{{ loc.match }}">
+      {%- elif loc.location is defined %}
+  <Location "{{ loc.location }}">
+      {%- endif %}
       {%- if loc.authtype is defined and loc.authtype == "None" %}
     # No AuthUserFile for this Location as AuthType is None
       {%- elif loc.authtype is not defined and loc.alias is defined %}
@@ -165,7 +169,11 @@
     Redirect "{{ loc.redirect }}"
         {%- endif %}
       {%- endif %}
+      {%- if loc.match is defined %}
+  </LocationMatch>
+      {%- elif loc.location is defined %}
   </Location>
+      {%- endif %}
     {%- endfor %}
   {%- endif %}
   <Location "/.well-known/acme-challenge">
