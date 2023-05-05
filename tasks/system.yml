@@ -158,18 +158,47 @@
           loop_control:
             loop_var: users_phpfpm_ver
 
-        - name: Query the version of PHP using update-alternatives --query php
+        - name: Run update-alternatives to find the default version of PHP
           ansible.builtin.command: update-alternatives --query php
           args:
             strip_empty_ends: true
           check_mode: false
           changed_when: false
-          register: users_update_alternatives_query_php
+          register: apache_update_alternatives_query_php
 
-        - name: Set a fact for the PHP-FPM versions and the default version
+        - name: Set a fact for the default version of PHP
           ansible.builtin.set_fact:
-            users_phpfpm_alternatives: "{{ users_update_alternatives_query_php.stdout | string | community.general.jc('update-alt-q') }}"
-            users_phpfpm_default_version: "{{ users_update_alternatives_query_php.stdout | string | community.general.jc('update-alt-q') | community.general.json_query('max_by(alternatives, &priority).alternative') | regex_replace('^[/]usr[/]bin[/]php') }}"
+            users_phpfpm_update_alt_q: "{{ apache_update_alternatives_query_php.stdout | string | community.general.jc('update_alt_q') }}"
+        - name: Debug PHP update-alternatives --query php | jc --update-alt-q | jp value
+          ansible.builtin.debug:
+            var: users_phpfpm_update_alt_q.value
+            verbosity: 3
+
+        - name: Check if the default version of PHP is a symlink
+          ansible.builtin.stat:
+            path: "{{ users_phpfpm_update_alt_q.value }}"
+          register: users_phpfpm_update_alt_q_value_path
+
+        - name: Debug PHP default version path
+          ansible.builtin.debug:
+            var: users_phpfpm_update_alt_q_value_path.stat
+            verbosity: 3
+
+        - name: Set a fact for the default version of PHP when it is a symlink
+          ansible.builtin.set_fact:
+            users_phpfpm_version: "{{ users_phpfpm_update_alt_q_value_path.stat.lnk_target | regex_replace('^php') }}"
+          when: users_phpfpm_update_alt_q_value_path.stat.islnk | bool
+
+        - name: Set a fact for the default version of PHP when it is a not symlink
+          ansible.builtin.set_fact:
+            users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q.value | regex_replace('^/usr/bin/php') }}"
+          when: not users_phpfpm_update_alt_q_value_path.stat.islnk | bool
+
+        - name: A default PHP version is required
+          ansible.builtin.assert:
+            that:
+              - users_phpfpm_default_version is regex('^[5-9][.][0-9]')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: Debug PHP default version
           ansible.builtin.debug:
