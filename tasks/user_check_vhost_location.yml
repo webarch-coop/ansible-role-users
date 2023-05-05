@@ -2,6 +2,11 @@
 - name: "Apache VirtualHost checks {{ vhost.key }} for {{ user.key }}"
   block:
 
+    - name: Debug the Location variables
+      ansible.builtin.debug:
+        var: loc
+      verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+
     - name: "Either location or match is required for a Location or LocationMatch directive for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
