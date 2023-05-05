@@ -186,7 +186,7 @@
 
         - name: Set a fact for the default version of PHP when it is a symlink
           ansible.builtin.set_fact:
-            users_phpfpm_version: "{{ users_phpfpm_update_alt_q_value_path.stat.lnk_target | ansible.builtin.regex_replace('^php') }}"
+            users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q_value_path.stat.lnk_target | ansible.builtin.regex_replace('^php') }}"
           when: users_phpfpm_update_alt_q_value_path.stat.islnk | bool
 
         - name: Set a fact for the default version of PHP when it is a not symlink
