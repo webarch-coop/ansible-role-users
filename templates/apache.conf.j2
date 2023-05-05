@@ -118,11 +118,11 @@
     {%- endfor %}
   {%- endif %}
   {%- if vhost_config.users_apache_sts is defined %}
-    Header always set Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
+    Header setifempty Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
   {%- else %}
-    Header always set Strict-Transport-Security "max-age=31536000"
+    Header setifempty Strict-Transport-Security "max-age=31536000"
   {%- endif %}
-    Header always set Permissions-Policy "interest-cohort=()"
+    Header setifempty Permissions-Policy "interest-cohort=()"
   </IfModule>
   {%- if vhost_config.users_apache_allow_encoded_slashes is defined %}
   AllowEncodedSlashes {{ vhost_config.users_apache_allow_encoded_slashes }}
