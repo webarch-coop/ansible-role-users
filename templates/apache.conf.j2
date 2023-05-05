@@ -90,18 +90,18 @@
     {%- if users_apache_set_env_if is defined %}
       {%- for setenv in users_apache_set_env_if %}
         {%- if setenv.case is not defined or setenv.case is defined and setenv.case | bool %}
-    SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+    SetEnvIf {{ setenv.attribute }} "{{ setenv.regex }}" {{ setenv.env }}
         {%- else %}
-    SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+    SetEnvIfNoCase {{ setenv.attribute }} "{{ setenv.regex }}" {{ setenv.env }}
         {% endif %}
       {%- endfor %}
     {%- endif %}
     {%- if vhost_config.users_apache_set_env_if is defined %}
       {%- for setenv in vhost_config.users_apache_set_env_if %}
         {%- if setenv.case is not defined or setenv.case is defined and setenv.case %}
-    SetEnvIf {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+    SetEnvIf {{ setenv.attribute }} "{{ setenv.regex }}" {{ setenv.env }}
         {%- else %}
-    SetEnvIfNoCase {{ setenv.attribute }} {{ setenv.regex }} {{ setenv.env }}
+    SetEnvIfNoCase {{ setenv.attribute }} "{{ setenv.regex }}" {{ setenv.env }}
         {% endif %}
       {%- endfor %}
     {%- endif %}
