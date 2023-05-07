@@ -141,7 +141,7 @@ users_private_files:
     mode: "0600"
     state: touch
   - path: .myclirc
-    mode: "0400"
+    mode: "0600"
     state: touch
   - path: .mysql
     mode: "0700"
