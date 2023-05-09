@@ -56,25 +56,11 @@
           - vhost.value.nextcloud_title | length
       when: vhost.value.nextcloud_title is defined
 
-    # https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/language_configuration.html
-    - name: "Check that the nextcloud_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that: vhost.value.nextcloud_locale is regex("^^[a-z]{2,3}[_]{0.1}[A-Z]{0,2}$")
-      when: vhost.value.nextcloud_locale is defined
-
     - name: "Check that the nextcloud_dbuser is {{ user.key }} is defined for {{ vhost.key }} VirtualHost"
       assert:
         that:
           - vhost.value.nextcloud_dbuser == user.key
       when: vhost.value.nextcloud_dbuser is defined
-
-    - name: "Check that the nextcloud_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - vhost.value.nextcloud_dbprefix | length
-          - vhost.value.nextcloud_dbprefix is regex("^[a-zA-Z0-9_]*$")
-          - vhost.value.nextcloud_dbprefix is regex("^.{1,6}$")
-      when: vhost.value.nextcloud_dbprefix is defined
 
     - name: "Check that the nextcloud_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
@@ -96,89 +82,11 @@
           - ( vhost.value.nextcloud_autoupdate ) or ( not vhost.value.nextcloud_autoupdate )
       when: vhost.value.nextcloud_autoupdate is defined
 
-    - name: "Check that nextcloud_smtpmode is smtp or sendmail if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - vhost.value.nextcloud_smtpmode is regex("^smtp|sendmail$")
-      when: vhost.value.nextcloud_smtpmode is defined
-
     - name: "Check that nextcloud_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:
         that:
           - ( vhost.value.nextcloud_notify ) or ( not vhost.value.nextcloud_notify )
       when: vhost.value.nextcloud_notify is defined
-
-    - name: "Check that nextcloud_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - ( vhost.value.nextcloud_autoupdate ) or ( not vhost.value.nextcloud_autoupdate )
-      when: vhost.value.nextcloud_autoupdate is defined
-
-    - name: "Check that any apps listed in nextcloud_app_remove are not in nextcloud_app_install for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - app not in vhost.value.nextcloud_app_install
-      loop: "{{ vhost.value.nextcloud_app_remove }}"
-      loop_control:
-        loop_var: app
-      when:
-        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
-        - ( vhost.value.nextcloud_app_install is defined ) and ( vhost.value.nextcloud_app_install != [] )
-
-    - name: "Check that any apps listed in nextcloud_app_remove are not in nextcloud_app_enable for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - app not in vhost.value.nextcloud_app_enable
-      loop: "{{ vhost.value.nextcloud_app_remove }}"
-      loop_control:
-        loop_var: app
-      when:
-        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
-        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
-
-    - name: "Check that any apps listed in nextcloud_app_install are not in nextcloud_app_remove for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - app not in vhost.value.nextcloud_app_remove
-      loop: "{{ vhost.value.nextcloud_app_install }}"
-      loop_control:
-        loop_var: app
-      when:
-        - ( vhost.value.nextcloud_app_install is defined ) and ( vhost.value.nextcloud_app_install != [] )
-        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
-
-    - name: "Check that any apps listed in nextcloud_app_disable are not in nextcloud_app_enable for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - app not in vhost.value.nextcloud_app_enable
-      loop: "{{ vhost.value.nextcloud_app_disable }}"
-      loop_control:
-        loop_var: app
-      when:
-        - ( vhost.value.nextcloud_app_disable is defined ) and ( vhost.value.nextcloud_app_disable != [] )
-        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
-
-    - name: "Check that any apps listed in nextcloud_app_enable are not listed in nextcloud_app_remove for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - app not in vhost.value.nextcloud_app_remove
-      loop: "{{ vhost.value.nextcloud_app_enable }}"
-      loop_control:
-        loop_var: app
-      when:
-        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
-        - ( vhost.value.nextcloud_app_remove is defined ) and ( vhost.value.nextcloud_app_remove != [] )
-
-    - name: "Check that any apps listed in nextcloud_app_enable are not listed in nextcloud_app_disable for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that:
-          - app not in vhost.value.nextcloud_app_disable
-      loop: "{{ vhost.value.nextcloud_app_enable }}"
-      loop_control:
-        loop_var: app
-      when:
-        - ( vhost.value.nextcloud_app_enable is defined ) and ( vhost.value.nextcloud_app_enable != [] )
-        - ( vhost.value.nextcloud_app_disable is defined ) and ( vhost.value.nextcloud_app_disable != [] )
 
     - name: "Check that nextcloud_onlyoffice_documentserver is set to an ascii domain name if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       assert:

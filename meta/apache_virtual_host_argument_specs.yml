@@ -650,10 +650,6 @@ nextcloud_dbuser:
   type: str
   required: false
   description: Nextcloud database username.
-nextcloud_default_phone_region:
-  type: str
-  required: false
-  description: Nextcloud ISO_3166-1 phone region code.
 nextcloud_domain:
   type: str
   required: false
@@ -662,40 +658,6 @@ nextcloud_group:
   type: str
   required: false
   description: Nextcloud group.
-nextcloud_locale:
-  type: str
-  required: false
-  description: Nextcloud language code.
-nextcloud_mail_domain:
-  type: str
-  required: false
-  description: Nextcloud outgoing email address domain name, the part after @.
-nextcloud_mail_from_address:
-  type: str
-  required: false
-  description: Nextcloud outgoing email address username, the part before @.
-nextcloud_memcache_distributed:
-  type: str
-  required: false
-  description: Nextcloud distributed cache.
-  choices:
-    - absent
-    - redis
-nextcloud_memcache_local:
-  type: str
-  required: false
-  description: Nextcloud distributed cache.
-  choices:
-    - apcu
-    - absent
-    - redis
-nextcloud_memcache_locking:
-  type: str
-  required: false
-  description: Nextcloud memcache locking.
-  choices:
-    - absent
-    - redis
 nextcloud_notify:
   type: bool
   required: false

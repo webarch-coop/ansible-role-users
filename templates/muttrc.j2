@@ -15,7 +15,6 @@ set sendmail="/usr/sbin/sendmail -f{{ user.value.users_phpfpm_sendmail_from }}"
 set sendmail="/usr/sbin/sendmail -f{{ user.key }}@{{ inventory_hostname }}"
 {% endif %}
 # set smtp_url=smtp://localhost:25/
-# ssl_verify_host=no
 # set ssl_starttls=no
 # set ssl_force_tls=no
 set hostname="{{ inventory_hostname }}"
