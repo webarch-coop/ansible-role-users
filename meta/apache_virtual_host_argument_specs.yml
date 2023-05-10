@@ -650,10 +650,30 @@ nextcloud_dbuser:
   type: str
   required: false
   description: Nextcloud database username.
+nextcloud_docroot:
+  type: str
+  required: false
+  description: The Nextcloud Apache DocumentRoot directory.
 nextcloud_domain:
   type: str
   required: false
   description: Nextcloud domain name.
+# nextcloud_config:
+#   type: dict
+#   required: false
+#   description: Nextcloud config to be converted into JSON and imported.
+#   options:
+#     system:
+#       type: dict
+#       required: false
+#       description: Nextcloud system config to be converted into JSON and imported.
+#     apps:
+#       type: dict
+#       required: false
+#       description: Nextcloud system config to be converted into JSON and imported.
+#   type: dict
+#   required: false
+#   description: Nextcloud config to be converted nto JAON and loaded using occ config:import.
 nextcloud_group:
   type: str
   required: false
