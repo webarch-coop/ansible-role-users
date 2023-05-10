@@ -70,11 +70,11 @@ php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functi
 ; php_admin_value[disable_functions] =
 {% endif %}
 
-{% if users_phpfpm_enable_open_basedir is defined and users_phpfpm_enable_open_basedir %}
-; users_phpfpm_enable_open_basedir is true
-{% if user.value.users_phpfpm_enable_open_basedir is not defined or user.value.users_phpfpm_enable_open_basedir %}
-; user.value.users_phpfpm_enable_open_basedir is not set to false
-{% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir != [] %}
+{% if users_phpfpm_enable_open_basedir is defined and users_phpfpm_enable_open_basedir | bool %}
+; users_phpfpm_enable_open_basedir is defined and true
+{% if user.value.users_phpfpm_enable_open_basedir is not defined or not user.value.users_phpfpm_enable_open_basedir | bool %}
+; user.value.users_phpfpm_enable_open_basedir is not defined or false
+{% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir | bool %}
 ; open_basedir directories set from the user.value.users_phpfpm_open_basedir array
 php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
 {% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir != [] %}
