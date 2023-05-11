@@ -9,6 +9,5 @@ skip_list:
   - no-changed-when
   - no-handler
   - schema[tasks]
-  # - var-spacing
 # vim: syntax=yaml
 ...
