@@ -3,7 +3,7 @@
   block:
 
     - name: "Check that the SSL certs for {{ user.key }} are present"
-      include_tasks: apache_cert_check_vhost.yml
+      ansible.builtin.include_tasks: apache_cert_check_vhost.yml
       register: apache_vhost_cert_check_vhosts
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
@@ -11,12 +11,12 @@
         label: "{{ vhost.key }}"
 
     - name: Debug SSL cert check results
-      debug:
+      ansible.builtin.debug:
         var: apache_vhost_cert_check_vhosts.results
         verbosity: 2
 
     - name: Debug users_apache_certs_present
-      debug:
+      ansible.builtin.debug:
         var: users_apache_certs_present
         verbosity: 1
       when: users_apache_certs_present is defined
@@ -29,27 +29,27 @@
   block:
 
     - name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
-      stat:
+      ansible.builtin.stat:
         path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
       register: users_apache_tls_cert_check
 
     - name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
-      stat:
+      ansible.builtin.stat:
         path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
       register: users_apache_tls_key_check
 
     - name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
-      stat:
+      ansible.builtin.stat:
         path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
       register: users_apache_tls_ca_check
 
     - name: Set a fact for the results if any cert is missing
-      set_fact:
+      ansible.builtin.set_fact:
         users_apache_certs_present: false
       when: ( not users_apache_tls_cert_check.stat.exists ) or ( not users_apache_tls_key_check.stat.exists ) or ( not users_apache_tls_ca_check.stat.exists )
 
     - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
-      set_fact:
+      ansible.builtin.set_fact:
         users_apache_certs_present: true
       when:
         - users_apache_certs_present is not defined
@@ -58,7 +58,7 @@
         - users_apache_tls_ca_check.stat.exists
 
     - name: Set a fact for the results if a cert exists and users_apache_certs_present is not false
-      set_fact:
+      ansible.builtin.set_fact:
         users_apache_certs_present: true
       when:
         - users_apache_certs_present is defined

@@ -3,31 +3,31 @@
   block:
 
     - name: Ensure that a name is defined for the cron job
-      assert:
+      ansible.builtin.assert:
         that:
           - job.name is defined
           - job.name | type_debug is regex('^(str|AnsibleUnicode|AnsibleUnsafeText)$')
 
     - name: Ensure that a job is defined for the cron job
-      assert:
+      ansible.builtin.assert:
         that:
           - job.job is defined
           - job.job | type_debug is regex('^(str|AnsibleUnicode|AnsibleUnsafeText)$')
 
     - name: Ensure that the state is present or absent if defined for the cron job
-      assert:
+      ansible.builtin.assert:
         that:
           - job.state is regex('^(absent|present)$')
       when: job.state is defined
 
     - name: Ensure that disabled is true or false if defined for the cron job
-      assert:
+      ansible.builtin.assert:
         that:
           - job.disabled is | type_debug == "bool"
       when: job.disabled is defined
 
     - name: Ensure that the special_time for the cron job is valid if defined
-      assert:
+      ansible.builtin.assert:
         that:
           - job.special_time is regex('^@(annually|yearly|monthly|weekly|daily|hourly|reboot)$')
       when: job.special_time is defined

@@ -1,16 +1,16 @@
 ---
 - name: "Slay any processes running as user {{ user.key }}"
-  command: "slay {{ user.key }}"
+  ansible.builtin.command: "slay {{ user.key }}"
   tags:
     - users
 
 - name: "Crontab absent for user {{ user.key }}"
-  include_tasks: crontab_user_absent.yml
+  ansible.builtin.include_tasks: crontab_user_absent.yml
   tags:
     - users
 
 - name: "Include Apache config tasks absent user for {{ user.key }}"
-  include_tasks: apache_user_absent.yml
+  ansible.builtin.include_tasks: apache_user_absent.yml
   when:
     - ( "apache2" in ansible_local.dpkg.installed )
     - ( users_apache is defined ) and ( users_apache )
@@ -18,13 +18,13 @@
     - users
 
 - name: "Absent user {{ user.key }} MariaDB account and databases absent"
-  include_tasks: mariadb_user_absent.yml
+  ansible.builtin.include_tasks: mariadb_user_absent.yml
   when: ( users_mariadb is defined ) and ( users_mariadb )
   tags:
     - users
 
 - name: "Include PHP FPM user absent tasks for {{ user.key }}"
-  include_tasks: phpfpm_user_absent.yml
+  ansible.builtin.include_tasks: phpfpm_user_absent.yml
   tags:
     - users
 
@@ -35,12 +35,12 @@
       block:
 
         - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
-          include_tasks: chroot_user_absent_fstab.yml
+          ansible.builtin.include_tasks: chroot_user_absent_fstab.yml
           when:
             - ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
 
         - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
-          include_tasks: chroot_user_absent.yml
+          ansible.builtin.include_tasks: chroot_user_absent.yml
           when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
 
       when: ( users_chroot_dir_check is defined ) and ( users_chroot_dir_check.stat.exists )
@@ -50,14 +50,14 @@
     - users
 
 - name: "Absent user {{ user.key }} home directory removed"
-  file:
+  ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     state: absent
   tags:
     - users
 
 - name: "User account {{ user.key }} absent"
-  user:
+  ansible.builtin.user:
     name: "{{ user.key }}"
     state: absent
     remove: true
@@ -66,14 +66,14 @@
     - users
 
 - name: "User {{ user.key }} groups absent"
-  group:
+  ansible.builtin.group:
     name: "{{ user.key }}"
     state: absent
   tags:
     - users
 
 - name: Users state files updated
-  include_tasks: user_updated.yml
+  ansible.builtin.include_tasks: user_updated.yml
   tags:
     - users
 ...

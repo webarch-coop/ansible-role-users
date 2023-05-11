@@ -1,31 +1,22 @@
 ---
 - name: Set users_current_state and users_proposed_state to empty variables
-  set_fact:
+  ansible.builtin.set_fact:
     users_current_state: ""
     users_proposed_state: ""
   tags:
     - users
 
 - name: "Check current state file for {{ user.key }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     checksum_algorithm: sha256
   register: users_current_state
   tags:
     - users
 
-- name: "{{ user.key }} needs adding for Ansible < 2.13"
-  set_fact:
-    users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
-  when:
-    - ansible_version.full is version('2.13.0', '<')
-    - not users_current_state.stat.exists | bool
-  tags:
-    - users
-
-- name: "{{ user.key }} needs adding for Ansible >= 2.13"
-  set_fact:
-    users_update: "{{ users_update | default([]) + [ user.key ] }}"
+- name: "{{ user.key }} needs adding"
+  ansible.builtin.set_fact:
+    users_update: "{{ users_update | default([]) + [user.key] }}"
   when:
     - ansible_version.full is version('2.13.0', '>=')
     - not users_current_state.stat.exists | bool
@@ -33,28 +24,17 @@
     - users
 
 - name: "Check the proposed state file for {{ user.key }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
     checksum_algorithm: sha256
   register: users_proposed_state
   tags:
     - users
 
-- name: "{{ user.key }} needs updating for Ansible < 2.13"
-  set_fact:
-    users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
+- name: "{{ user.key }} needs updating"
+  ansible.builtin.set_fact:
+    users_update: "{{ users_update | default([]) + [user.key] }}"
   when:
-    - ansible_version.full is version('2.13.0', '<')
-    - users_current_state.stat.exists | bool
-    - users_current_state.stat.checksum != users_proposed_state.stat.checksum
-  tags:
-    - users
-
-- name: "{{ user.key }} needs updating for Ansible >= 2.13"
-  set_fact:
-    users_update: "{{ users_update | default([]) + [ user.key ] }}"
-  when:
-    - ansible_version.full is version('2.13.0', '>=')
     - users_current_state.stat.exists | bool
     - users_current_state.stat.checksum != users_proposed_state.stat.checksum
   tags:

@@ -10,7 +10,7 @@
     - users
 
 - name: Debug some apache.conf.j2 template variables
-  debug:
+  ansible.builtin.debug:
     msg:
       - "user.key: {{ user.key }}"
       - "user.value.users_groups: {% if user.value.users_groups is defined %}{{ user.value.users_groups }}{% endif %}"
@@ -30,7 +30,7 @@
     - users
 
 - name: VirtualHosts files present for www-data
-  template:
+  ansible.builtin.template:
     src: apache.conf.j2
     dest: "/etc/apache2/sites-available/{{ vhost.key }}.conf"
     trim_blocks: false

@@ -5,7 +5,7 @@
     # TODO Stop Apache?
 
     - name: /var/www chroot directories unmounted for Apache
-      include_tasks: umount.yml
+      ansible.builtin.include_tasks: umount.yml
       vars:
         users_mount_path: "{{ users_chroot_users_dir }}/www-data/var/www/{{ dir }}"
       loop: "{{ users_apache_chroot_mount_dirs }}"
@@ -15,7 +15,7 @@
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
 
     - name: Chroot directories unmounted for Apache
-      include_tasks: umount.yml
+      ansible.builtin.include_tasks: umount.yml
       loop:
         - "{{ users_chroot_users_dir }}/www-data/usr/lib/apache2"
         - "{{ users_chroot_users_dir }}/www-data{{ users_basedir }}"
@@ -30,7 +30,7 @@
         label: "{{ users_mount_path | basename }}"
 
     - name: Apache chroot mounts absent from /etc/fstab
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: /etc/fstab
         state: absent
         marker: "# {mark} APACHE CHROOT"

@@ -3,27 +3,27 @@
   block:
 
     - name: "Check that the SSL cert for {{ vhost.value.users_apache_server_name }} is present"
-      stat:
+      ansible.builtin.stat:
         path: "{{ le_dir }}/{{ vhost.value.users_apache_server_name }}.cert.pem"
       register: users_apache_tls_cert_check
 
     - name: "Check that the SSL key for {{ vhost.value.users_apache_server_name }} is present"
-      stat:
+      ansible.builtin.stat:
         path: "{{ le_dir }}/{{ vhost.value.users_apache_server_name }}.key.pem"
       register: users_apache_tls_key_check
 
     - name: "Check that the SSL ca file for {{ vhost.value.users_apache_server_name }} is present"
-      stat:
+      ansible.builtin.stat:
         path: "{{ le_dir }}/{{ vhost.value.users_apache_server_name }}.ca.pem"
       register: users_apache_tls_ca_check
 
     - name: Set a fact for the results if any cert is missing
-      set_fact:
+      ansible.builtin.set_fact:
         users_apache_certs_present: false
       when: ( not users_apache_tls_cert_check.stat.exists ) or ( not users_apache_tls_key_check.stat.exists ) or ( not users_apache_tls_ca_check.stat.exists )
 
     - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
-      set_fact:
+      ansible.builtin.set_fact:
         users_apache_certs_present: true
       when:
         - users_apache_certs_present is not defined
@@ -32,7 +32,7 @@
         - users_apache_tls_ca_check.stat.exists
 
     - name: Set a fact for the results if a cert exists and users_apache_certs_present is not false
-      set_fact:
+      ansible.builtin.set_fact:
         users_apache_certs_present: true
       when:
         - users_apache_certs_present is defined
@@ -42,7 +42,7 @@
         - users_apache_tls_ca_check.stat.exists
 
     - name: Debug users_apache_certs_present
-      debug:
+      ansible.builtin.debug:
         var: users_apache_certs_present
         verbosity: 1
       when: users_apache_certs_present is defined

@@ -19,8 +19,8 @@
     msg:
       - "name: {{ user.key }}"
       - "group: {{ user.value.users_group | default(user.key) }}"
-      - "groups: {{ user.value.users_groups | default([]) | join(',') or \ omit }}"
-      - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit }}"
+      - "groups: {{ user.value.users_groups | default([]) | join(',') or omit }}"
+      - "all groups: {{ users_all_groups | default([]) | join(',') or omit }}"
       - "home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       - "email: {% if user.value.users_email is defined %}{{ user.value.users_email }}{% endif %}"
       - "shell: {{ user.value.users_shell | default('/bin/bash', true) }}"
@@ -39,7 +39,7 @@
   ansible.builtin.user:
     name: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    groups: "{{ users_all_groups | default([]) | join(',') or \ omit }}"
+    groups: "{{ users_all_groups | default([]) | join(',') or omit }}"
     home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     create_home: true
     shell: "{{ user.value.users_shell | default('/bin/bash', true) }}"

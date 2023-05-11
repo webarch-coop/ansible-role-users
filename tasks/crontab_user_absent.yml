@@ -3,19 +3,19 @@
   block:
 
     - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md absent"
-      file:
+      ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md"
         state: absent
 
     - name: "Daily cron jobs for {{ user.key }} absent"
-      cron:
+      ansible.builtin.cron:
         name: "Daily cron jobs"
         user: root
         cron_file: "chroot_cron_daily_{{ user.key }}"
         state: absent
 
     - name: "Hourly cron jobs for {{ user.key }} absent"
-      cron:
+      ansible.builtin.cron:
         name: "Hourly cron jobs"
         user: root
         cron_file: "chroot_cron_hourly_{{ user.key }}"
@@ -23,7 +23,7 @@
         hour: "*"
 
     - name: "Cron job files for {{ user.key }} absent"
-      file:
+      ansible.builtin.file:
         path: "/etc/cron.d/{{ file }}"
         state: absent
       loop:
@@ -33,31 +33,31 @@
         loop_var: file
 
     - name: "Daily cron jobs for {{ user.key }} absent"
-      cron:
+      ansible.builtin.cron:
         name: "Daily cron jobs"
         user: "{{ user.key }}"
         state: absent
 
     - name: "Hourly cron jobs for {{ user.key }} absent"
-      cron:
+      ansible.builtin.cron:
         name: "Hourly cron jobs"
         user: "{{ user.key }}"
         state: absent
 
     - name: "Daily deletion of users TMPDIR files which are older than a week absent"
-      cron:
+      ansible.builtin.cron:
         name: "Daily deletion of TMPDIR files for {{ user.key }}"
         user: "{{ user.key }}"
         state: absent
 
     - name: "Daily MariaDB dump cron job absent"
-      cron:
+      ansible.builtin.cron:
         name: "Nightly MySQL database backup for {{ user.key }}"
         user: "{{ user.key }}"
         state: absent
 
     - name: "Cron jobs defined at a user level absent"
-      cron:
+      ansible.builtin.cron:
         name: "{{ job.name }}"
         state: absent
       loop: "{{ users.value.users_cron_jobs }}"
@@ -67,7 +67,7 @@
       when: ( users.value.users_cron_jobs is defined ) and ( users.value.users_cron_jobs != [] )
 
     - name: "Crontab file absent from /var/spool for {{ user.key }}"
-      file:
+      ansible.builtin.file:
         path: "/var/spool/cron/crontabs/{{ user.key }}"
         state: absent
 

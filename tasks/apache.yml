@@ -6,7 +6,7 @@
       block:
 
         - name: Register the loaded Apache modules
-          command: a2query -m
+          ansible.builtin.command: a2query -m
           check_mode: false
           changed_when: false
           register: users_apache_modules_check
@@ -14,7 +14,7 @@
       rescue:
 
         - name: No mods enabled
-          set_fact:
+          ansible.builtin.set_fact:
             users_apache_modules_loaded: []
           when: ( "No module matches" in users_apache_modules_check.stderr )
 
@@ -22,18 +22,18 @@
       block:
 
         - name: Debug the loaded modules
-          debug:
+          ansible.builtin.debug:
             var: users_apache_modules_check.stdout_lines
             verbosity: 3
 
         - name: Set users_apache_modules_loaded to an empty array
-          set_fact:
+          ansible.builtin.set_fact:
             users_apache_modules_loaded: []
 
         # TODO Replace this loop with map https://git.coop/-/snippets/111
         - name: Set an array of the loaded modules
-          set_fact:
-            users_apache_modules_loaded: "{{ users_apache_modules_loaded + [ line.split(' ')[0] ] }}"
+          ansible.builtin.set_fact:
+            users_apache_modules_loaded: "{{ users_apache_modules_loaded + [line.split(' ')[0]] }}"
           loop: "{{ users_apache_modules_check.stdout_lines }}"
           loop_control:
             loop_var: line
@@ -44,42 +44,42 @@
         - users_apache_modules_check.stderr | length == 0
 
     - name: Debug loaded modules
-      debug:
+      ansible.builtin.debug:
         var: users_apache_modules_loaded
         verbosity: 3
 
     - name: Check that Apache suexec is enabled when users_apache_chroot_suexec is true
-      assert:
+      ansible.builtin.assert:
         that:
           - ( "suexec" in users_apache_modules_loaded )
       when: users_apache_chroot_suexec
 
     - name: Check that Apache proxy_fcgi is enabled when users_phpfpm is true
-      assert:
+      ansible.builtin.assert:
         that:
           - ( "proxy_fcgi" in users_apache_modules_loaded )
       when: users_phpfpm
 
     - name: Debug Apache chroot variable
-      debug:
+      ansible.builtin.debug:
         var: users_apache_chroot
         verbosity: 3
       when: users_apache_chroot is defined
 
     - name: Apache chroot present configuration
-      include_tasks: apache_chroot_present.yml
+      ansible.builtin.include_tasks: apache_chroot_present.yml
       when:
         - ( users_apache_chroot is defined ) and ( users_apache_chroot )
         - ( users_apache_chroot_dir is defined )
 
     - name: Apache chroot absent configuration
-      include_tasks: apache_chroot_absent.yml
+      ansible.builtin.include_tasks: apache_chroot_absent.yml
       when:
         - ( users_apache_chroot_remove is defined ) and ( users_apache_chroot_remove )
         - ( users_apache_chroot is defined ) and ( not users_apache_chroot )
 
     - name: Users Apache logrotation config in place
-      template:
+      ansible.builtin.template:
         src: apache_users_logrotate.j2
         dest: /etc/logrotate.d/apache_users_logrotate
         owner: root
@@ -98,7 +98,7 @@
       when: users_apache_logrotate.stat.exists | bool
 
     - name: Cron job to delete Apache logs when older than 30 days
-      cron:
+      ansible.builtin.cron:
         name: Delete Apache log files
         hour: "0"
         minute: "0"
@@ -106,7 +106,7 @@
         job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
 
     - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
-      cron:
+      ansible.builtin.cron:
         name: "Email monthly Apache bandwidth"
         hour: "1"
         minute: "0"

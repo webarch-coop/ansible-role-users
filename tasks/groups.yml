@@ -1,6 +1,6 @@
 ---
 - name: Debug group
-  debug:
+  ansible.builtin.debug:
     msg: "user={{ user }} group={{ group }}"
   loop: "{{ user.value.users_groups }}"
   loop_control:
@@ -10,7 +10,7 @@
     - users
 
 - name: Add group
-  group:
+  ansible.builtin.group:
     name: "{{ group }}"
     state: present
   loop: "{{ user.value.users_groups }}"

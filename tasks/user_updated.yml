@@ -1,13 +1,13 @@
 ---
 - name: "Check if a current state files exists for {{ user.key }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
   register: users_current_state_file
   tags:
     - users
 
 - name: "Current state file copied to the previous directory for {{ user.key }}"
-  copy:
+  ansible.builtin.copy:
     src: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     dest: "{{ users_state_dir }}/previous/{{ user.key }}.yml"
     remote_src: true
@@ -19,7 +19,7 @@
     - users
 
 - name: "Proposed users state file copied to the current directory for {{ user.key }}"
-  copy:
+  ansible.builtin.copy:
     src: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
     dest: "{{ users_state_dir }}/current/{{ user.key }}.yml"
     remote_src: true

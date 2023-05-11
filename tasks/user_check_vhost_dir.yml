@@ -3,12 +3,12 @@
   block:
 
     - name: "Debug Directory array for {{ vhost.key }} VirtualHost for {{ user.key }} user"
-      debug:
+      ansible.builtin.debug:
         var: dir
         verbosity: 2
 
     - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_expires is regex('^medium|strict|forever$')
       when: dir.value.users_apache_expires is defined
@@ -17,13 +17,13 @@
       block:
 
         - name: "Check that the Options for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.value.users_apache_options | length
               - dir.value.users_apache_options[0] is defined
 
         - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - option is regex("^[+-](?i)All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$")
           loop: "{{ dir.value.users_apache_options }}"
@@ -37,13 +37,13 @@
       block:
 
         - name: "Check that the IndexOptions for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.value.users_apache_index_options | length
               - dir.value.users_apache_index_options[0] is defined
 
         - name: "Check that all IndexOptions are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - option is regex("^[+-](?i)AddAltClass|Charset|DescriptionWidth|FancyIndexing|FoldersFirst|HTMLTable|IconsAreLinks|IconHeight|IconWidth|IgnoreCase|IgnoreClient|NameWidth|ScanHTMLTitles|ShowForbidden|SuppressColumnSorting|SuppressDescription|SuppressHTMLPreamble|SuppressIcon|SuppressLastModified|SuppressRules|SuppressSize|TrackModified|UseOldDateFormat|VersionSort|XHTML.*$")
           loop: "{{ dir.value.users_apache_index_options }}"
@@ -54,43 +54,43 @@
       when: dir.value.users_apache_index_options is defined
 
     - name: "Check that the IndexHeadInsert is a string, which doesn't contain single quotes if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_index_head_insert | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
       when: dir.value.users_apache_index_head_insert is defined
 
     - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_header_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
       when: dir.value.users_apache_header_name is defined
 
     - name: "Check that the ReadmeName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_readme_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
       when: dir.value.users_apache_readme_name is defined
 
     - name: "Check that SSILegacyExprParser is true or false for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_ssi_legacy | type_debug == "bool"
       when: dir.value.users_apache_ssi_legacy is defined
 
     - name: "Check that SSILastModified is true or false for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_ssi_modified | type_debug == "bool"
       when: dir.value.users_apache_ssi_modified is defined
 
     - name: "Check that AddOutputFilter for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_add_output_filters | type_debug == "list"
       when: dir.value.users_apache_add_output_filters is defined
 
     - name: "Check that AddType for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_add_type | type_debug == "list"
       when: dir.value.users_apache_add_type is defined
@@ -99,13 +99,13 @@
       block:
 
         - name: "Check that the AllowOverride directives for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.value.users_apache_override | length
               - dir.value.users_apache_override[0] is defined
 
         - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
           loop: "{{ dir.value.users_apache_override }}"
@@ -119,13 +119,13 @@
       block:
 
         - name: "Check that the DirectoryIndex directive for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.value.users_apache_index | length
               - dir.value.users_apache_index[0] is defined
 
         - name: "Check that each DirectoryIndex appears to be a filename for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - index is regex("^\w+\.\w+$")
           loop: "{{ dir.value.users_apache_index }}"
@@ -136,7 +136,7 @@
       when: dir.value.users_apache_index is defined
 
     - name: "Check that AuthType is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      assert:
+      ansible.builtin.assert:
         that:
           - dir.value.users_apache_auth_type | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
           - dir.value.users_apache_auth_type is regex("None|Basic|Digest|Form")
@@ -146,12 +146,12 @@
       block:
 
         - name: "Check that users_apache_require is a list for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.value.users_apache_require | type_debug == "list"
 
         - name: "Check that that values other than method for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - req is regex("^all granted|^all denied|^env .*|^method [A-Z ]{3,51}|^expr .*|^user .*|^group .*|^valid-user|^ip .*|^forward-dns .*")
           when: req is not regex("method .*")
@@ -166,12 +166,12 @@
       block:
 
         - name: "Check that users_apache_filesmatch is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - dir.value.users_apache_filesmatch | type_debug == "list"
 
         - name: "Check that regex is defined for FilesMatch for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - fm.regex is defined
           loop: "{{ dir.value.users_apache_filesmatch }}"
