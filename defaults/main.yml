@@ -248,7 +248,6 @@ users_phpfpm_request_terminate_timeout: 360
 # processed for PHP commands, it can also be set at a users level
 users_phpfpm_extensions:
   - php
-users_phpfpm_enable_open_basedir: false
 # PHP expands $pool to the pool name and in this case it is the same as the username
 users_phpfpm_open_basedir:
   - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}"
@@ -532,12 +531,12 @@ users_phpfpm_disable_functions_nextcloud:
   - posix_setsid
   - posix_setuid
   # The proc_ functions are used by some features of MediaWiki
-  - proc_close
-  - proc_get_status
-  - proc_nice
-  # proc_open is used for email with some Nextcloud configuration
+  # - proc_close
+  # - proc_get_status
+  # - proc_nice
+  # proc_open is used for sendmail email by Nextcloud configuration
   # - proc_open
-  - proc_terminate
+  # - proc_terminate
   # The shell_exec function is used by Matomo and Nextcloud for the serverinfo
   # - shell_exec
   - show_source

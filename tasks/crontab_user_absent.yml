@@ -1,5 +1,5 @@
 ---
-- name: "Cron jobs absent for {{ user.key }}"
+- name: Cron jobs absent for {{ user.key }}
   block:
 
     - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md absent"

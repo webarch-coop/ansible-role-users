@@ -1,7 +1,8 @@
 ---
 - name: Debug group
   ansible.builtin.debug:
-    msg: "user={{ user }} group={{ group }}"
+    var: group
+    verbosity: 2
   loop: "{{ user.value.users_groups }}"
   loop_control:
     loop_var: group

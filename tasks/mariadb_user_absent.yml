@@ -13,7 +13,9 @@
         login_user: root
         login_unix_socket: /var/run/mysqld/mysqld.sock
       loop: "{{ users_mariadb_list.stdout_lines }}"
-      when: ( users_mariadb_list.stdout_lines is defined ) and ( users_mariadb_list.stdout_lines != [] )
+      when:
+        - users_mariadb_list.stdout_lines is defined
+        - users_mariadb_list.stdout_lines != []
       loop_control:
         loop_var: db
         label: "{{ db }}"

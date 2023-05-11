@@ -13,7 +13,8 @@
   ansible.builtin.include_tasks: apache_user_absent.yml
   when:
     - ( "apache2" in ansible_local.dpkg.installed )
-    - ( users_apache is defined ) and ( users_apache )
+    - users_apache is defined
+    - users_apache | bool
   tags:
     - users
 
@@ -36,16 +37,25 @@
 
         - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
           ansible.builtin.include_tasks: chroot_user_absent_fstab.yml
-          when:
-            - ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
+          when: >-
+            ( ( user.value.users_state is defined ) and
+            ( user.value.users_state == "absent" ) ) or
+            ( "chroot" not in user.value.users_groups )
 
         - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
           ansible.builtin.include_tasks: chroot_user_absent.yml
-          when: ( user.value.users_state is defined and user.value.users_state == "absent" ) or ( "chroot" not in user.value.users_groups )
+          when: >-
+            ( ( user.value.users_state is defined ) and
+            ( user.value.users_state == "absent" ) ) or
+            ( "chroot" not in user.value.users_groups )
 
-      when: ( users_chroot_dir_check is defined ) and ( users_chroot_dir_check.stat.exists )
+      when:
+        - users_chroot_dir_check is defined
+        - users_chroot_dir_check.stat.exists | bool
 
-  when: ( users_chroot is defined ) and ( users_chroot )
+  when:
+    - users_chroot is defined
+    - users_chroot | bool
   tags:
     - users
 
