@@ -53,7 +53,7 @@ php_admin_value[output_buffering] = {% if user.value.users_phpfpm_output_bufferi
 {% if user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions == [] %}
 ; disable_functions set from user.value.users_phpfpm_disable_functions
 ; php_admin_value[disable_functions] =
-{% eif user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions != [] %}
+{% elif user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions != [] %}
 ; disable_functions set from user.value.users_phpfpm_disable_functions
 php_admin_value[disable_functions] = "{% for func in user.value.users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
 {% elif users_phpfpm_disable_functions is defined and users_phpfpm_disable_functions == [] %}
@@ -70,25 +70,24 @@ php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functi
 ; php_admin_value[disable_functions] =
 {% endif %}
 
-{% if users_phpfpm_enable_open_basedir is defined and users_phpfpm_enable_open_basedir | bool %}
-; users_phpfpm_enable_open_basedir is defined and true
-{% if user.value.users_phpfpm_enable_open_basedir is not defined or not user.value.users_phpfpm_enable_open_basedir | bool %}
-; user.value.users_phpfpm_enable_open_basedir is not defined or false
-{% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir | bool %}
-; open_basedir directories set from the user.value.users_phpfpm_open_basedir array
-php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
+{% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir == [] %}
+; open_basedir set from user.value.users_phpfpm_open_basedir
+; php_admin_value[open_basedir] =
+{% elif user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir != [] %}
+; open_basedir set from user.value.users_phpfpm_open_basedir
+php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}"
+{% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir == [] %}
+; open_basedir set from users_phpfpm_open_basedir
+; php_admin_value[open_basedir] =
 {% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir != [] %}
-; open_basedir set from the users_phpfpm_open_basedir array
-php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
+; open_basedir set from users_phpfpm_open_basedir
+php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}"
 {% else %}
-; netiher user.value.users_phpfpm_open_basedir or users_phpfpm_open_basedir are defined and
-; not empty list so open_basedir has not been set
-{% endif %}
-{% else %}
-; user.value.users_phpfpm_enable_open_basedir is not defined or false so open_basedir has not been set
-{% endif %}
-{% else %}
-; users_phpfpm_enable_open_basedir is not defined or false so open_basedir has not been set
+; open_basedir not set as neither
+; user.value.users_phpfpm_open_basedir or users_phpfpm_open_basedir
+; are set however php_open_basedir might be applied to the main php.ini
+; file
+; php_admin_value[open_basedir] =
 {% endif %}
 
 {% if user.value.users_phpfpm_mysqli_allow_local_infile is defined and user.value.users_phpfpm_mysqli_allow_local_infile %}

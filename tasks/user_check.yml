@@ -408,10 +408,10 @@
           - user.value.users_phpfpm_mysqli_allow_local_infile | type_debug == "bool"
       when: user.value.users_phpfpm_mysqli_allow_local_infile is defined
 
-    - name: Check that users_phpfpm_enable_open_basedir is a boolean if defined
+    - name: Check that users_phpfpm_open_basedir is a list if defined
       ansible.builtin.assert:
         that:
-          - user.value.users_phpfpm_enable_open_basedir | type_debug == "bool"
+          - user.value.users_phpfpm_enable_open_basedir | type_debug == "list"
       when: user.value.users_phpfpm_enable_open_basedir is defined
 
     - name: "Check that users_phpfpm_output_buffering is set to an integer if defined"

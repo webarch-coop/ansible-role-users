@@ -120,8 +120,8 @@ users_phpfpm_disable_functions:
   elements: str
   required: false
   descripion: List for php_admin_value[disable_functions].
-users_phpfpm_enable_open_basedir:
-  type: bool
+users_phpfpm_open_basedir:
+  type: list
   required: false
   description: PHP-FPM open_basedir.
 users_phpfpm_max_children:
