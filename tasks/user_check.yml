@@ -408,6 +408,12 @@
           - user.value.users_phpfpm_mysqli_allow_local_infile | type_debug == "bool"
       when: user.value.users_phpfpm_mysqli_allow_local_infile is defined
 
+    - name: Check that users_phpfpm_disable_functions is a list if defined
+      ansible.builtin.assert:
+        that:
+          - user.value.users_phpfpm_enable_disable_functions | type_debug == "list"
+      when: user.value.users_phpfpm_enable_disable_functions is defined
+
     - name: Check that users_phpfpm_open_basedir is a list if defined
       ansible.builtin.assert:
         that:
