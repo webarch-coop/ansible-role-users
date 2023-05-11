@@ -531,12 +531,12 @@ users_phpfpm_disable_functions_nextcloud:
   - posix_setsid
   - posix_setuid
   # The proc_ functions are used by some features of MediaWiki
-  - proc_close
-  - proc_get_status
-  - proc_nice
-  # proc_open is used for email with some Nextcloud configuration
+  # - proc_close
+  # - proc_get_status
+  # - proc_nice
+  # proc_open is used for sendmail email by Nextcloud configuration
   # - proc_open
-  - proc_terminate
+  # - proc_terminate
   # The shell_exec function is used by Matomo and Nextcloud for the serverinfo
   # - shell_exec
   - show_source
