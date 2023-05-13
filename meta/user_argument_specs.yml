@@ -12,6 +12,24 @@ users_apache_virtual_hosts:
   type: dict
   required: false
   description: A dictionary of Apache VirtualHosts.
+users_cron_jobs:
+  type: list
+  elements: dict
+  required: false
+  description: A list of users cron jobs.
+  options:
+    disabled:
+      type: bool
+    name:
+      type: str
+      required: true
+      description: The name of the cron job, used by Ansible blockinfile, so it needs to be unique and when it is changed old will not be removed.
+    special_time:
+    state:
+users_cron_tmpdir_clean:
+  type: bool
+  required: false
+  description: Disable the daily cron job to clear the ~/tmp directory.
 users_daily_scripts:
   type: list
   elements: str
@@ -62,6 +80,11 @@ users_home_owner:
   type: str
   required: false
   description: The owner of the users HOME directory.
+users_hourly_scripts:
+  type: list
+  elements: str
+  required: false
+  description: A list of Bash command lines to be run hourly.
 users_mariadb_databases:
   type: list
   elements: str
@@ -133,6 +156,10 @@ users_phpfpm_open_basedir:
   elements: str
   required: false
   descripion: A list of directories in which PHP is allowed to run, php_admin_value[open_basedir].
+users_phpfpm_output_buffering:
+  type: int
+  required: false
+  descripion: An interger for output_buffering, zero to disable or a positive number of bytes ro limit the size of the buffer.
 users_phpfpm_pm:
   type: str
   required: false
