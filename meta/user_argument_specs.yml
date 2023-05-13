@@ -18,14 +18,45 @@ users_cron_jobs:
   required: false
   description: A list of users cron jobs.
   options:
+    day:
+      type: str
+      required: false
+      description: A day for the users cron job.
     disabled:
       type: bool
+      required: false
+      description: Disable the users cron job.
+    job:
+      type: str
+      required: false
+      description: A task for the users cron job.
+    hour:
+      type: str
+      required: false
+      description: A hour for the users cron job.
+    minute:
+      type: str
+      required: false
+      description: A minute for the users cron job.
+    month:
+      type: str
+      required: false
+      description: A minute for the users cron job.
     name:
       type: str
       required: true
       description: The name of the cron job, used by Ansible blockinfile, so it needs to be unique and when it is changed old will not be removed.
     special_time:
+      type: str
+      required: false
+      description: A special time for the users cron job.
     state:
+      type: str
+      required: false
+      description: A state for the users cron job.
+      choices:
+        - absent
+        - present
 users_cron_tmpdir_clean:
   type: bool
   required: false

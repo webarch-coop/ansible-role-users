@@ -180,10 +180,6 @@
     - name: "Include daily script tasks for {{ user.key }}"
       ansible.builtin.include_tasks: user_scripts.yml
 
-    - name: "Include cron tasks for {{ user.key }}"
-      ansible.builtin.include_tasks: user_cron.yml
-      when: user.value.users_cron_jobs is defined
-
     - name: "User state files updated for {{ user.key }}"
       ansible.builtin.include_tasks: user_updated.yml
 
