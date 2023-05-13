@@ -155,6 +155,7 @@
       community.mysql.mysql_user:
         name: "{{ user.key }}"
         password: "{{ users_mariadb_password }}"
+        host: localhost
         priv: "{{ users_mariadb_priv }}"
         state: present
         update_password: always
