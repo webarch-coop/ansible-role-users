@@ -205,10 +205,6 @@ argument_specs:
         elements: str
         required: false
         description: A list of PHP-FPM functions to disable for Nextcloud.
-      users_phpfpm_enable_open_basedir:
-        type: bool
-        required: true
-        description: Set php_admin_value[open_basedir] in users PHP-FPM pool.d files.
       users_phpfpm_extensions:
         type: list
         elements: str

@@ -417,8 +417,8 @@
     - name: Check that users_phpfpm_open_basedir is a list if defined
       ansible.builtin.assert:
         that:
-          - user.value.users_phpfpm_enable_open_basedir | type_debug == "list"
-      when: user.value.users_phpfpm_enable_open_basedir is defined
+          - user.value.users_phpfpm_open_basedir | type_debug == "list"
+      when: user.value.users_phpfpm_open_basedir is defined
 
     - name: "Check that users_phpfpm_output_buffering is set to an integer if defined"
       ansible.builtin.assert:
