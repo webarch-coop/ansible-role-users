@@ -21,5 +21,5 @@ map <F10> gqap
 " https://github.com/vim/vim/issues/1326#issuecomment-266955735
 set mouse-=a
 
-" https://stackoverflow.com/a/23036077
-set viminfo=%,<800,'10,/50,:100,h,f0,n~/.vim/.viminfo
+" https://vi.stackexchange.com/a/14358
+set viminfo=+=n~/.vim/viminfo
