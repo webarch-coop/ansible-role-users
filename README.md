@@ -676,10 +676,11 @@ Results in:
 ### Directories
 
 The `users_apache_directories` variable can be used at a `VirtualHost` level to
-list dictionaries representing `Directory` directives, **relative to the
-`users_sites_dir` path**. The variables that can be used are the same as the
-ones for the `DocumentRoot` directory apart from `users_apache_type`, this
-can't be used to set the `Directory` type to `php` or `static`.
+list dictionaries representing `Directory` directives, either relative to the
+`users_sites_dir` path, when they don't start with a `/` or using fill paths.
+The variables that can be used are the same as the ones for the `DocumentRoot`
+directory apart from `users_apache_type`, this can't be used to set the
+`Directory` type to `php` or `static`.
 
 Prior to version `3.0.0` of this role `users_apache_directories` was used for
 an array of directories and when it was used the default `DocumentRoot` /
@@ -736,6 +737,84 @@ And this will generate:
   ProxyPass "/media" "!"
   ProxyPass "/" "http://127.0.0.1:8000/"
   ProxyPassReverse "/" "http://127.0.0.1:8000/"
+```
+
+Prior to version `4.3.1` of this role `users_apache_directories` could only be used for directories relative to the `users_sites_dir` path, this is still the case when they doesn't start with a `/`, but now a full path can also be used, for example:
+
+```yaml
+    users_apache_virtual_hosts:
+      openproject:
+        users_apache_server_name: "{{ inventory_hostname }}"
+        users_apache_vhost_docroot: false
+        users_apache_expires: medium
+        users_apache_directories:
+          "/opt/openproject/public":
+            users_apache_override:
+              - "None"
+            users_apache_options:
+              - "-Indexes"
+        users_apache_headers:
+          - type: request
+            action: setifempty
+            arg: X-Forwarded-Proto https
+        users_apache_alias:
+          - url: /assets
+            path: /opt/openproject/public/assets
+          - url: /uploads
+            path: /opt/openproject/public/uploads
+        users_apache_locations:
+          - location: "/"
+            proxy_pass: http://127.0.0.1:6000/
+            reverse: true
+          - location: "/assets"
+            proxy_pass: "!"
+          - match: "^/sys"
+            authname: Local connections only
+            authtype: None
+            require:
+              - local
+```
+
+Will generate:
+
+```apache
+  <IfModule headers_module>
+    RequestHeader setifempty X-Forwarded-Proto https
+    Header setifempty Strict-Transport-Security "max-age=155520225;"
+    Header setifempty Permissions-Policy "interest-cohort=()"
+  </IfModule>
+  <Location "/">
+    # ProxyPass Location so no AuthUserFile
+    ProxyPass "http://127.0.0.1:6000/"
+    ProxyPassReverse "http://127.0.0.1:6000/"
+  </Location>
+  <Location "/assets">
+    # ProxyPass Location so no AuthUserFile
+    ProxyPass "!"
+  </Location>
+  <LocationMatch "^/sys">
+    # No AuthUserFile for this Location as AuthType is None
+    AuthName "Local connections only"
+    AuthType "None"
+    Require local
+  </LocationMatch>
+  <Location "/.well-known/acme-challenge">
+    AuthType "None"
+    Require all granted
+  </Location>
+  <IfModule alias_module>
+    Alias "/assets" "/opt/openproject/public/assets"
+    Alias "/uploads" "/opt/openproject/public/uploads"
+  </IfModule>
+  <IfFile "/opt/openproject/public">
+    <Directory "/opt/openproject/public">
+      Options -Indexes
+      DirectoryIndex index.html index.htm
+      AllowOverride None
+      AuthType "None"
+      Require all granted
+    </Directory>
+  </IfFile>
 ```
 
 If no Directories are required use `users_apache_directories: []`.

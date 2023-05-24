@@ -6,7 +6,7 @@
       ansible.builtin.assert:
         that:
           - user.key != users_disallowed_username
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       loop: "{{ users_disallowed_usernames }}"
       loop_control:
         loop_var: users_disallowed_username
@@ -16,14 +16,14 @@
         that:
           - user.value.users_state | length
           - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" ) or ( user.value.users_state == "ignore" )
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_state is defined
 
     - name: "Check that the group for {{ user.key }} contains only ascii letters, numbers and dashes"
       ansible.builtin.assert:
         that:
           - user.value.users_group is regex("^[a-zA-Z0-9-]*$")
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_group is defined
 
     - name: "Check the groups for {{ user.key }}"
@@ -34,7 +34,7 @@
             that:
               - user.value.users_groups | length
               - user.value.users_groups[0] is defined
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Debug users groups for {{ user.key }}"
           ansible.builtin.debug:
@@ -45,7 +45,7 @@
           ansible.builtin.assert:
             that:
               - group is regex("^[a-zA-Z0-9-]*$")
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ user.value.users_groups }}"
           loop_control:
             loop_var: group
@@ -59,6 +59,7 @@
                 that:
                   - users_chroot is defined
                   - users_chroot
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
             # NOTE users_chroot_dir_check is defined via a task in system.yml
             - name: "Check that users_chroot_dir is defined and the directory is present when {{ user.key }} is in the chroot group"
@@ -66,6 +67,7 @@
                 that:
                   - users_chroot_dir is defined
                   - users_chroot_dir_check.stat.exists
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
             # NOTE users_chroot_users_dir_check is defined via a task in system.yml
             - name: "Check that users_chroot_users_dir is defined and the directory is present when {{ user.key }} is in the chroot group"
@@ -73,6 +75,7 @@
                 that:
                   - users_chroot_users_dir is defined
                   - users_chroot_users_dir_check.stat.exists
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
           when: ( "chroot" in user.value.users_groups )
 
@@ -86,7 +89,7 @@
             that:
               - user.value.users_group_members | length
               - user.value.users_group_members[0] is defined
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Debug group members for {{ user.key }}"
           ansible.builtin.debug:
@@ -97,7 +100,7 @@
           ansible.builtin.assert:
             that:
               - group is regex("^[a-zA-Z0-9-]*$")
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ user.value.users_group_members }}"
           loop_control:
             loop_var: group
@@ -109,14 +112,14 @@
       ansible.builtin.assert:
         that:
           - user.value.users_home is regex("^\/.*$")
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_home is defined
 
     - name: "Check that the shell for {{ user.key }} is valid"
       ansible.builtin.assert:
         that:
           - user.value.users_shell in users_shells
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: ( users_shells is defined ) and ( user.value.users_shell is defined )
 
     - name: "Check users_skel is an existing path for {{ user.key }}"
@@ -130,7 +133,7 @@
       ansible.builtin.assert:
         that:
           - ( user.value.users_system ) or ( not user.value.users_system )
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_system is defined
 
     # TODO check users_home_owner
@@ -141,14 +144,14 @@
       ansible.builtin.assert:
         that:
           - ( user.value.users_generate_ssh_key ) or ( not user.value.users_generate_ssh_key )
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_generate_ssh_key is defined
 
     - name: "Check email address for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - user.value.users_email is regex("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_email is defined
 
     - name: SSH public key URL checks
@@ -159,7 +162,7 @@
             that:
               - user.value.users_ssh_public_keys | length
               - user.value.users_ssh_public_keys[0] is defined
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }}"
           ansible.builtin.uri:
@@ -180,49 +183,49 @@
       ansible.builtin.assert:
         that:
           - user.value.users_quota | human_to_bytes | int > 0
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_quota is defined
 
     - name: "Check that users_quota_block_softlimit is a positive number for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - user.value.users_quota_block_softlimit | human_to_bytes | int > 0
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_quota_block_softlimit is defined
 
     - name: "Check that users_quota_block_hardlimit is a positive number for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - user.value.users_quota_block_hardlimit | human_to_bytes | int > 0
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_quota_block_hardlimit is defined
 
     - name: "Check that users_quota_inode_softlimit is a positive number for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - user.value.users_quota_inode_softlimit | human_to_bytes | int > 0
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_quota_inode_softlimit is defined
 
     - name: "Check that users_quota_inode_hardlimit is a positive number for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - user.value.users_quota_inode_hardlimit | human_to_bytes | int > 0
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_quota_inode_hardlimit is defined
 
     - name: "Check that users_notify_passwd for {{ user.key }} is true or false"
       ansible.builtin.assert:
         that:
           - ( user.value.users_notify_passwd ) or ( not user.value.users_notify_passwd )
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_notify_passwd is defined
 
     - name: "Check that users_mariadb_notify_passwd for {{ user.key }} is true or false"
       ansible.builtin.assert:
         that:
           - ( user.value.users_mariadb_notify_passwd ) or ( not user.value.users_mariadb_notify_passwd )
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_mariadb_notify_passwd is defined
 
     - name: "MariaDB users_mariadb_databases array checks for {{ user.key }}"
@@ -233,14 +236,14 @@
             that:
               - user.value.users_mariadb_databases | length
               - user.value.users_mariadb_databases[0] is defined
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that the database names only contain lower case letters, numbers and underscores for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - db is regex("^[a-z0-9_]*$")
             fail_msg: "The database name, {{ db }} must only contain lower case letters, numbers and underscores"
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ user.value.users_mariadb_databases }}"
           loop_control:
             loop_var: db
@@ -252,7 +255,7 @@
             that:
               - db is regex("^.{2,25}$")
             fail_msg: "The database name, {{ db }} must be more than 2 but less than or equal to 25 characters long"
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ user.value.users_mariadb_databases }}"
           loop_control:
             loop_var: db
@@ -268,7 +271,7 @@
             that:
               - user.value.users_mariadb_database_privileges | length
               - user.value.users_mariadb_database_privileges[0] is defined
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         # https://mariadb.com/kb/en/grant/
         - name: "Check that the MariaDB database privileges are valid for {{ user.key }}"
@@ -276,7 +279,7 @@
             that:
               - priv is regex("^ALL|ALTER[ ]{0,1}ROUTINE|ALTER|CREATE[ ]{0,1}VIEW|CREATE[ ]{0,1}ROUTINE|CREATE[ ]{0,1}TEMPORARY[ ]{0,1}TABLES|CREATE[ ]{0,1}VIEW|CREATE|DELETE[ ]{0,1}HISTORY|DELETE|DROP|EXECUTE|EVENT|GRANT[ ]{0,1}OPTION|INDEX|INSERT|LOCK[ ]{0,1}TABLES|REFERENCES|SELECT|SHOW[ ]{0,1}VIEW|TRIGGER|UPDATE$")
             fail_msg: "Privilege, {{ priv }} is not valid"
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ user.value.users_mariadb_database_privileges }}"
           loop_control:
             loop_var: priv
@@ -293,7 +296,7 @@
       ansible.builtin.assert:
         that:
           - user.value.users_phpfpm_version is in users_phpfpm_versions
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when:
         - ( "phpfpm" in getent_group )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
@@ -312,7 +315,7 @@
       ansible.builtin.assert:
         that:
           - user.value.users_phpfpm_pm_max_children | int >= 1
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_phpfpm_pm_max_children is defined
 
     - name: "Check the PHP-FPM pm dynamic pool settings for {{ user.key }} if defined"
@@ -322,35 +325,35 @@
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_start_servers | int >= 1
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: user.value.users_phpfpm_pm_start_servers is defined
 
         - name: "Check the PHP-FPM pm.min_spare_servers for {{ user.key }} if defined"
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_min_spare_servers | int >= 1
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: user.value.users_phpfpm_pm_min_spare_servers is defined
 
         - name: "Check the PHP-FPM pm.max_spare_servers for {{ user.key }} if defined"
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_max_spare_servers | int >= 1
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: user.value.users_phpfpm_pm_max_spare_servers is defined
 
         - name: "Check the PHP-FPM users_phpfpm_pm_max_children for {{ user.key }} if defined"
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= 1
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: user.value.users_phpfpm_pm_max_children is defined
 
         - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.start_servers for {{ user.key }} if defined"
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_start_servers | int
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_start_servers is defined
@@ -359,7 +362,7 @@
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_min_spare_servers | int
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
@@ -368,7 +371,7 @@
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_max_spare_servers | int
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when:
             - user.value.users_phpfpm_pm_max_children is defined
             - user.value.users_phpfpm_pm_max_spare_servers is defined
@@ -377,7 +380,7 @@
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_start_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when:
             - user.value.users_phpfpm_pm_start_servers is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
@@ -386,7 +389,7 @@
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_start_servers | int <= user.value.users_phpfpm_pm_max_spare_servers | int
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when:
             - user.value.users_phpfpm_pm_start_servers is defined
             - user.value.users_phpfpm_pm_max_spare_servers is defined
@@ -395,7 +398,7 @@
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_max_spare_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
-            quiet: true
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when:
             - user.value.users_phpfpm_pm_max_spare_servers is defined
             - user.value.users_phpfpm_pm_min_spare_servers is defined
@@ -406,24 +409,28 @@
       ansible.builtin.assert:
         that:
           - user.value.users_phpfpm_mysqli_allow_local_infile | type_debug == "bool"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_phpfpm_mysqli_allow_local_infile is defined
 
     - name: Check that users_phpfpm_disable_functions is a list if defined
       ansible.builtin.assert:
         that:
           - user.value.users_phpfpm_enable_disable_functions | type_debug == "list"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_phpfpm_enable_disable_functions is defined
 
     - name: Check that users_phpfpm_open_basedir is a list if defined
       ansible.builtin.assert:
         that:
           - user.value.users_phpfpm_open_basedir | type_debug == "list"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_phpfpm_open_basedir is defined
 
     - name: "Check that users_phpfpm_output_buffering is set to an integer if defined"
       ansible.builtin.assert:
         that:
           - user.value.users_phpfpm_output_buffering | type_debug == "int"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_phpfpm_output_buffering is defined
 
     - name: Checks for users_phpfpm_extensions
@@ -433,11 +440,13 @@
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_extensions | type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that users_phpfpm_extensions for {{ user.key }} is an array if defined"
           ansible.builtin.assert:
             that:
               - ext is regex('^[a-zA-Z0-9_-]{1,6}$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ user.value.users_phpfpm_extensions }}"
           loop_control:
             loop_var: ext
@@ -449,6 +458,7 @@
         that:
           - user.value.users_daily_scripts | type_debug == "list"
           - user.value.users_daily_scripts | length > 0
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_daily_scripts is defined
 
     - name: "Check that the users_hourly_scripts array for {{ user.key }} is a non-empty list if defined"
@@ -456,6 +466,7 @@
         that:
           - user.value.users_hourly_scripts | type_debug == "list"
           - user.value.users_hourly_scripts | length > 0
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_hourly_scripts is defined
 
     - name: Check the entries in the users_cron_jobs array if defined

@@ -120,6 +120,7 @@
               ( "php8.1-fpm" in ansible_local.dpkg.installed ) or
               ( "php8.2-fpm" in ansible_local.dpkg.installed ) or
               ( "php-fpm" in ansible_local.dpkg.installed )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: Query the version of PHP using phpquery -V
           ansible.builtin.command: phpquery -V
@@ -137,11 +138,13 @@
           ansible.builtin.assert:
             that:
               - users_phpfpm_versions is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: Check the values of the list of users_phpfpm_versions
           ansible.builtin.assert:
             that:
               - users_phpfpm_ver is regex('^[0-9]{1,2}[.][0-9]$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ users_phpfpm_versions }}"
           loop_control:
             loop_var: users_phpfpm_ver

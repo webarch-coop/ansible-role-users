@@ -6,12 +6,14 @@
       ansible.builtin.assert:
         that:
           - vhost.key is regex("^[a-zA-Z0-9/_.-]*$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
         fail_msg: "Only letters, numbers, underscores, dashes and forward slashes can be present in the DocumentRoot path"
 
     - name: "Check that users_apache_vhost_docroot is a boolean if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - vhost.value.users_apache_vhost_docroot | type_debug == "bool"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_vhost_docroot is defined
 
     - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName"
@@ -21,6 +23,7 @@
           - vhost.value.users_apache_server_name | type_debug is not regex('^dict|list|int|bool$')
           - vhost.value.users_apache_server_name | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
           - vhost.value.users_apache_server_name | length
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has a ServerName that resolves to a IPv4 address"
       ansible.builtin.include_tasks: user_check_domain.yml
@@ -38,6 +41,7 @@
               - vhost.value.users_apache_server_aliases | length
               - vhost.value.users_apache_server_aliases | type_debug == "list"
               - vhost.value.users_apache_server_aliases[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that the {{ vhost.key }} VirtualHost for {{ user.key }} has ServerAlias' that resolve to IPv4 addresses"
           ansible.builtin.include_tasks: user_check_domain.yml
@@ -59,11 +63,13 @@
           ansible.builtin.assert:
             that:
               - vhost.value.users_apache_allow_encoded_slashes | type_debug is regex('bool|str|AnsibleUnicode|AnsibleUnsafeText$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that users_apache_allow_encoded_slashes for {{ vhost.key }} VirtualHost for {{ user.key }} is NoDecode when a string"
           ansible.builtin.assert:
             that:
               - vhost.value.users_apache_allow_encoded_slashes == "NoDecode"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: vhost.value.users_apache_allow_encoded_slashes | type_debug is regex('str|AnsibleUnicode|AnsibleUnsafeText$')
 
       when: vhost.value.users_apache_allow_encoded_slashes is defined
@@ -72,6 +78,7 @@
       ansible.builtin.assert:
         that:
           - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_type is defined
 
     - name: Check that users_apache_php_socket_path exists and is a socket and the user is not chrooted
@@ -108,6 +115,7 @@
           ansible.builtin.assert:
             that:
               - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_set_env }}"
           loop_control:
             loop_var: setenv
@@ -118,6 +126,7 @@
             that:
               - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
               - ( setenv.value is defined ) and ( setenv.regex | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_set_env }}"
           loop_control:
             loop_var: setenv
@@ -134,13 +143,16 @@
               - ( setenv.attribute is defined ) and ( setenv.attribute | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
               - ( setenv.regex is defined ) and ( setenv.regex | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
               - ( setenv.env is defined ) and ( setenv.env | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$') )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_set_env_if }}"
           loop_control:
             loop_var: setenv
 
         - name: "Check that the case attribute for SetEnvIf for {{ vhost.key }} VirtualHost for {{ user.key }} is a boolean if defined"
           ansible.builtin.assert:
-            that: setenv.env | type_debug == "bool"
+            that:
+              - setenv.env | type_debug == "bool"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_set_env_if }}"
           loop_control:
             loop_var: setenv
@@ -156,6 +168,7 @@
             that:
               - header.type is defined
               - header.type is regex('^request|response$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_headers }}"
           loop_control:
             loop_var: header
@@ -166,6 +179,7 @@
               - header.action is defined
               - header.action is regex('add|append|edit[*]?|merge|set|setifempty|unset')
               - header.arg is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_headers }}"
           loop_control:
             loop_var: header
@@ -177,6 +191,7 @@
               - header.action is defined
               - header.action is regex('^add|append|echo|edit[*]?|merge|set|setifempty|unset|note$')
               - header.expr is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_headers }}"
           loop_control:
             loop_var: header
@@ -188,18 +203,21 @@
       ansible.builtin.assert:
         that:
           - vhost.value.users_apache_robots == "deny"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_robots is defined
 
     - name: "Check that users_apache_remoteip for {{ vhost.key }} VirtualHost for {{ user.key }} is set to cloudflare if it is defined"
       ansible.builtin.assert:
         that:
           - vhost.value.users_apache_remoteip is regex("cloudflare")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_remoteip is defined
 
     - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
       ansible.builtin.assert:
         that:
           - vhost.value.users_apache_expires is regex('^medium|strict|forever$')
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_expires is defined
 
     - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
@@ -210,6 +228,7 @@
             that:
               - htuser.name is defined
               - htuser.name is regex("^[a-zA-Z0-9_-]*$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_htauth_users }}"
           loop_control:
             loop_var: htuser
@@ -219,6 +238,7 @@
           ansible.builtin.assert:
             that:
               - htuser.password is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( htuser.state is not defined ) or ( htuser.state == "present" )
           loop: "{{ vhost.value.users_apache_htauth_users }}"
           loop_control:
@@ -229,6 +249,7 @@
           ansible.builtin.assert:
             that:
               - htuser.state is regex("present|absent")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: htuser.state is defined
           loop: "{{ vhost.value.users_apache_htauth_users }}"
           loop_control:
@@ -244,6 +265,7 @@
           ansible.builtin.assert:
             that:
               - redirect.status is regex('^301|302|303|410|permanent|temp|seeother|gone$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
@@ -253,6 +275,7 @@
           ansible.builtin.assert:
             that:
               - ( redirect.path is defined and redirect.url is defined ) or ( redirect.regex_path is defined and redirect.url is defined )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
@@ -264,6 +287,7 @@
           ansible.builtin.assert:
             that:
               - redirect.url is regex('^https?:\/\/.*$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
@@ -274,6 +298,7 @@
             that:
               - redirect.path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
               - redirect.path is regex('^\/.*$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
@@ -283,6 +308,7 @@
           ansible.builtin.assert:
             that:
               - redirect.regex_path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_redirects }}"
           loop_control:
             loop_var: redirect
@@ -297,6 +323,7 @@
           ansible.builtin.assert:
             that:
               - ( alias.url is defined and alias.path is defined ) or ( alias.regex_url is defined and alias.regex_path is defined )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_alias }}"
           loop_control:
             loop_var: alias
@@ -306,6 +333,7 @@
             that:
               - alias.url is regex('^[\/].*')
               - alias.path is regex('^[\/].*')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_alias }}"
           loop_control:
             loop_var: alias
@@ -318,6 +346,7 @@
             that:
               - alias.regex_url | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
               - alias.regex_path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_alias }}"
           loop_control:
             loop_var: alias
@@ -334,6 +363,7 @@
           ansible.builtin.assert:
             that:
               - ( rewrite.cond is defined ) or ( rewrite.rule is defined )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_rewrite }}"
           loop_control:
             loop_var: rewrite
@@ -342,6 +372,7 @@
           ansible.builtin.assert:
             that:
               - rewrite.cond | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: rewrite.cond is defined
           loop: "{{ vhost.value.users_apache_rewrite }}"
           loop_control:
@@ -351,6 +382,7 @@
           ansible.builtin.assert:
             that:
               - rewrite.rule | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: rewrite.rule is defined
           loop: "{{ vhost.value.users_apache_rewrite }}"
           loop_control:
@@ -366,6 +398,7 @@
             that:
               - vhost.value.users_apache_locations | length
               - vhost.value.users_apache_locations[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Loop through the users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
           ansible.builtin.include_tasks: user_check_vhost_location.yml
@@ -380,17 +413,20 @@
       ansible.builtin.assert:
         that:
           - vhost.value.users_daily_scripts is not defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: "The users_hourly_scripts array should be defined at at user level for {{ user.key }} not at a VirtualHost level"
       ansible.builtin.assert:
         that:
           - vhost.value.users_hourly_scripts is not defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: "Check that the users_apache_nophp_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
       ansible.builtin.assert:
         that:
           - vhost.value.users_apache_nophp_dirs | length
           - vhost.value.users_apache_nophp_dirs[0] is defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_nophp_dirs is defined
 
     - name: "Check that the users_apache_deny_dirs array for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty if defined"
@@ -398,6 +434,7 @@
         that:
           - vhost.value.users_apache_deny_dirs | length
           - vhost.value.users_apache_deny_dirs[0] is defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_deny_dirs is defined
 
     - name: "Checks for users_apache_directories for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -407,6 +444,7 @@
           ansible.builtin.assert:
             that:
               - vhost_config.users_apache_directories | type_debug == "dict"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that no old variables are used in the users_apache_directories dictionary for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
@@ -415,17 +453,19 @@
               - dir.options is not defined
               - dir.allow_override is not defined
               - dir.require is not defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost_config.users_apache_directories | dict2items }}"
           loop_control:
             loop_var: dir
             label: "{{ dir.key }}"
 
-        - name: "Check that the users_apache_directories keys, which are relative paths, for {{ vhost.key }} VirtualHost for {{ user.key }} contain valid characters"
+        - name: "Check that the users_apache_directories keys when they are relative paths, for {{ vhost.key }} VirtualHost for {{ user.key }} contain valid characters"
           ansible.builtin.assert:
             that:
-              - dir.key is not regex("^[\/].*$")
               - dir.key is regex("^[a-zA-Z0-9/_.-]*$")
-            fail_msg: "A relative DocumentRoot path, only letters, numbers, underscores, dashes and forward slashes are allowed"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+            fail_msg: "With a relative DocumentRoot path, only letters, numbers, underscores, dashes and forward slashes are allowed"
+          when: dir.key is not regex("^[\/].*$")
           loop: "{{ vhost_config.users_apache_directories | dict2items }}"
           loop_control:
             loop_var: dir
@@ -447,6 +487,7 @@
           ansible.builtin.assert:
             that:
               - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: vhost.value.users_apache_type is defined
 
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -463,11 +504,13 @@
           ansible.builtin.assert:
             that:
               - vhost.value.users_apache_proxy_pass | type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check preserve_host is a boolean for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - proxy.preserve_host | type_debug == "bool"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -477,6 +520,7 @@
           ansible.builtin.assert:
             that:
               - proxy.add_headers | type_debug == "bool"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -486,6 +530,7 @@
           ansible.builtin.assert:
             that:
               - ( proxy.path is defined and proxy.url is defined ) or ( proxy.pathmatch and proxy.url is defined )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -498,6 +543,7 @@
               - proxy.path is regex('^(unix:\/.*)|(\/.*)$')
               - proxy.url is defined
               - ( proxy.url == "!" ) or ( proxy.url is regex('^https?:\/\/.*$') ) or ( proxy.url is regex('^ws:\/\/.*$') )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -509,6 +555,7 @@
               - proxy.pathmatch is defined
               - proxy.url is defined
               - proxy.url is regex('^([!])|(https?:\/\/.*)|(wss?:\/\/.*)$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -518,6 +565,7 @@
           ansible.builtin.assert:
             that:
               - proxy.reverse | type_debug == "bool"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -528,6 +576,7 @@
             that:
               - proxy.rewrite_rules is defined
               - proxy.rewrite_rules | type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -537,6 +586,7 @@
           ansible.builtin.assert:
             that:
               - proxy.rewrite_rules | type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_proxy_pass }}"
           loop_control:
             loop_var: proxy
@@ -551,6 +601,7 @@
           ansible.builtin.assert:
             that:
               - vhost.value.users_apache_error_docs | type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that the code and path values for users_apache_error_docs are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
@@ -558,6 +609,7 @@
               - doc.code is defined
               - doc.code is regex('^4|5[0-9][0-9]$')
               - doc.path is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_error_docs }}"
           loop_control:
             loop_var: doc
@@ -571,6 +623,7 @@
           ansible.builtin.assert:
             that:
               - vhost.value.users_cms is regex("mediawiki|flarum|moodle|nextcloud|kimai|drupal|wordpress|matomo|phpmyadmin")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Drupal checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.include_tasks: cms_check_drupal.yml

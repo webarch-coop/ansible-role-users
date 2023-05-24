@@ -10,11 +10,13 @@
           - ( vhost.value.kimai_dbname is defined ) and ( vhost.value.kimai_dbname in user.value.users_mariadb_databases )
           - vhost.value.kimai_version is defined
           - ( vhost.value.kimai_admin_user is defined ) and ( vhost.value.kimai_admin_user is regex("^[a-z0-9_-]*$") )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: "Check that {{ user.key }} is in the phpfpm group if it is present"
       ansible.builtin.assert:
         that:
           - ( "phpfpm" in user.value.users_groups )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: ( "phpfpm" in getent_group )
 
     - name: "Check the kimai_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -24,6 +26,7 @@
           ansible.builtin.assert:
             that:
               - vhost.value.kimai_url is not regex("/$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: Set a fact for the kimai_url without a protcol
           ansible.builtin.set_fact:
@@ -33,12 +36,14 @@
           ansible.builtin.assert:
             that:
               - ( kimai_url_domain == vhost.key )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is not defined )
 
         - name: "Check that kimai_url domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - ( kimai_url_domain == vhost.key ) or ( kimai_url_domain in vhost.value.users_apache_server_aliases )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
       when: vhost.value.kimai_url is defined
@@ -47,12 +52,15 @@
       ansible.builtin.assert:
         that:
           - vhost.value.kimai_title | length
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.kimai_title is defined
 
     # https://github.com/kevinpapst/kimai2/tree/master/translations
     - name: "Check that the kimai_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
-        that: vhost.value.kimai_locale is regex("^^[a-z]{2,3}[_]{0.1}[A-Z]{0,2}$")
+        that:
+          - vhost.value.kimai_locale is regex("^^[a-z]{2,3}[_]{0.1}[A-Z]{0,2}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.kimai_locale is defined
 
     - name: "Check that the kimai_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -61,6 +69,7 @@
           - vhost.value.kimai_dbprefix | length
           - vhost.value.kimai_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.kimai_dbprefix is regex("^.{1,6}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.kimai_dbprefix is defined
 
     - name: "Check that the kimai_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -69,18 +78,21 @@
           - vhost.value.kimai_admin_user | length
           - vhost.value.kimai_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.kimai_admin_user is regex("^.{2,17}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.kimai_admin_user is defined
 
     - name: "Check that the kimai_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - vhost.value.kimai_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.kimai_admin_email is defined
 
     - name: "Check that kimai_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - ( vhost.value.kimai_notify ) or ( not vhost.value.kimai_notify )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.kimai_notify is defined
 
   tags:

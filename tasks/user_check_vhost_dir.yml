@@ -11,6 +11,7 @@
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_expires is regex('^medium|strict|forever$')
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_expires is defined
 
     - name: "Check that only valid Options are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
@@ -21,11 +22,13 @@
             that:
               - dir.value.users_apache_options | length
               - dir.value.users_apache_options[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - option is regex("^[+-](?i)All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_options }}"
           loop_control:
             loop_var: option
@@ -41,11 +44,13 @@
             that:
               - dir.value.users_apache_index_options | length
               - dir.value.users_apache_index_options[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that all IndexOptions are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - option is regex("^[+-](?i)AddAltClass|Charset|DescriptionWidth|FancyIndexing|FoldersFirst|HTMLTable|IconsAreLinks|IconHeight|IconWidth|IgnoreCase|IgnoreClient|NameWidth|ScanHTMLTitles|ShowForbidden|SuppressColumnSorting|SuppressDescription|SuppressHTMLPreamble|SuppressIcon|SuppressLastModified|SuppressRules|SuppressSize|TrackModified|UseOldDateFormat|VersionSort|XHTML.*$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_index_options }}"
           loop_control:
             loop_var: option
@@ -57,42 +62,49 @@
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_index_head_insert | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_index_head_insert is defined
 
     - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_header_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_header_name is defined
 
     - name: "Check that the ReadmeName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_readme_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_readme_name is defined
 
     - name: "Check that SSILegacyExprParser is true or false for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_ssi_legacy | type_debug == "bool"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_ssi_legacy is defined
 
     - name: "Check that SSILastModified is true or false for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_ssi_modified | type_debug == "bool"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_ssi_modified is defined
 
     - name: "Check that AddOutputFilter for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_add_output_filters | type_debug == "list"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_add_output_filters is defined
 
     - name: "Check that AddType for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
       ansible.builtin.assert:
         that:
           - dir.value.users_apache_add_type | type_debug == "list"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_add_type is defined
 
     - name: "Check that only valid AllowOverride directives are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
@@ -103,11 +115,13 @@
             that:
               - dir.value.users_apache_override | length
               - dir.value.users_apache_override[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_override }}"
           loop_control:
             loop_var: override
@@ -123,11 +137,13 @@
             that:
               - dir.value.users_apache_index | length
               - dir.value.users_apache_index[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that each DirectoryIndex appears to be a filename for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - index is regex("^\w+\.\w+$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_index }}"
           loop_control:
             loop_var: index
@@ -140,6 +156,7 @@
         that:
           - dir.value.users_apache_auth_type | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
           - dir.value.users_apache_auth_type is regex("None|Basic|Digest|Form")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_auth_type is defined
 
     - name: "Check that Require is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
@@ -149,11 +166,13 @@
           ansible.builtin.assert:
             that:
               - dir.value.users_apache_require | type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that that values other than method for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - req is regex("^all granted|^all denied|^env .*|^method [A-Z ]{3,51}|^expr .*|^user .*|^group .*|^valid-user|^ip .*|^forward-dns .*")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: req is not regex("method .*")
           loop: "{{ dir.value.users_apache_require }}"
           loop_control:
@@ -169,11 +188,13 @@
           ansible.builtin.assert:
             that:
               - dir.value.users_apache_filesmatch | type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that regex is defined for FilesMatch for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - fm.regex is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_filesmatch }}"
           loop_control:
             loop_var: fm

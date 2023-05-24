@@ -52,12 +52,14 @@
       ansible.builtin.assert:
         that:
           - ( "suexec" in users_apache_modules_loaded )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: users_apache_chroot_suexec
 
     - name: Check that Apache proxy_fcgi is enabled when users_phpfpm is true
       ansible.builtin.assert:
         that:
           - ( "proxy_fcgi" in users_apache_modules_loaded )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: users_phpfpm
 
     - name: Debug Apache chroot variable

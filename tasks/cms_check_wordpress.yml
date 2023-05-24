@@ -8,17 +8,20 @@
           - vhost.value.users_apache_type == "php"
           - vhost.value.wordpress_dbname is defined
           - vhost.value.wordpress_dbname in user.value.users_mariadb_databases
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: "Check that {{ user.key }} is in the phpfpm group if it is present"
       ansible.builtin.assert:
         that:
           - ( "phpfpm" in user.value.users_groups )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: ( "phpfpm" in getent_group )
 
     - name: "Check that the wordpress_dbuser is {{ user.key }} is defined for {{ vhost.key }} VirtualHost"
       ansible.builtin.assert:
         that:
           - vhost.value.wordpress_dbuser == user.key
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_dbuser is defined
 
     - name: "Check that the wordpress_dbprefix is less than 8 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -27,12 +30,15 @@
           - vhost.value.wordpress_dbprefix | length
           - vhost.value.wordpress_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.wordpress_dbprefix is regex("^.{1,8}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_dbprefix is defined
 
     # https://wpastra.com/docs/complete-list-wordpress-locale-codes/
     - name: "Check that the wordpress_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
-        that: vhost.value.wordpress_locale is regex("^[a-z]{2,3}[_]{0,1}[A-Z]{0,2}$")
+        that:
+          - vhost.value.wordpress_locale is regex("^[a-z]{2,3}[_]{0,1}[A-Z]{0,2}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_locale is defined
 
     - name: "Check the wordpress_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -42,6 +48,7 @@
           ansible.builtin.assert:
             that:
               - vhost.value.wordpress_url is not regex("/$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: Set a fact for the wordpress_url without a protcol
           ansible.builtin.set_fact:
@@ -51,12 +58,14 @@
           ansible.builtin.assert:
             that:
               - ( wordpress_url_domain == vhost.value.users_apache_server_name )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is not defined )
 
         - name: "Check that wordpress_url domain (protocol removed) contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - ( wordpress_url_domain == vhost.value.users_apache_server_name ) or ( wordpress_url_domain in vhost.value.users_apache_server_aliases )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
       when: vhost.value.wordpress_url is defined
@@ -65,6 +74,7 @@
       ansible.builtin.assert:
         that:
           - vhost.value.wordpress_title | length
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_title is defined
 
     - name: "Check that the wordpress_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -73,18 +83,21 @@
           - vhost.value.wordpress_admin_user | length
           - vhost.value.wordpress_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.wordpress_admin_user is regex("^.{2,17}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_admin_user is defined
 
     - name: "Check that the wordpress_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - vhost.value.wordpress_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_admin_email is defined
 
     - name: "Check that wordpress_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - ( vhost.value.wordpress_notify ) or ( not vhost.value.wordpress_notify )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_notify is defined
 
   tags:

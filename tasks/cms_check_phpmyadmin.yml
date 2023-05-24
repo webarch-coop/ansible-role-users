@@ -7,6 +7,7 @@
       - ( vhost.value.phpmyadmin_dbname is defined ) and ( vhost.value.phpmyadmin_dbname in user.value.users_mariadb_databases )
       - ( vhost.value.phpmyadmin_version is defined )
       - ( vhost.value.phpmyadmin_version == "latest" ) or ( vhost.value.phpmyadmin_version is regex("^[0-9][.][0-9][.][0-9]{1,2}[.]{0,1}[0-9]{0,2}$") )
+    quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
   tags:
     - users
 
@@ -14,6 +15,7 @@
   ansible.builtin.assert:
     that:
       - ( "phpfpm" in user.value.users_groups )
+    quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
   when: ( "phpfpm" in getent_group )
   tags:
     - users
