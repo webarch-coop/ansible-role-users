@@ -18,6 +18,7 @@
     - name: SSH keys present when ~/.ssh/authorized_keys.d exists
       block:
 
+        # TODO Add a check that content is returned
         - name: "SSH public keys downloaded for {{ user.key }}"
           ansible.builtin.get_url:
             url: "{{ key_url }}"

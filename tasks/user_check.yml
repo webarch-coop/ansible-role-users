@@ -126,7 +126,9 @@
       ansible.builtin.stat:
         path: "{{ user.value.users_skel }}"
       register: user_skel_path
-      failed_when: not user_skel_path.stat.isdir
+      failed_when:
+        - not user_skel_path.stat.exists | bool
+        - not user_skel_path.stat.isdir | bool
       when: user.value.users_skel is defined
 
     - name: "Check system for {{ user.key }} is true or false"
