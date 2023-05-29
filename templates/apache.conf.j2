@@ -50,14 +50,14 @@
   {%- if users_cert is defined %}
   SSLEngine on
     {%- if users_cert == "user" %}
-  SSLCertificateFile            {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
-  SSLCertificateKeyFile         {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
-  SSLCertificateChainFile       {{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
+  SSLCertificateFile            {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
+  SSLCertificateKeyFile         {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
+  SSLCertificateChainFile       {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
     {%- endif %}
     {%- if users_cert == "vhost" %}
-  SSLCertificateFile            {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
-  SSLCertificateKeyFile         {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
-  SSLCertificateChainFile       {{ le_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
+  SSLCertificateFile            {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
+  SSLCertificateKeyFile         {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
+  SSLCertificateChainFile       {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
     {%- endif %}
   {%- endif %}
   {%- if user.value.users_email is defined and user.value.users_email != "" %}

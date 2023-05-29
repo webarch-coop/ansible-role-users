@@ -30,17 +30,17 @@
 
     - name: "Check that the SSL cert for {{ user.key }}.{{ inventory_hostname }} is present"
       ansible.builtin.stat:
-        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
+        path: "{{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem"
       register: users_apache_tls_cert_check
 
     - name: "Check that the SSL key for {{ user.key }}.{{ inventory_hostname }} is present"
       ansible.builtin.stat:
-        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
+        path: "{{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem"
       register: users_apache_tls_key_check
 
     - name: "Check that the SSL ca file for {{ user.key }}.{{ inventory_hostname }} is present"
       ansible.builtin.stat:
-        path: "{{ le_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
+        path: "{{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem"
       register: users_apache_tls_ca_check
 
     - name: Set a fact for the results if any cert is missing

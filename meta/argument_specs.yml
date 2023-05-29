@@ -71,6 +71,10 @@ argument_specs:
         choices:
           - user
           - vhost
+      users_cert_dir:
+        type: str
+        required: false
+        description: Directory for HTTPS certificates.
       users_cgi_extensions:
         type: list
         elements: str

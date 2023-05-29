@@ -55,7 +55,7 @@
     - name: "Certcheck crontab for {{ user.key }} absent"
       ansible.builtin.cron:
         name: "Cert check for {{ user.key }}.{{ ansible_fqdn }}"
-        job: "ssl-cert-check -qac {{ le_dir }}/{{ user.key }}.{{ ansible_fqdn }}.cert.pem -e 'root@localhost'"
+        job: "ssl-cert-check -qac {{ users_cert_dir }}/{{ user.key }}.{{ ansible_fqdn }}.cert.pem -e 'root@localhost'"
         state: absent
 
     - name: "Keys and certs for {{ user.key }}.{{ ansible_fqdn }} absent"
