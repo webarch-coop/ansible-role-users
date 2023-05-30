@@ -4,15 +4,15 @@
 
     # Locally test that users_domain resolves to a IP address
     - name: Variable users_domain_dig set to empty
-      set_fact:
+      ansible.builtin.set_fact:
         users_domain_dig: ""
 
     - name: Set a fact for the domain we are testing
-      set_fact:
+      ansible.builtin.set_fact:
         users_domain_dig: "{{ query('dig', users_domain) | ansible.utils.ipv4 }}"
 
     - name: Debug domain name and IP address
-      debug:
+      ansible.builtin.debug:
         msg:
           - "users_domain: {{ users_domain }}"
           - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
@@ -25,7 +25,7 @@
         - ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
 
     - name: Debug domain name and IP address
-      debug:
+      ansible.builtin.debug:
         msg:
           - "users_domain: {{ users_domain }}"
           - "ansible_default_ipv4.address: {{ ansible_default_ipv4.address }}"
@@ -38,21 +38,21 @@
         - ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
 
     - name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
-      debug:
+      ansible.builtin.debug:
         msg: "{{ users_domain }} appears not to resolve to a IP address"
       when:
         - ( users_domain_dig == [] ) or ( users_domain_dig | length == 0 )
-        - ( users_domain_check is not defined ) or ( users_domain_check != "strict" )
+        - ( users_domain_checks is not defined ) or ( users_domain_check != "strict" )
 
     - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
-      fail:
+      ansible.builtin.fail:
         msg: "{{ users_domain }} appears not to resolve to a IP address"
       when:
         - ( users_domain_dig == [] ) or ( users_domain_dig | length == 0 )
         - ( users_domain_check is defined ) and ( users_domain_check == "strict" )
 
     - name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
-      debug:
+      ansible.builtin.debug:
         msg: "{{ users_domain_dig[0] }} not in {{ ansible_all_ipv4_addresses }}"
       when:
         - users_domain_dig[0] is defined
@@ -61,12 +61,13 @@
         - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
 
     - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
-      fail:
+      ansible.builtin.fail:
         msg: "{{ users_domain_dig[0] }} not in {{ ansible_all_ipv4_addresses }}"
       when:
         - users_domain_dig[0] is defined
         - users_domain_dig[0] not in ansible_all_ipv4_addresses
-        - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check == "strict" )
+        - users_domain_check is defined
+        - users_domain_check == "strict"
         - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
 
   when: users_domain is not regex('^[*][.].*$')
