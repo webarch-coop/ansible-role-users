@@ -4,7 +4,7 @@
 
     # /var/www/users
     - name: "Users PHP FPM chrooted directory for mounting {{ users_basedir }} at {{ users_apache_chroot_users_basedir }} present"
-      file:
+      ansible.builtin.file:
         path: "{{ users_apache_chroot_users_basedir }}"
         state: directory
         mode: "0755"
@@ -13,7 +13,7 @@
 
     # /chroot/var/www/users
     - name: "Directory for users home directories to be mounted under present in the chroot, {{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}"
-      file:
+      ansible.builtin.file:
         path: "{{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}"
         state: directory
         mode: "0755"
@@ -25,7 +25,7 @@
 
         # /chroot/etc/apache2/suexec
         - name: "Mount point {{ users_chroot_dir }}/etc/apache/suexec present"
-          file:
+          ansible.builtin.file:
             path: "{{ users_chroot_dir }}/etc/apache/suexec"
             state: directory
             mode: "0750"
@@ -33,7 +33,7 @@
             group: root
 
         - name: Symlink for /etc/alternatives/suexec present in the chroot
-          file:
+          ansible.builtin.file:
             src: /usr/lib/apache2/suexec-custom
             dest: "{{ users_chroot_dir }}/etc/alternatives/suexec"
             state: link
@@ -44,7 +44,7 @@
             group: root
 
         - name: Apache www-data user suexec configuration in place
-          template:
+          ansible.builtin.template:
             src: www-data.j2
             dest: /etc/apache2/suexec/www-data
             mode: "0640"
@@ -58,7 +58,7 @@
 
         # /chroots/www-data
         - name: "Check if {{ users_apache_chroot_dir }} is mounted"
-          command: "findmnt {{ users_apache_chroot_dir }}"
+          ansible.builtin.command: "findmnt {{ users_apache_chroot_dir }}"
           check_mode: false
           changed_when: false
           register: users_findmnt
@@ -66,7 +66,7 @@
 
         # /chroots/www-data
         - name: "Directory for Apache chroot to be mounted on present at {{ users_apache_chroot_dir }}"
-          file:
+          ansible.builtin.file:
             path: "{{ users_apache_chroot_dir }}"
             state: directory
             mode: "0750"
@@ -75,7 +75,7 @@
           when: users_findmnt.rc == 1
 
     - name: Apache chroot mounts present in /etc/fstab
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: /etc/fstab
         block: |
           # Read only chroot mounted for Apache
@@ -107,7 +107,7 @@
         insertafter: '^\/dev\/'
 
     - name: Debug first set of chroot directories to be mounted for Apache
-      debug:
+      ansible.builtin.debug:
         msg:
           - "src: {{ mnt.src }}"
           - "path: {{ mnt.path }}"
@@ -157,7 +157,7 @@
         label: "{{ mnt.path | basename }}"
 
     - name: Debug second set of chroot directories to be mounted for Apache
-      debug:
+      ansible.builtin.debug:
         msg:
           - "src: /var/www/{{ dir }}"
           - "path: {{ users_apache_chroot_dir }}/var/www/{{ dir }}"
@@ -172,7 +172,7 @@
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
 
     - name: First set of chroot directories mounted for Apache
-      include_tasks: mount.yml
+      ansible.builtin.include_tasks: mount.yml
       vars:
         users_mount_src: "{{ mnt.src }}"
         users_mount_path: "{{ mnt.path }}"
@@ -216,7 +216,7 @@
       block:
 
         - name: Sub-directories of /var/www present in the chroot
-          file:
+          ansible.builtin.file:
             path: "{{ users_chroot_dir }}/var/www/{{ dir }}"
             state: directory
             mode: "0755"
@@ -225,7 +225,7 @@
             loop_var: dir
 
         - name: Debug chroot /var/www directories to be mounted for Apache
-          debug:
+          ansible.builtin.debug:
             msg:
               - "src: /var/www/{{ dir }}"
               - "path: {{ users_apache_chroot_dir }}/var/www/{{ dir }}"
@@ -238,7 +238,7 @@
             loop_var: dir
 
         - name: Chroot /var/www directories mounted for Apache
-          include_tasks: mount.yml
+          ansible.builtin.include_tasks: mount.yml
           vars:
             users_mount_src: "/var/www/{{ dir }}"
             users_mount_path: "{{ users_apache_chroot_dir }}/var/www/{{ dir }}"

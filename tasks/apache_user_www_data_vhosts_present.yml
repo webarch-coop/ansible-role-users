@@ -1,11 +1,21 @@
 ---
+- name: Set a fact for the PHP system version for the user to use
+  ansible.builtin.set_fact:
+    users_phpfpm_system_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+  when:
+    - users_phpfpm_versions is defined
+    - users_phpfpm_versions != []
+    - users_phpfpm_default_version is defined
+  tags:
+    - users
+
 - name: Debug some apache.conf.j2 template variables
-  debug:
+  ansible.builtin.debug:
     msg:
       - "user.key: {{ user.key }}"
       - "user.value.users_groups: {% if user.value.users_groups is defined %}{{ user.value.users_groups }}{% endif %}"
       - "users_sites_dir: {{ users_sites_dir }}"
-      - "users_phpfpm_version: {% if users_phpfpm_version is defined %}{{ users_phpfpm_version }}{% endif %}"
+      - "users_phpfpm_system_version: {% if users_phpfpm_system_version is defined %}{{ users_phpfpm_system_version }}{% endif %}"
       - "vhost.key: {{ vhost.key }}"
       - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
       - "vhost.value.users_apache_vhost_docroot: {% if vhost.value.users_apache_vhost_docroot is defined %}{{ vhost.value.users_apache_vhost_docroot }}{% endif %}"
@@ -20,7 +30,7 @@
     - users
 
 - name: VirtualHosts files present for www-data
-  template:
+  ansible.builtin.template:
     src: apache.conf.j2
     dest: "/etc/apache2/sites-available/{{ vhost.key }}.conf"
     trim_blocks: false

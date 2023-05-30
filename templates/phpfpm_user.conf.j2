@@ -1,6 +1,6 @@
 ; Ansible provisioned
 [{{ user.key }}]
-user = {{ user.key }} 
+user = {{ user.key }}
 group = {{ user.value.users_group | default(user.key) }}
 {#  {% if users_chroot is defined and users_chroot and users_chroot_dir is defined and users_chroot_dir_check.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %} #}
 {#  chroot = {{ users_chroot_users_dir }}/{{ user.key }} #}
@@ -24,8 +24,8 @@ listen.mode = 0660
 ;listen.acl_users =
 ;listen.acl_groups =
 listen.allowed_clients = 127.0.0.1
-; Error log level. Possible values: alert, error, warning, notice, debug. Default value: notice. 
-php_admin_value[log_level] = {{ user.value.users_phpfpm_log_level | default('notice') }} 
+; Error log level. Possible values: alert, error, warning, notice, debug. Default value: notice.
+php_admin_value[log_level] = {{ user.value.users_phpfpm_log_level | default('notice') }}
 
 {% if users_apache_chroot is defined and users_apache_chroot %}
 env[TMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
@@ -47,12 +47,18 @@ php_admin_value[output_buffering] = {% if user.value.users_phpfpm_output_bufferi
 
 ; PHP settings passed with php_value or php_flag will overwrite php.ini values
 ; but defining disable_functions or disable_classes will not overwrite
-; previously defined php.ini values, but will append the new value instead. 
+; previously defined php.ini values, but will append the new value instead.
 ;
 ; https://www.php.net/install.fpm.configuration
-{% if user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions != [] %} 
+{% if user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions == [] %}
+; disable_functions set from user.value.users_phpfpm_disable_functions
+; php_admin_value[disable_functions] =
+{% elif user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions != [] %}
 ; disable_functions set from user.value.users_phpfpm_disable_functions
 php_admin_value[disable_functions] = "{% for func in user.value.users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
+{% elif users_phpfpm_disable_functions is defined and users_phpfpm_disable_functions == [] %}
+; disable_functions set from users_phpfpm_disable_functions
+; php_admin_value[disable_functions] =
 {% elif users_phpfpm_disable_functions is defined and users_phpfpm_disable_functions != [] %}
 ; disable_functions set from users_phpfpm_disable_functions
 php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
@@ -61,30 +67,29 @@ php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functi
 ; user.value.users_phpfpm_disable_functions or users_phpfpm_disable_functions
 ; are set however php_disable_functions might be applied to the main php.ini
 ; file
-; php_admin_value[disable_functions] = 
+; php_admin_value[disable_functions] =
 {% endif %}
 
-{% if users_phpfpm_enable_open_basedir is defined and users_phpfpm_enable_open_basedir %}
-; users_phpfpm_enable_open_basedir is true
-{% if user.value.users_phpfpm_enable_open_basedir is not defined or user.value.users_phpfpm_enable_open_basedir %}
-; user.value.users_phpfpm_enable_open_basedir is not set to false
-{% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir != [] %}
-; open_basedir directories set from the user.value.users_phpfpm_open_basedir array
-php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
+{% if user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir == [] %}
+; open_basedir set from user.value.users_phpfpm_open_basedir
+; php_admin_value[open_basedir] =
+{% elif user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir != [] %}
+; open_basedir set from user.value.users_phpfpm_open_basedir
+php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}"
+{% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir == [] %}
+; open_basedir set from users_phpfpm_open_basedir
+; php_admin_value[open_basedir] =
 {% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir != [] %}
-; open_basedir set from the users_phpfpm_open_basedir array
-php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %}:{% endif %}{% endfor %}"
+; open_basedir set from users_phpfpm_open_basedir
+php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}"
 {% else %}
-; netiher user.value.users_phpfpm_open_basedir or users_phpfpm_open_basedir are defined and 
-; not empty list so open_basedir has not been set
+; open_basedir not set as neither
+; user.value.users_phpfpm_open_basedir or users_phpfpm_open_basedir
+; are set however php_open_basedir might be applied to the main php.ini
+; file
+; php_admin_value[open_basedir] =
 {% endif %}
-{% else %}
-; user.value.users_phpfpm_enable_open_basedir is not defined or false so open_basedir has not been set
-{% endif %}
-{% else %}
-; users_phpfpm_enable_open_basedir is not defined or false so open_basedir has not been set
-{% endif %}
-  
+
 {% if user.value.users_phpfpm_mysqli_allow_local_infile is defined and user.value.users_phpfpm_mysqli_allow_local_infile %}
 ; Matomo needs mysqli.allow_local_infile enabled
 php_admin_value[mysqli.allow_local_infile] = 1

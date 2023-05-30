@@ -1,0 +1,35 @@
+---
+- name: Remove PHP-FPM pool.d file and restart service
+  block:
+
+    - name: "Check if /etc/php/{{ users_phpfpm_ver }}/fpm/pool.d/{{ user.key }}.conf is present"
+      ansible.builtin.stat:
+        path: "/etc/php/{{ users_phpfpm_ver }}/fpm/pool.d/{{ user.key }}.conf"
+      register: users_phpfpm_pool_file
+
+    - name: "PHP FPM pool.d file absent for {{ user.key }}"
+      ansible.builtin.file:
+        path: "/etc/php/{{ users_phpfpm_ver }}/fpm/pool.d/{{ user.key }}.conf"
+        state: absent
+      register: users_phpfpm_pool_absent
+
+    - name: PHP FPM conditional restart
+      block:
+
+        - name: "PHP FPM configtest for version {{ users_phpfpm_ver }}"
+          ansible.builtin.command: "php-fpm{{ users_phpfpm_ver }} --test"
+          register: users_phpfpm_pool_configtest
+
+        - name: "PHP FPM restarted for version {{ users_phpfpm_ver }}"
+          ansible.builtin.service:
+            name: "php{{ users_phpfpm_ver }}-fpm"
+            state: restarted
+          when: ( "test is successful" in users_phpfpm_pool_configtest.stderr )
+
+      when:
+        - users_phpfpm_pool_absent.changed is defined
+        - users_phpfpm_pool_absent.changed | bool
+
+  tags:
+    - users
+...

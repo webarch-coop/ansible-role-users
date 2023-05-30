@@ -1,4 +1,4 @@
-# Webarchitects Ansible Debian Users Role 
+# Webarchitects Ansible Debian Users Role
 
 [![pipeline status](https://git.coop/webarch/users/badges/master/pipeline.svg)](https://git.coop/webarch/users/-/commits/master)
 
@@ -24,7 +24,7 @@ when their state is either *"present"* or *"absent"*, if their state is set to
 
 The reason for this is since running all the tasks in this role for all the
 users takes a long time and usually runs a lot of tasks that won't make
-changes. 
+changes.
 
 In order to keep track of the users state, on the server (so that updates can
 be applied from different places), YAML files for each user are written to
@@ -37,7 +37,7 @@ dictionary, will be updated.
 Alternative update strategies can be specified by setting the
 `users_update_strategy` variable to a few optional values as explained below.
 
-### Update all users 
+### Update all users
 
 ```bash
 ansible-playbook wsh.yml --extra-vars "users_update_strategy=all"
@@ -69,12 +69,6 @@ ansible-playbook users.yml --extra-vars "users_update_strategy=apache"
 ansible-playbook users.yml --extra-vars "users_update_strategy=quotas"
 ```
 
-### Only update the firewall rules
-
-```bash
-ansible-playbook users.yml --extra-vars "users_update_strategy=firewall"
-```
-
 ### Only update users PHP-FPM pool.d files
 
 ```bash
@@ -101,7 +95,7 @@ To use this role you need to use Ansible Galaxy to install it into another
 repository under `galaxy/roles/users` by adding a `requirements.yml` file in
 that repo that contains:
 
-```yml
+```yaml
 ---
 - name: users
   src: https://git.coop/webarch/users.git
@@ -114,7 +108,7 @@ the [quota role](https://git.coop/webarch/quota) and make sure that `quota_dir`
 is set to a mount point for a partition, for example have a seperate `/home`
 partition.
 
-```yml
+```yaml
 ---
 - name: quota
   src: https://git.coop/webarch/quota.git
@@ -142,12 +136,12 @@ galaxy/roles
 To pull this repo in run:
 
 ```bash
-ansible-galaxy install -r requirements.yml --force 
+ansible-galaxy install -r requirements.yml --force
 ```
 
 The other repo should also contain a `users.yml` file that contains:
 
-```yml
+```yaml
 ---
 - name: Add user accounts
   become: yes
@@ -193,10 +187,10 @@ The other repo should also contain a `users.yml` file that contains:
           - operator
         users_editor: vim
         users_ssh_public_keys:
-          - https://git.coop/chris.keys 
+          - https://git.coop/chris.keys
       fred:
         users_state: absent
-    
+
   hosts:
     - users_servers
 
@@ -206,7 +200,7 @@ The other repo should also contain a `users.yml` file that contains:
 
 And a `hosts.yml` file that contains lists of servers, for example:
 
-```yml
+```yaml
 ---
 all:
   children:
@@ -222,7 +216,7 @@ all:
 Then it can be run as follows:
 
 ```bash
-ansible-playbook users.yml 
+ansible-playbook users.yml
 ```
 
 ## Debugging
@@ -254,7 +248,7 @@ Tasks can be added to the Bash scripts using the `users_hourly_scripts` and
 `users_daily_scripts` arrays at a user level, or they can be manually added not
 using Ansible by users, for example to archive Matomo stats on an hourly basis:
 
-```yml
+```yaml
     users_hourly_scripts:
       - "cd ~/sites/default && php console --no-ansi -qn core:archive --force-all-websites > ~/private/matomo-archive.log"
       - "cd ~/sites/default && php console --no-ansi -qn core:run-scheduled-tasks > ~/private/matomo-archive.log"
@@ -264,11 +258,9 @@ The number of minutes part the hour that the script run at in set randomly for
 each user and saved in `~/.cron_min` to ensure that all the jobs for different
 users don't run at the same time.
 
-Also many features of the [Ansible cron
-module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html)
-cane used used via a `users_cron_jobs` array set at the users level, for example:
+Also some features of the [Ansible cron module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html) can used used via a `users_cron_jobs` array set at the users level, for example:
 
-```yml
+```yaml
     users_cron_jobs:
       - name: printenv
         job: printenv
@@ -294,7 +286,7 @@ Then the `~/.ssh/authorized_keys.d/authorized_keys_*` files are assembled to
 `~/.ssh/authorized_keys`, (inless this file name is overridden from the
 default, see the users_ssh_authorized_keys_file_name variable) this means if
 you want to add additional keys then you can simply add them to this directory,
-with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`. 
+with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`.
 
 ## Apache
 
@@ -338,7 +330,7 @@ work.  ### Options
 Server wide settings for `VirtualHosts` can be set like this (see the commented
 out variables in [defaults/main.yml](defaults/main.yml)):
 
-```yml
+```yaml
 users_apache_options:
   - -Indexes
   - +SymlinksIfOwnerMatch
@@ -401,7 +393,7 @@ template for the details](templates/apache.conf.j2).
 Basic authentication can be set on the `DocumentRoot` directory, for example
 for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 
-```yml
+```yaml
         users_apache_auth_name: Private
         users_apache_auth_type: Basic
         users_apache_require:
@@ -413,7 +405,7 @@ for MediaWiki (the `VisualEditor` needs access via the `localhost`):
 The same `users_apache_htauth_users` array is used for the usernaes and
 passwords as documented below.
 
-### SetEnv 
+### SetEnv
 
 The `users_apache_env` array can be used to set and remove environmental
 variables, at a server or `VirtualHost` level, via [the
@@ -422,7 +414,7 @@ variables, at a server or `VirtualHost` level, via [the
 `UnsetEnv`](https://httpd.apache.org/docs/current/mod/mod_env.html#unsetenv)
 Apache directives, for example:
 
-```yml
+```yaml
         users_apache_env:
           - env: FOO
             value: bar
@@ -435,7 +427,7 @@ Will generate:
 ```apache
 SetEnv FOO bar
 UnsetEnv BAZ
-``` 
+```
 
 ### SetEnvIf
 
@@ -446,7 +438,7 @@ and [the
 `SetEnvIfNoCase`](https://httpd.apache.org/docs/current/mod/mod_setenvif.html#setenvifnocase)
 Apache directives, for example:
 
-```yml
+```yaml
         users_apache_set_env_if:
           - attribute: Host
             regex: "^(.*)$"
@@ -476,7 +468,7 @@ See the [Apache SetEnvIf documentation](https://httpd.apache.org/docs/current/mo
 
 The `users_apache_headers` array can be used to set [Header](https://httpd.apache.org/docs/current/mod/mod_headers.html#header) and [RequestHeader](https://httpd.apache.org/docs/current/mod/mod_headers.html#requestheader) directives, at a `VirtualHost` level, for example:
 
-```yml
+```yaml
         users_apache_headers:
           - type: request
             action: set
@@ -511,11 +503,11 @@ and
 [`RedirectTemp`](https://httpd.apache.org/docs/current/mod/mod_alias.html#redirecttemp)
 directives, for example:
 
-```yml
+```yaml
         users_apache_redirects:
           - path: /service
             url: http://foo2.example.com/service
-            status: 301
+            status: "301"
           - path: /one
             url: http://example.com/two
             status: permanent
@@ -529,9 +521,9 @@ directives, for example:
 The `users_apache_alias` array can be used to generate
 [`Alias`](https://httpd.apache.org/docs/current/mod/mod_alias.html#alias) and
 [`AliasMatch`](https://httpd.apache.org/docs/current/mod/mod_alias.html#aliasmatch)
-directives, for example: 
+directives, for example:
 
-```yml
+```yaml
         users_apache_alias:
           - url: /image
             path: /ftp/pub/image
@@ -546,7 +538,7 @@ directives, for example:
 The `users_apache_rewrite` array can be used to set `RewriteCond` and
 `RewriteRule` directives, for example:
 
-```yml
+```yaml
         users_apache_rewrite_rules:
           - cond: %{HTTP_USER_AGENT} DavClnt
           - rule: ^$ /remote.php/webdav/ [L,R=302]
@@ -557,7 +549,6 @@ The `users_apache_rewrite` array can be used to set `RewriteCond` and
           - rule: ^(?:build|tests|config|lib|3rdparty|templates)/.* - [R=404,L]
           - rule: ^\.well-known/(?!acme-challenge|pki-validation) /index.php [QSA,L]
           - rule: ^(?:\.(?!well-known)|autotest|occ|issue|indie|db_|console).* - [R=404,L]
-         
 ```
 
 To generate:
@@ -580,7 +571,7 @@ To generate:
 The `users_apache_locations` array can be used to apply HTTP Authentication to
 URL paths, for example:
 
-```yml
+```yaml
         users_apache_locations:
           - authname: WordPress Login
             location: /wp-login.php
@@ -603,7 +594,7 @@ passwords, these are written to `~/.htpasswd/` in one file per
 `users_apache_server_name`, the optional `state` variables can be set to absent
 to remove users, for example:
 
-```yml
+```yaml
         users_apache_htauth_users:
           - name: foo
             password: bar
@@ -616,7 +607,7 @@ If the `authtype` is set to `None` then `AuthUserFile` isn't set and then a
 addresses](https://httpd.apache.org/docs/current/mod/mod_authz_core.html#require),
 for example:
 
-```yml
+```yaml
         users_apache_locations:
           - authname: Drupal Login
             location: /user/login
@@ -629,14 +620,14 @@ for example:
 It is also possible to set `Redirect`, see [the Apache
 Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
 
-```yml
+```yaml
         users_apache_locations:
           - location: old-site/
             redirect: https://example.org/
 ```
 
 An `Alias` can also be used in a `Location`:
-```yml
+```yaml
         users_apache_locations:
           - location: /static
             alias: /home/foo/sites/www/staticfiles
@@ -645,7 +636,7 @@ An `Alias` can also be used in a `Location`:
 And `ProxyPass` and `ProxyPassReverse` can be used in a `Location`, see [the
 Apache ProxyPass documentation](https://httpd.apache.org/docs/2.4/mod/mod_proxy.html#proxypass):
 
-```yml
+```yaml
         users_apache_locations:
           - location: /push/
             proxy_pass: http://127.0.0.1:7867/
@@ -666,13 +657,30 @@ Results in:
   </Location>
 ```
 
+If `match` is set rather than `location` then a `LocationMatch` directive is generated, for example:
+
+```yaml
+        users_apache_locations:
+          - match: ^/$
+            redirect: https://example.org/welcome/
+```
+
+Results in:
+
+```apache
+  <LocationMatch "^/$">
+    Redirect https://example.org/welcome/
+  </LocationMatch>
+```
+
 ### Directories
 
 The `users_apache_directories` variable can be used at a `VirtualHost` level to
-list dictionaries representing `Directory` directives, **relative to the
-`users_sites_dir` path**. The variables that can be used are the same as the
-ones for the `DocumentRoot` directory apart from `users_apache_type`, this
-can't be used to set the `Directory` type to `php` or `static`.
+list dictionaries representing `Directory` directives, either relative to the
+`users_sites_dir` path, when they don't start with a `/` or using fill paths.
+The variables that can be used are the same as the ones for the `DocumentRoot`
+directory apart from `users_apache_type`, this can't be used to set the
+`Directory` type to `php` or `static`.
 
 Prior to version `3.0.0` of this role `users_apache_directories` was used for
 an array of directories and when it was used the default `DocumentRoot` /
@@ -683,7 +691,7 @@ by setting `users_apache_vhost_docroot` to `False`.
 This is handy when some directories are needed for static
 content and `Alias` and also a proxy, for example:
 
-```yml
+```yaml
     users_apache_virtual_hosts:
       api:
         users_apache_type: static
@@ -731,7 +739,271 @@ And this will generate:
   ProxyPassReverse "/" "http://127.0.0.1:8000/"
 ```
 
+Prior to version `4.3.1` of this role `users_apache_directories` could only be used for directories relative to the `users_sites_dir` path, this is still the case when they doesn't start with a `/`, but now a full path can also be used, for example:
+
+```yaml
+    users_apache_virtual_hosts:
+      openproject:
+        users_apache_server_name: "{{ inventory_hostname }}"
+        users_apache_vhost_docroot: false
+        users_apache_expires: medium
+        users_apache_directories:
+          "/opt/openproject/public":
+            users_apache_override:
+              - "None"
+            users_apache_options:
+              - "-Indexes"
+        users_apache_headers:
+          - type: request
+            action: setifempty
+            arg: X-Forwarded-Proto https
+        users_apache_alias:
+          - url: /assets
+            path: /opt/openproject/public/assets
+          - url: /uploads
+            path: /opt/openproject/public/uploads
+        users_apache_locations:
+          - location: "/"
+            proxy_pass: http://127.0.0.1:6000/
+            reverse: true
+          - location: "/assets"
+            proxy_pass: "!"
+          - match: "^/sys"
+            authname: Local connections only
+            authtype: None
+            require:
+              - local
+```
+
+Will generate:
+
+```apache
+  <IfModule headers_module>
+    RequestHeader setifempty X-Forwarded-Proto https
+    Header setifempty Strict-Transport-Security "max-age=155520225;"
+    Header setifempty Permissions-Policy "interest-cohort=()"
+  </IfModule>
+  <Location "/">
+    # ProxyPass Location so no AuthUserFile
+    ProxyPass "http://127.0.0.1:6000/"
+    ProxyPassReverse "http://127.0.0.1:6000/"
+  </Location>
+  <Location "/assets">
+    # ProxyPass Location so no AuthUserFile
+    ProxyPass "!"
+  </Location>
+  <LocationMatch "^/sys">
+    # No AuthUserFile for this Location as AuthType is None
+    AuthName "Local connections only"
+    AuthType "None"
+    Require local
+  </LocationMatch>
+  <Location "/.well-known/acme-challenge">
+    AuthType "None"
+    Require all granted
+  </Location>
+  <IfModule alias_module>
+    Alias "/assets" "/opt/openproject/public/assets"
+    Alias "/uploads" "/opt/openproject/public/uploads"
+  </IfModule>
+  <IfFile "/opt/openproject/public">
+    <Directory "/opt/openproject/public">
+      Options -Indexes
+      DirectoryIndex index.html index.htm
+      AllowOverride None
+      AuthType "None"
+      Require all granted
+    </Directory>
+  </IfFile>
+```
+
 If no Directories are required use `users_apache_directories: []`.
+
+The following variables can be used to control the content of the `Directory` directive:
+
+#### users_apache_add_output_filters
+
+A list of [AddOutputFilter directives](https://httpd.apache.org/docs/current/mod/mod_mime.html#addoutputfilter), for example:
+
+```yaml
+        users_apache_add_output_filters:
+          - INCLUDES;DEFLATE shtml
+```
+
+Will generate:
+
+```apache
+    AddOutputFilter INCLUDES;DEFLATE shtml
+```
+
+#### users_apache_add_type
+
+A list of MIME types and extensions for [AddType](https://httpd.apache.org/docs/current/mod/mod_mime.html#addtype), for example:
+
+```yaml
+        users_apache_add_type:
+          - ext: bar
+            type: text/plain
+```
+
+Will generate:
+
+```apache
+    AddType text/plain .bar
+```
+
+Note that the dot before the file extensions is added automatically.
+
+#### users_apache_auth_name
+
+A [AuthName](https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authname), for example:
+
+```yaml
+        users_apache_auth_name: Authentication Required
+```
+
+```apache
+      AuthName Authentication Required
+```
+
+#### users_apache_auth_type
+
+A [AuthType](https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype), when set to `Basic` a [AuthUserFile](https://httpd.apache.org/docs/2.4/mod/mod_authn_file.html#authuserfile) directive is automatically added to point to the htpasswd for for the VirtualHost, for example:
+
+```yaml
+        users_apache_auth_type: Basic
+```
+
+```apache
+      AuthType Basic
+      AuthUserFile: /home/example/.htpasswd/foo
+```
+
+The other options, `Digest` and `Form` and `None` can be used but they don't add any additional directives.
+
+#### users_apache_expires
+
+Set `users_apache_expires` to one of these values:
+
+* forever
+* medium
+* strict
+
+For one of the [Apache role](https://git.coop/webarch/apache) templates to be added as a `IncludeOptional` for the `Directory`:
+
+* [expires-forever.conf](https://git.coop/webarch/apache/-/blob/master/templates/expires-forever.conf.j2)
+* [expires-medium.conf)](https://git.coop/webarch/apache/-/blob/master/templates/expires-medium.conf.j2)
+* [expires-strict.conf](https://git.coop/webarch/apache/-/blob/master/templates/expires-strict.conf.j2)
+
+#### users_apache_filesmatch
+
+A list of[FilesMatch](https://httpd.apache.org/docs/2.4/mod/core.html#filesmatch) and [Require]() directives for example:
+
+```yaml
+        users_apache_filesmatch:
+          - regex: "^(?<sitename>[^/]+)"
+            require:
+              - "ldap-group cn=%{env:MATCH_SITENAME},ou=combined,o=Example"
+```
+
+```apache
+<FilesMatch "^(?<sitename>[^/]+)">
+    Require ldap-group cn=%{env:MATCH_SITENAME},ou=combined,o=Example
+</FilesMatch>
+```
+
+If `require` is omitted then it will default to `Require all denied`.
+
+#### users_apache_header_name
+
+A values for the [HeaderName](https://httpd.apache.org/docs/current/mod/mod_autoindex.html#headername), for example:
+
+```yaml
+        users_apache_header_name: HEADER.html
+```
+
+```apache
+HeaderName HEADER.html
+```
+
+#### users_apache_index
+
+A list of file names for the [DirectoryIndex](https://httpd.apache.org/docs/2.4/mod/mod_dir.html#directoryindex) directive, for example:
+
+```yaml
+        users_apache_index:
+          - index.htm
+          - index.html
+          - index.php
+```
+
+```apache
+DirectoryIndex index.htm index.html index.php
+```
+
+#### users_apache_index_head_insert
+
+Text for the [IndexHeadInsert](https://httpd.apache.org/docs/2.4/mod/mod_autoindex.html#indexheadinsert) directive, for example:
+
+```yaml
+        users_apache_head_insert: '<link rel=\"sitemap\" href=\"/sitemap.html\">'
+```
+
+```apache
+IndexHeadInsert '<link rel=\"sitemap\" href=\"/sitemap.html\">'
+```
+
+#### users_apache_index_options
+
+A list of options for the [IndexOptions](https://httpd.apache.org/docs/2.4/mod/mod_autoindex.html#indexoptions), for example:
+
+```yaml
+        users_apache_index_options:
+          - +ScanHTMLTitles
+          - -IconsAreLinks
+          - FancyIndexing
+```
+
+```apache
+IndexOptions +ScanHTMLTitles -IconsAreLinks FancyIndexing
+```
+
+#### users_apache_options
+#### users_apache_override
+#### users_apache_readme_name
+
+A values for the [ReadmeName](https://httpd.apache.org/docs/current/mod/mod_autoindex.html#readmename), for example:
+
+```yaml
+        users_apache_readme_name: FOOTER.html
+```
+
+```apache
+ReadmeName FOOTER.html
+```
+
+#### users_apache_require
+
+A list of requirements for the Apache [Require](https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require) directive, for example:
+
+```yaml
+        users_apache_require:
+          - ip 10 172.20 192.168.2
+          - method http-method GET HEAD
+```
+
+```apache
+Require ip 10 172.20 192.168.2
+Require method http-method GET HEAD
+```
+
+#### users_apache_ssi_legacy
+
+A boolean, enable the [SSILegacyExprParser](https://httpd.apache.org/docs/2.4/mod/mod_include.html#ssilegacyexprparser).
+
+#### users_apache_ssi_modified
+
+A boolean, enable [SSILastModified](https://httpd.apache.org/docs/2.4/mod/mod_include.html#ssilastmodified).
 
 ### Reverse Proxy
 
@@ -739,7 +1011,7 @@ Configure a reverse proxy, for example for a [Nextcloud notify_push
 server](https://github.com/nextcloud/notify_push#apache) like this you can
 specify:
 
-```yml
+```yaml
         users_apache_proxy_pass:
           - path: /push/ws
             url: ws://127.0.0.1:7867/ws
@@ -761,7 +1033,7 @@ proxy](https://docs.rocket.chat/installing-and-updating/manual-installation/conf
 to a [Rocket.Chat server installed using
 snaps](https://docs.rocket.chat/installing-and-updating/snaps):
 
-```yml
+```yaml
         users_apache_proxy_pass:
           - path: /
             url: http://127.0.0.1:3000/
@@ -788,8 +1060,7 @@ For an
 [ONLYOFFICE](https://github.com/biva/documentation/blob/biva/admin_manual/configuration_server/onlyoffice_configuration.rst)
 server:
 
-```yml
-        
+```yaml
         users_apache_set_env_if:
           - attribute: Host
             regex: "^(.*)$"
@@ -814,7 +1085,7 @@ server:
 
 A reverse proxy to an applicaton that doesn't have any user authentication can be configured to use HTTP Authentication, for example for [Mailcatcher](https://git.coop/webarch/mailcatcher):
 
-```yml
+```yaml
         users_apache_proxy_pass:
           - path: /
             url: http://127.0.0.1:1080/
@@ -837,7 +1108,7 @@ By default the reverse proxy doesn't proxy error documents served from `/wsh`:
 If an `users_apache_filesmatch` array specified at the `VirtualHost` level with
 a list of `regex` like this:
 
-```yml
+```yaml
         users_apache_filesmatch:
           - regex: '^license\.txt$'
           - regex: '^readme\.html$'
@@ -847,7 +1118,7 @@ a list of `regex` like this:
 Then access to these files will be denied, unless one of more `require` items
 are listed, for example:
 
-```yml
+```yaml
         users_apache_filesmatch:
           - regex: '^xmlrpc\.php$'
             require:
@@ -878,7 +1149,7 @@ Some specific PHP variables include the `users_apache_nophp_dirs` array, this
 can be used to list directories that PHP cannot be used in, for example
 directories where users can upload files, for example:
 
-```yml
+```yaml
         users_apache_nophp_dirs:
           - wp-content/uploads
 ```
@@ -899,14 +1170,17 @@ apc.enable_cli = 1
 
 Setting `memory_limit = -1` overides the default of 128M, this is required for the Nextcloud CLI updater.
 
-### Example Apache VirtualHost 
+By default, for users in the `phpfpm` group, the PHP socket is created in the `$HOME` directory as `~/php-fpm.sock`, the use of this path by the Apache configuratoon can be overridden when Apache is not chrooted and the users is not chrooted, per `VirtualHost` by setting `users_apache_php_socket_path` to a path to another socket _however_ this variable is not used by this roles PHP tasks, the socket configuration needs to be done by the [PHP role](https://git.coop/webarch/php).
+
+### Example Apache VirtualHost
 
 If a user has a set of variables like this:
 
-```yml
+```yaml
     users_apache_virtual_hosts:
       default:
         users_apache_type: php
+        users_apache_php_socket_path: /run/php/php8.2-fpm.sock
         users_apache_nophp_dirs:
           - wp-content/uploads
         users_apache_server_name: wordpress.example.org

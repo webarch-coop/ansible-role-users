@@ -1,22 +1,24 @@
 ---
 # This is included from group_members.yml
+#
+# TODO Update this to use facts and a module and not report changes where there are none
 
 - name: "Check that the {{ member }} user exists"
   block:
 
     - name: "Check that the user {{ member }} exists"
-      command: "getent passwd {{ member }}"
+      ansible.builtin.command: "getent passwd {{ member }}"
       changed_when: false
       check_mode: false
       register: users_user_check
 
     - name: "Users that have membership of {{ user.value.users_group | default(user.key) }} group"
-      command: "usermod -a -G {{ user.value.users_group | default(user.key) }} {{ member }}"
+      ansible.builtin.command: "usermod -a -G {{ user.value.users_group | default(user.key) }} {{ member }}"
 
   rescue:
 
     - name: Don't fail, print a warning, this role might need to be run again
-      debug:
+      ansible.builtin.debug:
         msg: "The {{ member }} user hasn't yet been created so skipping"
 
   tags:

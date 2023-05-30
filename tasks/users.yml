@@ -2,53 +2,57 @@
 - name: Users tasks
   block:
 
-    - name: Packages present
-      apt:
-        pkg:
-          - bash-completion
-          - bc
-          - bind9-dnsutils
-          - curl
-          - jq
-          - mutt
-          - python3-dnspython
-          - python3-passlib
-          - pwgen
-          - slay
-          - texlive
-          - vim
-          - whois
-        state: present
-
-    - name: Debian Stretch and Jessie Python 2 packages present
-      apt:
-        pkg:
-          - python-dns
-          - python-dnspython
-          - python-passlib
-        state: present
-      when: ansible_distribution_release is regex('jessie|stretch')
-
     - name: Check that usernames are between 2 and 17 ascii letters, numbers and dashes
-      assert:
+      ansible.builtin.assert:
         that:
           - user.key is regex("^[a-zA-Z0-9-]{2,17}$")
-        quiet: true
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
         fail_msg: "Usernames can only be between 2 and 17 ascii letters, numbers and dashes"
       loop: "{{ users | dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
 
+    - name: Debug meta/user_argument_specs.yml
+      ansible.builtin.debug:
+        msg: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | from_yaml }}"
+        verbosity: 2
+
+    - name: Debug users dict
+      ansible.builtin.debug:
+        var: user.value
+        verbosity: 2
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: Check individual user variables using meta/user_argument_specs.yml
+      ansible.builtin.validate_argument_spec:
+        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | from_yaml }}"
+        provided_arguments: "{{ user.value }}"
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
+    - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
+      ansible.builtin.include_tasks: validate_vhost.yml
+      when: user.value.users_apache_virtual_hosts is defined
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+
     - name: System setup and checks
-      include_tasks: system.yml
+      ansible.builtin.include_tasks: system.yml
 
     - name: Check config only
       block:
 
         - name: Run checks on users
-          include_tasks: user_check.yml
-          when: >
+          ansible.builtin.include_tasks: user_check.yml
+          when: >-
             ( user.value.users_state is not defined ) or
             ( user.value.users_state != "absent" ) or
             ( user.value.users_state != "ignore" )
@@ -58,25 +62,12 @@
             label: "{{ user.key }}"
 
         - name: End as checks completed
-          meta: end_play
+          ansible.builtin.meta: end_play
 
-      when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
-
-    - name: Update the firewall rules only
-      block:
-
-        - name: Update firewall
-          include_tasks: firewall.yml
-
-        - name: End as checks completed
-          meta: end_play
-
-      when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "firewall" )
+      when: ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
 
     - name: Set an empty users_update array
-      set_fact:
+      ansible.builtin.set_fact:
         users_update: []
       when: users_update is not defined
 
@@ -84,13 +75,13 @@
       block:
 
         - name: Include Apache user tasks
-          include_tasks: apache_user_vhosts_present.yml
+          ansible.builtin.include_tasks: apache_user_vhosts_present.yml
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
           when:
-            - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
+            - ( user.key != "root" ) and ( "apache2" in ansible_local.dpkg.installed )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
             - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
 
@@ -102,7 +93,7 @@
       block:
 
         - name: Include PHP-FPM user config tasks
-          include_tasks: phpfpm_user_present.yml
+          ansible.builtin.include_tasks: phpfpm_user_present.yml
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
@@ -113,14 +104,16 @@
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
 
       when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "phpfpm" )
-        - ( users_phpfpm_version is defined ) and ( users_phpfpm_version | length > 0 )
+        - users_update_strategy is defined
+        - users_update_strategy == "phpfpm"
+        - users_phpfpm_versions is defined
+        - users_phpfpm_default_version is defined
 
     - name: Update SSH keys for users present
       block:
 
         - name: Include SSH keys tasks
-          include_tasks: ssh.yml
+          ansible.builtin.include_tasks: ssh.yml
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
@@ -136,7 +129,7 @@
       block:
 
         - name: Quotas set for users
-          include_tasks: quota.yml
+          ansible.builtin.include_tasks: quota.yml
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
@@ -153,30 +146,17 @@
     - name: Set users to update to all
       block:
 
-        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all on Ansible < 2.13
-          set_fact:
-            users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
-          when:
-            - ansible_version.full is version('2.13.0', '<')
-            - user.value.users_state != "ignore"
-          loop: "{{ users | dict2items }}"
-          loop_control:
-            loop_var: user
-            label: "{{ user.key }}"
-
-        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all on Ansible >= 2.13
-          set_fact:
-            users_update: "{{ users_update | default([]) + [ user.key ] }}"
-          when:
-            - ansible_version.full is version('2.13.0', '>=')
-            - user.value.users_state != "ignore"
+        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
+          ansible.builtin.set_fact:
+            users_update: "{{ users_update | default([]) + [user.key] }}"
+          when: user.value.users_state != "ignore"
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
 
         - name: Print the users to update if users_update_strategy is not set or set to all
-          debug:
+          ansible.builtin.debug:
             msg: "User to update: {{ users_update }}"
 
       when:
@@ -186,7 +166,7 @@
       block:
 
         - name: Loop through the users with additional groups
-          include_tasks: users_groups.yml
+          ansible.builtin.include_tasks: users_groups.yml
           when:
             - ( user.value.users_groups is defined and user.value.users_groups != [] ) or ( user.key in users_update_groups )
             - ( user.key not in users_update ) and ( user.value.users_state != "ignore" )
@@ -196,7 +176,7 @@
             label: "{{ user.key }}"
 
         - name: Print the users in the groups to update
-          debug:
+          ansible.builtin.debug:
             msg: "User to update: {{ users_update }}"
 
       when:
@@ -207,10 +187,10 @@
       block:
 
         - name: Check users changed
-          include_tasks: users_changed.yml
+          ansible.builtin.include_tasks: users_changed.yml
 
         - name: Print the changed users to update
-          debug:
+          ansible.builtin.debug:
             msg: "User to update: {{ users_update }}"
 
       when:
@@ -220,7 +200,7 @@
       block:
 
         - name: Print users to update
-          debug:
+          ansible.builtin.debug:
             msg: "User to update: {{ user }}"
             verbosity: 1
           when:
@@ -233,7 +213,7 @@
             label: "{{ user.key }}"
 
         - name: User absent loop
-          include_tasks: user_absent.yml
+          ansible.builtin.include_tasks: user_absent.yml
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
@@ -244,7 +224,7 @@
             label: "{{ user.key }}"
 
         - name: Check variables for users present
-          include_tasks: user_check.yml
+          ansible.builtin.include_tasks: user_check.yml
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
@@ -257,7 +237,7 @@
             label: "{{ user.key }}"
 
         - name: User present loop
-          include_tasks: user_present.yml
+          ansible.builtin.include_tasks: user_present.yml
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
@@ -272,7 +252,7 @@
           block:
 
             - name: Set a fact for the users who are present and in the phpfpm and chroot groups
-              set_fact:
+              ansible.builtin.set_fact:
                 users_in_phpfpm_and_chroot_group: "{{ users_in_phpfpm_and_chroot_group | default('') }} {{ user.key }}"
               when:
                 - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
@@ -285,20 +265,24 @@
                 label: "{{ user.key }}"
 
             - name: Debug the users who are present and in the phpfpm and chroot groups
-              debug:
+              ansible.builtin.debug:
                 msg: "Users in the phpfpm and chroot groups: {{ users_in_phpfpm_and_chroot_group }}"
                 verbosity: 1
               when: users_in_phpfpm_and_chroot_group is defined
 
             - name: Include the munin_node phpfpm-multi tasks
-              include_role:
+              ansible.builtin.include_role:
                 name: munin_node
                 tasks_from: phpfpm_multi.yml
               vars:
                 munin_phpfpm_users: "{{ users_in_phpfpm_and_chroot_group }}"
               when: ( users_in_phpfpm_and_chroot_group is defined ) and ( users_in_phpfpm_and_chroot_group != [] )
 
-          when: ( users_phpfpm_version is defined ) and ( "phpfpm" in getent_group and "chroot" in getent_group )
+          when:
+            - users_phpfpm_versions is defined
+            - users_phpfpm_default_version is defined
+            - ( "phpfpm" in getent_group )
+            - ( "chroot" in getent_group )
 
       when:
         - ( users_update is defined ) and ( users_update != [] )
@@ -307,7 +291,7 @@
       block:
 
         - name: Updated users quotas written and md5sum printed
-          shell: |
+          ansible.builtin.shell: |
             set -e -o pipefail
             repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
             chmod 600 {{ quota_dir }}/quota_user.csv
@@ -321,7 +305,7 @@
             ( ( users_repquota_md5sum_before is defined and users_repquota_md5sum_before.stdout ) != users_repquota_md5sum_after.stdout )
 
         - name: Updated users quotas fetched
-          fetch:
+          ansible.builtin.fetch:
             src: "{{ quota_dir }}/quota_user.csv"
             dest: /tmp/
           check_mode: false
@@ -331,13 +315,8 @@
 
       when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
 
-    - name: Firewall tasks included
-      include_tasks: firewall.yml
-      when:
-        - ( users_firewall is defined ) and ( users_firewall )
-
     - name: List the updated users
-      debug:
+      ansible.builtin.debug:
         msg: "Users updated: {{ users_update }}"
       when:
         - users_update != []

@@ -10,7 +10,7 @@
   block:
 
     - name: "Random passwd for {{ user.key }} generated"
-      ansible.builtin.command: "pwgen -n {{ 24 | random(14) }} 1"
+      ansible.builtin.command: "pwgen -n {{ 30 | random(20) }} 1"
       no_log: true
       register: users_passwd
 

@@ -1,7 +1,7 @@
 ---
 # https://github.com/digitalist-se/userconsole#userdelete
 - name: "Include deleteuser tasks from Matomo role for {{ user.key }}"
-  include_role:
+  ansible.builtin.include_role:
     name: matomo
     tasks_from: deleteuser.yml
   vars:

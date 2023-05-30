@@ -19,8 +19,8 @@
     msg:
       - "name: {{ user.key }}"
       - "group: {{ user.value.users_group | default(user.key) }}"
-      - "groups: {{ user.value.users_groups | default([]) | join(',') or \ omit }}"
-      - "all groups: {{ users_all_groups | default([]) | join(',') or \ omit }}"
+      - "groups: {{ user.value.users_groups | default([]) | join(',') or omit }}"
+      - "all groups: {{ users_all_groups | default([]) | join(',') or omit }}"
       - "home: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
       - "email: {% if user.value.users_email is defined %}{{ user.value.users_email }}{% endif %}"
       - "shell: {{ user.value.users_shell | default('/bin/bash', true) }}"
@@ -39,7 +39,7 @@
   ansible.builtin.user:
     name: "{{ user.key }}"
     group: "{{ user.value.users_group | default(user.key) }}"
-    groups: "{{ users_all_groups | default([]) | join(',') or \ omit }}"
+    groups: "{{ users_all_groups | default([]) | join(',') or omit }}"
     home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
     create_home: true
     shell: "{{ user.value.users_shell | default('/bin/bash', true) }}"
@@ -47,6 +47,55 @@
     generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
     system: "{{ user.value.users_system | default('false') }}"
   when: user.key != "root"
+  tags:
+    - users
+
+- name: Enforce env vars for users with a skel set to /usr/local/etc/skel.d/www
+  block:
+
+    - name: Check if ~/.bash_profile is present
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_profile"
+      register: users_bash_profile
+
+    - name: Debug users_bash_profile
+      ansible.builtin.debug:
+        var: users_bash_profile
+        verbosity: 2
+
+    - name: Bash ~/.bash_profile present for users with skel set to /usr/local/etc/skel.d/www
+      ansible.builtin.copy:
+        src: .bash_profile
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_profile"
+        mode: "0600"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+      when: >-
+        ( not users_bash_profile.stat.exists | bool ) or
+        ( ( users_bash_profile.stat.size is defined ) and
+        ( users_bash_profile.stat.size == 0 ) )
+
+    - name: Remove comment above line in ~/.bashrc that caused duplicate paths in PATH
+      ansible.builtin.lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        line: "# Add ~/bin to $PATH"
+        state: absent
+        mode: "0600"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+
+    - name: Remove line in ~/.bashrc that caused duplicate paths in PATH
+      ansible.builtin.lineinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bashrc"
+        line: 'export PATH="${HOME}/bin:${PATH}"'
+        state: absent
+        mode: "0600"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+
+  when:
+    - user.value.users_skel is defined
+    - user.value.users_skel == "/usr/local/etc/skel.d/www"
   tags:
     - users
 
@@ -60,7 +109,7 @@
   tags:
     - users
 
-- name: "Debug private files touched for {{ user.key }}"
+- name: "Debug private files touched for non-sudoer {{ user.key }}"
   ansible.builtin.debug:
     msg:
       - "path: {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file.path }}"
@@ -73,6 +122,7 @@
     verbosity: 2
   when:
     - user.key != "root"
+    - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "sudo" not in user.value.users_groups )
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_files is defined ) and ( users_private_files[0] is defined )
   loop: "{{ users_private_files }}"
@@ -80,7 +130,7 @@
     loop_var: file
     label: "{{ file.path }}"
 
-- name: "Private directories and files present for {{ user.key }}"
+- name: "Private directories and files present for non-sudoer {{ user.key }}"
   ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ file.path }}"
     state: "{{ file.state }}"
@@ -91,6 +141,7 @@
     modification_time: preserve
   when:
     - user.key != "root"
+    - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "sudo" not in user.value.users_groups )
     - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
     - ( users_private_files is defined ) and ( users_private_files[0] is defined )
   loop: "{{ users_private_files }}"

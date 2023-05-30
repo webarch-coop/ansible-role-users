@@ -1,4 +1,6 @@
 ---
+users_verify: false
+
 # If users_update_strategy is set to "all" then all users will be configured
 # everytime the tasks in this role are run, it it is set to "changed" than only
 # user accounts that have changes will be updated. If it is set to "apache" then
@@ -8,6 +10,9 @@
 # the users_update_groups array is defined then only users in these groups will
 # be updated. If it is set to "check" then the users: YAML is checked only.
 users_update_strategy: changed
+# users_home_bin is a path relative to $HOME, it should not start with a slash
+# ~/bin was hardcoded in lots of places, at some point it might be updated to default to .local/bin
+users_home_bin: bin
 # Define users_cusers_chroot hroot to true for members of the chroot group to be chrooted
 users_chroot: false
 # users_chroot_dir is the path to the rw chroot files
@@ -17,7 +22,7 @@ users_chroot_dir: "{{ chroot_dir | default('/chroot') }}"
 users_chroot_users_dir: "{{ chroot_users_dir | default('/chroots') }}"
 # Define users_apache to true for this role to manage the Apache VirtualHosts
 users_apache: false
-users_apache_chroot: "{{ apache_chroot | default(False) }}"
+users_apache_chroot: "{{ apache_chroot | default(false) }}"
 users_apache_chroot_suexec: false
 users_apache_chroot_dir: "{{ apache_chroot_dir | default(users_chroot_users_dir + '/www-data') }}"
 # users_apache_chroot_users_basedir is the directory that will be used to mount
@@ -32,7 +37,9 @@ users_apache_chroot_mount_dirs:
   - wsh
 users_disallowed_usernames:
   - "{{ users_basedir | regex_replace('^\/') }}"
-  - "{{ users_apache_chroot_mount_dirs }}"
+  - html
+  - localhost
+  - wsh
 # Users home directories to be created as sub-directories of users_basedir
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root
@@ -84,6 +91,9 @@ users_private_files:
   - path: .bash_aliases
     mode: "0600"
     state: touch
+  - path: .bash_completion
+    mode: "0600"
+    state: touch
   - path: .bash_history
     mode: "0600"
     state: touch
@@ -133,7 +143,7 @@ users_private_files:
     mode: "0600"
     state: touch
   - path: .myclirc
-    mode: "0400"
+    mode: "0600"
     state: touch
   - path: .mysql
     mode: "0700"
@@ -202,6 +212,7 @@ users_notify_cron_append: "Reply-To: {{ users_notify_reply_to }}"
 users_forward: true
 users_muttrc: true
 users_cert: user
+users_cert_dir: /etc/ssl/le
 # For Nextcloud updates users_apache_php_proxy_timeout needs to be set to 1200,
 # this is best done at a VirtualHost level
 users_apache_php_proxy_timeout: 300
@@ -233,27 +244,20 @@ users_apache_php_proxy_timeout: 300
 users_cgi_extensions:
   - cgi
   - pl
-# https://www.php.net/manual/en/install.fpm.configuration.php
-users_phpfpm_pm: dynamic
-users_phpfpm_pm_max_children: 3
-users_phpfpm_pm_start_servers: 2
-users_phpfpm_pm_min_spare_servers: 1
-users_phpfpm_pm_max_spare_servers: 1
 users_phpfpm_request_terminate_timeout: 360
 # The users_phpfpm_extensions array is for a list of files extensions to be
 # processed for PHP commands, it can also be set at a users level
 users_phpfpm_extensions:
   - php
-users_phpfpm_enable_open_basedir: false
 # PHP expands $pool to the pool name and in this case it is the same as the username
 users_phpfpm_open_basedir:
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}/"
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp/"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp"
   - /usr/share/php
-# The MediaWiki file includes/shell/Command.php uses/bin/bash
+# The MediaWiki file includes/shell/Command.php uses /bin/bash
 users_phpfpm_open_basedir_mediawiki:
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}/"
-  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp/"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/{{ users_sites_dir }}"
+  - "{% if users_apache_chroot is defined and users_apache_chroot %}{{ users_apache_chroot_users_basedir }}{% else %}{{ users_basedir }}{% endif %}/$pool/tmp"
   - /usr/share/php
   - /bin
 # users_phpfpm_disable_functions values are appended, they do not overwrite
@@ -528,13 +532,14 @@ users_phpfpm_disable_functions_nextcloud:
   - posix_setsid
   - posix_setuid
   # The proc_ functions are used by some features of MediaWiki
-  - proc_close
-  - proc_get_status
-  - proc_nice
-  - proc_open
-  - proc_terminate
-  # The shell_exec function is used by Matomo
-  - shell_exec
+  # - proc_close
+  # - proc_get_status
+  # - proc_nice
+  # proc_open is used for sendmail email by Nextcloud configuration
+  # - proc_open
+  # - proc_terminate
+  # The shell_exec function is used by Matomo and Nextcloud for the serverinfo
+  # - shell_exec
   - show_source
   - socket_create
   - symlink

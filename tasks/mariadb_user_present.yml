@@ -11,7 +11,7 @@
       block:
 
         - name: "Generate a random password for {{ user.key }} MariaDB account as ~/.my.cnf doesn't exist"
-          ansible.builtin.command: "pwgen -n {{ 24 | random(14) }} 1"
+          ansible.builtin.command: "pwgen -n {{ 30 | random(20) }} 1"
           no_log: true
           register: users_mariadb_password_gen
 
@@ -102,14 +102,40 @@
         loop_var: db
         label: "{{ db }}"
 
-    - name: "mycli config file ~/.myclirc generated for {{ user.key }}"
+    - name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
+      register: users_myclirc_conf
+
+    - name: "Edit myclir config file ~/.myclirc for {{ user.key }}"
+      community.general.ini_file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
+        section: alias_dsn
+        option: "{{ users_db }}"
+        value: "mysql://{{ user.key }}@localhost/{{ users_db }}"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0600"
+      loop: "{{ user.value.users_mariadb_databases }}"
+      loop_control:
+        loop_var: users_db
+      when:
+        - users_myclirc_conf.stat.exists | bool
+        - user.value.users_mariadb_databases is defined
+        - user.value.users_mariadb_databases != []
+
+    - name: "Template mycli config file ~/.myclirc for {{ user.key }}"
       ansible.builtin.template:
         src: myclirc.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
-        mode: "0400"
+        mode: "0600"
         force: true
+      when:
+        - not users_myclirc_conf.stat.exists | bool
+        - user.value.users_mariadb_databases is defined
+        - user.value.users_mariadb_databases != []
 
     - name: "Set a variable for mysql_user db priv for {{ user.key }} using the default privileges"
       ansible.builtin.set_fact:
@@ -129,6 +155,7 @@
       community.mysql.mysql_user:
         name: "{{ user.key }}"
         password: "{{ users_mariadb_password }}"
+        host: localhost
         priv: "{{ users_mariadb_priv }}"
         state: present
         update_password: always

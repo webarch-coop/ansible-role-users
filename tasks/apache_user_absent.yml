@@ -3,34 +3,40 @@
   block:
 
     - name: "Check if the {{ user.key }} site is enabled"
-      stat:
+      ansible.builtin.stat:
         path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
       register: users_apache_site_enabled
 
     - name: "Apache {{ user.key }} sites-enabled symlink absent"
-      command: "a2dissite {{ user.key }}"
+      ansible.builtin.command: "a2dissite {{ user.key }}"
       register: users_apache_site_enabled_absent
-      when: users_apache_site_enabled.stat.exists and users_apache_site_enabled.stat.islnk
+      when:
+        - users_apache_site_enabled.stat.exists | bool
+        - users_apache_site_enabled.stat.islnk | bool
 
     - name: Conditional Apache restart
       block:
 
-        - name: "apache2ctl configtest to check deletion of /etc/apache2/sites-enabled/{{ user.key }}.conf"
-          command: apache2ctl configtest
-          changed_when: '"Syntax OK" not in users_apache2ctl_configtest.stderr'
+        - name: "Run apache2ctl configtest to check deletion of /etc/apache2/sites-enabled/{{ user.key }}.conf"
+          ansible.builtin.command: apache2ctl configtest
+          changed_when: ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
           check_mode: false
           register: users_apache2ctl_configtest
 
         - name: Apache restart
-          service:
+          ansible.builtin.service:
             name: apache2
             state: restarted
-          when: ( users_apachectl_configtest is defined ) and ( "Syntax OK" in users_apachectl_configtest.stderr )
+          when:
+            - users_apachectl_configtest is defined
+            - ( "Syntax OK" in users_apachectl_configtest.stderr )
 
-      when: ( users_apache_site_enabled is defined ) and ( users_apache_site_enabled.stat.exists )
+      when:
+        - users_apache_site_enabled is defined
+        - users_apache_site_enabled.stat.exists
 
     - name: "Apache {{ user.key }} sites-available file(s) absent"
-      file:
+      ansible.builtin.file:
         path: "{{ file }}"
         state: absent
       loop:
@@ -42,18 +48,18 @@
         label: "{{ file }}"
 
     - name: "Apache suEXEC config for {{ user.key }} absent"
-      file:
+      ansible.builtin.file:
         path: "/etc/apache2/suexec/{{ user.key }}"
         state: absent
 
     - name: "Certcheck crontab for {{ user.key }} absent"
-      cron:
+      ansible.builtin.cron:
         name: "Cert check for {{ user.key }}.{{ ansible_fqdn }}"
-        job: "ssl-cert-check -qac {{ le_dir }}/{{ user.key }}.{{ ansible_fqdn }}.cert.pem -e 'root@localhost'"
+        job: "ssl-cert-check -qac {{ users_cert_dir }}/{{ user.key }}.{{ ansible_fqdn }}.cert.pem -e 'root@localhost'"
         state: absent
 
     - name: "Keys and certs for {{ user.key }}.{{ ansible_fqdn }} absent"
-      file:
+      ansible.builtin.file:
         path: "{{ path }}"
         state: absent
       loop:

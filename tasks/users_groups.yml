@@ -2,22 +2,10 @@
 - name: Users groups
   block:
 
-    - name: Add user to users_update array if they are in a group in the users_update_groups array for Ansible < 2.13
-      set_fact:
-        users_update: "{{ users_update }} + [ '{{ user.key }}' ]"
+    - name: Add user to users_update array if they are in a group in the users_update_groups array
+      ansible.builtin.set_fact:
+        users_update: "{{ users_update | default([]) + [user.key] }}"
       when:
-        - ( ansible_version.full is version('2.13.0', '<') )
-        - ( user.value.users_groups is defined and users_update_group in user.value.users_groups ) or ( users_update_group == user.key )
-        - ( user.key not in users_update )
-      loop: "{{ users_update_groups }}"
-      loop_control:
-        loop_var: users_update_group
-
-    - name: Add user to users_update array if they are in a group in the users_update_groups array for Ansible >= 2.13
-      set_fact:
-        users_update: "{{ users_update | default([]) + [ user.key ] }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '>=') )
         - ( user.value.users_groups is defined and users_update_group in user.value.users_groups ) or ( users_update_group == user.key )
         - ( user.key not in users_update )
       loop: "{{ users_update_groups }}"

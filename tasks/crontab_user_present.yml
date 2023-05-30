@@ -2,15 +2,15 @@
 - name: Cron jobs
   block:
 
-    - name: Check if the ~/bin directory exists
-      stat:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
+    - name: Check if the users bin directory exists
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
       register: users_home_bin_path
 
-    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md in place"
-      copy:
+    - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md in place"
+      ansible.builtin.copy:
         src: files/CRON_README.md
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/README.md"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/README.md"
         mode: "0644"
         owner: root
         group: root
@@ -19,7 +19,7 @@
         - ( user.value.users_system is not defined ) or ( not user.value.users_system )
 
     - name: "Cron minute file {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
-      shell: |
+      ansible.builtin.shell: |
         set -e -o pipefail
         echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
       args:
@@ -28,12 +28,12 @@
       when: ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
 
     - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
-      slurp:
+      ansible.builtin.slurp:
         src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       register: users_cron_min_b64encoded
 
     - name: Set a variable for the users crontab minute
-      set_fact:
+      ansible.builtin.set_fact:
         users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
 
     - name: Generate files to be run by root in /etc/cron.d for chrooted users
@@ -44,34 +44,34 @@
         # if it does then run it in the chroot, as the user and send the
         # user any results in an email
         - name: "Daily cron jobs for {{ user.key }}"
-          cron:
+          ansible.builtin.cron:
             name: "Daily cron jobs"
             cron_file: "chroot_cron_daily_{{ user.key }}"
             user: root
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh | wc -l) -gt 0 ];
               then /usr/sbin/chroot {{ users_chroot_users_dir }}/{{ user.key }} sudo -u {{ user.key }}
-              PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
+              PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh 2>&1 |
+              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh 2>&1 |
               mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ user.key }} account on {{ inventory_hostname }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
             hour: "{{ users_cron_daily_hour | default('05') }}"
 
         - name: "Hourly cron jobs for {{ user.key }}"
-          cron:
+          ansible.builtin.cron:
             name: "Hourly cron jobs"
             cron_file: "chroot_cron_hourly_{{ user.key }}"
             user: root
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh | wc -l) -gt 0 ];
               then /usr/sbin/chroot {{ users_chroot_users_dir }}/{{ user.key }} sudo -u {{ user.key }}
-              PATH={{ users_basedir }}/{{ user.key }}/bin:/usr/local/bin:/usr/bin:/bin
+              PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh 2>&1 |
+              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh 2>&1 |
               mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ user.key }} account on {{ inventory_hostname }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
@@ -86,24 +86,24 @@
       block:
 
         - name: "Daily cron jobs for {{ user.key }}"
-          cron:
+          ansible.builtin.cron:
             name: "Daily cron jobs"
             user: "{{ user.key }}"
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh | wc -l) -gt 0 ];
-              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_daily.sh; fi
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh | wc -l) -gt 0 ];
+              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh; fi
             minute: "{{ users_cron_min }}"
             hour: "{{ users_cron_daily_hour | default('05') }}"
 
         - name: "Hourly cron jobs for {{ user.key }}"
-          cron:
+          ansible.builtin.cron:
             name: "Hourly cron jobs"
             user: "{{ user.key }}"
             job: >
-              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh ] &&
-              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh | wc -l) -gt 0 ];
-              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin/cron_hourly.sh; fi
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh | wc -l) -gt 0 ];
+              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh; fi
             minute: "{{ users_cron_min }}"
             hour: "*"
 
@@ -113,19 +113,19 @@
         - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
 
     - name: "USER env var added to {{ user.key }} crontab"
-      cron:
+      ansible.builtin.cron:
         env: true
         name: USER
         value: "{{ user.key }}"
         user: "{{ user.key }}"
 
     - name: Check if the ~/tmp directory exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
       register: users_home_tmp_path
 
     - name: "TMPDIR env var added to {{ user.key }} crontab"
-      cron:
+      ansible.builtin.cron:
         env: true
         name: TMPDIR
         value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
@@ -134,7 +134,7 @@
         state: "{% if users_home_tmp_path.stat.exists %}present{% else %}absent{% endif %}"
 
     - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
-      cron:
+      ansible.builtin.cron:
         name: "Daily deletion of TMPDIR files for {{ user.key }}"
         job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
         state: present
@@ -147,7 +147,7 @@
         - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean )
 
     - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
-      cron:
+      ansible.builtin.cron:
         name: "Daily deletion of TMPDIR files for {{ user.key }}"
         state: absent
         user: "{{ user.key }}"
@@ -158,7 +158,7 @@
         - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
 
     - name: "PATH env var added to {{ user.key }} crontab"
-      cron:
+      ansible.builtin.cron:
         env: true
         name: PATH
         value: "/usr/local/bin:/usr/bin:/bin"
@@ -167,7 +167,7 @@
         state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
 
     - name: "MAILTO env var added to {{ user.key }} crontab"
-      cron:
+      ansible.builtin.cron:
         env: true
         name: MAILTO
         value: "{{ user.value.users_email }}"
@@ -179,17 +179,17 @@
       block:
 
         - name: Check if /usr/local/bin/mysql-backup-user exists
-          stat:
+          ansible.builtin.stat:
             path: /usr/local/bin/mysql-backup-user
           register: users_mysql_backup_script
 
         - name: Check if ~/.my.cnf exists
-          stat:
+          ansible.builtin.stat:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
           register: users_home_mycnf_path
 
         - name: "Daily MariaDB dump cron job in place for users with databases"
-          cron:
+          ansible.builtin.cron:
             name: "Nightly MySQL database backup for {{ user.key }}"
             job: "/usr/local/bin/mysql-backup-user {{ user.key }}"
             user: "{{ user.key }}"
@@ -205,7 +205,7 @@
       block:
 
         - name: "Cron jobs without a special time, defined at a user level, present or absent"
-          cron:
+          ansible.builtin.cron:
             name: "{{ job.name }}"
             job: "{{ job.job }}"
             user: "{{ user.key }}"
@@ -223,7 +223,7 @@
           when: ( job.special_time is not defined )
 
         - name: "Cron jobs with a special time, defined at a user level, present or absent"
-          cron:
+          ansible.builtin.cron:
             name: "{{ job.name }}"
             job: "{{ job.job }}"
             user: "{{ user.key }}"

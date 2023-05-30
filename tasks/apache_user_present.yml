@@ -1,6 +1,6 @@
 ---
 - name: "Apache suEXEC config for {{ user.key }} present"
-  template:
+  ansible.builtin.template:
     src: suexec.j2
     dest: "/etc/apache2/suexec/{{ user.key }}"
     mode: "0750"
@@ -14,7 +14,7 @@
 
 # /home/USER/sites
 - name: "Apache {{ user.key }}/{{ users_sites_dir }} directory present"
-  file:
+  ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}"
     state: directory
     owner: "{{ user.key }}"
@@ -25,7 +25,7 @@
 
 # /home/USER/sites/VHOST
 - name: "Apache DocumentRoot(s) present for VitualServers for {{ user.key }}"
-  file:
+  ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
     state: directory
     owner: "{{ user.key }}"
@@ -40,7 +40,7 @@
     - users
 
 - name: Check Apache status
-  command: service apache2 status
+  ansible.builtin.command: service apache2 status
   check_mode: false
   changed_when: false
   register: users_apache2_status
@@ -48,7 +48,7 @@
     - users
 
 - name: Fail if Apache is not running
-  fail:
+  ansible.builtin.fail:
     msg: "Apache is not running!"
   when: users_apache2_status.rc == 3
   tags:
@@ -56,7 +56,7 @@
 
 # One cert per VirtualHost
 - name: "Let's Encrypt cert per vhost role included for {{ user.key }}"
-  include_role:
+  ansible.builtin.include_role:
     name: acmesh
     tasks_from: letsencrypt
   vars:
@@ -73,7 +73,7 @@
 
 # One cert per user
 - name: "Let's Encrypt cert per user role included for {{ user.key }}"
-  include_role:
+  ansible.builtin.include_role:
     name: acmesh
     tasks_from: letsencrypt
   vars:
@@ -85,7 +85,7 @@
     - users
 
 - name: "HTTP Authentication htpasswd files present for {{ user.key }}"
-  include_tasks: htauth.yml
+  ansible.builtin.include_tasks: htauth.yml
   when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
@@ -95,7 +95,7 @@
     - users
 
 - name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present"
-  file:
+  ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
     state: directory
     owner: root
@@ -105,13 +105,13 @@
     - users
 
 - name: "Check that the SSL certs for {{ user.key }} are present"
-  include_tasks: apache_cert_check.yml
+  ansible.builtin.include_tasks: apache_cert_check.yml
   when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
   tags:
     - users
 
 - name: "Apache {{ user.key }} sites-enabled symlink absent"
-  file:
+  ansible.builtin.file:
     path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
     state: absent
   when: not users_apache_certs_present
@@ -119,14 +119,14 @@
     - users
 
 - name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
-  stat:
+  ansible.builtin.stat:
     path: "/etc/apache2/sites-available/{{ user.key }}.conf"
   register: users_apache_conf_check
   tags:
     - users
 
 - name: "Apache {{ user.key }} sites-available file copied"
-  copy:
+  ansible.builtin.copy:
     src: "/etc/apache2/sites-available/{{ user.key }}.conf"
     dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
     remote_src: true
@@ -138,7 +138,7 @@
     - users
 
 - name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
-  include_tasks: apache_user_www_data_vhosts_present.yml
+  ansible.builtin.include_tasks: apache_user_www_data_vhosts_present.yml
   when:
     - user.key == "www-data"
     - users_apache_certs_present is defined
@@ -147,7 +147,7 @@
     - users
 
 - name: "Generate and enable Apache VirtualHosts for {{ user.key }}"
-  include_tasks: apache_user_vhosts_present.yml
+  ansible.builtin.include_tasks: apache_user_vhosts_present.yml
   when:
     - user.key != "www-data"
     - users_apache_certs_present is defined
@@ -160,18 +160,18 @@
   block:
 
     - name: Get all users
-      getent:
+      ansible.builtin.getent:
         database: passwd
         split: ':'
 
     - name: Debug matomo_user
-      debug:
+      ansible.builtin.debug:
         var: matomo_user
         verbosity: 2
       when: matomo_user is defined
 
     - name: Debug getent_passwd.keys()
-      debug:
+      ansible.builtin.debug:
         var: getent_passwd.keys()
         verbosity: 3
       when: getent_passwd.keys() is defined
@@ -180,7 +180,7 @@
       block:
 
         - name: Check if Matomo config file exists
-          stat:
+          ansible.builtin.stat:
             path: "{{ matomo_html }}/config/config.ini.php"
           check_mode: false
           register: user_matomo_config
@@ -189,7 +189,7 @@
           block:
 
             - name: Include Matomo version check tasks
-              include_role:
+              ansible.builtin.include_role:
                 name: matomo
                 tasks_from: check_version.yml
 
@@ -197,7 +197,7 @@
               block:
 
                 - name: Include admin user authentication checks
-                  include_role:
+                  ansible.builtin.include_role:
                     name: matomo
                     tasks_from: check_auth.yml
 
@@ -205,11 +205,11 @@
                   block:
 
                     - name: "Debug matomo addsite for {{ user.key }}"
-                      debug:
+                      ansible.builtin.debug:
                         msg:
                           - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
                           - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
-                          - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
+                          - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}{% else %}[]{% endif %}"
                           - "matomo_login: {{ user.key }}"
                           - "matomo_login_email: {{ user.value.users_email }}"
                           - "users_cms: {{ vhost.value.users_cms | default('') }}"
@@ -223,7 +223,7 @@
                         label: "{{ vhost.key }}"
 
                     - name: "Matomo sites present for {{ user.key }}"
-                      include_role:
+                      ansible.builtin.include_role:
                         name: matomo
                         tasks_from: site_present.yml
                       when:
@@ -239,7 +239,7 @@
                         matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
                         matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
                         # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
-                        matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$','http://\\1') | list }}{% else %}[]{% endif %}"
+                        matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}{% else %}[]{% endif %}"
 
                   when: ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
 
@@ -259,13 +259,26 @@
   tags:
     - users
 
+# WIP for https://git.coop/webarch/users/-/issues/57
+# - name: Include CMS roles
+#   ansible.builtin.include_role:
+#     name: "{{ users_cms_role }}"
+#   vars: "{{ users_cms_role.vars }}"
+#   loop: "{{ vhost.value.users_cms_roles }}"
+#   loop_control:
+#     loop_var: users_cms_role
+#     label: "{{ users_cms_role.name }}"
+#   when:
+#     - vhost.value.users_cms_roles is defined
+#     - vhost.value.users_cms_roles | length > 0
+
 - name: CMS roles included when MariaDB databases are defined
   block:
 
     # The users_mariadb_password shoudl already be set from mariadb_user_present.yml
 
     # - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
-    #   command: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client"
+    #   ansible.builtin.command: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client"
     #   changed_when: false
     #   check_mode: false
     #   no_log: true
@@ -281,7 +294,7 @@
     #   no_log: true
 
     - name: "Include WordPress role for {{ user.key }} with Matomo"
-      include_role:
+      ansible.builtin.include_role:
         name: wordpress
       vars:
         wordpress_user: "{{ user.key }}"
@@ -324,7 +337,7 @@
         - ( users_matomo is defined ) and ( users_matomo )
 
     - name: "Include WordPress role for {{ user.key }} without Matomo"
-      include_role:
+      ansible.builtin.include_role:
         name: wordpress
       vars:
         wordpress_user: "{{ user.key }}"
@@ -358,8 +371,8 @@
         - ( vhost.value.users_cms == "wordpress" )
         - ( users_matomo is not defined ) or ( not users_matomo )
 
-    - name: "Include Drupal role for {{ user.key }} for Ansible < 2.13"
-      include_role:
+    - name: "Include Drupal role for {{ user.key }}"
+      ansible.builtin.include_role:
         name: drupal
       vars:
         drupal_user: "{{ user.key }}"
@@ -368,7 +381,7 @@
         drupal_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         drupal_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         drupal_docroot_mode: "0750"
-        drupal_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+        drupal_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [vhost.value.users_apache_server_name] }}"
         drupal_url: "{{ vhost.value.drupal_url | default('https://' + vhost.value.users_apache_server_name) }}"
         drupal_title: "{{ vhost.value.drupal_title | default(vhost.value.users_apache_server_name) }}"
         drupal_locale: "{{ vhost.value.drupal_locale | default('en') }}"
@@ -389,47 +402,10 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '<') )
-        - ( vhost.value.users_cms == "drupal" )
-
-    - name: "Include Drupal role for {{ user.key }} for Ansible >= 2.13"
-      include_role:
-        name: drupal
-      vars:
-        drupal_user: "{{ user.key }}"
-        drupal_group: "{{ user.value.users_group | default(user.key) }}"
-        drupal_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        drupal_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        drupal_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-        drupal_docroot_mode: "0750"
-        drupal_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [ vhost.value.users_apache_server_name ] }}"
-        drupal_url: "{{ vhost.value.drupal_url | default('https://' + vhost.value.users_apache_server_name) }}"
-        drupal_title: "{{ vhost.value.drupal_title | default(vhost.value.users_apache_server_name) }}"
-        drupal_locale: "{{ vhost.value.drupal_locale | default('en') }}"
-        drupal_dbname: "{% if vhost.value.drupal_dbname is defined %}{{ vhost.value.drupal_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
-        drupal_dbuser: "{{ vhost.value.drupal_dbuser | default(user.key) }}"
-        drupal_dbpass: "{{ users_mariadb_password }}"
-        drupal_dbprefix: "{{ vhost.value.drupal_dbprefix | default('') }}"
-        drupal_admin_user: "{{ vhost.value.drupal_admin_user | default(user.key) }}"
-        drupal_admin_email: "{{ vhost.value.drupal_admin_email | default(user.value.users_email) }}"
-        drupal_autoupdate: "{{ vhost.value.drupal_autoupdate | default(false) | bool }}"
-        drupal_notify: "{{ vhost.value.drupal_notify | default(true) | bool }}"
-        drupal_notify_from: "{{ users_notify_from }}"
-        drupal_notify_reply_to: "{{ users_notify_reply_to }}"
-        drupal_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
-        drupal_notify_headers: "{{ users_notify_headers }}"
-        drupal_notify_signature: "{{ users_notify_signature }}"
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost.key }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '>=') )
-        - ( vhost.value.users_cms == "drupal" )
+      when: vhost.value.users_cms == "drupal"
 
     - name: "Include Kimai role for {{ user.key }}"
-      include_role:
+      ansible.builtin.include_role:
         name: kimai
       vars:
         kimai_user: "{{ user.key }}"
@@ -460,7 +436,7 @@
       when: ( vhost.value.users_cms == "kimai" )
 
     - name: "Include Moodle role for {{ user.key }}"
-      include_role:
+      ansible.builtin.include_role:
         name: moodle
       vars:
         moodle_user: "{{ vhost.value.moodle_user | default(user.key) }}"
@@ -497,202 +473,89 @@
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "moodle" )
 
-    - name: "Include Nextcloud role for {{ user.key }} with default apps for Ansible < 2.13"
-      include_role:
+    - name: "Include Nextcloud role for {{ user.key }} with default apps"
+      ansible.builtin.include_role:
         name: nextcloud
       vars:
-        nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
-        nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-        nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
-        nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
-        nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
-        nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
-        nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
-        nextcloud_dbpass: "{{ users_mariadb_password }}"
-        nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
-        nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
         nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
-        nextcloud_mail_from_address: "{{ vhost.value.nextcloud_mail_from_address | default(user.key) }}"
-        nextcloud_mail_domain: "{{ vhost.value.nextcloud_mail_domain | default(inventory_hostname) }}"
-        nextcloud_default_phone_region: "{{ vhost.value.nextcloud_default_phone_region | default('GB') }}"
-        nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
+        nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
         nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
+        # nextcloud_config: "{{ vhost.value.nextcloud_config | default(nextcloud_config) }}"
+        nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
+        nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+        nextcloud_dbpass: "{{ users_mariadb_password }}"
+        nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('oc_') }}"
+        nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
+        nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+        nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
+        nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
+        nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
         nextcloud_notify_from: "{{ users_notify_from }}"
-        nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
-        nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
         nextcloud_notify_headers: "{{ users_notify_headers }}"
+        nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
         nextcloud_notify_signature: "{{ users_notify_signature }}"
+        nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
-        nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
+        nextcloud_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+        nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
+        nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
+        nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+        nextcloud_version: "{{ vhost.value.nextcloud_version }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
       when:
-        - ( ansible_version.full is version('2.13.0', '<') )
         - ( vhost.value.users_cms == "nextcloud" )
         - ( vhost.value.nextcloud_app_remove is not defined )
         - ( vhost.value.nextcloud_app_install is not defined )
         - ( vhost.value.nextcloud_app_disable is not defined )
         - ( vhost.value.nextcloud_app_enable is not defined )
 
-    - name: "Include Nextcloud role for {{ user.key }} with default apps for Ansible >= 2.13"
-      include_role:
+    - name: "Include Nextcloud role for {{ user.key }} with custom apps for Ansible"
+      ansible.builtin.include_role:
         name: nextcloud
       vars:
-        nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
-        nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-        nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [ vhost.value.users_apache_server_name ] }}"
-        nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
-        nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
-        nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
-        nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
-        nextcloud_dbpass: "{{ users_mariadb_password }}"
-        nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
-        nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
         nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
-        nextcloud_mail_from_address: "{{ vhost.value.nextcloud_mail_from_address | default(user.key) }}"
-        nextcloud_mail_domain: "{{ vhost.value.nextcloud_mail_domain | default(inventory_hostname) }}"
-        nextcloud_default_phone_region: "{{ vhost.value.nextcloud_default_phone_region | default('GB') }}"
-        nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
-        nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
-        nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
-        nextcloud_notify_from: "{{ users_notify_from }}"
-        nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
-        nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
-        nextcloud_notify_headers: "{{ users_notify_headers }}"
-        nextcloud_notify_signature: "{{ users_notify_signature }}"
-        nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
-        nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost.key }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '>=') )
-        - ( vhost.value.users_cms == "nextcloud" )
-        - ( vhost.value.nextcloud_app_remove is not defined )
-        - ( vhost.value.nextcloud_app_install is not defined )
-        - ( vhost.value.nextcloud_app_disable is not defined )
-        - ( vhost.value.nextcloud_app_enable is not defined )
-
-    - name: "Include Nextcloud role for {{ user.key }} with custom apps for Ansible < 2.13"
-      include_role:
-        name: nextcloud
-      vars:
-        nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
-        nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-        nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
-        nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
-        nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
-        nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
-        nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
-        nextcloud_dbpass: "{{ users_mariadb_password }}"
-        nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
         nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
-        nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
-        nextcloud_mail_from_address: "{{ vhost.value.nextcloud_mail_from_address | default(user.key) }}"
-        nextcloud_mail_domain: "{{ vhost.value.nextcloud_mail_domain | default(inventory_hostname) }}"
-        nextcloud_default_phone_region: "{{ vhost.value.nextcloud_default_phone_region | default('GB') }}"
-        nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
-        nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
-        nextcloud_app_remove: "{{ vhost.value.nextcloud_app_remove | default([]) }}"
-        nextcloud_app_install: "{{ vhost.value.nextcloud_app_install | default([]) }}"
         nextcloud_app_disable: "{{ vhost.value.nextcloud_app_disable | default([]) }}"
         nextcloud_app_enable: "{{ vhost.value.nextcloud_app_enable | default([]) }}"
+        nextcloud_app_install: "{{ vhost.value.nextcloud_app_install | default([]) }}"
+        nextcloud_app_remove: "{{ vhost.value.nextcloud_app_remove | default([]) }}"
+        nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
+        # nextcloud_config: "{{ vhost.value.nextcloud_config | default(nextcloud_config) }}"
+        nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
+        nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+        nextcloud_dbpass: "{{ users_mariadb_password }}"
+        nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('oc_') }}"
+        nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
+        nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+        nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
+        nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
+        nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
         nextcloud_notify_from: "{{ users_notify_from }}"
-        nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
-        nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
         nextcloud_notify_headers: "{{ users_notify_headers }}"
+        nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
         nextcloud_notify_signature: "{{ users_notify_signature }}"
+        nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
         nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
-        nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
+        nextcloud_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+        nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
+        nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
+        nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+        nextcloud_version: "{{ vhost.value.nextcloud_version }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
       when:
-        - ( ansible_version.full is version('2.13.0', '<') )
         - ( vhost.value.users_cms == "nextcloud" )
         - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
 
-    - name: "Include Nextcloud role for {{ user.key }} with custom apps for Ansible >= 2.13"
-      include_role:
-        name: nextcloud
-      vars:
-        nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
-        nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
-        nextcloud_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-        nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [ vhost.value.users_apache_server_name ] }}"
-        nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
-        nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
-        nextcloud_locale: "{{ vhost.value.nextcloud_locale | default('en') }}"
-        nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
-        nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
-        nextcloud_dbpass: "{{ users_mariadb_password }}"
-        nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('') }}"
-        nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
-        nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
-        nextcloud_mail_from_address: "{{ vhost.value.nextcloud_mail_from_address | default(user.key) }}"
-        nextcloud_mail_domain: "{{ vhost.value.nextcloud_mail_domain | default(inventory_hostname) }}"
-        nextcloud_default_phone_region: "{{ vhost.value.nextcloud_default_phone_region | default('GB') }}"
-        nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
-        nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
-        nextcloud_app_remove: "{{ vhost.value.nextcloud_app_remove | default([]) }}"
-        nextcloud_app_install: "{{ vhost.value.nextcloud_app_install | default([]) }}"
-        nextcloud_app_disable: "{{ vhost.value.nextcloud_app_disable | default([]) }}"
-        nextcloud_app_enable: "{{ vhost.value.nextcloud_app_enable | default([]) }}"
-        nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
-        nextcloud_notify_from: "{{ users_notify_from }}"
-        nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
-        nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
-        nextcloud_notify_headers: "{{ users_notify_headers }}"
-        nextcloud_notify_signature: "{{ users_notify_signature }}"
-        nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
-        nextcloud_memcache_local: "{{ vhost.value.nextcloud_memcache_local | default('apcu') }}"
-        nextcloud_memcache_distributed: "{{ vhost.value.nextcloud_memcache_distributed | default(false) }}"
-        nextcloud_memcache_locking: "{{ vhost.value.nextcloud_memcache_locking | default(false) }}"
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost.key }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '>=') )
-        - ( vhost.value.users_cms == "nextcloud" )
-        - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
-
-    - name: "Include Flarum role for {{ user.key }} for Ansible < 2.13"
-      include_role:
+    - name: "Include Flarum role for {{ user.key }}"
+      ansible.builtin.include_role:
         name: flarum
       vars:
         flarum_user: "{{ user.key }}"
@@ -701,7 +564,7 @@
         flarum_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         flarum_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         flarum_version: "{{ vhost.value.flarum_version }}"
-        flarum_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + [ '{{ vhost.value.users_apache_server_name }}' ]{% else %}[ '{{ vhost.value.users_apache_server_name }}' ]{% endif %}"
+        flarum_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [vhost.value.users_apache_server_name] }}"
         flarum_url: "{{ vhost.value.flarum_url | default('https://' + vhost.value.users_apache_server_name) }}"
         flarum_title: "{{ vhost.value.flarum_title | default(vhost.value.users_apache_server_name) }}"
         flarum_description: "{{ vhost.value.flarum_description | default('A web based discussion board') }}"
@@ -726,53 +589,12 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '<') )
-        - ( vhost.value.users_cms == "flarum" )
-
-    - name: "Include Flarum role for {{ user.key }} for Ansible >= 2.13"
-      include_role:
-        name: flarum
-      vars:
-        flarum_user: "{{ user.key }}"
-        flarum_group: "{{ user.value.users_group | default(user.key) }}"
-        flarum_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        flarum_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        flarum_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
-        flarum_version: "{{ vhost.value.flarum_version }}"
-        flarum_trusted_hosts: "{{ vhost.value.users_apache_server_aliases | default([]) + [ vhost.value.users_apache_server_name ] }}"
-        flarum_url: "{{ vhost.value.flarum_url | default('https://' + vhost.value.users_apache_server_name) }}"
-        flarum_title: "{{ vhost.value.flarum_title | default(vhost.value.users_apache_server_name) }}"
-        flarum_description: "{{ vhost.value.flarum_description | default('A web based discussion board') }}"
-        flarum_welcome_title: "{{ vhost.value.flarum_welcome_title | default('Flarum discussion board') }}"
-        flarum_welcome_message: "{{ vhost.value.flarum_welcome_message | default('A forum hosted by Webarchitects Co-operative') }}"
-        flarum_locale: "{{ vhost.value.flarum_locale | default('en') }}"
-        flarum_dbname: "{% if vhost.value.flarum_dbname is defined %}{{ vhost.value.flarum_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
-        flarum_dbuser: "{{ vhost.value.flarum_dbuser | default(user.key) }}"
-        flarum_dbpass: "{{ users_mariadb_password }}"
-        flarum_dbprefix: "{{ vhost.value.flarum_dbprefix | default('') }}"
-        flarum_admin_user: "{{ vhost.value.flarum_admin_user | default(user.key) }}"
-        flarum_admin_email: "{{ vhost.value.flarum_admin_email | default(user.value.users_email) }}"
-        flarum_autoupdate: "{{ vhost.value.flarum_autoupdate | default(false) }}"
-        flarum_mail_from: "{{ vhost.value.flarum_mail_from | default(user.key + '@' + inventory_hostname) }}"
-        flarum_notify: "{{ vhost.value.flarum_notify | default(true) | bool }}"
-        flarum_notify_from: "{{ users_notify_from }}"
-        flarum_notify_reply_to: "{{ users_notify_reply_to }}"
-        flarum_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
-        flarum_notify_headers: "{{ users_notify_headers }}"
-        flarum_notify_signature: "{{ users_notify_signature }}"
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost.key }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '>=') )
-        - ( vhost.value.users_cms == "flarum" )
+      when: vhost.value.users_cms == "flarum"
 
 # MediaWiki with Matomo needs fixing
 #
 #     - name: "Include MediaWiki role for {{ user.key }} with Matomo configuration"
-#       include_role:
+#       ansible.builtin.include_role:
 #         name: mediawiki
 #       vars:
 #         mediawiki_user: "{{ user.key }}"
@@ -812,7 +634,7 @@
 #         - ( users_matomo is defined ) and ( not users_matomo )
 
     - name: "Include MediaWiki role for {{ user.key }} without Matomo configuration"
-      include_role:
+      ansible.builtin.include_role:
         name: mediawiki
       vars:
         mediawiki_user: "{{ user.key }}"
@@ -849,7 +671,7 @@
         - ( vhost.value.users_cms == "mediawiki" )
 
     - name: "Include Matomo role for {{ user.key }}"
-      include_role:
+      ansible.builtin.include_role:
         name: matomo
       vars:
         matomo_user: "{{ user.key }}"
@@ -858,7 +680,7 @@
         matomo_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         matomo_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         matomo_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
-        matomo_bin: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
+        matomo_bin: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
         matomo_logs: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
         matomo_db_username: "{{ user.key }}"
         matomo_db_pass: "{{ users_mariadb_password }}"
@@ -884,9 +706,10 @@
       when: ( vhost.value.users_cms == "matomo" )
 
     - name: "Include phpMyAdmin role for {{ user.key }}"
-      include_role:
+      ansible.builtin.include_role:
         name: phpmyadmin
       vars:
+        phpmyadmin: true
         phpmyadmin_user: "{{ user.key }}"
         phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
         phpmyadmin_dbname: "{% if vhost.value.phpmyadmin_dbname is defined %}{{ vhost.value.phpmyadmin_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
@@ -895,13 +718,15 @@
         phpmyadmin_dbhost: localhost
         phpmyadmin_dbport: 3306
         phpmyadmin_dbsocket: /var/run/mysqld/mysqld.sock
-        phpmyadmin_url: "https://{{ vhost.value.users_apache_server_name }}/"
         phpmyadmin_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        phpmyadmin_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+        phpmyadmin_tmp: "{% if users_apache_chroot is defined and users_apache_chroot | bool %}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp{% else %}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp{% endif %}"
         phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
         phpmyadmin_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         phpmyadmin_version: "{{ vhost.value.phpmyadmin_version }}"
         phpmyadmin_lang: "{{ vhost.value.phpmyadmin_lang | default('en') }}"
+        phpmyadmin_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+        phpmyadmin_env:
+          PATH: "{% if users_apache_chroot is defined and users_apache_chroot | bool %}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/bin{% else %}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin{% endif %}:/usr/local/bin:/usr/bin:/bin"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -910,20 +735,20 @@
 
   when:
     - ( vhost.value.users_cms is defined )
-    - ( users_mariadb is defined ) and ( users_mariadb )
+    - ( users_mariadb is defined ) and ( users_mariadb | bool )
     - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
   tags:
     - users
 
 - name: Check if the user HOME bin directory exists
-  stat:
-    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin"
+  ansible.builtin.stat:
+    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
   register: users_home_bin_path
   tags:
     - users
 
 - name: "Include scripts role for {{ user.key }}"
-  include_tasks: user_scripts.yml
+  ansible.builtin.include_tasks: user_scripts.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost
@@ -936,7 +761,7 @@
     - users
 
 - name: "Chown and potentially chmod CMS DocumentRoot for {{ user.key }}"
-  include_tasks: cms_chown.yml
+  ansible.builtin.include_tasks: cms_chown.yml
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
     loop_var: vhost

@@ -3,16 +3,11 @@
 skip_list:
   - args[module]
   - command-instead-of-module
-  - deprecated-command-syntax
-  - fqcn-builtins
-  - jinja[invalid]
   - key-order[task]
   - name[casing]
   - name[template]
   - no-changed-when
   - no-handler
-  - schema[meta]
   - schema[tasks]
-  - var-spacing
 # vim: syntax=yaml
 ...

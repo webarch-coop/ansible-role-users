@@ -2,43 +2,51 @@
 - name: System checks
   block:
 
+    - name: Packages present
+      ansible.builtin.apt:
+        pkg:
+          - bash-completion
+          - bc
+          - bind9-dnsutils
+          - curl
+          - jq
+          - mutt
+          - python3-dnspython
+          - python3-passlib
+          - pwgen
+          - slay
+          - texlive
+          - vim
+          - whois
+        state: present
+      register: users_pkgs_installed
+
     - name: Include apt role local fact tasks if variables are not defined
       ansible.builtin.include_role:
         name: apt
         tasks_from: local_facts.yml
       when: >-
-        ( ansible_local.dpkg.arch is not defined ) or
+        ( users_pkgs_installed.changed | bool ) or
+        ( ( ansible_local.dpkg.arch is not defined ) or
         ( ansible_local.gpg.version is not defined ) or
-        ( ansible_local.bash.path is not defined )
+        ( ansible_local.bash.path is not defined ) )
 
     - name: Check which shells are present
-      slurp:
+      ansible.builtin.slurp:
         src: /etc/shells
       check_mode: false
       changed_when: false
       register: users_shells_b64encoded
 
     - name: Create an array for the shells including /usr/sbin/nologin
-      set_fact:
+      ansible.builtin.set_fact:
         users_shells:
           - /usr/sbin/nologin
 
-    - name: Array set for available shells for Ansible < 2.13
-      set_fact:
-        users_shells: "{{ users_shells }} + [ '{{ shell }}' ]"
+    - name: Array set for available shells
+      ansible.builtin.set_fact:
+        users_shells: "{{ users_shells | default([]) + [shell] }}"
       when:
-        - ( ansible_version.full is version('2.13.0', '<') )
-        - ( shell is not regex('^#') ) and ( shell | length > 0 )
-      loop: "{{ ( users_shells_b64encoded['content'] | b64decode ).split('\n') | list }}"
-      loop_control:
-        loop_var: shell
-        label: "{{ shell }}"
-
-    - name: Array set for available shells for Ansible >= 2.13
-      set_fact:
-        users_shells: "{{ users_shells | default([]) + [ shell ] }}"
-      when:
-        - ( ansible_version.full is version('2.13.0', '>=') )
         - ( shell is not regex('^#') ) and ( shell | length > 0 )
       loop: "{{ ( users_shells_b64encoded['content'] | b64decode ).split('\n') | list }}"
       loop_control:
@@ -46,137 +54,194 @@
         label: "{{ shell }}"
 
     - name: Set a fact for the path to Bash
-      set_fact:
+      ansible.builtin.set_fact:
         users_bash: "{{ ansible_local.bash.path }}"
 
     - name: Print available shells and the path for Bash
-      debug:
+      ansible.builtin.debug:
         msg:
           - "Available shells: {{ users_shells }}"
           - "Path to Bash: {{ users_bash }}"
         verbosity: 2
 
     - name: Get all groups
-      getent:
+      ansible.builtin.getent:
         database: group
         split: ':'
 
     - name: Debug getent_group
-      debug:
+      ansible.builtin.debug:
         var: getent_group
         verbosity: 2
 
     - name: Get all users
-      getent:
+      ansible.builtin.getent:
         database: passwd
         split: ':'
 
     - name: Debug getent_passwd
-      debug:
+      ansible.builtin.debug:
         var: getent_passwd
         verbosity: 2
 
     - name: Set a fact for the Debian version
-      set_fact:
+      ansible.builtin.set_fact:
         users_debian_version: "{{ ansible_distribution_release }}"
 
     - name: Load package information as facts
-      package_facts:
+      ansible.builtin.package_facts:
         manager: apt
 
-    - name: Fail if ansible_facts.packages is not defined or empty
-      fail:
-        msg: The package_facts array is empty, this could be a result of the Ansible 2.8.x bug https://github.com/ansible/ansible/issues/56921
-      when: ( ansible_facts.packages is not defined ) or ( ansible_facts.packages == [] )
-
     - name: Include Apache tasks
-      include_tasks: apache.yml
+      ansible.builtin.include_tasks: apache.yml
       when:
-        - ( "apache2" in ansible_facts.packages )
+        - ( "apache2" in ansible_local.dpkg.installed )
         - ( users_apache is defined ) and ( users_apache )
 
     - name: Include MariaDB tasks
-      include_tasks: mariadb.yml
+      ansible.builtin.include_tasks: mariadb.yml
       when:
-        - ( "mariadb-server" in ansible_facts.packages )
+        - ( "mariadb-server" in ansible_local.dpkg.installed )
         - ( users_mariadb is defined ) and ( users_apache )
 
     - name: PHP FPM checks and tasks
       block:
 
         - name: Check that php-fpm is installed
-          assert:
-            that:
-              - ( "php-fpm" in ansible_facts.packages )
+          ansible.builtin.assert:
+            that: >-
+              ( "php5.6-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.0-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.1-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.2-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.3-fpm" in ansible_local.dpkg.installed ) or
+              ( "php7.4-fpm" in ansible_local.dpkg.installed ) or
+              ( "php8.0-fpm" in ansible_local.dpkg.installed ) or
+              ( "php8.1-fpm" in ansible_local.dpkg.installed ) or
+              ( "php8.2-fpm" in ansible_local.dpkg.installed ) or
+              ( "php-fpm" in ansible_local.dpkg.installed )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: Query the version of PHP using phpquery -V
-          command: phpquery -V
+          ansible.builtin.command: phpquery -V
           args:
             strip_empty_ends: true
           check_mode: false
           changed_when: false
           register: users_phpquery
-          failed_when: >
-            ( users_phpquery.stdout_lines | count > 1 ) or
-            ( users_phpquery.stdout is not version('7.0', '>=') )
 
-        - name: Set a fact for the PHP-FPM version
-          set_fact:
-            users_phpfpm_version: "{{ users_phpquery.stdout | trim }}"
+        - name: Set a fact for the PHP-FPM versions
+          ansible.builtin.set_fact:
+            users_phpfpm_versions: "{{ users_phpquery.stdout_lines | trim }}"
 
-        - name: Fail if users_phpfpm_version is not defined
-          assert:
+        - name: Fail if users_phpfpm_versions is not defined
+          ansible.builtin.assert:
             that:
-              - users_phpfpm_version is defined
-              - users_phpfpm_version is regex('^[1-9][.][1-9]$')
+              - users_phpfpm_versions is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        - name: Check the values of the list of users_phpfpm_versions
+          ansible.builtin.assert:
+            that:
+              - users_phpfpm_ver is regex('^[0-9]{1,2}[.][0-9]$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          loop: "{{ users_phpfpm_versions }}"
+          loop_control:
+            loop_var: users_phpfpm_ver
+
+        - name: Run update-alternatives to find the default version of PHP
+          ansible.builtin.command: update-alternatives --query php
+          args:
+            strip_empty_ends: true
+          check_mode: false
+          changed_when: false
+          register: apache_update_alternatives_query_php
+
+        - name: Set a fact for the default version of PHP
+          ansible.builtin.set_fact:
+            users_phpfpm_update_alt_q: "{{ apache_update_alternatives_query_php.stdout | string | community.general.jc('update_alt_q') }}"
+        - name: Debug PHP update-alternatives --query php | jc --update-alt-q | jp value
+          ansible.builtin.debug:
+            var: users_phpfpm_update_alt_q.value
+            verbosity: 3
+
+        - name: Check if the default version of PHP is a symlink
+          ansible.builtin.stat:
+            path: "{{ users_phpfpm_update_alt_q.value }}"
+          register: users_phpfpm_update_alt_q_value_path
+
+        - name: Debug PHP default version path
+          ansible.builtin.debug:
+            var: users_phpfpm_update_alt_q_value_path.stat
+            verbosity: 3
+
+        - name: Set a fact for the default version of PHP when it is a symlink
+          ansible.builtin.set_fact:
+            users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q_value_path.stat.lnk_target | ansible.builtin.regex_replace('^php') }}"
+          when: users_phpfpm_update_alt_q_value_path.stat.islnk | bool
+
+        - name: Set a fact for the default version of PHP when it is a not symlink
+          ansible.builtin.set_fact:
+            users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q.value | ansible.builtin.regex_replace('^/usr/bin/php') }}"
+          when: not users_phpfpm_update_alt_q_value_path.stat.islnk | bool
+
+        - name: A default PHP version is required
+          ansible.builtin.assert:
+            that:
+              - users_phpfpm_default_version is regex('^[5-9][.][0-9]')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        - name: Debug PHP default version
+          ansible.builtin.debug:
+            var: users_phpfpm_default_version
 
         - name: Legacy /etc/logrotate.d/phpfpm_users_logrotate absent
-          file:
+          ansible.builtin.file:
             path: /etc/logrotate.d/phpfpm_users_logrotate
             state: absent
 
         - name: /etc/apache2/localhost.d present
-          file:
+          ansible.builtin.file:
             path: /etc/apache2/localhost.d
             state: directory
             mode: "0755"
             owner: root
             group: root
-          when: ( "apache2" in ansible_facts.packages )
+          when: ( "apache2" in ansible_local.dpkg.installed )
 
         - name: /etc/nginx/localhost.d present
-          file:
+          ansible.builtin.file:
             path: /etc/nginx/localhost.d
             state: directory
             mode: "0755"
             owner: root
             group: root
-          when: ( "nginx" in ansible_facts.packages )
+          when: ( "nginx" in ansible_local.dpkg.installed )
 
-      when: ( users_phpfpm is defined ) and ( users_phpfpm )
+      when: ( users_phpfpm is defined ) and ( users_phpfpm | bool )
 
     - name: Chroot directory check tasks
       block:
 
         - name: Check if a chroot exists
-          stat:
+          ansible.builtin.stat:
             path: "{{ users_chroot_dir }}"
           register: users_chroot_dir_check
           # when: ( users_chroot_dir is defined ) and ( users_chroot_dir | length > 0 )
 
         - name: "The {{ users_chroot_dir }} directory needs to exist when users_chroot is True"
-          assert:
+          ansible.builtin.assert:
             that:
               - users_chroot_dir_check.stat.exists
 
         - name: Check if a parent directory for the chroot mount points exists
-          stat:
+          ansible.builtin.stat:
             path: "{{ users_chroot_users_dir }}"
           register: users_chroot_users_dir_check
           # when: ( users_chroot_users_dir is defined ) and ( users_chroot_users_dir | length > 0 )
 
         - name: Parent directory for the chroot mount points present
-          file:
+          ansible.builtin.file:
             path: "{{ users_chroot_users_dir }}"
             state: directory
             mode: "0755"
@@ -190,7 +255,7 @@
       block:
 
         - name: "Touch {{ quota_dir }}/quota_user.csv"
-          file:
+          ansible.builtin.file:
             path: "{{ quota_dir }}/quota_user.csv"
             state: touch
             mode: "0600"
@@ -200,13 +265,13 @@
           changed_when: false
 
         - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
-          command: "md5sum {{ quota_dir }}/quota_user.csv"
+          ansible.builtin.command: "md5sum {{ quota_dir }}/quota_user.csv"
           register: users_repquota_md5sum_before
           check_mode: false
           changed_when: false
 
         - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
-          shell: |
+          ansible.builtin.shell: |
             set -e -o pipefail
             repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
             chmod 600 {{ quota_dir }}/quota_user.csv
@@ -219,7 +284,7 @@
           changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
 
         - name: Users quotas fetched
-          fetch:
+          ansible.builtin.fetch:
             src: "{{ quota_dir }}/quota_user.csv"
             dest: /tmp/
           check_mode: false
@@ -227,7 +292,7 @@
       when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
 
     - name: Directories for users state files present
-      file:
+      ansible.builtin.file:
         path: "{{ users_state_dir }}/{{ dir }}"
         state: directory
         mode: "0700"
@@ -241,7 +306,7 @@
         loop_var: dir
 
     - name: Proposed users state files present
-      template:
+      ansible.builtin.template:
         src: user_state.yml.j2
         dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
         mode: "0600"

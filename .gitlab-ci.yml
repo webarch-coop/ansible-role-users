@@ -1,15 +1,15 @@
 ---
-image: registry.git.coop/webarch/containers/images/ansible:0.20.0
+image: registry.git.coop/webarch/containers/images/ansible:0.24.0
 variables:
-  PY_COLORS: "1"
+  ANSIBLE_DEFAULT_VERBOSITY: "2"
+  ANSIBLE_DIFF_ALWAYS: "1"
   ANSIBLE_FORCE_COLOR: "1"
+  PY_COLORS: "1"
 before_script:
   - chmod 700 $(pwd)
-stages:
-  - lint
-lint:
-  stage: lint
+molecule:
+  stage: test
   script:
-    - molecule lint
+    - molecule converge
 # vim: syntax=yaml
 ...

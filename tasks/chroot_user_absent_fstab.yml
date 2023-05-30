@@ -1,6 +1,6 @@
 ---
 - name: "{{ users_chroot_users_dir }}/{{ user.key }} directories absent from /etc/fstab"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/fstab
     regexp: "{{ mount }}"
     state: absent

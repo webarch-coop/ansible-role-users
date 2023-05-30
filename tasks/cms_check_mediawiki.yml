@@ -3,126 +3,144 @@
   block:
 
     - name: "Check that required MediaWiki variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.users_apache_type == "php"
           - ( vhost.value.mediawiki_dbname is defined ) and ( vhost.value.mediawiki_dbname in user.value.users_mariadb_databases )
           - ( vhost.value.mediawiki_wikiname is defined ) and ( vhost.value.mediawiki_wikiname is regex("^[a-zA-Z0-9-_ ]*$") )
           - ( vhost.value.mediawiki_semver is defined ) and ( vhost.value.mediawiki_semver is version('1.31.0', '>=') )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     # - name: "Check Matomo variables for {{ vhost.key }} VirtualHost for {{ user.key }}"
-    #   assert:
+    #   ansible.builtin.assert:
     #     that:
     #       - ( vhost.value.mediawiki_matomo_domain is defined )
     #       - ( vhost.value.mediawiki_matomo_idsite is defined )
+    #     quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
     #   when:
     #     - user.value.users_matomo_account is defined
     #     - user.value.users_matomo_account
 
     - name: "Check that {{ user.key }} is in the phpfpm group if it is present"
-      assert:
+      ansible.builtin.assert:
         that:
           - ( "phpfpm" in user.value.users_groups )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: ( "phpfpm" in getent_group )
 
     - name: "Check that mediawiki_password_sender is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.mediawiki_password_sender is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.mediawiki_password_sender is defined
 
     - name: "Check the mediawiki_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
 
         - name: "Check that the mediawiki_url doesn't end in a slash for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - vhost.value.mediawiki_url is not regex("/$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: Set a fact for the mediawiki_url without a protcol
-          set_fact:
+          ansible.builtin.set_fact:
             mediawiki_url_domain: "{{ vhost.value.mediawiki_url | regex_replace('^https://') }}"
 
         - name: "Check that mediawiki_domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( mediawiki_url_domain == vhost.value.users_apache_server_name )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is not defined )
 
         - name: "Check that mediawiki_domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          assert:
+          ansible.builtin.assert:
             that:
               - ( mediawiki_url_domain == vhost.value.users_apache_server_name ) or ( mediawiki_url_domain in vhost.value.users_apache_server_aliases )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
       when: vhost.value.mediawiki_url is defined
 
     - name: "Check that mediawiki_domain equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - ( vhost.value.mediawiki_domain == vhost.value.users_apache_server_name )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: ( vhost.value.mediawiki_domain is defined ) and ( vhost.value.users_apache_server_aliases is not defined )
 
     - name: "Check that mediawiki_domain contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - ( vhost.value.mediawiki_domain == vhost.value.users_apache_server_name ) or ( vhost.value.mediawiki_domain in vhost.value.users_apache_server_aliases )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: ( vhost.value.mediawiki_domain is defined ) and ( vhost.value.users_apache_server_aliases is defined )
 
     - name: "Check that mediawiki_url starts with https:// for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.mediawiki_url is regex("^https:\/\/.*$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.mediawiki_url is defined
 
     - name: "Check that mediawiki_domain is the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.mediawiki_domain == vhost.value.users_apache_server_name
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when:
         - vhost.value.mediawiki_domain is defined
         - vhost.value.users_apache_server_aliases is not defined
 
     - name: "Check that mediawiki_domain is the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - ( vhost.value.mediawiki_domain == vhost.value.users_apache_server_name ) or ( vhost.value.mediawiki_domain in vhost.users_apache_server_aliases )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when:
         - vhost.value.mediawiki_domain is defined
         - ( vhost.users_apache_server_aliases is defined ) and ( vhost.users_apache_server_aliases[0] is defined )
 
     # https://www.mediawiki.org/wiki/Manual:$wgLanguageCode
     - name: "Check that the mediawiki_locale look likes an allowed language for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
-        that: vhost.value.mediawiki_locale is regex("^[a-z-]")
+      ansible.builtin.assert:
+        that:
+          - vhost.value.mediawiki_locale is regex("^[a-z-]")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.mediawiki_locale is defined
 
     - name: "Check that the mediawiki_dbprefix is less than 6 numbers or letters or underscores or empty for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.mediawiki_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.mediawiki_dbprefix is regex("^.{1,6}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when:
         - vhost.value.mediawiki_dbprefix is defined
         - vhost.value.mediawiki_dbprefix | length > 0
 
     - name: "Check that the mediawiki_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.mediawiki_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.mediawiki_admin_user is regex("^.{2,17}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.mediawiki_admin_user is defined
 
     - name: "Check that the mediawiki_admin_email is a email address for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - vhost.value.mediawiki_admin_email is regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.mediawiki_admin_email is defined
 
     - name: "Check that mediawiki_notify is true or false for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      assert:
+      ansible.builtin.assert:
         that:
           - ( vhost.value.mediawiki_notify ) or ( not vhost.value.mediawiki_notify )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.mediawiki_notify is defined
 
   tags:

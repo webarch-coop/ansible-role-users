@@ -1,6 +1,6 @@
 ---
 - name: Include user_present tasks from Matomo role
-  include_role:
+  ansible.builtin.include_role:
     name: matomo
     tasks_from: user_present.yml
     # tasks_from: adduser.yml

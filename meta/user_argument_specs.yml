@@ -1,0 +1,255 @@
+# Copyright 2018-2023 Chris Croome
+#
+# This file is part of the Webarchitects users Ansible role.
+#
+# The Webarchitects users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+users_apache_virtual_hosts:
+  type: dict
+  required: false
+  description: A dictionary of Apache VirtualHosts.
+users_cron_jobs:
+  type: list
+  elements: dict
+  required: false
+  description: A list of users cron jobs.
+  options:
+    day:
+      type: str
+      required: false
+      description: A day for the users cron job.
+    disabled:
+      type: bool
+      required: false
+      description: Disable the users cron job.
+    job:
+      type: str
+      required: false
+      description: A task for the users cron job.
+    hour:
+      type: str
+      required: false
+      description: A hour for the users cron job.
+    minute:
+      type: str
+      required: false
+      description: A minute for the users cron job.
+    month:
+      type: str
+      required: false
+      description: A minute for the users cron job.
+    name:
+      type: str
+      required: true
+      description: The name of the cron job, used by Ansible blockinfile, so it needs to be unique and when it is changed old will not be removed.
+    special_time:
+      type: str
+      required: false
+      description: A special time for the users cron job.
+    state:
+      type: str
+      required: false
+      description: A state for the users cron job.
+      choices:
+        - absent
+        - present
+users_cron_tmpdir_clean:
+  type: bool
+  required: false
+  description: Disable the daily cron job to clear the ~/tmp directory.
+users_daily_scripts:
+  type: list
+  elements: str
+  required: false
+  description: A list of Bash command lines to run daily.
+users_editor:
+  type: str
+  required: false
+  description: The users editor.
+  choices:
+    - nano
+    - vim
+users_email:
+  type: str
+  required: false
+  description: The users email address.
+users_forward:
+  type: bool
+  required: false
+  description: Users ~/.forward file present.
+users_generate_ssh_key:
+  type: bool
+  required: false
+  description: Users generate SSH keypair.
+users_group_members:
+  type: list
+  elements: str
+  required: false
+  description: A list of users who are in this users group, this grants them access to group readable paths.
+users_groups:
+  type: list
+  elements: str
+  required: false
+  description: A list additional groups that the users is a member of.
+users_home:
+  type: str
+  required: false
+  description: Path of the users $HOME directory.
+users_home_group:
+  type: str
+  required: false
+  description: The users $HOME directory group.
+users_home_mode:
+  type: str
+  required: false
+  description: The quoted octal mode for the the home directory.
+users_home_owner:
+  type: str
+  required: false
+  description: The owner of the users HOME directory.
+users_hourly_scripts:
+  type: list
+  elements: str
+  required: false
+  description: A list of Bash command lines to be run hourly.
+users_mariadb_databases:
+  type: list
+  elements: str
+  required: false
+  description: A list of MariaDB databases for this user.
+users_mariadb_database_privileges:
+  type: list
+  elements: str
+  required: false
+  description: A list of MariaDB databases privileges for this user.
+  choices:
+    - ALTER
+    - ALTER ROUTINE
+    - CREATE
+    - CREATE ROUTINE
+    - CREATE TEMPORARY TABLES
+    - CREATE VIEW
+    - DELETE
+    - DROP
+    - EXECUTE
+    - GRANT
+    - INDEX
+    - INSERT
+    - LOCK TABLES
+    - REFERENCES
+    - SELECT
+    - SHOW VIEW
+    - TRIGGER
+    - UPDATE
+users_mariadb_notify_passwd:
+  type: bool
+  required: false
+  description: Send a email to the user containing their MariaDB password.
+users_matomo_account:
+  type: bool
+  required: false
+  description: Matomo account for this user present.
+users_matomo_notify_passwd:
+  type: bool
+  required: false
+  description: Send a email to the user containing their Matomo password.
+users_muttrc:
+  type: bool
+  required: false
+  description: Users ~/.muttrc present.
+users_name:
+  type: str
+  required: false
+  description: The name of the user.
+users_notify_passwd:
+  type: bool
+  required: false
+  description: Send a email to the user containing their password.
+users_phpfpm_disable_functions:
+  type: list
+  elements: str
+  required: false
+  descripion: List for php_admin_value[disable_functions].
+users_phpfpm_max_children:
+  type: int
+  required: false
+  description: PHP-FPM process manager max children, pm.max_children.
+users_phpfpm_mysqli_allow_local_infile:
+  type: bool
+  required: false
+  description: PHP-FPM php_admin_value[mysqli.allow_local_infile].
+users_phpfpm_open_basedir:
+  type: list
+  elements: str
+  required: false
+  descripion: A list of directories in which PHP is allowed to run, php_admin_value[open_basedir].
+users_phpfpm_output_buffering:
+  type: int
+  required: false
+  descripion: An interger for output_buffering, zero to disable or a positive number of bytes ro limit the size of the buffer.
+users_phpfpm_pm:
+  type: str
+  required: false
+  description: PHP-FPM process manager.
+  choices:
+    - dynamic
+    - ondemand
+    - static
+users_phpfpm_pm_max_spare_servers:
+  type: int
+  required: false
+  description: The PHP-FPM pool max spare servers.
+users_phpfpm_pm_min_spare_servers:
+  type: int
+  required: false
+  description: The PHP-FPM pool min spare servers.
+users_phpfpm_pm_start_servers:
+  type: int
+  required: false
+  description: The PHP-FPM pool start servers.
+users_phpfpm_sendmail_from:
+  type: str
+  required: false
+  description: The users From email header.
+users_phpfpm_version:
+  type: str
+  required: false
+  description: The verson of PHP.
+users_private_dirs_mode:
+  type: str
+  required: false
+  description: The octal mode as a string for the users private directory.
+users_quota:
+  type: str
+  required: false
+  description: The disk quota.
+users_shell:
+  type: str
+  required: false
+  description: The users shell.
+users_skel:
+  type: str
+  required: false
+  description: A path to the skel files to be used when creating the user.
+users_ssh_public_keys:
+  type: list
+  elements: str
+  required: false
+  description: A list of URLs for of SSH public keys to be added to ~/.ssh/authorized_keys.
+users_state:
+  type: str
+  required: false
+  description: The state for the user.
+  choices:
+    - absent
+    - ignore
+    - present
+users_system:
+  type: bool
+  required: false
+  description: A system user.
+...

@@ -5,48 +5,36 @@
   block:
 
     - name: Run dig to lookup an IPv4 address
-      command: "dig -4 +short {{ users_host }}"
+      ansible.builtin.command: "dig -4 +short {{ users_host }}"
       check_mode: false
       changed_when: false
       register: users_host_ipv4
 
-    - name: Add users_host_ipv4 addresses to the users_ipv4_hosts array for Ansible < 2.13
-      set_fact:
-        users_host_ipv4s: "{{ users_host_ipv4s }} + [ '{{ users_ipv4 }}' ]"
+    - name: Add users_host_ipv4 addresses to the users_ipv4_hosts array
+      ansible.builtin.set_fact:
+        users_host_ipv4s: "{{ [users_host_ipv4s | default(None)] + [users_ipv4] }}"
       when:
-        - ansible_version.full is version('2.13.0', '<')
-        - users_ipv4 is regex('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')
-      loop: "{{ users_host_ipv4.stdout_lines }}"
-      loop_control:
-        loop_var: users_ipv4
-
-    - name: Add users_host_ipv4 addresses to the users_ipv4_hosts array for Ansible >= 2.13
-      set_fact:
-        users_host_ipv4s: "{{ [ users_host_ipv4s | default(None) ] + [ users_ipv4 ] }}"
-      when:
-        - ansible_version.full is version('2.13.0', '>=')
         - users_host_ipv4s | length > 0
         - users_ipv4 is regex('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')
       loop: "{{ users_host_ipv4.stdout_lines }}"
       loop_control:
         loop_var: users_ipv4
 
-    - name: Make the users_ipv4_hosts equal users_host_ipv4 for Ansible >= 2.13
-      set_fact:
+    - name: Make the users_ipv4_hosts equal users_host_ipv4
+      ansible.builtin.set_fact:
         users_host_ipv4s: "{{ users_host_ipv4.stdout_lines | list }}"
-      when:
-        - ansible_version.full is version('2.13.0', '>=')
-        - users_host_ipv4s | length == 0
+      when: users_host_ipv4s | length == 0
 
     - name: Debug users_host_ipv4s
-      debug:
+      ansible.builtin.debug:
         var: users_host_ipv4s
         verbosity: 2
 
     - name: Check that users_host_ipv4s is an array if defined
-      assert:
+      ansible.builtin.assert:
         that:
           - users_host_ipv4s | type_debug == "list"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: users_host_ipv4s is defined
 
   when:

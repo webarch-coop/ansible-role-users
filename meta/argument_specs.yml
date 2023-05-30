@@ -22,6 +22,224 @@ argument_specs:
         type: bool
         required: true
         description: Configure Apache VirtualHosts for users.
+      users_apache_bandwidth_email:
+        type: str
+        required: false
+        description: Email address to send monthly bandwidth emails to.
+      users_apache_chroot:
+        type: bool
+        required: false
+        description: Apache is chrooted.
+      users_apache_chroot_dir:
+        type: str
+        required: false
+        description: Directory for Apache to be chrooted into.
+      users_apache_chroot_mount_dirs:
+        type: list
+        elements: str
+        required: false
+        description: A list of directories in /var/www to be mounted read-only in the Apache chroot.
+      users_apache_chroot_suexec:
+        type: bool
+        required: false
+        description: Chroot Apache suEXEC to enable CGI and SSI to run using IDs other than www-data.
+      users_apache_chroot_users_basedir:
+        type: str
+        required: false
+        description: The directory used to mount chrooted users home directories, it needs to be a sub-directory of /var/www for suEXEC.
+      users_apache_modules_loaded:
+        type: list
+        elements: str
+        required: false
+        description: A list of modules loaded by Apache.
+      users_apache_php_proxy_timeout:
+        type: int
+        required: false
+        description: The timeout in seconds for requests proxied from Apache to PHP-FPM.
+      users_backup_script:
+        type: str
+        required: false
+        description: The path to the script used to dump MariaDB databases.
+      users_basedir:
+        type: str
+        required: true
+        description: The parent directory for users HOME directories, defaults to /home.
+      users_cert:
+        type: str
+        required: false
+        description: Provision HTTPS certificates for Apache per user or per VirtualHost.
+        choices:
+          - user
+          - vhost
+      users_cert_dir:
+        type: str
+        required: false
+        description: Directory for HTTPS certificates.
+      users_cgi_extensions:
+        type: list
+        elements: str
+        required: false
+        description: A list of file extension, without a leading dot, that will be processes as CGI.
+      users_chroot:
+        type: bool
+        required: true
+        description: Chroot users.
+      users_chroot_dir:
+        type: str
+        required: false
+        description: The directory containing the chroot that root can update and which will be mounted read only for users.
+        default: /chroot
+      users_chroot_users_dir:
+        type: str
+        required: false
+        description: The in which users HOME directories will be mounted when chrooted.
+        default: /chroots
+      users_cron:
+        type: bool
+        required: true
+        description: Generate users cron tasks.
+      users_cron_daily_hour:
+        type: str
+        required: false
+        description: The hour in which the users daily cron job will run.
+      users_cron_mysqldump_hour:
+        type: str
+        required: false
+        description: The hour in which the users daily MariaDB dumps will be generated.
+      users_cron_tmpdir_hour:
+        type: str
+        required: false
+        description: The hour in which the users TMPDIR files and directories will be deleted.
+      users_cron_tmpdir_max_age_days:
+        type: int
+        required: false
+        description: The maximum ages TMPDIR files and directories can reach before they are deleted.
+      users_disallowed_usernames:
+        type: list
+        elements: str
+        required: false
+        description: A list of strings that cannot be used as usernames.
+      users_domain_check:
+        type: str
+        required: false
+        description: Strict checking of domain name resolution.
+        choices:
+          - slack
+          - strict
+      users_forward:
+        type: bool
+        required: true
+        description: Generate ~/.forward files for users using their email address.
+      users_home_bin:
+        type: str
+        required: true
+        description: A sub-directory of $HOME for users scripts.
+      users_mariadb:
+        type: bool
+        required: true
+        description: Create MariaDB users and databases.
+      users_mariadb_database_privileges:
+        type: list
+        elements: str
+        required: false
+        description: A list of database privileges that users are granted.
+      users_matomo:
+        type: bool
+        required: false
+        description: Create Matomo accounts for users and add sites to the Matomo instance on the server.
+      users_matomo_delete_users:
+        type: bool
+        required: false
+        description: Delete Matromo accounts and sites when removing users accounts.
+      users_muttrc:
+        type: bool
+        required: false
+        description: Generate ~/.mutrc files for users for testing SMTP and /usr/sbin/sendmail on the localhost.
+      users_notify_cron_append:
+        type: str
+        required: false
+        description: A email header to add to cron email.
+      users_notify_from:
+        type: str
+        required: false
+        description: A email address to be used as the From header in outgoing emails.
+      users_notify_headers:
+        type: list
+        elements: str
+        required: false
+        description: A list of email headers to add to outgoing notification emails.
+      users_notify_reply_to:
+        type: str
+        required: false
+        description: A email address for the Reply-To header in outgoing notification emails.
+      users_notify_signature:
+        type: str
+        required: false
+        description: A signature to append to outgoing notification emails.
+      users_notify_subject_tag:
+        type: str
+        required: false
+        description: A string to add, in square brackets, to the start of outgong email notification Subject headers.
+      users_phpfpm:
+        type: bool
+        required: true
+        description: Configure PHP-FPM pood.d files for users.
+      users_phpfpm_disable_functions:
+        type: list
+        elements: str
+        required: false
+        description: A list of PHP-FPM functions to disable, note they are appended, they do not overwrite previously defined php.ini values.
+      users_phpfpm_disable_functions_civicrm:
+        type: list
+        elements: str
+        required: false
+        description: A list of PHP-FPM functions to disable for CiviCRM.
+      users_phpfpm_disable_functions_matomo:
+        type: list
+        elements: str
+        required: false
+        description: A list of PHP-FPM functions to disable for Matomo.
+      users_phpfpm_disable_functions_mediawiki:
+        type: list
+        elements: str
+        required: false
+        description: A list of PHP-FPM functions to disable for MediaWiki.
+      users_phpfpm_disable_functions_nextcloud:
+        type: list
+        elements: str
+        required: false
+        description: A list of PHP-FPM functions to disable for Nextcloud.
+      users_phpfpm_extensions:
+        type: list
+        elements: str
+        required: false
+        description: A list of file extensions, without a leading dot, to be processed for PHP commands.
+      users_phpfpm_open_basedir:
+        type: list
+        elements: str
+        required: false
+        description: A list of directories to use for php_admin_value[open_basedir] in users PHP-FPM pool.d files.
+      users_phpfpm_open_basedir_mediawiki:
+        type: list
+        elements: str
+        required: false
+        description: A list of directories to use for php_admin_value[open_basedir] for MediaWiki in users PHP-FPM pool.d files.
+      users_phpfpm_pm:
+        type: str
+        required: false
+        description: The PHP-FPM process manager to use in the users PHP-FPM pool.d files.
+        choices:
+          - dynamic
+          - ondemand
+          - static
+      users_phpfpm_request_terminate_timeout:
+        type: int
+        required: false
+        description: The default PHP-FPM request_terminate_timeout to use in users pool.d files.
+      users_private_dirs_mode:
+        type: str
+        required: false
+        description: The octal mode as a string for the users private directory.
       users_private_files:
         type: list
         required: true
@@ -53,4 +271,42 @@ argument_specs:
               - directory
               - file
               - touch
+      users_quotaon:
+        type: bool
+        required: true
+        description: Manage disk quotas when users_basedir is a partition mounted with quota options.
+      users_sites_dir:
+        type: str
+        required: true
+        description: A sub-directory of the users HOME directory which is the parent directory for Apache DocumentRoot directories.
+      users_sites_dir_mode:
+        type: str
+        required: true
+        description: The octal mode for the users_sites_dir directory.
+      users_ssh_authorized_keys_file_name:
+        type: str
+        required: true
+        description: The file name to use for the SSH authorized_keys.
+      users_state_dir:
+        type: str
+        required: true
+        description: The path to use for the directory that is used to record the users state.
+      users_update_groups:
+        type: list
+        elements: str
+        required: false
+        description: Update the users who are members of one or more of the groups.
+      users_update_strategy:
+        type: str
+        required: true
+        description: The strategy to use for updating users when this role is run.
+        choices:
+          - all
+          - apache
+          - changed
+          - check
+          - groups
+          - phpfpm
+          - quotas
+          - sshkeys
 ...
