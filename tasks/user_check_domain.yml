@@ -42,7 +42,7 @@
         msg: "{{ users_domain }} appears not to resolve to a IP address"
       when:
         - ( users_domain_dig == [] ) or ( users_domain_dig | length == 0 )
-        - ( users_domain_checks not defined ) or ( users_domain_check != "strict" )
+        - ( users_domain_checks is not defined ) or ( users_domain_check != "strict" )
 
     - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
       ansible.builtin.fail:
