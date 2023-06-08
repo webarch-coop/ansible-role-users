@@ -274,7 +274,7 @@
               ansible.builtin.include_role:
                 name: munin_node
                 tasks_from: phpfpm_multi.yml
-              vars:
+              vars:  # noqa var-naming[no-role-prefix]
                 munin_phpfpm_users: "{{ users_in_phpfpm_and_chroot_group }}"
               when: ( users_in_phpfpm_and_chroot_group is defined ) and ( users_in_phpfpm_and_chroot_group != [] )
 

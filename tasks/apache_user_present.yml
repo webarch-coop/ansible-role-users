@@ -59,7 +59,7 @@
   ansible.builtin.include_role:
     name: acmesh
     tasks_from: letsencrypt
-  vars:
+  vars:  # noqa var-naming[no-role-prefix]
     common_name: "{{ vhost.value.users_apache_server_name }}"
     subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | reject('regex', '^[*][.]') | sort }}"
     reloadcmd: "service apache2 reload"
@@ -76,7 +76,7 @@
   ansible.builtin.include_role:
     name: acmesh
     tasks_from: letsencrypt
-  vars:
+  vars:  # noqa var-naming[no-role-prefix]
     common_name: "{{ user.key }}.{{ inventory_hostname }}"
     subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | reject('regex', '^[*][.]') | sort }}"
     reloadcmd: "service apache2 reload"
@@ -708,7 +708,7 @@
     - name: "Include phpMyAdmin role for {{ user.key }}"
       ansible.builtin.include_role:
         name: phpmyadmin
-      vars:
+      vars:  # noqa var-naming[no-role-prefix]
         phpmyadmin: true
         phpmyadmin_user: "{{ user.key }}"
         phpmyadmin_group: "{{ user.value.users_group | default(user.key) }}"
