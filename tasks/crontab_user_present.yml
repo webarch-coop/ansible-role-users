@@ -163,7 +163,7 @@
         name: PATH
         value: "/usr/local/bin:/usr/bin:/bin"
         user: "{{ user.key }}"
-        insertafter: TMPDIR
+        insertafter: USER
         state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
 
     - name: "MAILTO env var added to {{ user.key }} crontab"
@@ -172,7 +172,7 @@
         name: MAILTO
         value: "{{ user.value.users_email }}"
         user: "{{ user.key }}"
-        insertafter: PATH
+        insertafter: USER
         state: "{% if user.value.users_email is defined and user.value.users_email | length > 0 %}present{% else %}absent{% endif %}"
 
     - name: MariaDB CRON tasks
