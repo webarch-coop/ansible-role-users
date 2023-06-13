@@ -122,7 +122,6 @@
   {%- else %}
     Header setifempty Strict-Transport-Security "max-age=31536000"
   {%- endif %}
-    Header setifempty Permissions-Policy "interest-cohort=()"
   </IfModule>
   {%- if vhost_config.users_apache_allow_encoded_slashes is defined %}
   AllowEncodedSlashes {{ vhost_config.users_apache_allow_encoded_slashes }}
