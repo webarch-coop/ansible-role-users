@@ -157,6 +157,15 @@
         - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
         - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
 
+    - name: "HOME env var added to {{ user.key }} crontab"
+      ansible.builtin.cron:
+        env: true
+        name: HOME
+        value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        user: "{{ user.key }}"
+        insertafter: USER
+        state: present
+
     - name: "PATH env var added to {{ user.key }} crontab"
       ansible.builtin.cron:
         env: true
