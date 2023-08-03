@@ -9,7 +9,7 @@
 
     - name: Set a fact for the domain we are testing
       ansible.builtin.set_fact:
-        users_domain_dig: "{{ query('dig', users_domain) | ansible.utils.ipv4 }}"
+        users_domain_dig: "{{ query('community.general.dig', users_domain) | ansible.utils.ipv4 }}"
 
     - name: Debug domain name and IP address
       ansible.builtin.debug:
