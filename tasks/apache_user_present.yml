@@ -55,7 +55,7 @@
     - users
 
 # One cert per VirtualHost
-- name: "Let's Encrypt cert per vhost role included for {{ user.key }}"
+- name: "Let's Encrypt cert per vhost role included for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
   ansible.builtin.include_role:
     name: acmesh
     tasks_from: letsencrypt
@@ -72,7 +72,7 @@
     - users
 
 # One cert per user
-- name: "Let's Encrypt cert per user role included for {{ user.key }}"
+- name: "Let's Encrypt cert per user role included for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
   ansible.builtin.include_role:
     name: acmesh
     tasks_from: letsencrypt
@@ -222,7 +222,7 @@
                         loop_var: vhost
                         label: "{{ vhost.key }}"
 
-                    - name: "Matomo sites present for {{ user.key }}"
+                    - name: "Matomo sites present for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
                       ansible.builtin.include_role:
                         name: matomo
                         tasks_from: site_present.yml
@@ -293,10 +293,11 @@
     #     loop_var: line
     #   no_log: true
 
-    - name: "Include WordPress role for {{ user.key }} with Matomo"
+    - name: "Include WordPress role for {{ user.key }} with Matomo"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: wordpress
       vars:
+        wordpress: true
         wordpress_user: "{{ user.key }}"
         wordpress_group: "{{ user.value.users_group | default(user.key) }}"
         wordpress_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
@@ -337,10 +338,11 @@
         - ( vhost.value.users_cms == "wordpress" )
         - ( users_matomo is defined ) and ( users_matomo )
 
-    - name: "Include WordPress role for {{ user.key }} without Matomo"
+    - name: "Include WordPress role for {{ user.key }} without Matomo"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: wordpress
       vars:
+        wordpress: true
         wordpress_user: "{{ user.key }}"
         wordpress_group: "{{ user.value.users_group | default(user.key) }}"
         wordpress_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
@@ -373,10 +375,11 @@
         - ( vhost.value.users_cms == "wordpress" )
         - ( users_matomo is not defined ) or ( not users_matomo )
 
-    - name: "Include Drupal role for {{ user.key }}"
+    - name: "Include Drupal role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: drupal
       vars:
+        drupal: true
         drupal_user: "{{ user.key }}"
         drupal_group: "{{ user.value.users_group | default(user.key) }}"
         drupal_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
@@ -406,10 +409,11 @@
         label: "{{ vhost.key }}"
       when: vhost.value.users_cms == "drupal"
 
-    - name: "Include Kimai role for {{ user.key }}"
+    - name: "Include Kimai role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: kimai
       vars:
+        kimai: true
         kimai_user: "{{ user.key }}"
         kimai_group: "{{ user.value.users_group | default(user.key) }}"
         kimai_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
@@ -437,10 +441,11 @@
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "kimai" )
 
-    - name: "Include Moodle role for {{ user.key }}"
+    - name: "Include Moodle role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: moodle
       vars:
+        moodle: true
         moodle_user: "{{ vhost.value.moodle_user | default(user.key) }}"
         moodle_group: "{{ vhost.value.moodle_group | default(user.value.users_group) | default(user.key) }}"
         moodle_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
@@ -475,10 +480,11 @@
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "moodle" )
 
-    - name: "Include Nextcloud role for {{ user.key }} with default apps"
+    - name: "Include Nextcloud role for {{ user.key }} with default apps"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: nextcloud
       vars:
+        nextcloud: true
         nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
         nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
         nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
@@ -515,10 +521,11 @@
         - ( vhost.value.nextcloud_app_disable is not defined )
         - ( vhost.value.nextcloud_app_enable is not defined )
 
-    - name: "Include Nextcloud role for {{ user.key }} with custom apps for Ansible"
+    - name: "Include Nextcloud role for {{ user.key }} with custom apps for Ansible"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: nextcloud
       vars:
+        nextcloud: true
         nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
         nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
         nextcloud_app_disable: "{{ vhost.value.nextcloud_app_disable | default([]) }}"
@@ -556,10 +563,11 @@
         - ( vhost.value.users_cms == "nextcloud" )
         - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
 
-    - name: "Include Flarum role for {{ user.key }}"
+    - name: "Include Flarum role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: flarum
       vars:
+        flarum: true
         flarum_user: "{{ user.key }}"
         flarum_group: "{{ user.value.users_group | default(user.key) }}"
         flarum_tmp: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
@@ -595,10 +603,11 @@
 
 # MediaWiki with Matomo needs fixing
 #
-#     - name: "Include MediaWiki role for {{ user.key }} with Matomo configuration"
+#     - name: "Include MediaWiki role for {{ user.key }} with Matomo configuration"  # noqa: var-naming[no-role-prefix]
 #       ansible.builtin.include_role:
 #         name: mediawiki
 #       vars:
+#         mediawiki: true
 #         mediawiki_user: "{{ user.key }}"
 #         mediawiki_group: "{{ user.value.users_group | default(user.key) }}"
 #         mediawiki_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
@@ -635,10 +644,11 @@
 #         - ( vhost.value.users_cms == "mediawiki" )
 #         - ( users_matomo is defined ) and ( not users_matomo )
 
-    - name: "Include MediaWiki role for {{ user.key }} without Matomo configuration"
+    - name: "Include MediaWiki role for {{ user.key }} without Matomo configuration"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: mediawiki
       vars:
+        mediawiki: true
         mediawiki_user: "{{ user.key }}"
         mediawiki_group: "{{ user.value.users_group | default(user.key) }}"
         mediawiki_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
@@ -672,10 +682,11 @@
       when:
         - ( vhost.value.users_cms == "mediawiki" )
 
-    - name: "Include Matomo role for {{ user.key }}"
+    - name: "Include Matomo role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: matomo
       vars:
+        matomo: true
         matomo_user: "{{ user.key }}"
         matomo_group: "{{ user.value.users_group | default(user.key) }}"
         matomo_url: "https://{{ vhost.value.users_apache_server_name }}/"
@@ -707,7 +718,7 @@
         label: "{{ vhost.key }}"
       when: ( vhost.value.users_cms == "matomo" )
 
-    - name: "Include phpMyAdmin role for {{ user.key }}"
+    - name: "Include phpMyAdmin role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
         name: phpmyadmin
       vars:  # noqa var-naming[no-role-prefix]
