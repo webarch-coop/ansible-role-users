@@ -11,14 +11,23 @@
         dateext
         sharedscripts
         prerotate
-                chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
-                chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+		if [ -e {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log ]
+		then
+               		chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+               		chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+		fi
         endscript
         postrotate
                 /usr/lib/php/php{{ users_phpfpm_version }}-fpm-reopenlogs
-                chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
-                chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
-                chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
-                chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
+		if [ -e {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log ]
+		then
+                	chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+                	chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*log
+		fi
+		fi [ -e {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz ]
+		then
+                	chown {{ user.key }}:{{ user.value.users_group | default(user.key) }} {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
+                	chmod 600 {{ users_basedir }}/{{ user.key }}/logs/php-fpm*gz
+		fi
         endscript
 }
