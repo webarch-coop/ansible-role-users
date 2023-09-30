@@ -1,5 +1,5 @@
 ---
-- name: "Chown {{ vhost.key }} for {{ user.key }}"
+- name: "Chown {{ vhost.key }} for {{ user.key }}"  # noqa: no-free-form
   ansible.builtin.command: "chown -R {{ vhost.value.users_cms_owner }}:{{ vhost.value.users_cms_group }}"
   tags:
     - users

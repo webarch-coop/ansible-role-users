@@ -11,7 +11,7 @@
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
-        label: "{{ vhost }}"
+        label: "{{ vhost.key }}"
 
     - name: Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml
       ansible.builtin.validate_argument_spec:
