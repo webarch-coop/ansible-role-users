@@ -93,10 +93,18 @@
         path: /etc/logrotate.d/apache_users_logrotate
       register: users_apache_logrotate
 
-    - name: Check Apache logrotation config
-      ansible.builtin.command: /usr/sbin/logrotate -d /etc/logrotate.d/apache_users_logrotate
-      check_mode: false
-      changed_when: false
+    - name: Chreck and run the Apache logrotation
+      block:
+
+        - name: Check Apache logrotation config
+          ansible.builtin.command: /usr/sbin/logrotate -d /etc/logrotate.d/apache_users_logrotate
+          check_mode: false
+          changed_when: false
+
+        - name: Run Apache logrotation config
+          ansible.builtin.command: /usr/sbin/logrotate -v /etc/logrotate.d/apache_users_logrotate
+          changed_when: true
+
       when: users_apache_logrotate.stat.exists | bool
 
     - name: Cron job to delete Apache logs when older than 30 days
