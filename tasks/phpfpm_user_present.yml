@@ -101,11 +101,10 @@
         - name: Run PHP FPM log rotation config
           ansible.builtin.command: "/usr/sbin/logrotate -f /etc/logrotate.d/phpfpm_{{ user.key }}"
           register: users_phpfpm_logrotate_run
-          failed_when: >-
-            ( users_phpfpm_logrotate_run.rc != 0 ) or
-            ( ( users_phpfpm_logrotate_run.rc == 1 ) and
-            ( "already exists, skipping rotation" not in users_phpfpm_logrotate_run.stderr )
-          changed_when: ( "already exists, skipping rotation" not in users_phpfpm_logrotate_run.stderr )
+          failed_when:
+            - users_phpfpm_logrotate_run.rc != 0
+            - ( "skipping rotation" not in users_phpfpm_logrotate_run.stderr )
+          changed_when: ( "skipping rotation" not in users_phpfpm_logrotate_run.stderr )
 
       when: users_phpfpm_logrotate.stat.exists | bool
 
