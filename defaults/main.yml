@@ -88,6 +88,9 @@ users_private_files:
   - path: .ansible
     mode: "0700"
     state: directory
+  - path: .aws
+    mode: "0700"
+    state: directory
   - path: .bash_aliases
     mode: "0600"
     state: touch
