@@ -640,19 +640,6 @@ nextcloud_coturn_listening_ip:
   elements: str
   required: false
   description: A list of Coturm listening IP addresses.
-# nextcloud_config:
-#   type: dict
-#   required: false
-#   description: Nextcloud config to be converted into JSON and imported.
-#   options:
-#     system:
-#       type: dict
-#       required: false
-#       description: Nextcloud system config to be converted into JSON and imported.
-#     apps:
-#       type: dict
-#       required: false
-#       description: Nextcloud apps config to be converted into JSON and imported.
 nextcloud_coturn_auth_secret:
   type: str
   required: false
@@ -693,6 +680,10 @@ nextcloud_cron_job:
   type: str
   required: false
   description: Nextcloud cron job.
+nextcloud_datadir:
+  type: str
+  required: false
+  description: Nextcloud data directory path.
 nextcloud_dbname:
   type: str
   required: false
