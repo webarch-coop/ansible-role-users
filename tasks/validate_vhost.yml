@@ -2,7 +2,7 @@
 - name: Validate Apache VirtualHost variables
   block:
 
-    - name: "Debug the VirtualServer's for {{ user.key }}"
+    - name: "Debug the VirtualServer's variables for {{ user.key }}"
       ansible.builtin.debug:
         var: vhost
         verbosity: 2
@@ -11,7 +11,7 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
 
-    - name: Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml
+    - name: "Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml for {{ user.key }}"
       ansible.builtin.validate_argument_spec:
         argument_spec: "{{ lookup('ansible.builtin.file', 'meta/apache_virtual_host_argument_specs.yml') | from_yaml }}"
         provided_arguments: "{{ vhost.value }}"
@@ -19,6 +19,12 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+
+  # rescue:
+
+  #   - name: There was a failure validating the arg spec
+  #     ansible.builtin.debug:
+  #       msg: "The users role meta/apache_virtual_host_argument_specs.yml vaildating failed for the user {{ user.key }}"
 
   tags:
     - users

@@ -601,7 +601,7 @@ moodle_version:
   description: Moodle version.
 nextcloud:
   type: bool
-  required: true
+  required: false
   description: Run the tasks in this role.
 nextcloud_admin_email:
   type: str
@@ -640,19 +640,19 @@ nextcloud_coturn_listening_ip:
   elements: str
   required: false
   description: A list of Coturm listening IP addresses.
-nextcloud_config:
-  type: dict
-  required: false
-  description: Nextcloud config to be converted into JSON and imported.
-  options:
-    system:
-      type: dict
-      required: false
-      description: Nextcloud system config to be converted into JSON and imported.
-    apps:
-      type: dict
-      required: false
-      description: Nextcloud apps config to be converted into JSON and imported.
+# nextcloud_config:
+#   type: dict
+#   required: false
+#   description: Nextcloud config to be converted into JSON and imported.
+#   options:
+#     system:
+#       type: dict
+#       required: false
+#       description: Nextcloud system config to be converted into JSON and imported.
+#     apps:
+#       type: dict
+#       required: false
+#       description: Nextcloud apps config to be converted into JSON and imported.
 nextcloud_coturn_auth_secret:
   type: str
   required: false
@@ -695,23 +695,23 @@ nextcloud_cron_job:
   description: Nextcloud cron job.
 nextcloud_dbname:
   type: str
-  required: true
+  required: false
   description: Nextcloud database name.
 nextcloud_dbpass:
   type: str
-  required: true
+  required: false
   description: Nextcloud database password.
 nextcloud_dbprefix:
   type: str
-  required: true
+  required: false
   description: Nextcloud database prefix.
 nextcloud_dbuser:
   type: str
-  required: true
+  required: false
   description: Nextcloud database username.
 nextcloud_docroot:
   type: str
-  required: true
+  required: false
   description: The Nextcloud Apache DocumentRoot directory.
 nextcloud_domain:
   type: str
@@ -719,11 +719,11 @@ nextcloud_domain:
   description: Nextcloud domain name.
 nextcloud_group:
   type: str
-  required: true
+  required: false
   description: The Nextcloud Linux group.
 nextcloud_home:
   type: str
-  required: true
+  required: false
   description: The Nextcllud Linux users home directory.
 nextcloud_locale:
   type: str
@@ -826,7 +826,7 @@ nextcloud_onlyoffice_jwt_secret:
   description: ONLYOFFICE Documentserver JWT secret.
 nextcloud_php_alias:
   type: str
-  required: true
+  required: false
   description: The PHP CLI alias.
 nextcloud_php_ini_path:
   type: str
@@ -834,11 +834,11 @@ nextcloud_php_ini_path:
   description: A path to a PHP ini file to be added to the PHP CLI alias.
 nextcloud_php_path:
   type: str
-  required: true
+  required: false
   description: The PHP CLI path.
 nextcloud_php_version:
   type: str
-  required: true
+  required: false
   description: The version of PHP that Nextcloud is set to use.
 nextcloud_pkgs:
   type: list
@@ -847,7 +847,7 @@ nextcloud_pkgs:
   description: Debian / Ubuntu packages to be installed.
 nextcloud_private:
   type: str
-  required: true
+  required: false
   description: The Nextcloud Linux users private directory.
 nextcloud_redis_host:
   type: str
@@ -902,11 +902,11 @@ nextcloud_url:
   description: The Nextcloud instance URL.
 nextcloud_user:
   type: str
-  required: true
+  required: false
   description: The Nextcloud Linux user account.
 nextcloud_validate:
   type: bool
-  required: true
+  required: false
   description: Validate all variables that start with nextcloud_.
 nextcloud_version:
   type: str
