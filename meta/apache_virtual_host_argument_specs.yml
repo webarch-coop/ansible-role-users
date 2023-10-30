@@ -599,6 +599,10 @@ moodle_version:
   type: str
   required: false
   description: Moodle version.
+nextcloud:
+  type: bool
+  required: true
+  description: Run the tasks in this role.
 nextcloud_admin_email:
   type: str
   required: false
@@ -631,6 +635,52 @@ nextcloud_admin_user:
   type: str
   required: false
   description: Nextcloud admin username.
+nextcloud_coturn_listening_ip:
+  type: list
+  elements: str
+  required: false
+  description: A list of Coturm listening IP addresses.
+nextcloud_config:
+  type: dict
+  required: false
+  description: Nextcloud config to be converted into JSON and imported.
+  options:
+    system:
+      type: dict
+      required: false
+      description: Nextcloud system config to be converted into JSON and imported.
+    apps:
+      type: dict
+      required: false
+      description: Nextcloud apps config to be converted into JSON and imported.
+nextcloud_coturn_auth_secret:
+  type: str
+  required: false
+  description: Coturn auth secret for spreed.
+nextcloud_coturn_listening_port:
+  type: int
+  required: false
+  description: The Coturn port.
+nextcloud_coturn_protocols:
+  type: list
+  elements: str
+  required: false
+  description: A list of Coturm protocols.
+  choices:
+    - tcp
+    - udp
+  default:
+    - tcp
+    - udp
+nextcloud_coturn_realm:
+  type: str
+  required: false
+  description: The Coturn realm, the domain name for the Nextcloud server.
+nextcloud_coturn_relay_ip:
+  type: list
+  elements: str
+  required: false
+  description: A list of Coturm relay IP addresses.
 nextcloud_cron:
   type: str
   required: false
@@ -638,70 +688,226 @@ nextcloud_cron:
   choices:
     - ajax
     - cron
+  default: ajax
+nextcloud_cron_job:
+  type: str
+  required: false
+  description: Nextcloud cron job.
 nextcloud_dbname:
   type: str
-  required: false
+  required: true
   description: Nextcloud database name.
+nextcloud_dbpass:
+  type: str
+  required: true
+  description: Nextcloud database password.
 nextcloud_dbprefix:
   type: str
-  required: false
+  required: true
   description: Nextcloud database prefix.
 nextcloud_dbuser:
   type: str
-  required: false
+  required: true
   description: Nextcloud database username.
 nextcloud_docroot:
   type: str
-  required: false
+  required: true
   description: The Nextcloud Apache DocumentRoot directory.
 nextcloud_domain:
   type: str
   required: false
   description: Nextcloud domain name.
-# nextcloud_config:
-#   type: dict
-#   required: false
-#   description: Nextcloud config to be converted into JSON and imported.
-#   options:
-#     system:
-#       type: dict
-#       required: false
-#       description: Nextcloud system config to be converted into JSON and imported.
-#     apps:
-#       type: dict
-#       required: false
-#       description: Nextcloud system config to be converted into JSON and imported.
-#   type: dict
-#   required: false
-#   description: Nextcloud config to be converted nto JAON and loaded using occ config:import.
 nextcloud_group:
   type: str
+  required: true
+  description: The Nextcloud Linux group.
+nextcloud_home:
+  type: str
+  required: true
+  description: The Nextcllud Linux users home directory.
+nextcloud_locale:
+  type: str
   required: false
-  description: Nextcloud group.
+  description: Nextcloud language code.
 nextcloud_notify:
   type: bool
   required: false
   description: Send a email with the admin login details when installing.
+nextcloud_notify_from:
+  type: str
+  required: false
+  description: Email address for the From header for admin login notification.
+nextcloud_notify_headers:
+  type: str
+  required: false
+  description: Email headers for admin login notification.
+nextcloud_notify_push_systemd_units:
+  type: list
+  elements: dict
+  required: false
+  description: A list of dictionaries for the systemd role to use to configure notify_push.
+nextcloud_notify_reply_to:
+  type: str
+  required: false
+  description: Email Reply-To address for admin login notification.
+nextcloud_notify_signature:
+  type: str
+  required: false
+  description: Email signature for admin login notification.
+nextcloud_notify_subject_tag:
+  type: str
+  required: false
+  description: Email Subject notification tag.
+nextcloud_occ_alias:
+  type: str
+  required: false
+  description: Bash occ alias.
+nextcloud_occ_autocompletion:
+  type: str
+  required: false
+  description: Bash autocompletion for the occ command.
 nextcloud_onlyoffice_documentserver:
   type: str
   required: false
   description: Domain name of the ONLYOFFICE document server.
-nextcloud_php_version:
+nextcloud_onlyoffice_documentserver_community_settings:
+  type: list
+  elements: dict
+  required: false
+  description: ONLYOFFICE system settings for the Community Documentserver.
+  options:
+    setting:
+      type: str
+      required: false
+      description: ONLYOFFICE system setting name for the Community Documentserver.
+    value:
+      type: str
+      required: false
+      description: ONLYOFFICE system setting value for the Community Documentserver.
+nextcloud_onlyoffice_documentserver_app_settings:
+  type: list
+  elements: dict
+  required: false
+  description: ONLYOFFICE app settings for the Documentserver.
+  options:
+    setting:
+      type: str
+      required: false
+      description: ONLYOFFICE app setting name for the Documentserver.
+    value:
+      type: str
+      required: false
+      description: ONLYOFFICE app setting value for the Documentserver.
+nextcloud_onlyoffice_documentserver_system_settings:
+  type: list
+  elements: dict
+  required: false
+  description: ONLYOFFICE system settings for the Documentserver.
+  options:
+    setting:
+      type: str
+      required: false
+      description: ONLYOFFICE setting name for the Documentserver.
+    value:
+      type: str
+      required: false
+      description: ONLYOFFICE setting value for the Documentserver.
+nextcloud_onlyoffice_jwt_header:
   type: str
   required: false
+  description: ONLYOFFICE Documentserver JWT HTTP header.
+nextcloud_onlyoffice_jwt_leeway:
+  type: int
+  required: false
+  description: ONLYOFFICE Documentserver time jitter leeway.
+nextcloud_onlyoffice_jwt_secret:
+  type: str
+  required: false
+  description: ONLYOFFICE Documentserver JWT secret.
+nextcloud_php_alias:
+  type: str
+  required: true
+  description: The PHP CLI alias.
+nextcloud_php_ini_path:
+  type: str
+  required: false
+  description: A path to a PHP ini file to be added to the PHP CLI alias.
+nextcloud_php_path:
+  type: str
+  required: true
+  description: The PHP CLI path.
+nextcloud_php_version:
+  type: str
+  required: true
   description: The version of PHP that Nextcloud is set to use.
+nextcloud_pkgs:
+  type: list
+  elements: str
+  required: false
+  description: Debian / Ubuntu packages to be installed.
+nextcloud_private:
+  type: str
+  required: true
+  description: The Nextcloud Linux users private directory.
+nextcloud_redis_host:
+  type: str
+  required: false
+  description: Redis server IP address.
+nextcloud_redis_port:
+  type: int
+  required: false
+  description: Redis server port.
+nextcloud_requirements:
+  type: list
+  elements: dict
+  required: false
+  description: List of Nextcloud versions and requirements.
+  options:
+    nextcloud_onlyoffice:
+      type: list
+      elements: str
+      required: false
+      description: A list of nextcloud-onlyoffice app versions.
+    nextcloud_version:
+      type: str
+      required: true
+      description: Nextcloud version string.
+    mariadb_versions:
+      type: list
+      elements: str
+      required: true
+      description: An array of MariaDB versions.
+    php_versions:
+      type: list
+      elements: str
+      required: true
+      description: An array of PHP versions.
 nextcloud_title:
   type: str
   required: false
   description: Nextcloud title.
+nextcloud_trusted_hosts:
+  type: list
+  elements: str
+  required: false
+  description: A list of trusted hosts.
+nextcloud_trusted_proxies:
+  type: list
+  elements: str
+  required: false
+  description: A list of trusted proxies for notify_push.
 nextcloud_url:
   type: str
   required: false
-  description: Nextcloud URL.
+  description: The Nextcloud instance URL.
 nextcloud_user:
   type: str
-  required: false
-  description: Nextcloud user.
+  required: true
+  description: The Nextcloud Linux user account.
+nextcloud_validate:
+  type: bool
+  required: true
+  description: Validate all variables that start with nextcloud_.
 nextcloud_version:
   type: str
   required: false
