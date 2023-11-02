@@ -22,7 +22,7 @@ repos:
           - jmespath==1.0.1
   # https://github.com/jackdewinter/pymarkdown/releases
   - repo: https://github.com/jackdewinter/pymarkdown
-    rev: v0.9.13.4
+    rev: v0.9.14
     hooks:
       - id: pymarkdown
         name: Markdown Lint
