@@ -446,14 +446,18 @@ mediawiki_matomo_domain:
   type: str
   required: false
   description: Matomo server domain name.
-mediawiki_matomo_site_name:
-  type: str
-  required: false
-  description: Matomo site name.
 mediawiki_matomo_html:
   type: str
   required: false
   description: Matomo DocumentRoot.
+mediawiki_matomo_idsite:
+  type: int
+  required: false
+  description: Matomo user.
+mediawiki_matomo_site_name:
+  type: str
+  required: false
+  description: Matomo site name.
 mediawiki_matomo_user:
   type: str
   required: false
