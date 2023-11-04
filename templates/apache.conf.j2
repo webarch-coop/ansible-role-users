@@ -696,9 +696,9 @@
       {%- else %}
       <FilesMatch "\.php$">
       {%- endif %}
-      <If "-f %{REQUEST_FILENAME}">
-          Require all denied
-      </If>
+        <If "-f %{REQUEST_FILENAME}">
+            Require all denied
+        </If>
       </FilesMatch>
     </Directory>
   </IfFile>
