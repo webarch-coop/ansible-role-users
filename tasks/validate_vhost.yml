@@ -22,9 +22,9 @@
 
   # rescue:
 
-  # - name: There was a failure validating the arg spec
-  #   ansible.builtin.debug:
-  #     msg: "The users role meta/apache_virtual_host_argument_specs.yml vaildating failed for the user {{ user.key }}"
+  #   - name: There was a failure validating the arg spec
+  #     ansible.builtin.debug:
+  #       msg: "The users role meta/apache_virtual_host_argument_specs.yml vaildating failed for the user {{ user.key }}"
 
   tags:
     - users

@@ -26,6 +26,9 @@
 
 - name: "Include PHP FPM user absent tasks for {{ user.key }}"
   ansible.builtin.include_tasks: phpfpm_user_absent.yml
+  when:
+    - users_phpfpm_versions is defined
+    - users_phpfpm_default_version is defined
   tags:
     - users
 

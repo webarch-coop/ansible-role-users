@@ -2,24 +2,27 @@
 - name: "PHP FPM config absent for {{ user.key }}"
   block:
 
-    - name: Set a fact for the users PHP version
-      ansible.builtin.set_fact:
-        users_phpfpm_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
-
     - name: Debug users_phpfpm_version
       ansible.builtin.debug:
         var: users_phpfpm_version
         verbosity: 2
+      when: users_phpfpm_version is defined
 
     - name: Debug users_phpfpm_versions
       ansible.builtin.debug:
         var: users_phpfpm_versions
         verbosity: 2
+      when: users_phpfpm_versions is defined
 
     - name: Debug users_phpfpm_default_version
       ansible.builtin.debug:
         var: users_phpfpm_default_version
         verbosity: 2
+      when: users_phpfpm_default_version is defined
+
+    - name: Set a fact for the users PHP version
+      ansible.builtin.set_fact:
+        users_phpfpm_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
 
     - name: Debug getent_group
       ansible.builtin.debug:
