@@ -118,7 +118,7 @@ partition.
 
 And a `ansible.cfg` that contains:
 
-```
+```ini
 [defaults]
 retry_files_enabled = False
 pipelining = True
@@ -129,7 +129,7 @@ roles_path = galaxy/roles
 
 And a `.gitignore` containing:
 
-```
+```txt
 galaxy/roles
 ```
 
@@ -445,6 +445,7 @@ Apache directives, for example:
             env: THE_HOST=$1
             case: false
 ```
+
 Will generate:
 
 ```apache
@@ -456,6 +457,7 @@ And if `case` is omitted or set to `True`:
 ```apache
 SetEnvIf Host "^(.*)$" THE_HOST=$1
 ```
+
 Will generate:
 
 ```apache
@@ -483,13 +485,13 @@ The `users_apache_headers` array can be used to set [Header](https://httpd.apach
 
 The `response` header type accepts an optional condition, `con`, an action, `action` and an expression, `expr`, for example
 
-```
+```apache
 Header {% if header.con is defined %}{{ header.con }} {% endif %}{{ header.action }} {{ header.expr }}
 ```
 
 The `request` type accepts an action, `action` and an argument, `arg`:
 
-```
+```apache
 RequestHeader {{ header.action }} {{ header.arg }}
 ```
 
@@ -539,7 +541,7 @@ The `users_apache_rewrite` array can be used to set `RewriteCond` and
 `RewriteRule` directives, for example:
 
 ```yaml
-        users_apache_rewrite_rules:
+        users_apache_rewrite:
           - cond: %{HTTP_USER_AGENT} DavClnt
           - rule: ^$ /remote.php/webdav/ [L,R=302]
           - rule: .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -627,6 +629,7 @@ Documentation](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#redirect):
 ```
 
 An `Alias` can also be used in a `Location`:
+
 ```yaml
         users_apache_locations:
           - location: /static
@@ -897,7 +900,7 @@ For one of the [Apache role](https://git.coop/webarch/apache) templates to be ad
 
 #### users_apache_filesmatch
 
-A list of[FilesMatch](https://httpd.apache.org/docs/2.4/mod/core.html#filesmatch) and [Require]() directives for example:
+A list of[FilesMatch](https://httpd.apache.org/docs/2.4/mod/core.html#filesmatch) and [Require](https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require) directives for example:
 
 ```yaml
         users_apache_filesmatch:
@@ -969,7 +972,9 @@ IndexOptions +ScanHTMLTitles -IconsAreLinks FancyIndexing
 ```
 
 #### users_apache_options
+
 #### users_apache_override
+
 #### users_apache_readme_name
 
 A values for the [ReadmeName](https://httpd.apache.org/docs/current/mod/mod_autoindex.html#readmename), for example:
@@ -1162,7 +1167,7 @@ alias php="php --php-ini ~/.php.ini"
 
 And `~/.php.ini` is created with the following three lines (with `example` replaced with the username):
 
-```
+```ini
 sys_temp_dir = "/home/example/tmp"
 memory_limit = -1
 apc.enable_cli = 1
@@ -1351,7 +1356,6 @@ It will generate an Apache config like this:
 # vim: set ft=apache:
 
 ```
-
 
 ## TODO
 
