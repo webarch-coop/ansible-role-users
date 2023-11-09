@@ -727,7 +727,7 @@
   <IfModule proxy_module>
     # In reverse proxy or gateway configuration, ProxyRequests should be set to Off
     ProxyRequests Off
-    # Server Apache error documents rather than proxy errors
+    # Serve Apache error documents rather than proxy errors
     ProxyErrorOverride On
     {%- for proxy in vhost_config.users_apache_proxy_pass %}
       {%- if proxy.preserve_host is defined %}
