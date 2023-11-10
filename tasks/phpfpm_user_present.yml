@@ -215,6 +215,11 @@
     - name: PHP CLI configuration present
       block:
 
+        - name: "Stat /usr/bin/php{{ users_phpfpm_version }}"
+          ansible.builtin.stat:
+            path: "/usr/bin/php{{ users_phpfpm_version }}"
+          register: users_php_bin_file
+
         - name: Users php symlink in place
           ansible.builtin.file:
             state: link
@@ -224,6 +229,9 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          when:
+            - users_phpcli_pkg in ansible_local.dpkg.installed
+            - users_php_bin_file.stat.exists | bool
 
         - name: "Stat /usr/bin/php{{ users_phpfpm_version }}-config"
           ansible.builtin.stat:
@@ -275,9 +283,7 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when:
-            - users_phpize_pkg in ansible_local.dpkg.installed
-            - users_phpize_bin_file.stat.exists | bool
+          when: users_phpize_bin_file.stat.exists | bool
 
         - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
           ansible.builtin.lineinfile:
