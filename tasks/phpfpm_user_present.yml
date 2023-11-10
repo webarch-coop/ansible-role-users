@@ -225,6 +225,11 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
+        - name: "Stat /usr/bin/php{{ users_phpfpm_version }}-config"
+          ansible.builtin.stat:
+            path: "/usr/bin/php{{ users_phpfpm_version }}-config"
+          register: users_phpdev_bin_file
+
         - name: Users php-config symlink in place
           ansible.builtin.file:
             state: link
@@ -234,7 +239,14 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: users_phpdev_pkg in ansible_local.dpkg.installed
+          when:
+            - users_phpdev_pkg in ansible_local.dpkg.installed
+            - users_phpdev_bin_file.stat.exists | bool
+
+        - name: "Stat /usr/bin/php{{ users_phpfpm_version }}dbg"
+          ansible.builtin.stat:
+            path: "/usr/bin/php{{ users_phpfpm_version }}dbg"
+          register: users_phpdbg_bin_file
 
         - name: Users phpdbg symlink in place
           ansible.builtin.file:
@@ -245,7 +257,14 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: users_phpdbg_pkg in ansible_local.dpkg.installed
+          when:
+            - users_phpdbg_pkg in ansible_local.dpkg.installed
+            - users_phpdbg_bin_file.stat.exists | bool
+
+        - name: "Stat /usr/bin/php{{ users_phpfpm_version }}ize"
+          ansible.builtin.stat:
+            path: "/usr/bin/php{{ users_phpfpm_version }}ize"
+          register: users_phpize_bin_file
 
         - name: Users phpize symlink in place
           ansible.builtin.file:
@@ -256,7 +275,9 @@
             follow: false
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: users_phpdev_pkg in ansible_local.dpkg.installed
+          when:
+            - users_phpize_pkg in ansible_local.dpkg.installed
+            - users_phpize_bin_file.stat.exists | bool
 
         - name: Alias php via ~/.bash_aliases for CLI usage to include settings from ~/.php.ini
           ansible.builtin.lineinfile:
