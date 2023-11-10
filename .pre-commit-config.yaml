@@ -15,7 +15,7 @@ repos:
         language: python
         additional_dependencies:
           # https://pypi.org/project/ansible/
-          - ansible==8.6.0
+          - ansible==8.6.1
           # https://github.com/kellyjonbrazil/jc/releases
           - jc==1.23.6
           # https://github.com/jmespath/jmespath.py/tags
@@ -26,4 +26,7 @@ repos:
     hooks:
       - id: pymarkdown
         name: Markdown Lint
+        args:
+          - 'scan'
+          - 'README.md'
 ...

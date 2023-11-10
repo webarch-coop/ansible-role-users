@@ -155,6 +155,10 @@ argument_specs:
         type: bool
         required: false
         description: Generate ~/.mutrc files for users for testing SMTP and /usr/sbin/sendmail on the localhost.
+      users_name:
+        type: str
+        required: false
+        description: The users full name.
       users_notify_cron_append:
         type: str
         required: false
