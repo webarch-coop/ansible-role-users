@@ -1487,6 +1487,10 @@ wordpress_locale:
   type: str
   required: false
   description: The WordPress locale.
+users_matomo_site:
+  type: bool
+  required: false
+  description: Configure this VirtualHost for Matomo.
 wordpress_notify:
   type: bool
   required: false
