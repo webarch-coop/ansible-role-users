@@ -22,6 +22,15 @@
         state: absent
         hour: "*"
 
+    - name: "Minutely cron jobs for {{ user.key }} absent"
+      ansible.builtin.cron:
+        name: "Minutely cron jobs"
+        user: root
+        cron_file: "chroot_cron_minutely_{{ user.key }}"
+        state: absent
+        hour: "*"
+        minute: "*"
+
     - name: "Cron job files for {{ user.key }} absent"
       ansible.builtin.file:
         path: "/etc/cron.d/{{ file }}"
@@ -29,6 +38,7 @@
       loop:
         - "chroot_cron_daily_{{ user.key }}"
         - "chroot_cron_hourly_{{ user.key }}"
+        - "chroot_cron_minutely_{{ user.key }}"
       loop_control:
         loop_var: file
 
@@ -41,6 +51,12 @@
     - name: "Hourly cron jobs for {{ user.key }} absent"
       ansible.builtin.cron:
         name: "Hourly cron jobs"
+        user: "{{ user.key }}"
+        state: absent
+
+    - name: "Minutely cron jobs for {{ user.key }} absent"
+      ansible.builtin.cron:
+        name: "Minutely cron jobs"
         user: "{{ user.key }}"
         state: absent
 

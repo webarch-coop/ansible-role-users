@@ -116,6 +116,11 @@ users_hourly_scripts:
   elements: str
   required: false
   description: A list of Bash command lines to be run hourly.
+users_minutely_scripts:
+  type: list
+  elements: str
+  required: false
+  description: A list of Bash command lines to be run minutely.
 users_mariadb_databases:
   type: list
   elements: str

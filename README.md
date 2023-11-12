@@ -239,14 +239,15 @@ ansible-galaxy install -r requirements.yml --force && \
 ## Cron jobs
 
 If `users_cron` is defined and true, at a server level then for users that are
-in the `chroot` group an hourly and daily cron job is created to run bash
-scripts that are created (empty by default) at `~/bin/cron_daily.sh` and
-`~/bin/cron_hourly.sh` in the chroot, for non-chrooted users a  cron job is
-created to run the same bash scripts.
+in the `chroot` group a daily, hourly and minutely cron job is created to run
+bash scripts that are created (empty by default) at `~/bin/cron_daily.sh`,
+`~/bin/cron_hourly.sh` and `~/bin/cron_minutely.sh` in the chroot, for
+non-chrooted users a  cron job is created to run the same bash scripts.
 
-Tasks can be added to the Bash scripts using the `users_hourly_scripts` and
-`users_daily_scripts` arrays at a user level, or they can be manually added not
-using Ansible by users, for example to archive Matomo stats on an hourly basis:
+Tasks can be added to the Bash scripts using the `users_daily_scripts`,
+`users_hourly_scripts` and `users_minutely_scripts` arrays at a user level, or
+they can be manually added not using Ansible by users, for example to archive
+Matomo stats on an hourly basis:
 
 ```yaml
     users_hourly_scripts:
@@ -254,11 +255,21 @@ using Ansible by users, for example to archive Matomo stats on an hourly basis:
       - "cd ~/sites/default && php console --no-ansi -qn core:run-scheduled-tasks > ~/private/matomo-archive.log"
 ```
 
-The number of minutes part the hour that the script run at in set randomly for
-each user and saved in `~/.cron_min` to ensure that all the jobs for different
-users don't run at the same time.
+To run the Nextcloud cron job every minute:
 
-Also some features of the [Ansible cron module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html) can used used via a `users_cron_jobs` array set at the users level, for example:
+```yaml
+    users_minutely_scripts:
+      - "php --php-ini ~/.php.ini -f ~/sites/cloud/cron.php"
+```
+
+The number of minutes part the hour that the daily and hourly script run at in
+set randomly for each user and saved in `~/.cron_min` to ensure that all the
+jobs for different users don't run at the same time.
+
+Also some features of the [Ansible cron
+module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html)
+can used used via a `users_cron_jobs` array set at the users level, for
+example:
 
 ```yaml
     users_cron_jobs:

@@ -77,6 +77,23 @@
             minute: "{{ users_cron_min }}"
             hour: "*"
 
+        - name: "Minutely cron jobs for {{ user.key }}"
+          ansible.builtin.cron:
+            name: "Minutely cron jobs"
+            cron_file: "chroot_cron_minutely_{{ user.key }}"
+            user: root
+            job: >
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh | wc -l) -gt 0 ];
+              then /usr/sbin/chroot {{ users_chroot_users_dir }}/{{ user.key }} sudo -u {{ user.key }}
+              PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
+              TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+              /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh 2>&1 |
+              mail -E -s '[{{ users_notify_subject_tag }}] Minutely cron output from the {{ user.key }} account on {{ inventory_hostname }}'
+              -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
+            minute: "*"
+            hour: "*"
+
       when:
         - ( users_home_bin_path.stat.exists )
         - ( user.value.users_system is not defined ) or ( not user.value.users_system )
@@ -105,6 +122,17 @@
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh | wc -l) -gt 0 ];
               then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh; fi
             minute: "{{ users_cron_min }}"
+            hour: "*"
+
+        - name: "Minutely cron jobs for {{ user.key }}"
+          ansible.builtin.cron:
+            name: "Minutely cron jobs"
+            user: "{{ user.key }}"
+            job: >
+              if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh ] &&
+              [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh | wc -l) -gt 0 ];
+              then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh; fi
+            minute: "*"
             hour: "*"
 
       when:

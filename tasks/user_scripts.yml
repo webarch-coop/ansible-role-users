@@ -73,6 +73,39 @@
         - ( users_home_bin_path.stat.exists )
         - ( user.value.users_system is not defined ) or ( not user.value.users_system )
 
+    - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh in place"
+      ansible.builtin.template:
+        src: cron_minutely.sh.j2
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+        force: false
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0750"
+      when:
+        - ( users_home_bin_path.stat.exists )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+
+    - name: "Minutely scripts in place for {{ user.key }}"
+      ansible.builtin.blockinfile:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+        block: |
+          {% if user.value.users_minutely_scripts is defined %}
+          {% for users_minutely_script in user.value.users_minutely_scripts %}
+          {{ users_minutely_script }}
+          {% endfor %}
+          {% else %}
+          # None
+          {% endif %}
+        state: present
+        create: false
+        marker: "# {mark} ANSIBLE SCRIPTS"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_group | default(user.key) }}"
+        mode: "0750"
+      when:
+        - ( users_home_bin_path.stat.exists )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+
   tags:
     - users
 ...
