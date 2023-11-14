@@ -16,12 +16,12 @@ you can use a SSH tunnel, see https://docs.webarch.net/wiki/MySQL.
 Note that there is no direct external access to the database.
 {% endif %}
 
-{% if phpmyadmin_user is defined and phpmyadmin_domain is defined and phpmyadmin_path is defined %}
+{% if phpmyadmin_user is defined and phpmyadmin_domain is defined %}
 The {{ inventory_hostname }} server has phpMyAdmin installed, you can
 use this web interface to the database at this URL with the username
 and password provided above:
 
-  URL:          https://{{ phpmyadmin_domain }}{{ phpmyadmin_path }}
+  URL:          https://{{ phpmyadmin_domain }}/
 {% endif %}
 
 All the best

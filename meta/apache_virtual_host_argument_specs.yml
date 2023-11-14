@@ -955,6 +955,10 @@ phpmyadmin_docroot:
   type: str
   required: false
   description: The phpMyAdmin Apache DocumentRoot directory.
+phpmyadmin_domain:
+  type: str
+  required: false
+  description: The phpMyAdmin Apache ServerName.
 phpmyadmin_env:
   type: dict
   required: false

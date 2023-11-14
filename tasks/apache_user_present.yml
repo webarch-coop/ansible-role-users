@@ -731,6 +731,7 @@
         phpmyadmin_dbhost: localhost
         phpmyadmin_dbport: 3306
         phpmyadmin_dbsocket: /var/run/mysqld/mysqld.sock
+        phpmyadmin_domain: "{{ vhost.value.phpmyadmin_domain | default(vhost.value.users_apache_server_name) }}"
         phpmyadmin_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         phpmyadmin_tmp: "{% if users_apache_chroot is defined and users_apache_chroot | bool %}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp{% else %}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp{% endif %}"
         phpmyadmin_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
