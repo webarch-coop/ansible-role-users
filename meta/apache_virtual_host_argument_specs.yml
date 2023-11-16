@@ -1449,6 +1449,10 @@ users_cms:
     - nextcloud
     - phpmyadmin
     - wordpress
+users_matomo_site:
+  type: bool
+  required: false
+  description: Configure this VirtualHost for Matomo.
 wordpress_admin_email:
   type: str
   required: false
@@ -1457,6 +1461,10 @@ wordpress_admin_user:
   type: str
   required: false
   description: The username for the first WordPress admin account.
+wordpress_blogdescription:
+  type: str
+  required: false
+  description: WordPress blogdescription option value.
 wordpress_autoupdate:
   type: bool
   required: false
@@ -1487,18 +1495,115 @@ wordpress_dbuser:
   type: str
   required: false
   description: The database username to use for WordPress.
+wordpress_docroot:
+  type: str
+  required: false
+  description: The Apache DocumentRoot for the WordPress site.
+wordpress_docroot_mode:
+  type: str
+  required: false
+  description: The mode for the Apache DocumentRoot for the WordPress site.
+wordpress_group:
+  type: str
+  required: false
+  description: The group for the WordPress user.
+wordpress_install_config:
+  type: list
+  required: false
+  description: A list of configuration for WordPress installs which will be written to wp-config.php.
+  options:
+    name:
+      type: str
+      required: true
+      description: The name of the configuration option to be written to wp-config.php.
+    value:
+      type: str
+      required: true
+      description: The value of the configuration option to be written to wp-config.php.
+wordpress_install_options:
+  type: list
+  required: false
+  description: A list of options for WordPress installs.
+  options:
+    otpion_name:
+      type: str
+      required: true
+      description: The name of the option.
+    option_value:
+      type: str
+      required: true
+      description: The value of the option.
+wordpress_install_packages:
+  type: list
+  required: false
+  description: A list of packages for WordPress installs.
+  options:
+    name:
+      type: str
+      required: true
+      description: The name of the WordPress package.
+    version:
+      type: str
+      required: true
+      description: The version of the WordPress package.
+wordpress_install_plugins:
+  type: list
+  required: false
+  description: A list of plugins for WordPress installs.
+  options:
+    name:
+      type: str
+      required: true
+      description: The name of the WordPress plugin.
+    status:
+      type: str
+      required: true
+      description: The status of the WordPress plugin.
+      choices:
+        - active
+        - inactive
+        - absent
+    version:
+      type: str
+      required: false
+      description: The version of the WordPress package.
+wordpress_jmespath:
+  type: dict
+  required: false
+  description: An internal dictionary of JMESPath queries.
 wordpress_locale:
   type: str
   required: false
   description: The WordPress locale.
-users_matomo_site:
-  type: bool
-  required: false
-  description: Configure this VirtualHost for Matomo.
 wordpress_notify:
   type: bool
   required: false
   description: Send a email with the WordPress admin account password.
+wordpress_notify_from:
+  type: str
+  required: false
+  description: The name to go with the from email address in account notification emails.
+wordpress_notify_from_name:
+  type: str
+  required: false
+  description: The email address for the from header in account notification emails.
+wordpress_notify_headers:
+  type: list
+  required: false
+  description: A list of email headers for the account notification emails.
+  elements: str
+wordpress_notify_reply_to:
+  type: str
+  required: false
+  description: A reply-to email address to be used by account notification emails.
+wordpress_notify_signature:
+  type: str
+  required: false
+  description: A email signature for the account notification emails.
+wordpress_notify_subject_tag:
+  type: str
+  required: false
+  description: A email account notification emails subject tag.
 wordpress_options:
   type: list
   elements: dict
@@ -1527,6 +1632,22 @@ wordpress_packages:
       type: str
       required: true
       description: The WordPress package version to install.
+wordpress_php_alias:
+  type: str
+  required: false
+  description: The string to envoke PHP using the CLI.
+wordpress_php_ini_path:
+  type: str
+  required: false
+  description: A optional path to a PHP ini file.
+wordpress_php_path:
+  type: str
+  required: false
+  description: The path to the PHP binary.
+wordpress_php_version:
+  type: str
+  required: false
+  description: The PHP version.
 wordpress_plugins:
   type: list
   elements: dict
@@ -1550,6 +1671,14 @@ wordpress_plugins:
       type: str
       required: false
       description: the version of the WordPress plugin.
+wordpress_sidebar_html:
+  type: str
+  required: false
+  description: A HTML string for the sidebar.
+wordpress_sidebar_title:
+  type: str
+  required: false
+  description: A title for the sidebar.
 wordpress_title:
   type: str
   required: false
@@ -1558,4 +1687,12 @@ wordpress_url:
   type: str
   required: false
   description: the URL of the WordPress site.
+wordpress_user:
+  type: str
+  required: false
+  description: The WordPress user.
+wordpress_verify:
+  type: bool
+  required: false
+  description: Verify all variables that start with wordpress_.
 ...
