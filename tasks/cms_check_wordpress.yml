@@ -52,19 +52,19 @@
 
         - name: Set a fact for the wordpress_url without a protcol
           ansible.builtin.set_fact:
-            wordpress_url_domain: "{{ vhost.value.wordpress_url | regex_replace('^https://') }}"
+            users_wordpress_url_domain: "{{ vhost.value.wordpress_url | regex_replace('^https://') }}"
 
         - name: "Check that wordpress_url domain (protocol removed) equals the ServerName for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - ( wordpress_url_domain == vhost.value.users_apache_server_name )
+              - ( users_wordpress_url_domain == vhost.value.users_apache_server_name )
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is not defined )
 
         - name: "Check that wordpress_url domain (protocol removed) contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - ( wordpress_url_domain == vhost.value.users_apache_server_name ) or ( wordpress_url_domain in vhost.value.users_apache_server_aliases )
+              - ( users_wordpress_url_domain == vhost.value.users_apache_server_name ) or ( useers_wordpress_url_domain in vhost.value.users_apache_server_aliases )
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
