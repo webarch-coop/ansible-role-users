@@ -1455,7 +1455,7 @@ users_matomo_site:
   description: Configure this VirtualHost for Matomo.
 wordpress:
   type: bool
-  required: true
+  required: false
   description: Run the tasks in the WordPress role.
 wordpress_admin_email:
   type: str
