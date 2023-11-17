@@ -64,7 +64,7 @@
         - name: "Check that wordpress_url domain (protocol removed) contains either the ServerName or a ServerAlias for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - ( users_wordpress_url_domain == vhost.value.users_apache_server_name ) or ( useers_wordpress_url_domain in vhost.value.users_apache_server_aliases )
+              - ( users_wordpress_url_domain == vhost.value.users_apache_server_name ) or ( users_wordpress_url_domain in vhost.value.users_apache_server_aliases )
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: ( vhost.value.users_apache_server_aliases is defined ) and ( vhost.value.users_apache_server_aliases[0] is defined )
 
