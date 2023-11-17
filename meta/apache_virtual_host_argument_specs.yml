@@ -1453,6 +1453,10 @@ users_matomo_site:
   type: bool
   required: false
   description: Configure this VirtualHost for Matomo.
+wordpress:
+  type: bool
+  required: true
+  description: Run the tasks in the WordPress role.
 wordpress_admin_email:
   type: str
   required: false
@@ -1461,14 +1465,14 @@ wordpress_admin_user:
   type: str
   required: false
   description: The username for the first WordPress admin account.
-wordpress_blogdescription:
-  type: str
-  required: false
-  description: WordPress blogdescription option value.
 wordpress_autoupdate:
   type: bool
   required: false
   description: Automatically update WordPress.
+wordpress_blogdescription:
+  type: str
+  required: false
+  description: WordPress blogdescription option value.
 wordpress_config:
   type: list
   elements: dict
@@ -1487,6 +1491,10 @@ wordpress_dbname:
   type: str
   required: false
   description: The database name to use for WordPress.
+wordpress_dbpass:
+  type: str
+  required: false
+  description: The database users password to use for WordPress.
 wordpress_dbprefix:
   type: str
   required: false
@@ -1575,6 +1583,22 @@ wordpress_locale:
   type: str
   required: false
   description: The WordPress locale.
+wordpress_matomo_login:
+  type: str
+  required: false
+  description: The Matomo login.
+wordpress_matomo_login_password:
+  type: str
+  required: false
+  description: The Matomo login password.
+wordpress_matomo_url:
+  type: str
+  required: false
+  description: The Matomo URL.
+wordpress_matomo_user:
+  type: str
+  required: false
+  description: The user account for Matomo.
 wordpress_notify:
   type: bool
   required: false
