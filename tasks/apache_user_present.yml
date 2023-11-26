@@ -714,6 +714,7 @@
         matomo_email_signature: "{{ users_notify_signature }}"
         matomo_version: "{{ vhost.value.matomo_version | default('') }}"
         matomo_autoupdate: "{{ vhost.value.matomo_autoupdate | default(true) | bool }}"
+        matomo_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
