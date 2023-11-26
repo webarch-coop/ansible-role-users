@@ -192,6 +192,8 @@
               ansible.builtin.include_role:
                 name: matomo
                 tasks_from: check_version.yml
+              vars:
+                matomo_php_version: "{{ users | community.general.json_query(users_jpq.matomo_php_version) }}"
 
             - name: Check the Matomo superuser access and add the site
               block:
@@ -200,6 +202,8 @@
                   ansible.builtin.include_role:
                     name: matomo
                     tasks_from: check_auth.yml
+                  vars:
+                    matomo_php_version: "{{ users | community.general.json_query(users_jpq.matomo_php_version) }}"
 
                 - name: Matomo site present
                   block:
@@ -245,7 +249,9 @@
 
               when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
 
-          when: user_matomo_config.stat.exists
+          when:
+            - user_matomo_config.stat.exists
+            - users | community.general.json_query(users_jpq.matomo_php_version) is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
 
       when: matomo_user in getent_passwd.keys()
 

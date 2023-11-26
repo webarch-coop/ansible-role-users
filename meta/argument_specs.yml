@@ -134,6 +134,15 @@ argument_specs:
         type: str
         required: true
         description: A sub-directory of $HOME for users scripts.
+      users_jpq:
+        type: dict
+        required: true
+        description: A dictionary of JMESPath queries.
+        options:
+          matomo_php_version:
+            type: str
+            required: true
+            description: A JMESPath query for the Matomo users PHP version.
       users_mariadb:
         type: bool
         required: true
@@ -151,6 +160,10 @@ argument_specs:
         type: bool
         required: false
         description: Delete Matromo accounts and sites when removing users accounts.
+      users_matomo_php_version:
+        type: str
+        required: false
+        description: The Matomo users PHP version.
       users_muttrc:
         type: bool
         required: false
