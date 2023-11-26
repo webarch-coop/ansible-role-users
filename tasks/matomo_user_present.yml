@@ -1,19 +1,31 @@
 ---
-- name: Include user_present tasks from Matomo role
-  ansible.builtin.include_role:
-    name: matomo
-    tasks_from: user_present.yml
-    # tasks_from: adduser.yml
-  vars:
-    matomo_login: "{{ user.key }}"
-    matomo_login_email: "{{ user.value.users_email }}"
-    matomo_login_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    matomo_notify_passwd: "{{ user.value.users_matomo_notify_passwd | default(true) }}"
-    matomo_notify_from: "{{ users_notify_from }}"
-    matomo_notify_reply_to: "{{ users_notify_reply_to }}"
-    matomo_notify_subject_tag: "{{ users_notify_subject_tag }}"
-    matomo_notify_headers: "{{ users_notify_headers }}"
-    matomo_notify_signature: "{{ users_notify_signature }}"
+- name: Matomo user present
+  block:
+
+    - name: Set a fact for the Matomo users PHP version
+      ansible.builtin.set_fact:
+        users_matomo_php_version: "{{ users | community.general.json_query(users_jpq.matomo_php_version) | string }}"
+      when: users | community.general.json_query(users_jpq.matomo_php_version) is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+
+    - name: Include user_present tasks from Matomo role
+      ansible.builtin.include_role:
+        name: matomo
+        tasks_from: user_present.yml
+      vars:
+        matomo_login: "{{ user.key }}"
+        matomo_login_email: "{{ user.value.users_email }}"
+        matomo_login_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        matomo_notify_passwd: "{{ user.value.users_matomo_notify_passwd | default(true) }}"
+        matomo_notify_from: "{{ users_notify_from }}"
+        matomo_notify_reply_to: "{{ users_notify_reply_to }}"
+        matomo_notify_subject_tag: "{{ users_notify_subject_tag }}"
+        matomo_notify_headers: "{{ users_notify_headers }}"
+        matomo_notify_signature: "{{ users_notify_signature }}"
+        matomo_php: "/usr/bin/php{{ users_matomo_php_version }}"
+      when:
+        - users_matomo_php_version is defined
+        - users_matomo_php_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+
   tags:
     - users
 ...

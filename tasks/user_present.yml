@@ -161,6 +161,8 @@
                       ansible.builtin.include_role:
                         name: matomo
                         tasks_from: check_auth.yml
+                      vars:
+                        matomo_php: "/usr/bin/php{{ users_matomo_php_version }}"
 
                     - name: "Matomo accounts for user {{ user.key }} present"
                       ansible.builtin.include_tasks: matomo_user_present.yml
@@ -171,6 +173,8 @@
                   when:
                     - matomo_installed is defined
                     - matomo_installed is version('3.14.1', '>=')
+                    - users_matomo_php_version is defined
+                    - users_matomo_php_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
 
               when:
                 - user_matomo_config.stat.exists | bool
