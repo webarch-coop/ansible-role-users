@@ -4,8 +4,16 @@
 
     - name: Set a fact for the Matomo users PHP version
       ansible.builtin.set_fact:
-        users_matomo_php_version: "{{ users | community.general.json_query(users_jpq.matomo_php_version) | string }}"
-      when: users | community.general.json_query(users_jpq.matomo_php_version) is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+        users_matomo_php_version: "{{ users | community.general.json_query(users_matomo_php_version_jpq) | string }}"
+      vars:
+        users_matomo_php_version_jpq: '["{{ matomo_user }}"]|[0].users_phpfpm_version'
+
+    - name: Check that the Matomo users PHP version is available
+      ansible.builtin.assert:
+        that:
+          - users_matomo_php_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+          - users_matomo_php_version in users_phpfpm_versions
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: Include user_present tasks from Matomo role
       ansible.builtin.include_role:

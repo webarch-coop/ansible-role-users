@@ -5,8 +5,4 @@ usershostvars: "{{ dict(usersvarnames | list | zip(q('vars', *usersvarnames))) }
 
 # Set variables to an empty list
 users_apache_modules_loaded: []
-
-# JMESPath Queries
-users_jpq:
-  matomo_php_version: '["{{ matomo_user }}"]|[0].users_phpfpm_version'
 ...

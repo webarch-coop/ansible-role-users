@@ -134,15 +134,6 @@ argument_specs:
         type: str
         required: true
         description: A sub-directory of $HOME for users scripts.
-      users_jpq:
-        type: dict
-        required: true
-        description: A dictionary of JMESPath queries.
-        options:
-          matomo_php_version:
-            type: str
-            required: true
-            description: A JMESPath query for the Matomo users PHP version.
       users_mariadb:
         type: bool
         required: true
