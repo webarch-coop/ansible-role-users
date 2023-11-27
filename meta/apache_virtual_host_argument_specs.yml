@@ -897,7 +897,7 @@ nextcloud_title:
   type: str
   required: false
   description: Nextcloud title.
-nextcloud_trusted_hosts:
+nextcloud_trusted_domains:
   type: list
   elements: str
   required: false
