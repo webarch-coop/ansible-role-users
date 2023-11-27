@@ -907,43 +907,43 @@ nextcloud_trusted_proxies:
   required: false
   description: A dictionary of trusted proxies for Nextcloud.
   options:
-    1:
+    "1":
       type: str
       required: true
       description: The first trusted proxy for Nextcloud.
-    2:
+    "2":
       type: str
       required: false
       description: The second trusted proxy for Nextcloud.
-    3:
+    "3":
       type: str
       required: false
       description: The third trusted proxy for Nextcloud.
-    4:
+    "4":
       type: str
       required: false
       description: The fouth trusted proxy for Nextcloud.
-    5:
+    "5":
       type: str
       required: false
       description: The fifth trusted proxy for Nextcloud.
-    6:
+    "6":
       type: str
       required: false
       description: The sixth trusted proxy for Nextcloud.
-    7:
+    "7":
       type: str
       required: false
       description: The seventh trusted proxy for Nextcloud.
-    8:
+    "8":
       type: str
       required: false
       description: The eighth trusted proxy for Nextcloud.
-    9:
+    "9":
       type: str
       required: false
       description: The ninth trusted proxy for Nextcloud.
-    10:
+    "10":
       type: str
       required: false
       description: The tenth trusted proxy for Nextcloud.
