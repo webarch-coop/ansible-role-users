@@ -905,7 +905,7 @@ nextcloud_trusted_domains:
 nextcloud_trusted_proxies:
   type: dict
   required: false
-  description: A list of trusted proxies for Nextcloud.
+  description: A dictionary of trusted proxies for Nextcloud.
   options:
     1:
       type: str
