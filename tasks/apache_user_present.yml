@@ -522,7 +522,7 @@
           - "nextcloud_url: {% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
           - "nextcloud_user: {{ vhost.value.nextcloud_user | default(user.key) }}"
           - "nextcloud_version: {{ vhost.value.nextcloud_version }}"
-          - "nextcloud_trusted_domains: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %}{{ nextcloud_onlyoffice_documentserver }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}', 'localhost' ]"
+          - "nextcloud_trusted_domains: [ 'localhost', '{{ vhost.value.users_apache_server_name }}' ]{% if vhost.value.users_apache_server_aliases is defined %} + {{ vhost.value.users_apache_server_aliases }}{% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %} + [ '{{ nextcloud_onlyoffice_documentserver }}' ]{% endif %}"
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
@@ -565,7 +565,7 @@
         nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_domains: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %}{{ nextcloud_onlyoffice_documentserver }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}', 'localhost' ]"
+        nextcloud_trusted_domains: "[ 'localhost', '{{ vhost.value.users_apache_server_name }}' ]{% if vhost.value.users_apache_server_aliases is defined %} + {{ vhost.value.users_apache_server_aliases }}{% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %} + [ '{{ nextcloud_onlyoffice_documentserver }}' ]{% endif %}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
@@ -610,7 +610,7 @@
           - "nextcloud_url: {% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
           - "nextcloud_user: {{ vhost.value.nextcloud_user | default(user.key) }}"
           - "nextcloud_version: {{ vhost.value.nextcloud_version }}"
-          - "nextcloud_trusted_domains: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %}{{ nextcloud_onlyoffice_documentserver }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}', 'localhost' ]"
+          - "nextcloud_trusted_domains: [ 'localhost', '{{ vhost.value.users_apache_server_name }}' ]{% if vhost.value.users_apache_server_aliases is defined %} + {{ vhost.value.users_apache_server_aliases }}{% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %} + [ '{{ nextcloud_onlyoffice_documentserver }}' ]{% endif %}"
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
@@ -654,7 +654,7 @@
         nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-        nextcloud_trusted_domains: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %}{{ nextcloud_onlyoffice_documentserver }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}', 'localhost' ]"
+        nextcloud_trusted_domains: "[ 'localhost', '{{ vhost.value.users_apache_server_name }}' ]{% if vhost.value.users_apache_server_aliases is defined %} + {{ vhost.value.users_apache_server_aliases }}{% endif %}{% if nextcloud_onlyoffice_documentserver is defined and nextcloud_onlyoffice_documentserver | length > 0 %} + [ '{{ nextcloud_onlyoffice_documentserver }}' ]{% endif %}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
