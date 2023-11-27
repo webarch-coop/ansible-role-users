@@ -903,10 +903,50 @@ nextcloud_trusted_domains:
   required: false
   description: A list of trusted hosts.
 nextcloud_trusted_proxies:
-  type: list
-  elements: str
+  type: dict
   required: false
-  description: A list of trusted proxies for notify_push.
+  description: A list of trusted proxies for Nextcloud.
+  options:
+    1:
+      type: str
+      required: true
+      description: The first trusted proxy for Nextcloud.
+    2:
+      type: str
+      required: false
+      description: The second trusted proxy for Nextcloud.
+    3:
+      type: str
+      required: false
+      description: The third trusted proxy for Nextcloud.
+    4:
+      type: str
+      required: false
+      description: The fouth trusted proxy for Nextcloud.
+    5:
+      type: str
+      required: false
+      description: The fifth trusted proxy for Nextcloud.
+    6:
+      type: str
+      required: false
+      description: The sixth trusted proxy for Nextcloud.
+    7:
+      type: str
+      required: false
+      description: The seventh trusted proxy for Nextcloud.
+    8:
+      type: str
+      required: false
+      description: The eighth trusted proxy for Nextcloud.
+    9:
+      type: str
+      required: false
+      description: The ninth trusted proxy for Nextcloud.
+    10:
+      type: str
+      required: false
+      description: The tenth trusted proxy for Nextcloud.
 nextcloud_url:
   type: str
   required: false
