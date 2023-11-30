@@ -16,7 +16,7 @@
         group: root
       when:
         - ( users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | cool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
 
     - name: "Cron minute file {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
       ansible.builtin.shell: |-
@@ -166,7 +166,7 @@
 
         - name: "Set a variable from the crontab contents for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_crontab: "{{ users_crontab_list.stdout | community.general.jc('crontab_i') }}"
+            users_crontab: "{{ users_crontab_list.stdout | community.general.jc('crontab_u') }}"
 
         - name: "Debug the crontab for {{ user.key }}"
           ansible.builtin.debug:
