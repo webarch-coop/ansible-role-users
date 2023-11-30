@@ -7,140 +7,151 @@
       check_mode: false
       changed_when: false
       register: users_etc_passwd
+      failed_when: users_etc_passwd.rc is not regex('^0|1$')
 
-    - name: "{{ user.key }} present in {{ users_chroot_dir }}/etc/passwd"
-      ansible.builtin.lineinfile:
-        path: "{{ users_chroot_dir }}/etc/passwd"
-        line: "{{ users_etc_passwd.stdout }}"
-        state: present
-        mode: "0644"
-        owner: root
-        group: root
+    - name: "Skipping adding user to the chroot as user account doesn't exist yet for {{ user.key }}"
+      ansible.builtin.debug:
+        msg: "Skipping chroot tasks for {{ user.key }}"
 
-    - name: "Read {{ user.key }} entry from /etc/group"
-      ansible.builtin.command: "grep ^{{ user.key }}: /etc/group"
-      check_mode: false
-      changed_when: false
-      register: users_etc_group
-
-    - name: "{{ user.key }} present in {{ users_chroot_dir }}/etc/group"
-      ansible.builtin.lineinfile:
-        path: "{{ users_chroot_dir }}/etc/group"
-        line: "{{ users_etc_group.stdout }}"
-        state: present
-        mode: "0644"
-        owner: root
-        group: root
-
-    # /chroot/home/USER
-    - name: "Chroot home directory present for {{ user.key }}"
-      ansible.builtin.file:
-        path: "{{ users_chroot_dir }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        state: directory
-        mode: "{{ user.value.users_home_mode | default('0750') }}"
-        owner: "{{ user.value.users_home_owner | default(user.key) }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-
-    # /chroots/USER
-    - name: "Check if the ro chroot is mounted for {{ user.key }}"
-      ansible.builtin.command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"
-      check_mode: false
-      changed_when: false
-      register: users_findmnt
-      failed_when: users_findmnt.rc is not regex('^0|1$')
-
-    # /chroots/USER
-    - name: "Directory {{ users_chroot_users_dir }}/{{ user.key }} present for {{ user.key }}"
-      ansible.builtin.file:
-        path: "{{ users_chroot_users_dir }}/{{ user.key }}"
-        state: directory
-        mode: "0755"
-        owner: root
-        group: root
-      when: users_findmnt.rc == 1
-
-    - name: "Chroot directories mounted for {{ user.key }}"
-      ansible.builtin.include_tasks: mount.yml
-      vars:
-        users_mount_src: "{{ mnt.src }}"
-        users_mount_path: "{{ mnt.path }}"
-        users_mount_opts: "{{ mnt.opts }}"
-        users_mount_fstype: ext4
-        users_mount_state: mounted
-      loop:
-        # mount /chroot at /chroots/USER
-        - src: "{{ users_chroot_dir }}"
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}"
-          opts: ro,nosuid,bind,private
-        # mount /home/USER at /chroots/USER/home/USER
-        - src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-          opts: rw,nodev,nosuid,bind,private
-        # mount /run/mysqld at /chroots/USER/run/mysqld
-        - src: /run/mysqld
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld"
-          opts: ro,nodev,nosuid,noexec,bind,private
-        # mount /run/chroot at /chroots/USER/run/chroot
-        - src: "/run/chroot"
-          path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/chroot"
-          opts: ro,nodev,nosuid,noexec,bind,private
-      loop_control:
-        loop_var: mnt
-        label: "{{ mnt.path }}"
-
-    - name: Additional mounts for user home directory under /var/www both within and outside the chroot when Apache is chrooted
+    - name: Update chroot when the user is present
       block:
 
-        # /var/www/users/USER
-        - name: "Mount point for users home present in {{ users_apache_chroot_users_basedir }} for Apache chroot"
+        - name: "{{ user.key }} present in {{ users_chroot_dir }}/etc/passwd"
+          ansible.builtin.lineinfile:
+            path: "{{ users_chroot_dir }}/etc/passwd"
+            line: "{{ users_etc_passwd.stdout }}"
+            state: present
+            mode: "0644"
+            owner: root
+            group: root
+
+        - name: "Read {{ user.key }} entry from /etc/group"
+          ansible.builtin.command: "grep ^{{ user.key }}: /etc/group"
+          check_mode: false
+          changed_when: false
+          register: users_etc_group
+
+        - name: "{{ user.key }} present in {{ users_chroot_dir }}/etc/group"
+          ansible.builtin.lineinfile:
+            path: "{{ users_chroot_dir }}/etc/group"
+            line: "{{ users_etc_group.stdout }}"
+            state: present
+            mode: "0644"
+            owner: root
+            group: root
+
+        # /chroot/home/USER
+        - name: "Chroot home directory present for {{ user.key }}"
           ansible.builtin.file:
-            path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+            path: "{{ users_chroot_dir }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
             state: directory
             mode: "{{ user.value.users_home_mode | default('0750') }}"
             owner: "{{ user.value.users_home_owner | default(user.key) }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
 
-        # /var/www/users/USER
-        - name: "Users home mounted rw in {{ users_apache_chroot_users_basedir }} for Apache chroot"
-          ansible.builtin.include_tasks: mount.yml
-          vars:
-            users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-            users_mount_path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-            users_mount_opts: rw,nodev,nosuid,bind,private
-            users_mount_fstype: ext4
-            users_mount_state: mounted
+        # /chroots/USER
+        - name: "Check if the ro chroot is mounted for {{ user.key }}"
+          ansible.builtin.command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"
+          check_mode: false
+          changed_when: false
+          register: users_findmnt
+          failed_when: users_findmnt.rc is not regex('^0|1$')
 
-        # /chroot/var/www/users/USER
-        - name: "Users directory present at {{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
+        # /chroots/USER
+        - name: "Directory {{ users_chroot_users_dir }}/{{ user.key }} present for {{ user.key }}"
           ansible.builtin.file:
-            path: "{{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+            path: "{{ users_chroot_users_dir }}/{{ user.key }}"
             state: directory
-            mode: "{{ user.value.users_home_mode | default('0750') }}"
-            owner: "{{ user.value.users_home_owner | default(user.key) }}"
-            group: "{{ user.value.users_home_group | default(user.key) }}"
+            mode: "0755"
+            owner: root
+            group: root
+          when: users_findmnt.rc == 1
 
-        # /chroots/www-data/var/www/users/USER
-        - name: "Users home mounted rw at {{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
+        - name: "Chroot directories mounted for {{ user.key }}"
           ansible.builtin.include_tasks: mount.yml
           vars:
-            users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-            users_mount_path: "{{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-            users_mount_opts: rw,nodev,nosuid,bind,private
+            users_mount_src: "{{ mnt.src }}"
+            users_mount_path: "{{ mnt.path }}"
+            users_mount_opts: "{{ mnt.opts }}"
             users_mount_fstype: ext4
             users_mount_state: mounted
+          loop:
+            # mount /chroot at /chroots/USER
+            - src: "{{ users_chroot_dir }}"
+              path: "{{ users_chroot_users_dir }}/{{ user.key }}"
+              opts: ro,nosuid,bind,private
+            # mount /home/USER at /chroots/USER/home/USER
+            - src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+              path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+              opts: rw,nodev,nosuid,bind,private
+            # mount /run/mysqld at /chroots/USER/run/mysqld
+            - src: /run/mysqld
+              path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld"
+              opts: ro,nodev,nosuid,noexec,bind,private
+            # mount /run/chroot at /chroots/USER/run/chroot
+            - src: "/run/chroot"
+              path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/chroot"
+              opts: ro,nodev,nosuid,noexec,bind,private
+          loop_control:
+            loop_var: mnt
+            label: "{{ mnt.path }}"
 
-        # /chroots/USER/var/www/users/USER
-        - name: "Users home mounted rw at {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
-          ansible.builtin.include_tasks: mount.yml
-          vars:
-            users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-            users_mount_path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
-            users_mount_opts: rw,nodev,nosuid,bind,private
-            users_mount_fstype: ext4
-            users_mount_state: mounted
+        - name: Additional mounts for user home directory under /var/www both within and outside the chroot when Apache is chrooted
+          block:
 
-      when:
-        - ( users_apache_chroot is defined ) and ( users_apache_chroot )
+            # /var/www/users/USER
+            - name: "Mount point for users home present in {{ users_apache_chroot_users_basedir }} for Apache chroot"
+              ansible.builtin.file:
+                path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+                state: directory
+                mode: "{{ user.value.users_home_mode | default('0750') }}"
+                owner: "{{ user.value.users_home_owner | default(user.key) }}"
+                group: "{{ user.value.users_home_group | default(user.key) }}"
+
+            # /var/www/users/USER
+            - name: "Users home mounted rw in {{ users_apache_chroot_users_basedir }} for Apache chroot"
+              ansible.builtin.include_tasks: mount.yml
+              vars:
+                users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+                users_mount_path: "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+                users_mount_opts: rw,nodev,nosuid,bind,private
+                users_mount_fstype: ext4
+                users_mount_state: mounted
+
+            # /chroot/var/www/users/USER
+            - name: "Users directory present at {{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
+              ansible.builtin.file:
+                path: "{{ users_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+                state: directory
+                mode: "{{ user.value.users_home_mode | default('0750') }}"
+                owner: "{{ user.value.users_home_owner | default(user.key) }}"
+                group: "{{ user.value.users_home_group | default(user.key) }}"
+
+            # /chroots/www-data/var/www/users/USER
+            - name: "Users home mounted rw at {{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
+              ansible.builtin.include_tasks: mount.yml
+              vars:
+                users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+                users_mount_path: "{{ users_apache_chroot_dir }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+                users_mount_opts: rw,nodev,nosuid,bind,private
+                users_mount_fstype: ext4
+                users_mount_state: mounted
+
+            # /chroots/USER/var/www/users/USER
+            - name: "Users home mounted rw at {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }} for Apache chroot"
+              ansible.builtin.include_tasks: mount.yml
+              vars:
+                users_mount_src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+                users_mount_path: "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+                users_mount_opts: rw,nodev,nosuid,bind,private
+                users_mount_fstype: ext4
+                users_mount_state: mounted
+
+          when:
+            - users_apache_chroot is defined
+            - users_apache_chroot | bool
+
+      when: users_etc_passwd.rc == 0
 
   tags:
     - users

@@ -15,11 +15,11 @@
         owner: root
         group: root
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | cool )
 
     - name: "Cron minute file {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
-      ansible.builtin.shell: |
+      ansible.builtin.shell: |-
         set -e -o pipefail
         echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
       args:
@@ -27,14 +27,28 @@
         creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       when: ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
 
+    - name: "Check that the minute file is present at {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      register: users_cron_min_path
+
     - name: "Read the minute from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       ansible.builtin.slurp:
         src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       register: users_cron_min_b64encoded
+      when: users_cron_min_path.stat.exists | bool
 
-    - name: Set a variable for the users crontab minute
+    - name: "Set a variable for the users crontab minute based on the value in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       ansible.builtin.set_fact:
-        users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
+        users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim  }}"
+      when:
+        - users_cron_min_path.stat.exists | bool
+        - users_cron_min_b64encoded is defined
+
+    - name: "Set a variable for the users crontab minute when a value can't be read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+      ansible.builtin.set_fact:
+        users_cron_min: "{{ 60 | ansible.builtin.random }}"
+      when: not users_cron_min_path.stat.exists | bool
 
     - name: Generate files to be run by root in /etc/cron.d for chrooted users
       block:
@@ -136,81 +150,101 @@
             hour: "*"
 
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
         - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
 
-    - name: "USER env var added to {{ user.key }} crontab"
-      ansible.builtin.cron:
-        env: true
-        name: USER
-        value: "{{ user.key }}"
-        user: "{{ user.key }}"
+    - name: "Check if a crontab exists for {{ user.key }}"
+      ansible.builtin.command: "crontab -l -u {{ user.key }}"
+      check_mode: false
+      changed_when: false
+      register: users_crontab_list
+      failed_when: users_crontab_list.rc is not regex('^0|1')
 
-    - name: Check if the ~/tmp directory exists
-      ansible.builtin.stat:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-      register: users_home_tmp_path
+    - name: Set a fact for the existing crontab
+      block:
 
-    - name: "TMPDIR env var added to {{ user.key }} crontab"
-      ansible.builtin.cron:
-        env: true
-        name: TMPDIR
-        value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-        user: "{{ user.key }}"
-        insertafter: USER
-        state: "{% if users_home_tmp_path.stat.exists %}present{% else %}absent{% endif %}"
+        - name: "Set a variable from the crontab contents for {{ user.key }}"
+          ansible.builtin.set_fact:
+            users_crontab: "{{ users_crontab_list.stdout | community.general.jc('crontab_i') }}"
 
-    - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
-      ansible.builtin.cron:
-        name: "Daily deletion of TMPDIR files for {{ user.key }}"
-        job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
-        state: present
-        user: "{{ user.key }}"
-        minute: "{{ users_cron_min }}"
-        hour: "{{ users_cron_tmpdir_hour }}"
-      when:
-        - ( users_home_tmp_path.stat.exists )
-        - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-        - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean )
+        - name: "Debug the crontab for {{ user.key }}"
+          ansible.builtin.debug:
+            var: users_crontab
 
-    - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
-      ansible.builtin.cron:
-        name: "Daily deletion of TMPDIR files for {{ user.key }}"
-        state: absent
-        user: "{{ user.key }}"
-        minute: "{{ users_cron_min }}"
-        hour: "{{ users_cron_tmpdir_hour }}"
-      when:
-        - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-        - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
+        - name: "USER env var added to {{ user.key }} crontab"
+          ansible.builtin.cron:
+            env: true
+            name: USER
+            value: "{{ user.key }}"
+            user: "{{ user.key }}"
 
-    - name: "HOME env var added to {{ user.key }} crontab"
-      ansible.builtin.cron:
-        env: true
-        name: HOME
-        value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        user: "{{ user.key }}"
-        insertafter: USER
-        state: present
+        - name: Check if the ~/tmp directory exists
+          ansible.builtin.stat:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+          register: users_home_tmp_path
 
-    - name: "PATH env var added to {{ user.key }} crontab"
-      ansible.builtin.cron:
-        env: true
-        name: PATH
-        value: "/usr/local/bin:/usr/bin:/bin"
-        user: "{{ user.key }}"
-        insertafter: USER
-        state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
+        - name: "TMPDIR env var added to {{ user.key }} crontab"
+          ansible.builtin.cron:
+            env: true
+            name: TMPDIR
+            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            user: "{{ user.key }}"
+            insertafter: USER
+            state: "{% if users_home_tmp_path.stat.exists %}present{% else %}absent{% endif %}"
 
-    - name: "MAILTO env var added to {{ user.key }} crontab"
-      ansible.builtin.cron:
-        env: true
-        name: MAILTO
-        value: "{{ user.value.users_email }}"
-        user: "{{ user.key }}"
-        insertafter: USER
-        state: "{% if user.value.users_email is defined and user.value.users_email | length > 0 %}present{% else %}absent{% endif %}"
+        - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
+          ansible.builtin.cron:
+            name: "Daily deletion of TMPDIR files for {{ user.key }}"
+            job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
+            state: present
+            user: "{{ user.key }}"
+            minute: "{{ users_cron_min }}"
+            hour: "{{ users_cron_tmpdir_hour }}"
+          when:
+            - ( users_home_tmp_path.stat.exists )
+            - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+            - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean )
+
+        - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
+          ansible.builtin.cron:
+            name: "Daily deletion of TMPDIR files for {{ user.key }}"
+            state: absent
+            user: "{{ user.key }}"
+            minute: "{{ users_cron_min }}"
+            hour: "{{ users_cron_tmpdir_hour }}"
+          when:
+            - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+            - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
+
+        - name: "HOME env var added to {{ user.key }} crontab"
+          ansible.builtin.cron:
+            env: true
+            name: HOME
+            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            user: "{{ user.key }}"
+            insertafter: USER
+            state: present
+
+        - name: "PATH env var added to {{ user.key }} crontab"
+          ansible.builtin.cron:
+            env: true
+            name: PATH
+            value: "/usr/local/bin:/usr/bin:/bin"
+            user: "{{ user.key }}"
+            insertafter: USER
+            state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
+
+        - name: "MAILTO env var added to {{ user.key }} crontab"
+          ansible.builtin.cron:
+            env: true
+            name: MAILTO
+            value: "{{ user.value.users_email }}"
+            user: "{{ user.key }}"
+            insertafter: USER
+            state: "{% if user.value.users_email is defined and user.value.users_email | length > 0 %}present{% else %}absent{% endif %}"
+
+      when: users_crontab_list.rc == 0
 
     - name: MariaDB CRON tasks
       block:
@@ -233,10 +267,10 @@
             minute: "{{ users_cron_min }}"
             hour: "{{ users_cron_mysqldump_hour | default('04') }}"
           when:
-            - ( users_mysql_backup_script.stat.exists ) and ( users_home_mycnf_path.stat.exists )
+            - ( users_mysql_backup_script.stat.exists | bool ) and ( users_home_mycnf_path.stat.exists | bool )
             - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
 
-      when: ( users_mariadb is defined ) and ( users_mariadb )
+      when: ( users_mariadb is defined ) and ( users_mariadb | bool )
 
     - name: Cron jobs defined at a user level
       block:
