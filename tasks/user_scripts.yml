@@ -16,8 +16,13 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+
+    - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh file exists"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
+      register: users_cron_daily_path
 
     - name: "Daily scripts in place for {{ user.key }}"
       ansible.builtin.blockinfile:
@@ -37,8 +42,9 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0700"
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+        - ( users_cron_daily_path.stat.exists | bool )
 
     - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh in place"
       ansible.builtin.template:
@@ -49,8 +55,13 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+
+    - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh file exists"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
+      register: users_cron_hourly_path
 
     - name: "Hourly scripts in place for {{ user.key }}"
       ansible.builtin.blockinfile:
@@ -70,8 +81,9 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+        - ( users_cron_hourly_path.stat.exists | bool )
 
     - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh in place"
       ansible.builtin.template:
@@ -82,8 +94,13 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+
+    - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh file exists"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+      register: users_cron_minutely_path
 
     - name: "Minutely scripts in place for {{ user.key }}"
       ansible.builtin.blockinfile:
@@ -103,8 +120,9 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+        - ( users_cron_minutely_path.stat.exists | bool )
 
   tags:
     - users
