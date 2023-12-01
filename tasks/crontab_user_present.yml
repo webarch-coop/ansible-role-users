@@ -40,7 +40,7 @@
 
     - name: "Set a variable for the users crontab minute based on the value in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       ansible.builtin.set_fact:
-        users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim  }}"
+        users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
       when:
         - users_cron_min_path.stat.exists | bool
         - users_cron_min_b64encoded is defined
