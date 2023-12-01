@@ -149,7 +149,9 @@
         - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
           ansible.builtin.set_fact:
             users_update: "{{ users_update | default([]) + [user.key] }}"
-          when: user.value.users_state != "ignore"
+          when: >-
+            ( user.value.users_state is not defined ) or
+            ( user.value.users_state != "ignore" )
           loop: "{{ users | dict2items }}"
           loop_control:
             loop_var: user
