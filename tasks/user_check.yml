@@ -294,6 +294,12 @@
         var: users_phpfpm_versions
         verbosity: 2
 
+    - name: Debug user.value.users_phpfpm_version
+      ansible.builtin.debug:
+        var: user.value.users_phpfpm_version
+        verbosity: 2
+      when: user.value.users_phpfpm_version is defined
+
     - name: Check that user.value.users_phpfpm_version is in users_phpfpm_versions when defined
       ansible.builtin.assert:
         that:

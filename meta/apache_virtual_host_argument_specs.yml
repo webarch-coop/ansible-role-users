@@ -598,6 +598,10 @@ moodle_shortname:
   type: str
   required: false
   description: Moodle short name.
+moodle_summary:
+  type: str
+  required: false
+  description: Moodle summary.
 moodle_tmp:
   type: str
   required: false
