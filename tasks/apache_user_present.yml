@@ -472,7 +472,7 @@
         moodle_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         moodle_data: "{{ vhost.value.moodle_data | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}-data"
         moodle_version: "{{ vhost.value.moodle_version }}"
-        moodle_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
+        # moodle_trusted_hosts: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }} + {% endif %}[ '{{ vhost.value.users_apache_server_name }}' ]"
         moodle_domain: "{{ vhost.value.moodle_domain | default(vhost.value.users_apache_server_name) }}"
         moodle_url: "{% if vhost.value.moodle_url is defined %}{{ vhost.value.moodle_url }}{% elif vhost.value.moodle_domain is defined %}https://{{ vhost.value.moodle_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
         moodle_fullname: "{{ vhost.value.moodle_fullname | default(vhost.value.users_apache_server_name) }}"
@@ -493,6 +493,9 @@
         moodle_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
         moodle_notify_headers: "{{ users_notify_headers }}"
         moodle_notify_signature: "{{ users_notify_signature }}"
+        moodle_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+        # Not sure why this fails:
+        moodle_verify: false
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost

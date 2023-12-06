@@ -619,6 +619,10 @@ moodle_user:
   type: str
   required: false
   description: Moodle user.
+moodle_verify:
+  type: bool
+  required: false
+  description: Verify moodle_ variables using the arg spec.
 moodle_version:
   type: str
   required: false

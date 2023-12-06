@@ -300,10 +300,13 @@
         verbosity: 2
       when: user.value.users_phpfpm_version is defined
 
-    - name: Check that user.value.users_phpfpm_version is in users_phpfpm_versions when defined
+    - name: Check that user.value.users_phpfpm_version is a string and is in users_phpfpm_versions when defined
       ansible.builtin.assert:
         that:
+          - user.value.users_phpfpm_version | type_debug == "str"
+          - user.value.users_phpfpm_version | type_debug != "int"
           - user.value.users_phpfpm_version is in users_phpfpm_versions
+        fail_msg: "The users_phpfpm_version variable needs to be quoted to ensure it is a string not a interger and the version of PHP required must already be installed."
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when:
         - ( "phpfpm" in getent_group )
