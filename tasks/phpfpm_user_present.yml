@@ -331,6 +331,17 @@
             group: "{{ user.value.users_group | default(user.key) }}"
           when: users_phpapcu_pkg in ansible_local.dpkg.installed
 
+        - name: Users ~/.php.ini file present and max_input_vars set to 100000
+          ansible.builtin.lineinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            regexp: '^max_input_vars = '
+            line: 'max_input_vars = 100000'
+            state: present
+            create: true
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
       when: users_phpcli_pkg in ansible_local.dpkg.installed
 
   tags:
