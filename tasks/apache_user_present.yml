@@ -60,6 +60,7 @@
     name: acmesh
     tasks_from: letsencrypt
   vars:  # noqa var-naming[no-role-prefix]
+    acmesh: true
     common_name: "{{ vhost.value.users_apache_server_name }}"
     subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | reject('regex', '^[*][.]') | sort }}"
     reloadcmd: "service apache2 reload"
@@ -77,6 +78,7 @@
     name: acmesh
     tasks_from: letsencrypt
   vars:  # noqa var-naming[no-role-prefix]
+    acmesh: true
     common_name: "{{ user.key }}.{{ inventory_hostname }}"
     subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | reject('regex', '^[*][.]') | sort }}"
     reloadcmd: "service apache2 reload"
