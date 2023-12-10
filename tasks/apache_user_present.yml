@@ -98,7 +98,7 @@
 
     - name: Set a fact for a regular expression to match the commonName to be used for the cert
       ansible.builtin.set_fact:
-        users_common_name_regex: "^{{ user.key }}.{{ inventory_hostname }}$"
+        users_common_name_regex: "^{{ user.key }}[.]{{ inventory_hostname | regex_escape }}$"
 
     - name: "Debug Let's Encrypt cert per user role included for {{ user.key }}"  # noqa var-naming[no-role-prefix]
       ansible.builtin.debug:
