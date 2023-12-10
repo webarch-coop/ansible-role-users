@@ -317,4 +317,8 @@ argument_specs:
           - phpfpm
           - quotas
           - sshkeys
+      users_verify:
+        type: bool
+        required: false
+        description: Verify all variables that start with users_ using the arg spec.
 ...

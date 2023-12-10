@@ -1,6 +1,4 @@
 ---
-users_verify: false
-
 # If users_update_strategy is set to "all" then all users will be configured
 # everytime the tasks in this role are run, it it is set to "changed" than only
 # user accounts that have changes will be updated. If it is set to "apache" then
@@ -564,4 +562,5 @@ users_ssh_authorized_keys_file_name: authorized_keys
 # last option in /etc/shells ending in /bash, so set it manually if this isn't
 # what is wanted
 # users_bash: /usr/bin/bash
+users_verify: true
 ...
