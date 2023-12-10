@@ -62,7 +62,7 @@
   vars:  # noqa var-naming[no-role-prefix]
     acmesh: true
     acmesh_common_name: "{{ vhost.value.users_apache_server_name }}"
-    acmesh_subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | reject('regex', '^[*][.]') | sort }}"
+    acmesh_subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | reject('regex', '^[*][.]') | unique | sort }}"
     acmesh_reloadcmd: "service apache2 reload"
   loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
   loop_control:
@@ -80,7 +80,7 @@
   vars:  # noqa var-naming[no-role-prefix]
     acmesh: true
     acmesh_common_name: "{{ user.key }}.{{ inventory_hostname }}"
-    acmesh_subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | reject('regex', '^[*][.]') | sort }}"
+    acmesh_subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | reject('regex', '^[*][.]') | unique | sort }}"
     acmesh_reloadcmd: "service apache2 reload"
   when: ( users_cert is defined ) and ( users_cert == 'user' ) and ( not ansible_check_mode )
   tags:
