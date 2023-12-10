@@ -124,7 +124,7 @@
         mode: "0644"
         owner: root
         group: root
-      when: users_phpfpm_pool_conf_check.stat.exists
+      when: users_phpfpm_pool_conf_check.stat.exists | bool
 
     - name: "PHP FPM pool.d file present for {{ user.key }}"
       ansible.builtin.template:
@@ -170,13 +170,13 @@
             mode: "0644"
             owner: root
             group: root
-          when: users_phpfpm_pool_conf_check.stat.exists
+          when: users_phpfpm_pool_conf_check.stat.exists | bool
 
         - name: "php-fpm{{ users_phpfpm_version }} --test failed, so removing config"
           ansible.builtin.file:
             path: "/etc/php/{{ users_phpfpm_version }}/fpm/pool.d/{{ user.key }}.conf"
             state: absent
-          when: not users_phpfpm_pool_conf_check.stat.exists
+          when: not users_phpfpm_pool_conf_check.stat.exists | bool
 
         - name: "Fail as php-fpm{{ users_phpfpm_version }} --test failed"
           ansible.builtin.fail:
@@ -185,7 +185,7 @@
               - "The broken config is available in /etc/php/{{ users_phpfpm_version }}/fpm/pool.d/.{{ user.key }}.conf.broken"
               - "The error was: {{ users_phpfpm_pool_configtest.stderr }}"
 
-      when: users_phpfpm_pool_conf.changed
+      when: users_phpfpm_pool_conf.changed | bool
 
     - name: Users Apache PHP FPM localhost.d file present
       ansible.builtin.template:
@@ -296,34 +296,63 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        # The following three lineinfiles could be updated to use community.general.ini_file
-        - name: Users ~/.php.ini file present and sys_temp_dir set to ~/tmp
-          ansible.builtin.lineinfile:
+        - name: Users ~/.php.ini file present and sys_temp_dir not in PHP section absent
+          community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            regexp: '^sys_temp_dir = '
-            line: 'sys_temp_dir = "/home/{{ user.key }}/tmp"'
+            option: sys_temp_dir
+            state: absent
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and sys_temp_dir in PHP section set to ~/tmp
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            section: PHP
+            option: sys_temp_dir
+            value: "/home/{{ user.key }}/tmp"
             state: present
             create: true
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and memory_limit set to -1
-          ansible.builtin.lineinfile:
+        - name: Users ~/.php.ini file present and memory_limit not in PHP section absent
+          community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            regexp: '^memory_limit = '
-            line: 'memory_limit = -1'
+            option: memory_limit
+            state: absent
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and memory_limit in PHP section set to -1
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            section: PHP
+            option: memory_limit
+            value: "-1"
             state: present
             create: true
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and apc.enable_cli set to 1
-          ansible.builtin.lineinfile:
+        - name: Users ~/.php.ini file present and apc.enable_cli not in apc section absent
+          community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            regexp: '^apc.enable_cli = '
-            line: 'apc.enable_cli = 1'
+            option: "apc.enable_cli"
+            state: absent
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and apc.enable_cli in apc section set to 1
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            section: apc
+            option: "apc.enable_cli"
+            value: "1"
             state: present
             create: true
             mode: "0640"
@@ -331,18 +360,28 @@
             group: "{{ user.value.users_group | default(user.key) }}"
           when: users_phpapcu_pkg in ansible_local.dpkg.installed
 
-        - name: Users ~/.php.ini file present and max_input_vars set to 100000
-          ansible.builtin.lineinfile:
+        - name: Users ~/.php.ini file present and max_input_vars not in PHP section absent
+          community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            regexp: '^max_input_vars = '
-            line: 'max_input_vars = 100000'
+            option: max_input_vars
+            state: absent
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and max_input_vars in PHP section set to 100000
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            section: PHP
+            option: max_input_vars
+            value: 100000
             state: present
             create: true
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-      when: users_phpcli_pkg in ansible_local.dpkg.installed
+      when: users_phpcli_pkg in ansible_local.dpkg.installed | bool
 
   tags:
     - users
