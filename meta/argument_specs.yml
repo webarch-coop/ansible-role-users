@@ -16,7 +16,7 @@ argument_specs:
     options:
       users:
         type: dict
-        required: true
+        required: false
         description: A dictionary describing the the user accounts to be configured.
       users_apache:
         type: bool

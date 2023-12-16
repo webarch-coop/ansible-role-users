@@ -1,4 +1,24 @@
+# Copyright 2018-2023 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
+- name: Webarchitects Ansible User role role skipped
+  ansible.builtin.debug:
+    msg: "The tasks in the Users role are not being run since the users variable is not defined, empty or not a dictionary."
+  when: >-
+    ( users is not defined ) or
+    ( users is defined and not users | bool ) or
+    ( users is defined and users | type_debug != "dict" ) or
+    ( users is defined and users == {} )
+  tags:
+    - users
+
 - name: Webarchitects Ansible User Role
   block:
 
@@ -18,7 +38,6 @@
       ansible.builtin.debug:
         var: users
         verbosity: 2
-      when: users is defined
 
     - name: Check users_ variables using meta/argument_specs.yml
       ansible.builtin.validate_argument_spec:
@@ -30,11 +49,11 @@
 
     - name: Include the users tasks when the users dictionary is defined
       ansible.builtin.include_tasks: users.yml
-      when:
-        - users is defined
-        - users | type_debug == "dict"
-        - users != {}
 
+  when:
+    - users is defined
+    - users | type_debug == "dict"
+    - users != {}
   tags:
     - users
 ...
