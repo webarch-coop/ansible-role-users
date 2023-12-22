@@ -834,7 +834,7 @@
         matomo_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
         matomo_notify_headers: "{{ users_notify_headers }}"
         matomo_notify_passwd: "{{ vhost.value.matomo_notify_passwd | default(true) | bool }}"
-        matomo_email_signature: "{{ users_notify_signature }}"
+        matomo_notify_signature: "{{ users_notify_signature }}"
         matomo_version: "{{ vhost.value.matomo_version | default('') }}"
         matomo_autoupdate: "{{ vhost.value.matomo_autoupdate | default(true) | bool }}"
         matomo_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
