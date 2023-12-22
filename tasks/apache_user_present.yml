@@ -818,7 +818,6 @@
         matomo_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         matomo_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         matomo_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
-        matomo_bin: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
         matomo_logs: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
         matomo_db_username: "{{ user.key }}"
         matomo_db_pass: "{{ users_mariadb_password }}"

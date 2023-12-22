@@ -298,10 +298,6 @@ matomo_autoupdate:
   type: bool
   required: false
   description: Automatically update Matomo.
-matomo_bin:
-  type: str
-  required: false
-  description: Matomo bin directory.
 matomo_dbname:
   type: str
   required: false
@@ -374,6 +370,10 @@ matomo_notify_passwd:
   type: bool
   required: false
   description: Matomo send password notification to the first user account when installing.
+matomo_php_version:
+  type: str
+  required: false
+  description: The PHP version the Matomo CLI should use.
 matomo_private:
   type: str
   required: false
