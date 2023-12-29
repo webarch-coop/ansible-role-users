@@ -199,7 +199,7 @@
     - name: Users Nginx PHP FPM localhost.d file present
       ansible.builtin.template:
         src: nginx_localhost.conf.j2
-        dest: "/etc/nginx/localhost.d/{{ item }}.conf"
+        dest: "/etc/nginx/localhost.d/{{ users.key }}.conf"
         mode: "0644"
         owner: root
         group: root
