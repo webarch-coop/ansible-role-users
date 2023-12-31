@@ -1,4 +1,5 @@
 # {{ ansible_managed }}
+# {# j2lint: disable=jinja-statements-delimiter j2lint: disable=single-statement-per-line j2lint: disable=jinja-statements-indentation #}
 
 {%- for vhost,vhost_config in user.value.users_apache_virtual_hosts.items() %}
 

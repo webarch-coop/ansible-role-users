@@ -1,4 +1,5 @@
 ; Ansible provisioned
+; {# j2lint: disable=jinja-statements-indentation j2lint: disable=single-statement-per-line #}
 [{{ user.key }}]
 user = {{ user.key }}
 group = {{ user.value.users_group | default(user.key) }}

@@ -1,3 +1,4 @@
+{# j2lint: disable=jinja-statements-no-tabs j2lint: disable=single-statement-per-line #}
 Hi {{ user.value.users_name | default(user.key) }}
 
 Your MariaDB account and database details for {{ inventory_hostname }}:
@@ -29,4 +30,6 @@ All the best
 {{ users_notify_reply_to }}
 
 -- 
-{{ users_notify_signature | default('Webarch Co-operative Limited\nhttps://www.webarch.coop/') }}
+{% if users_notify_signature is defined %}
+{{ users_notify_signature }}
+{% endif %}

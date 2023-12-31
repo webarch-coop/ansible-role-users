@@ -1,3 +1,4 @@
+{# j2lint: disable=jinja-statements-no-tabs #}
 Hi {{ user.value.users_name | default(user.key) }}
 
 Your SFTP / SSH account details for {{ inventory_hostname }}:
@@ -12,4 +13,6 @@ All the best
 {{ users_notify_reply_to }}
 
 -- 
-{{ users_notify_signature | default('Webarch Co-operative Limited\nhttps://www.webarch.coop/') }}
+{% if users_notify_signature is defined %}
+{{ users_notify_signature }}
+{% endif %}
