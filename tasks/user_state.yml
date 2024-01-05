@@ -35,6 +35,7 @@
   ansible.builtin.set_fact:
     users_update: "{{ users_update | default([]) + [user.key] }}"
   when:
+    - ( user.value.users_state is not defined ) or ( user.value.users_state != "ignore" )
     - users_current_state.stat.exists | bool
     - users_current_state.stat.checksum != users_proposed_state.stat.checksum
   tags:

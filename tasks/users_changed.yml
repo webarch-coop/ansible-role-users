@@ -1,6 +1,6 @@
 ---
 # The following will list the user state files that have changed
-# however if the tasks were not full completed then just using
+# however if the tasks were not fully completed then just using
 # this would result in changes not being applied, so a check of
 # the proposed vs the current state files is needed.
 #
