@@ -274,9 +274,9 @@ users_phpfpm_disable_functions:
   # - curl_multi_exec
   - dl
   # exec is used by the Nexcloud ONLYOFFICE app
-  - exec
+  # - exec
   # fsockopen is used by CiviCRM to send email
-  - fsockopen
+  # - fsockopen
   - passthru
   - pcntl_alarm
   - pcntl_fork
@@ -309,13 +309,13 @@ users_phpfpm_disable_functions:
   - posix_setsid
   - posix_setuid
   # The proc_ functions are used by some features of MediaWiki
-  - proc_close
-  - proc_get_status
-  - proc_nice
-  - proc_open
-  - proc_terminate
+  # - proc_close
+  # - proc_get_status
+  # - proc_nice
+  # - proc_open
+  # - proc_terminate
   # The shell_exec function is used by Matomo
-  - shell_exec
+  # - shell_exec
   - show_source
   - socket_create
   - symlink
