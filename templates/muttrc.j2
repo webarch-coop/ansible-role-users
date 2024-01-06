@@ -1,5 +1,5 @@
-# {{ ansible_managed }}
-# {# j2lint: disable=single-statement-per-line #}
+# {# j2lint: disable=single-statement-per-line #}{{ ansible_managed }}
+
 set tmpdir="~/tmp"
 set folder="~/.mutt"
 set postponed="~/.mutt/drafts"
@@ -24,3 +24,5 @@ set from="{% if user.value.users_name is defined %}{{ user.value.users_name }} {
 {% else %}
 set from="{% if user.value.users_name is defined %}{{ user.value.users_name }} {% endif %}<{{ user.key }}@{{ inventory_hostname }}>"
 {% endif %}
+
+# vim: ft=muttrc:

@@ -1,5 +1,5 @@
-# {{ ansible_managed }}
-# {# j2lint: disable=single-statement-per-line j2lint: disable=jinja-statements-indentation #}
+# {# j2lint: disable=single-statement-per-line j2lint: disable=jinja-statements-indentation #}{{ ansible_managed }}
+
 *filter
 :INPUT ACCEPT [0:0]
 :FORWARD ACCEPT [0:0]
@@ -34,4 +34,5 @@
 -A OUTPUT -j ACCEPT
 -A f2b-sshd -j RETURN
 COMMIT
-# vim: set ft=ipfilter:
+
+# vim: syntax=ipfilter:
