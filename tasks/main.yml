@@ -48,7 +48,7 @@
         - users_verify is defined
         - users_verify | bool
 
-    - name: Include the users tasks when the users dictionary is defined
+    - name: Include the users tasks
       ansible.builtin.include_tasks: users.yml
 
   when:
