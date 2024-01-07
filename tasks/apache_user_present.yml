@@ -63,6 +63,29 @@
   tags:
     - users
 
+- name: Set a fact for the acmesh_subject_alt_names for the acmesh role
+  block:
+
+    - name: Set a fact for the acmesh_subject_alt_names for the acmesh role
+      ansible.builtin.set_fact:
+        users_acmesh_subject_alt_names: []
+      when: >-
+        ( vhost.value.users_apache_server_aliases is not defined ) or
+        ( vhost.value.users_apache_server_aliases == [] )
+
+    - name: Set a fact for the acmesh_subject_alt_names for the acmesh role
+      ansible.builtin.set_fact:
+        users_acmesh_subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | reject('regex', '^[*][.]') | reject('regex', users_common_name_regex) | unique | sort }}"
+      when:
+        - vhost.value.users_apache_server_aliases is defined
+        - vhost.value.users_apache_server_aliases != []
+
+  when: >-
+    ( ( users_cert is defined ) and ( users_cert == "vhost" ) and ( not ansible_check_mode ) ) or
+    ( ( users_cert is defined ) and ( users_cert == 'user' ) and ( not ansible_check_mode ) )
+  tags:
+    - users
+
 - name: One cert per VirtualHost
   block:
 
@@ -77,7 +100,7 @@
       vars:  # noqa var-naming[no-role-prefix]
         acmesh: true
         acmesh_common_name: "{{ vhost.value.users_apache_server_name }}"
-        acmesh_subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | reject('regex', '^[*][.]') | unique | sort }}"
+        acmesh_subject_alt_names: "{{ users_acmesh_subject_alt_names }}"
         acmesh_reloadcmd: "service apache2 reload"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
@@ -91,7 +114,7 @@
       vars:  # noqa var-naming[no-role-prefix]
         acmesh: true
         acmesh_common_name: "{{ vhost.value.users_apache_server_name }}"
-        acmesh_subject_alt_names: "{{ vhost.value.users_apache_server_aliases | default([]) | reject('regex', '^[*][.]') | unique | sort }}"
+        acmesh_subject_alt_names: "{{ users_acmesh_subject_alt_names }}"
         acmesh_reloadcmd: "service apache2 reload"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
@@ -119,7 +142,7 @@
       vars:  # noqa var-naming[no-role-prefix]
         acmesh: true
         acmesh_common_name: "{{ user.key }}.{{ inventory_hostname }}"
-        acmesh_subject_alt_names: "{{ user.value.users_apache_virtual_hosts | dict2items | json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') | reject('regex', '^[*][.]') | reject('regex', users_common_name_regex) | unique | sort }}"
+        acmesh_subject_alt_names: "{{ users_acmesh_subject_alt_names }}"
         acmesh_reloadcmd: "service apache2 reload"
 
     - name: "Let's Encrypt cert per user role included for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
