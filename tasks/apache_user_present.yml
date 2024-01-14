@@ -80,6 +80,12 @@
         - vhost.value.users_apache_server_aliases is defined
         - vhost.value.users_apache_server_aliases != []
 
+    - name: Debug the acmesh_subject_alt_names for the acmesh role
+      ansible.builtin.debug:
+        var: users_acmesh_subject_alt_names
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      when: users_acmesh_subject_alt_names is defined
+
   when: >-
     ( ( users_cert is defined ) and ( users_cert == "vhost" ) and ( not ansible_check_mode ) ) or
     ( ( users_cert is defined ) and ( users_cert == 'user' ) and ( not ansible_check_mode ) )
