@@ -430,6 +430,7 @@
       when:
         - ( vhost.value.users_cms == "wordpress" )
         - ( users_matomo is defined ) and ( users_matomo )
+        - ( user.value.users_matomo_account is not defined ) or ( user.value.users_matomo_account is defined and user.value.users_matomo_account | bool )
 
     - name: "Include WordPress role for {{ user.key }} without Matomo"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
@@ -467,7 +468,7 @@
         label: "{{ vhost.key }}"
       when:
         - ( vhost.value.users_cms == "wordpress" )
-        - ( users_matomo is not defined ) or ( not users_matomo )
+        - ( ( users_matomo is defined and users_matomo | bool and user.value.users_matomo_account is defined and not user.value.users_matomo_account | bool ) or ( users_matomo is not defined or not users_matomo | bool ) )
 
     - name: "Include Drupal role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:
