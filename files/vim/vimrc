@@ -22,4 +22,4 @@ map <F10> gqap
 set mouse-=a
 
 " https://vi.stackexchange.com/a/14358
-set viminfo=+=n~/.vim/viminfo
+set viminfo='50,<1000,s100,:0,n~/.vim/viminfo
