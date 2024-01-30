@@ -161,7 +161,7 @@
     Alias "{{ loc.alias }}"
         {%- elif loc.proxy_pass is defined %}
     <IfModule proxy_module>
-      ProxyPass "{{ loc.proxy_pass }}"
+      ProxyPass "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ]','" "') }}"
           {%- if loc.reverse is defined and loc.reverse | bool %}
       ProxyPassReverse "{{ loc.proxy_pass }}"
           {%- endif %}
@@ -183,14 +183,14 @@
   </Location>
   {%- if vhost_config.users_apache_robots is defined and vhost_config.users_apache_robots == "deny" %}
     {%- if vhost_config.users_cms is defined and vhost_config.users_cms == "nextcloud" %}
-  IncludeOptional /etc/apache2/conf-available/robots-deny-nextcloud.conf
+  IncludeOptional "/etc/apache2/conf-available/robots-deny-nextcloud.conf"
     {%- else %}
-  IncludeOptional /etc/apache2/conf-available/robots-deny.conf
+  IncludeOptional "/etc/apache2/conf-available/robots-deny.conf"
     {%- endif %}
   {%- endif %}
   {%- if vhost_config.users_apache_remoteip is defined %}
     {%- if vhost_config.users_apache_remoteip == "cloudflare" %}
-  IncludeOptional /etc/apache2/conf-available/cloudflare.conf
+  IncludeOptional "/etc/apache2/conf-available/cloudflare.conf"
     {%- endif %}
   {%- endif %}
   {%- if apache_conf_enabled is defined %}
@@ -208,7 +208,7 @@
   {%- endif %}
   {%- if vhost_config.users_apache_include_optional is defined -%}
     {%- for inc in vhost_config.users_apache_include_optional %}
-  IncludeOptional {{ inc }}
+  IncludeOptional "{{ inc }}"
     {%- endfor %}
   {%- endif %}
   {%- if vhost_config.users_apache_alias is defined or vhost_config.users_apache_redirects is defined %}
