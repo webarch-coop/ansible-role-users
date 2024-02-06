@@ -330,38 +330,15 @@
 
         - name: "Check that attributes for Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
           ansible.builtin.assert:
-            that:
-              - ( alias.url is defined and alias.path is defined ) or ( alias.regex_url is defined and alias.regex_path is defined )
+            that: >-
+              ( alias.url is defined and alias.path is defined ) or
+              ( alias.url_regex is defined and alias.path is defined ) or
+              ( alias.script is defined and alias.path is defined ) or
+              ( alias.script_regex is defined and and alias.path is defined )
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ vhost.value.users_apache_alias }}"
           loop_control:
             loop_var: alias
-
-        - name: "Checks for Alias directive URL and path {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - alias.url is regex('^[\/].*')
-              - alias.path is regex('^[\/].*')
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_alias }}"
-          loop_control:
-            loop_var: alias
-          when:
-            - alias.url is defined
-            - alias.path is defined
-
-        - name: "Checks for Alias directive regular expression alias and path {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - alias.regex_url | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
-              - alias.regex_path | type_debug is regex('^str|AnsibleUnicode|AnsibleUnsafeText$')
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_alias }}"
-          loop_control:
-            loop_var: alias
-          when:
-            - alias.regex_url is defined
-            - alias.regex_path is defined
 
       when: vhost.value.users_apache_alias is defined
 

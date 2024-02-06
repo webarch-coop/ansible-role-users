@@ -526,7 +526,8 @@ directives, for example:
             status: permanent
           - regex_path: (.*)\.gif$
             url: http://other.example.com$1.jpg
-          # Use a `regex_path` if you want any URL on the domain to be redirected to a specific page
+          # Use a `regex_path` if you want to use RedirectMatch rather than Redirect so that any URL
+          # on the domain is redirected to a specific page
           - regex_path: (.*)
             url: http://new.example.com/about
 ```
@@ -542,8 +543,23 @@ directives, for example:
             path: /ftp/pub/image
           - url: /icons/
             path: /usr/local/apache/icons/
-          - regex_url: ^/icons(/|$)(.*)
+          - url_regex: ^/icons(/|$)(.*)
             path: /usr/local/apache/icons$1$2
+```
+
+The `users_apache_alias` array can also be used to generate
+[`ScriptAlias`](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#scriptalias) and
+[`ScriptAliasMatch`](https://httpd.apache.org/docs/2.4/mod/mod_alias.html#scriptaliasmatch)
+directives, for example:
+
+```yaml
+        users_apache_alias:
+          - url: /munin/static
+            path: /var/cache/munin/www/static
+          - script: /munin
+            path: /usr/lib/munin/cgi/munin-cgi-html
+          - script: /munin-cgi/munin-cgi-graph
+            path: /usr/lib/munin/cgi/munin-cgi-graph
 ```
 
 ### Rewrite

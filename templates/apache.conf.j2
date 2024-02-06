@@ -228,10 +228,14 @@
     {%- endif %}
     {%- if vhost_config.users_apache_alias is defined %}
       {%- for alias in vhost_config.users_apache_alias %}
-        {%- if alias.url is defined and alias.path is defined %}
+        {%- if alias.script is defined and alias.path is defined %}
+    ScriptAlias "{{ alias.script }}" "{{ alias.path }}"
+        {%- elif alias.regex_script is defined and alias.path is defined %}
+    ScriptAliasMatch "{{ alias.script_regex }}" "{{ alias.path }}"
+        {%- elif alias.url is defined and alias.path is defined %}
     Alias "{{ alias.url }}" "{{ alias.path }}"
-        {%- elif alias.regex_url is defined and alias.regex_path is defined %}
-    AliasMatch "{{ alias.regex_url }}" "{{ alias.regex_path }}"
+        {%- elif alias.url_regex is defined and alias.path is defined %}
+    AliasMatch "{{ alias.url_regex }}" "{{ alias.path }}"
         {%- endif %}
       {%- endfor %}
     {%- endif %}

@@ -1060,6 +1060,30 @@ users_apache_add_type:
       description: The MIME type for the file extension.
 users_apache_alias:
   type: list
+  elements: dict
+  required: false
+  description: A list of configuration for Alias, Aliasmatch, ScriptAlias or ScriptAliasMatch Apache directives.
+  options:
+    path:
+      required: true
+      type: str
+      description: The second argument for Apache Alias, AliasMatch, ScriptAlias or ScriptAliasMatch filesystem path.
+    script:
+      required: false
+      type: str
+      description: The first argument for Apache ScriptAlias.
+    script_regex:
+      required: false
+      type: str
+      description: The first argument for Apache ScriptAliasMatch.
+    url:
+      required: false
+      type: str
+      description: The first argument for Apache ScriptAlias.
+    url_regex:
+      required: false
+      type: str
+      description: The first argument for Apache AliasMatch.
 users_apache_allow_encoded_slashes:
   type: str
   required: false

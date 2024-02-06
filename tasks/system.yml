@@ -50,11 +50,12 @@
     - name: Create an array for the shells including /usr/sbin/nologin
       ansible.builtin.set_fact:
         users_shells:
+          - /bin/false
           - /usr/sbin/nologin
 
     - name: Array set for available shells
       ansible.builtin.set_fact:
-        users_shells: "{{ users_shells | default([]) + [shell] }}"
+        users_shells: "{{ users_shells + [shell] }}"
       when:
         - ( shell is not regex('^#') ) and ( shell | length > 0 )
       loop: "{{ ( users_shells_b64encoded['content'] | b64decode ).split('\n') | list }}"
