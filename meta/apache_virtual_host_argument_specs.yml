@@ -1062,7 +1062,7 @@ users_apache_alias:
   type: list
   elements: dict
   required: false
-  description: A list of configuration for Alias, Aliasmatch, ScriptAlias or ScriptAliasMatch Apache directives.
+  description: A list of configuration for Alias, AliasMatch, ScriptAlias or ScriptAliasMatch Apache directives.
   options:
     path:
       required: true
