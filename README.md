@@ -899,12 +899,14 @@ The other options, `Digest` and `Form` and `None` can be used but they don't add
 
 Set `users_apache_expires` to one of these values:
 
+* active
 * forever
 * medium
 * strict
 
 For one of the [Apache role](https://git.coop/webarch/apache) templates to be added as a `IncludeOptional` for the `Directory`:
 
+* [expires-active.conf](https://git.coop/webarch/apache/-/blob/master/templates/expires-active.conf.j2)
 * [expires-forever.conf](https://git.coop/webarch/apache/-/blob/master/templates/expires-forever.conf.j2)
 * [expires-medium.conf)](https://git.coop/webarch/apache/-/blob/master/templates/expires-medium.conf.j2)
 * [expires-strict.conf](https://git.coop/webarch/apache/-/blob/master/templates/expires-strict.conf.j2)

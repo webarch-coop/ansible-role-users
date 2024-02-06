@@ -1166,6 +1166,7 @@ users_apache_expires:
   required: false
   description: The name of the Apache expires conf file to include.
   choices:
+    - active
     - forever
     - medium
     - strict

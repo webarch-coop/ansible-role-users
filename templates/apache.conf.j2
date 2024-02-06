@@ -425,12 +425,22 @@
       Require all granted
         {%- endif %}
         {%- if dir_config.users_apache_expires is defined %}
-          {%- if dir_config.users_apache_expires == "medium" %}
-      IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
+          {%- if dir_config.users_apache_expires == "active" %}
+      <IfFile "/etc/apache2/conf-available/expires-active.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-active.conf"
+      </IfFile>
+          {%- elif dir_config.users_apache_expires == "medium" %}
+      <IfFile "/etc/apache2/conf-available/expires-medium.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
+      </IfFile>
           {%- elif dir_config.users_apache_expires == "strict" %}
-      IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
+      <IfFile "/etc/apache2/conf-available/expires-strict.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
+      </IfFile>
           {%- elif dir_config.users_apache_expires == "forever" %}
-      IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
+      <IfFile "/etc/apache2/conf-available/expires-forever.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
+      </IfFile>
           {%- endif %}
         {%- endif %}
     </Directory>
@@ -660,12 +670,22 @@
       Require all granted
     {%- endif %}
     {%- if vhost_config.users_apache_expires is defined %}
-      {%- if vhost_config.users_apache_expires == "medium" %}
-      IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
+      {%- if vhost_config.users_apache_expires == "active" %}
+      <IfFile "/etc/apache2/conf-available/expires-active.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-active.conf"
+      </IfFile>
+      {%- elif vhost_config.users_apache_expires == "medium" %}
+      <IfFile "/etc/apache2/conf-available/expires-medium.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
+      </IfFile>
       {%- elif vhost_config.users_apache_expires == "strict" %}
-      IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
+      <IfFile "/etc/apache2/conf-available/expires-strict.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
+      </IfFile>
       {%- elif vhost_config.users_apache_expires == "forever" %}
-      IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
+      <IfFile "/etc/apache2/conf-available/expires-forever.conf">
+        IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
+      </IfFile>
       {%- endif %}
     {%- endif %}
     </Directory>

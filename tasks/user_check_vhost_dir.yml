@@ -16,10 +16,10 @@
         var: dir
         verbosity: 2
 
-    - name: "Check that users_apache_expires is set to medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
+    - name: "Check that users_apache_expires is set to active, medium, strict or forever for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"
       ansible.builtin.assert:
         that:
-          - dir.value.users_apache_expires is regex('^medium|strict|forever$')
+          - dir.value.users_apache_expires is regex('^active|medium|strict|forever$')
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: dir.value.users_apache_expires is defined
 
