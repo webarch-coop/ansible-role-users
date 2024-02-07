@@ -813,6 +813,7 @@
   ErrorDocument {{ doc.code }} {{ doc.path }}
     {%- endfor %}
   {%- endif %}
+  {%- if user.value.users_system is not defined or not user.value.users_system %}
   CustomLog /var/log/apache2/{{ user.key }}_access.log bandwidth
   LogLevel error
   <IfFile {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs>
@@ -822,6 +823,13 @@
     ScriptLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.cgi.log
     {%- endif %}
   </IfFile>
+  {%- else %}
+  ErrorLog ${APACHE_LOG_DIR}/{{ vhost_config.users_apache_server_name }}.error.log
+  CustomLog ${APACHE_LOG_DIR}/{{ vhost_config.users_apache_server_name }}.access.log combined
+    {%- if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+  ScriptLog ${APACHE_LOG_DIR}/{{ vhost_config.users_apache_server_name }}.cgi.log
+    {%- endif %}
+  {%- endif %}
 </VirtualHost>
 {%- endfor %}
 

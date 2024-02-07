@@ -157,13 +157,14 @@
   tags:
     - users
 
-- name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present"
+- name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present for non-system users"
   ansible.builtin.file:
     path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
     state: directory
     owner: root
     group: "{{ user.key }}"
     mode: "0750"
+  when: ( user.value.users_system is not defined ) or ( not user.value.users_system )
   tags:
     - users
 
