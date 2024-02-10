@@ -1,0 +1,34 @@
+# Copyright 2018-2024 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Validate Apache VirtualHost Directory variables
+  block:
+
+    - name: "Debug the VirtualServer Directory variables for user {{ user.key }} directory {{ vhost.key }}"
+      ansible.builtin.debug:
+        var: vhost_dir
+        verbosity: 2
+      loop: "{{ vhost.value.users_apache_directories | dict2items }}"
+      loop_control:
+        loop_var: vhost_dir
+        label: "{{ vhost_dir.key }}"
+
+    - name: "Check users_apache_directories variables using meta/apache_directories_argument_specs.yml for user {{ user.key }} directory {{ vhost.key }}"
+      ansible.builtin.validate_argument_spec:
+        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/apache_directories_argument_specs.yml') | from_yaml }}"
+        provided_arguments: "{{ vhost_dir.value }}"
+      loop: "{{ vhost.value.users_apache_directories | dict2items }}"
+      loop_control:
+        loop_var: vhost_dir
+        label: "{{ vhost_dir.key }}"
+
+  tags:
+    - users
+...

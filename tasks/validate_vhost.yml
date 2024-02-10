@@ -29,6 +29,28 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
 
+    - name: "Debug the VirtualServer's users_apache_directories dictionaries for {{ user.key }}"
+      ansible.builtin.debug:
+        var: vhost.value.users_apache_directories
+        verbosity: 2
+      when:
+        - vhost.value.users_apache_directories is defined
+        - vhost.value.users_apache_directories | length > 0
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+
+    - name: "Check users_apache_directories variables using meta/apache_directories_argument_specs.yml for {{ user.key }}"
+      ansible.builtin.include_tasks: validate_vhost_dirs.yml
+      when:
+        - vhost.value.users_apache_directories is defined
+        - vhost.value.users_apache_directories | length > 0
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+
   # rescue:
 
   #   - name: There was a failure validating the arg spec

@@ -428,6 +428,83 @@
         {%- else %}
       Require all granted
         {%- endif %}
+    {%- if "proxy_fcgi" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type == "php" %}
+    {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
+      <IfModule proxy_fcgi_module>
+        <IfModule setenvif_module>
+          SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+        </IfModule>
+      {%- if user.value.users_phpfpm_extensions is defined %}
+        <FilesMatch "\.{% for ext in user.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      {%- elif users_phpfpm_extensions is defined %}
+        <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      {%- else %}
+        <FilesMatch "\.php$">
+      {%- endif %}
+          <If "-f %{REQUEST_FILENAME}">
+      {%- if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
+            SetHandler "proxy:fcgi://{{ user.key }}"
+      {%- elif users_phpfpm_system_version is defined %}
+            SetHandler "proxy:fcgi://localhost"
+      {%- endif %}
+          </If>
+        </FilesMatch>
+      </IfModule>
+    {%- elif "cgid" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type == "cgi" %}
+      <IfModule cgid_module>
+        <IfModule setenvif_module>
+          SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+        </IfModule>
+        <IfModule mime_module>
+      {%- if user.value.users_cgi_extensions is defined %}
+          <FilesMatch "\.{% for ext in user.value.users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+      {%- elif users_cgi_extensions is defined %}
+          <FilesMatch "\.{% for ext in users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+      {%- else %}
+          <FilesMatch "\.cgi$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+      {%- endif %}
+        </IfModule>
+      </IfModule>
+    {%- elif "fcgid" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type == "fcgi" %}
+      <IfModule fcgid_module>
+        <IfModule setenvif_module>
+          SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+        </IfModule>
+        <IfModule mime_module>
+      {%- if user.value.users_cgi_extensions is defined %}
+          <FilesMatch "\.{% for ext in user.value.users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+      {%- elif users_cgi_extensions is defined %}
+          <FilesMatch "\.{% for ext in users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+      {%- else %}
+          <FilesMatch "\.cgi$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+      {%- endif %}
+        </IfModule>
+      </IfModule>
+    {%- endif %}
         {%- if dir_config.users_apache_expires is defined %}
           {%- if dir_config.users_apache_expires == "active" %}
       <IfFile "/etc/apache2/conf-available/expires-active.conf">

@@ -1,0 +1,120 @@
+# Copyright 2018-2024 Chris Croome
+#
+# This file is part of the Webarchitects users Ansible role.
+#
+# The Webarchitects users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+users_apache_options:
+  type: list
+  elements: str
+  required: false
+  description: A list of Apache Directory Options.
+users_apache_index_options:
+  type: list
+  elements: str
+  required: false
+  description: A list of options for the IndexOptions directive.
+users_apache_index_head_insert:
+  type: str
+  required: false
+  description: A string to insert in the <head> section of the HTML generated for the index page.
+users_apache_header_name:
+  type: str
+  required: false
+  description: The HeaderName directive sets the name of the file that will be inserted at the top of the index listing
+users_apache_readme_name:
+  type: str
+  required: false
+  description: The ReadmeName directive sets the name of the file that will be inserted at the bottom of the index listing.
+users_apache_ssi_legacy:
+  type: bool
+  required: false
+  description: Enable the SSILegacyExprParser.
+users_apache_ssi_modified:
+  type: bool
+  required: false
+  description: Enable SSILastModified.
+users_apache_index:
+  type: list
+  elements: str
+  required: false
+  description: A list of file names for the Apache DirectoryIndex.
+users_apache_override:
+  type: list
+  elements: str
+  required: false
+  description: A list of Apache AllowOverride settings.
+users_apache_add_output_filters:
+  type: list
+  elements: str
+  required: false
+  description: Apache AddOutputFilter directives.
+users_apache_add_type:
+  type: list
+  elements: dict
+  required: false
+  description: A list of MIME types and files extensions for the Apache AddType directive.
+  options:
+    ext:
+      type: str
+      required: true
+      description: The filename extension, not including the leading dot.
+    type:
+      type: str
+      required: true
+      description: The MIME type for the file extension.
+users_apache_filesmatch:
+  type: list
+  elements: dict
+  required: false
+  options:
+    regex:
+      type: str
+      required: true
+      description: A regular Expression to use for the Apache FilesMatch directive.
+    require:
+      type: list
+      elements: str
+      required: false
+      description: A list of strings for the Apache Require directive within FilesMatch, each item will result in one Require directive being generated.
+users_apache_auth_name:
+  type: str
+  required: false
+  description: The Apache Directory AuthName.
+users_apache_auth_type:
+  type: str
+  required: false
+  description: The Apache AuthType Directive.
+  choices:
+    - Basic
+    - Digest
+    - Form
+    - None
+users_apache_require:
+  type: list
+  elements: str
+  required: false
+  description: A list of strings for the Apache Require directive, each item will result in one Require directive being generated.
+users_apache_expires:
+  type: str
+  required: false
+  description: The name of the Apache expires conf file to include.
+  choices:
+    - active
+    - forever
+    - medium
+    - strict
+users_apache_type:
+  type: str
+  required: false
+  description: The type of Apache VirtualHost.
+  choices:
+    - cgi
+    - fcgi
+    - php
+    - static
+...
