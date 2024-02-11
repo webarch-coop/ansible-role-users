@@ -47,8 +47,8 @@
       ansible.builtin.template:
         src: apache.conf.j2
         dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
-        trim_blocks: false
-        # lstrip_blocks: true
+        trim_blocks: true
+        lstrip_blocks: true
         mode: "0644"
         owner: root
         group: root

@@ -45,6 +45,28 @@
 
       when: dir.value.users_apache_options is defined
 
+    - name: "Check that only valid SSLOptions are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+      block:
+
+        - name: "Check that the SSLOptions for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
+          ansible.builtin.assert:
+            that:
+              - dir.value.users_apache_ssl_options | length
+              - dir.value.users_apache_ssl_options[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        - name: "Check that all SSLOptions are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.assert:
+            that:
+              - ssl_option is regex("^[+-](?i)StdEnvVars|ExportCertData|FakeBasicAuth|StrictRequire|OptRenegotiate|LegacyDNStringFormat$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          loop: "{{ dir.value.users_apache_ssl_options }}"
+          loop_control:
+            loop_var: ssl_option
+            label: "{{ ssl_option }}"
+
+      when: dir.value.users_apache_ssl_options is defined
+
     - name: "Check that only valid IndexOptions listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
 

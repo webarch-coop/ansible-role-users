@@ -1,12 +1,11 @@
-# {# j2lint: disable=jinja-statements-delimiter j2lint: disable=single-statement-per-line #}{{ ansible_managed }}
+#{# j2lint: disable=single-statement-per-line #} {{ ansible_managed }}
 
 {% for vhost,vhost_config in user.value.users_apache_virtual_hosts.items() %}
-
 # {{ vhost_config.users_apache_server_name }} port 80
 <VirtualHost *:80>
   ServerName {{ vhost_config.users_apache_server_name }}
 {%     if vhost_config.users_apache_server_aliases is defined %}
-  ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
+  ServerAlias {{ vhost_config.users_apache_server_aliases | join(" ") }}
 {%     endif %}
   <If "%{HTTP_HOST} == '{{ vhost_config.users_apache_server_name }}'">
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
@@ -34,7 +33,7 @@
 <VirtualHost *:443>
   ServerName {{ vhost_config.users_apache_server_name }}
 {%     if vhost_config.users_apache_server_aliases is defined %}
-  ServerAlias{% for alias in vhost_config.users_apache_server_aliases %} {{ alias }}{% endfor %}
+  ServerAlias {{ vhost_config.users_apache_server_aliases | join(" ") }}
 {%     endif %}
 {%     if users_apache_chroot_suexec and "suexec" in users_apache_modules_loaded %}
   <IfModule suexec_module>
@@ -48,17 +47,19 @@
   </IfModule>
 {%     endif %}
 {%     if users_cert is defined %}
-  SSLEngine on
+  <IfModule ssl_module>
+    SSLEngine on
 {%         if users_cert == "user" %}
-  SSLCertificateFile            {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
-  SSLCertificateKeyFile         {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
-  SSLCertificateChainFile       {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
+    SSLCertificateFile            {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
+    SSLCertificateKeyFile         {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
+    SSLCertificateChainFile       {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
 {%         endif %}
 {%         if users_cert == "vhost" %}
-  SSLCertificateFile            {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
-  SSLCertificateKeyFile         {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
-  SSLCertificateChainFile       {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
+    SSLCertificateFile            {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
+    SSLCertificateKeyFile         {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
+    SSLCertificateChainFile       {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
 {%         endif %}
+  </IfModule>
 {%     endif %}
 {%     if user.value.users_email is defined and user.value.users_email | length > 0 %}
   ServerAdmin "{{ user.value.users_email }}"
@@ -118,7 +119,7 @@
 {%         endfor %}
 {%     endif %}
 {%     if vhost_config.users_apache_sts is defined %}
-    Header setifempty Strict-Transport-Security "{% for rule in vhost_config.users_apache_sts %}{{ rule }};{% endfor %}"
+    Header setifempty Strict-Transport-Security "{{ vhost_config.users_apache_sts | join(";") }}"
 {%     else %}
     Header setifempty Strict-Transport-Security "max-age=31536000"
 {%     endif %}
@@ -126,7 +127,7 @@
 {%     if vhost_config.users_apache_allow_encoded_slashes is defined %}
   AllowEncodedSlashes {{ vhost_config.users_apache_allow_encoded_slashes }}
 {%     endif %}
-{%     if vhost_config.users_apache_locations is defined -%}
+{%     if vhost_config.users_apache_locations is defined %}
 {%         for loc in vhost_config.users_apache_locations %}
 {%             if loc.match is defined %}
   <LocationMatch "{{ loc.match }}">
@@ -208,7 +209,7 @@
   </Location>
 {%         endif %}
 {%     endif %}
-{%     if vhost_config.users_apache_include_optional is defined -%}
+{%     if vhost_config.users_apache_include_optional is defined %}
 {%         for inc in vhost_config.users_apache_include_optional %}
   IncludeOptional "{{ inc }}"
 {%         endfor %}
@@ -316,7 +317,7 @@
       ProxySet timeout={{ users_apache_php_proxy_timeout }}
 {%             endif %}
     </Proxy>
-{%         else -%}
+{%         else %}
     # Something went wrong the users_phpfpm_system_version variable needs to be
     # set to the PHP version in order for SetHandler path to the socket
     # to be set for the www-data user
@@ -339,14 +340,19 @@
     <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
 {%                 endif %}
 {%                 if dir_config.users_apache_options is defined %}
-      Options{% for option in dir_config.users_apache_options %} {{ option }}{% endfor %}
+      Options {{ dir_config.users_apache_options | join(" ") }}
 {%                 else %}
       Options None
 {%                 endif %}
+{%                 if dir_config.users_apache_ssl_options is defined %}
+      <IfModule ssl_module>
+        SSLOptions {{ dir_config.users_apache_ssl_options | join(" ") }}
+      </IfModule>
+{%                 endif %}
 {%                 if dir_config.users_apache_index_options is defined %}
-      IndexOptions{% for opt in dir_config.users_apache_index_options %} {{ opt }}{% endfor %}
+      IndexOptions {{ dir_config.users_apache_index_options | join(" ") }}
 {%                 elif users_apache_index_options is defined %}
-      IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
+      IndexOptions {{ users_apache_index_options | join(" ") }}
 {%                 endif %}
 {%                 if dir_config.users_apache_index_head_insert is defined %}
       IndexHeadInsert "{{ dir_config.users_apache_index_head_insert | regex_replace('[\"]', '\\"') }}"
@@ -379,7 +385,7 @@
       DirectoryIndex index.html index.htm
 {%                 endif %}
 {%                 if dir_config.users_apache_override is defined %}
-      AllowOverride{% for option in dir_config.users_apache_override %} {{ option }}{% endfor %}
+      AllowOverride {{ dir_config.users_apache_override | join(" ") }}
 {%                 else %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
 {%                 endif %}
@@ -542,9 +548,9 @@
     <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {%         endif %}
 {%         if vhost_config.users_apache_options is defined %}
-      Options{% for option in vhost_config.users_apache_options %} {{ option }}{% endfor %}
+      Options {{ vhost_config.users_apache_options | join(" ") }}
 {%         elif users_apache_options is defined %}
-      Options {% for option in users_apache_options %} {{ option }}{% endfor %}
+      Options {{ users_apache_options | join(" ") }}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
@@ -554,15 +560,20 @@
 {%         else %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
 {%         endif %}
+{%         if vhost_config.users_apache_ssl_options is defined %}
+      <IfModule ssl_module>
+        SSLOptions {{ vhost_config.users_apache_ssl_options | join(" ") }}
+      </IfModule>
+{%         endif %}
 {%         if vhost_config.users_apache_index_head_insert is defined %}
       IndexHeadInsert "{{ vhost_config.users_apache_index_head_insert | regex_replace('[\"]', '\\"') }}"
 {%         elif users_apache_index_head_insert is defined %}
       IndexHeadInsert "{{ users_apache_index_head_insert | regex_replace('[\"]', '\\"') }}"
 {%         endif %}
 {%         if vhost_config.users_apache_index_options is defined %}
-      IndexOptions{% for opt in vhost_config.users_apache_index_options %} {{ opt }}{% endfor %}
+      IndexOptions {{ vhost_config.users_apache_index_options | join(" ") }}
 {%         elif users_apache_index_options is defined %}
-      IndexOptions{% for opt in users_apache_index_options %} {{ opt }}{% endfor %}
+      IndexOptions {{ users_apache_index_options | join(" ") }}
 {%         endif %}
 {%         if vhost_config.users_apache_header_name is defined %}
       HeaderName {{ vhost_config.users_apache_header_name }}
@@ -580,22 +591,39 @@
       SSILegacyExprParser {% if users_apache_ssi_legacy %}on{% else %}off{% endif %}
 {%         endif %}
 {%         if vhost_config.users_apache_index is defined %}
-      DirectoryIndex{% for file in vhost_config.users_apache_index %} {{ file }}{% endfor %}
+      DirectoryIndex {{ vhost_config.users_apache_index | join(" ") }}
 {%         elif users_apache_index is defined %}
-      DirectoryIndex{% for file in users_apache_index %} {{ file }}{% endfor %}
+      DirectoryIndex {{ users_apache_index | join(" ") }}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-      DirectoryIndex {% if user.value.users_phpfpm_extensions is defined %}{% for ext in user.value.users_phpfpm_extensions %} index.{{ ext }}{% endfor %}{% elif users_phpfpm_extensions is defined %}{% for ext in users_phpfpm_extensions %} index.{{ ext }}{% endfor %}{%- else %} index.php{% endif %} index.html index.htm index.shtml
+{%             if user.value.users_phpfpm_extensions is defined %}
+      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(" ") }}
+{%             elif users_phpfpm_extensions is defined %}
+      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(" ") }}
+{%             else %}
+     DirectoryIndex index.php index.html index.htm index.shtml
+{%             endif %}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-      DirectoryIndex{% if user.value.users_cgi_extensions is defined %}{% for ext in user.value.users_cgi_extensions %} index.{{ ext }}{% endfor %}{% elif users_cgi_extensions is defined %}{% for ext in users_cgi_extensions %} index.{{ ext }}{% endfor %}{% else %} index.cgi{% endif %} index.html index.htm index.shtml
+{%             if user.value.users_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(" ") }} index.html index.htm index.shtml
+{%             elif users_cgi_extensions is defined %}
+      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(" ") }} index.html index.htm index.shtml
+{%             else %}
+      DirectoryIndex index.cgi index.html index.htm index.shtml
+{%             endif %}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
-      DirectoryIndex{% if user.value.users_cgi_extensions is defined %}{% for ext in user.value.users_cgi_extensions %} index.{{ ext }}{% endfor %}{% elif users_cgi_extensions is defined %}{% for ext in users_cgi_extensions %} index.{{ ext }}{% endfor %}{% else %} index.cgi{% endif %} index.html index.htm index.shtml
+{%             if user.value.users_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(" ") }} index.html index.htm index.shtml
+{%             elif users_cgi_extensions is defined %}
+      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(" ") }} index.html index.htm index.shtml
+{%             endif %}
+      DirectoryIndex index.cgi index.html index.htm index.shtml
 {%         else %}
       DirectoryIndex index.html index.htm index.shtml
 {%         endif %}
 {%         if vhost_config.users_apache_override is defined %}
-      AllowOverride{% for option in vhost_config.users_apache_override %} {{ option }}{% endfor %}
+      AllowOverride {{ vhost_config.users_apache_override | join(" ") }}
 {%         elif users_apache_override is defined %}
-      AllowOverride{% for option in users_apache_override %} {{ option }}{% endfor %}
+      AllowOverride {{ users_apache_override | join(" ") }}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
@@ -645,9 +673,9 @@
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
 {%             if user.value.users_phpfpm_extensions is defined %}
-        <FilesMatch "\.{% for ext in user.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+        <FilesMatch "\.{{ user.value.users_phpfpm_extensions | join('|') }}$">
 {%             elif users_phpfpm_extensions is defined %}
-        <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+        <FilesMatch "\.{{ users_phpfpm_extensions | join('|') }}$">
 {%             else %}
         <FilesMatch "\.php$">
 {%             endif %}
@@ -667,13 +695,13 @@
         </IfModule>
         <IfModule mime_module>
 {%             if user.value.users_cgi_extensions is defined %}
-          <FilesMatch "\.{% for ext in user.value.users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+          <FilesMatch "\.{{ user.value.users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
 {%             elif users_cgi_extensions is defined %}
-          <FilesMatch "\.{% for ext in users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+          <FilesMatch "\.{{ users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
@@ -694,13 +722,13 @@
         </IfModule>
         <IfModule mime_module>
 {%             if user.value.users_cgi_extensions is defined %}
-          <FilesMatch "\.{% for ext in user.value.users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+          <FilesMatch "\.{{ user.value.users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
 {%             elif users_cgi_extensions is defined %}
-          <FilesMatch "\.{% for ext in users_cgi_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+          <FilesMatch "\.{{ users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
@@ -771,16 +799,16 @@
     <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
 {%             endif %}
 {%             if users.value.users_phpfpm_extensions is defined %}
-      RemoveHandler {% for ext in users.value.users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
+      RemoveHandler {{ users.value.users_phpfpm_extensions | map('regex_replace', '^', '[.]') | join(' ') }}
 {%             elif users_phpfpm_extensions is defined %}
-      RemoveHandler {% for ext in users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
+      RemoveHandler {{ users_phpfpm_extensions | map('regex_replace', '^', '[.]') | join(' ') }}
 {%             else %}
       RemoveHandler .php
 {%             endif %}
 {%             if users.value.users_phpfpm_extensions is defined %}
-      <FilesMatch "\.{% for ext in users.value.users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      <FilesMatch "\.{{ users.value.users_phpfpm_extensions | join('|') }}$">
 {%             elif users_phpfpm_extensions is defined %}
-      <FilesMatch "\.{% for ext in users_phpfpm_extensions %}{{ ext }}{{ "|" if not loop.last else "" }}{% endfor %}$">
+      <FilesMatch "\.{{ users_phpfpm_extensions | join('|') }}$">
 {%             else %}
       <FilesMatch "\.php$">
 {%             endif %}
@@ -897,6 +925,6 @@
 {%         endif %}
 {%     endif %}
 </VirtualHost>
-{%- endfor %}
+{% endfor %}
 
 # vim: syntax=apache

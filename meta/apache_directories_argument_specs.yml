@@ -117,4 +117,9 @@ users_apache_type:
     - fcgi
     - php
     - static
+users_apache_ssl_options:
+  type: list
+  elements: str
+  required: false
+  description: A list of Apache Directory SSLOptions.
 ...
