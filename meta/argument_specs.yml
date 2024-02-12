@@ -47,11 +47,26 @@ argument_specs:
         type: str
         required: false
         description: The directory used to mount chrooted users home directories, it needs to be a sub-directory of /var/www for suEXEC.
+      users_apache_index:
+        type: list
+        elements: str
+        required: false
+        description: A list of file names for the Apache DirectoryIndex.
       users_apache_modules_loaded:
         type: list
         elements: str
         required: false
         description: A list of modules loaded by Apache.
+      users_apache_options:
+        type: list
+        elements: str
+        required: false
+        description: A list of Apache Directory Options.
+      users_apache_override:
+        type: list
+        elements: str
+        required: false
+        description: A list of Apache AllowOverride settings.
       users_apache_php_proxy_timeout:
         type: int
         required: false
