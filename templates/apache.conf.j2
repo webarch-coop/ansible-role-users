@@ -861,9 +861,9 @@
     <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
 {%             endif %}
 {%             if users.value.users_phpfpm_extensions is defined %}
-      RemoveHandler {{ users.value.users_phpfpm_extensions | map('regex_replace', '^', '[.]') | join(' ') }}
+      RemoveHandler {{ users.value.users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}
 {%             elif users_phpfpm_extensions is defined %}
-      RemoveHandler {{ users_phpfpm_extensions | map('regex_replace', '^', '[.]') | join(' ') }}
+      RemoveHandler {{ users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}
 {%             else %}
       RemoveHandler .php
 {%             endif %}
