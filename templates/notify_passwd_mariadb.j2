@@ -1,13 +1,12 @@
-{# j2lint: disable=jinja-statements-no-tabs j2lint: disable=single-statement-per-line #}
 Hi {{ user.value.users_name | default(user.key) }}
 
 Your MariaDB account and database details for {{ inventory_hostname }}:
 
-  Username:	{{ user.key }}
-  Password:	{{ users_mariadb_password }}
-  Server:	localhost
-  Port:		3306
-  Database(s):	{% for d in user.value.users_mariadb_databases %}{{ d }} {% endfor %}
+  Username:     {{ user.key }}
+  Password:     {{ users_mariadb_password }}
+  Server:       localhost
+  Port:         3306
+  Database(s):  {{ user.value.users_mariadb_databases | join(' ') }}
 
 
 {% if ssh_allow_tcp_forwarding is defined and ssh_allow_tcp_forwarding == "yes" %}

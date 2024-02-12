@@ -1,4 +1,4 @@
-# {# j2lint: disable=single-statement-per-line #}{{ ansible_managed }}
+# {{ ansible_managed }}
 
 set tmpdir="~/tmp"
 set folder="~/.mutt"
@@ -20,9 +20,17 @@ set sendmail="/usr/sbin/sendmail -f{{ user.key }}@{{ inventory_hostname }}"
 # set ssl_force_tls=no
 set hostname="{{ inventory_hostname }}"
 {% if user.value.users_phpfpm_sendmail_from is defined %}
-set from="{% if user.value.users_name is defined %}{{ user.value.users_name }} {% endif %}<{{ user.value.users_phpfpm_sendmail_from }}>"
+{%     if user.value.users_name is defined %}
+set from="{{ user.value.users_name }} <{{ user.value.users_phpfpm_sendmail_from }}>"
+{%     else %}
+set from="<{{ user.value.users_phpfpm_sendmail_from }}>"
+{%     endif %}
 {% else %}
-set from="{% if user.value.users_name is defined %}{{ user.value.users_name }} {% endif %}<{{ user.key }}@{{ inventory_hostname }}>"
+{%     if user.value.users_name is defined %}
+set from="{{ user.value.users_name }} <{{ user.key }}@{{ inventory_hostname }}>"
+{%     else %}
+set from="<{{ user.key }}@{{ inventory_hostname }}>"
+{%     endif %}
 {% endif %}
 
 # vim: ft=muttrc:

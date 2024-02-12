@@ -56,13 +56,13 @@ php_admin_value[output_buffering] = {% if user.value.users_phpfpm_output_bufferi
 ; php_admin_value[disable_functions] =
 {% elif user.value.users_phpfpm_disable_functions is defined and user.value.users_phpfpm_disable_functions != [] %}
 ; disable_functions set from user.value.users_phpfpm_disable_functions
-php_admin_value[disable_functions] = "{% for func in user.value.users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
+php_admin_value[disable_functions] = "{{ user.value.users_phpfpm_disable_functions | join(',') }}"
 {% elif users_phpfpm_disable_functions is defined and users_phpfpm_disable_functions == [] %}
 ; disable_functions set from users_phpfpm_disable_functions
 ; php_admin_value[disable_functions] =
 {% elif users_phpfpm_disable_functions is defined and users_phpfpm_disable_functions != [] %}
 ; disable_functions set from users_phpfpm_disable_functions
-php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functions %}{{ func }}{% if not loop.last %},{% endif %}{% endfor %}"
+php_admin_value[disable_functions] = "{{ users_phpfpm_disable_functions | join(',') }}"
 {% else %}
 ; disable_functions not set as neither
 ; user.value.users_phpfpm_disable_functions or users_phpfpm_disable_functions
@@ -76,13 +76,13 @@ php_admin_value[disable_functions] = "{% for func in users_phpfpm_disable_functi
 ; php_admin_value[open_basedir] =
 {% elif user.value.users_phpfpm_open_basedir is defined and user.value.users_phpfpm_open_basedir != [] %}
 ; open_basedir set from user.value.users_phpfpm_open_basedir
-php_admin_value[open_basedir] = "{% for dir in user.value.users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}"
+php_admin_value[open_basedir] = "{{ user.value.users_phpfpm_open_basedir | join(',') }}"
 {% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir == [] %}
 ; open_basedir set from users_phpfpm_open_basedir
 ; php_admin_value[open_basedir] =
 {% elif users_phpfpm_open_basedir is defined and users_phpfpm_open_basedir != [] %}
 ; open_basedir set from users_phpfpm_open_basedir
-php_admin_value[open_basedir] = "{% for dir in users_phpfpm_open_basedir %}{{ dir }}{% if not loop.last %},{% endif %}{% endfor %}"
+php_admin_value[open_basedir] = "{{ users_phpfpm_open_basedir | join(',') }}"
 {% else %}
 ; open_basedir not set as neither
 ; user.value.users_phpfpm_open_basedir or users_phpfpm_open_basedir
@@ -182,9 +182,10 @@ clear_env = yes
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5 .php7
 {% if user.value.users_phpfpm_extensions is defined %}
-security.limit_extensions = {% for ext in user.value.users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
+security.limit_extensions = {{ user.value.users_phpfpm_extensions | map('regex_replace', '^[.]') | join(' ') }}
 {% elif users_phpfpm_extensions is defined %}
 security.limit_extensions = {% for ext in users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
+security.limit_extensions = {{ users_phpfpm_extensions | map('regex_replace', '^[.]') | join(' ') }}
 {% else %}
 security.limit_extensions = .php
 {% endif %}
