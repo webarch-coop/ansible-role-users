@@ -184,7 +184,6 @@ clear_env = yes
 {% if user.value.users_phpfpm_extensions is defined %}
 security.limit_extensions = {{ user.value.users_phpfpm_extensions | map('regex_replace', '^[.]') | join(' ') }}
 {% elif users_phpfpm_extensions is defined %}
-security.limit_extensions = {% for ext in users_phpfpm_extensions %}.{{ ext }}{{ " " if not loop.last else "" }}{% endfor %}
 security.limit_extensions = {{ users_phpfpm_extensions | map('regex_replace', '^[.]') | join(' ') }}
 {% else %}
 security.limit_extensions = .php
