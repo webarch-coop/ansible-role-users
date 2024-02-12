@@ -182,9 +182,9 @@ clear_env = yes
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5 .php7
 {% if user.value.users_phpfpm_extensions is defined %}
-security.limit_extensions = {{ user.value.users_phpfpm_extensions | map('regex_replace', '^[.]') | join(' ') }}
+security.limit_extensions = {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}
 {% elif users_phpfpm_extensions is defined %}
-security.limit_extensions = {{ users_phpfpm_extensions | map('regex_replace', '^[.]') | join(' ') }}
+security.limit_extensions = {{ users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}
 {% else %}
 security.limit_extensions = .php
 {% endif %}
