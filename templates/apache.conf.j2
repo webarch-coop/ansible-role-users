@@ -416,8 +416,33 @@
 {%                 endif %}
 {%                 if dir_config.users_apache_index is defined %}
       DirectoryIndex {{ dir_config.users_apache_index | join(' ') }}
+{%                 elif users_apache_index is defined %}
+      DirectoryIndex {{ users_apache_index | join(' ') }}
+{%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "php" %}
+{%                     if user.value.users_phpfpm_extensions is defined %}
+      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
+{%                     elif users_phpfpm_extensions is defined %}
+      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
+{%                     else %}
+      DirectoryIndex index.php index.html index.htm index.shtml
+{%                     endif %}
+{%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "cgi" %}
+{%                     if user.value.users_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     elif users_cgi_extensions is defined %}
+      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     else %}
+      DirectoryIndex index.cgi index.html index.htm index.shtml
+{%                     endif %}
+{%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "fcgi" %}
+{%                     if user.value.users_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     elif users_cgi_extensions is defined %}
+      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     endif %}
+      DirectoryIndex index.cgi index.html index.htm index.shtml
 {%                 else %}
-      DirectoryIndex index.html index.htm
+      DirectoryIndex index.html index.htm index.shtml
 {%                 endif %}
 {%                 if dir_config.users_apache_override is defined %}
       AllowOverride {{ dir_config.users_apache_override | join(' ') }}
@@ -571,291 +596,291 @@
   </IfFile>
 {%             endfor %}
 {%         endif %}
-{%         if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
-{%             if users_apache_chroot is defined and users_apache_chroot %}
+{%     endif %}
+{%     if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
+{%         if users_apache_chroot is defined and users_apache_chroot %}
   <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}">
     DocumentRoot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}"
     <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}">
-{%             else %}
+{%         else %}
   <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
     DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
     <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-{%             endif %}
-{%             if vhost_config.users_apache_options is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_options is defined %}
       Options {{ vhost_config.users_apache_options | join(' ') }}
-{%             elif users_apache_options is defined %}
+{%         elif users_apache_options is defined %}
       Options {{ users_apache_options | join(' ') }}
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-{%             else %}
+{%         else %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-{%             endif %}
-{%             if vhost_config.users_apache_ssl_options is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_ssl_options is defined %}
       <IfModule ssl_module>
         SSLOptions {{ vhost_config.users_apache_ssl_options | join(' ') }}
       </IfModule>
-{%             endif %}
-{%             if vhost_config.users_apache_index_head_insert is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_index_head_insert is defined %}
       IndexHeadInsert "{{ vhost_config.users_apache_index_head_insert | regex_replace('[\"]', '\\"') }}"
-{%             elif users_apache_index_head_insert is defined %}
+{%         elif users_apache_index_head_insert is defined %}
       IndexHeadInsert "{{ users_apache_index_head_insert | regex_replace('[\"]', '\\"') }}"
-{%             endif %}
-{%             if vhost_config.users_apache_index_options is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_index_options is defined %}
       IndexOptions {{ vhost_config.users_apache_index_options | join(' ') }}
-{%             elif users_apache_index_options is defined %}
+{%         elif users_apache_index_options is defined %}
       IndexOptions {{ users_apache_index_options | join(' ') }}
-{%             endif %}
-{%             if vhost_config.users_apache_header_name is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_header_name is defined %}
       HeaderName {{ vhost_config.users_apache_header_name }}
-{%             elif users_apache_header_name is defined %}
+{%         elif users_apache_header_name is defined %}
       HeaderName {{ users_apache_header_name is defined }}
-{%             endif %}
-{%             if vhost_config.users_apache_readme_name is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_readme_name is defined %}
       ReadmeName {{ vhost_config.users_apache_readme_name }}
-{%             elif users_apache_readme_name is defined %}
+{%         elif users_apache_readme_name is defined %}
       ReadmeName {{ users_apache_readme_name is defined }}
-{%             endif %}
-{%             if vhost_config.users_apache_ssi_legacy is defined %}
-{%                 if vhost_config.users_apache_ssi_legacy %}
+{%         endif %}
+{%         if vhost_config.users_apache_ssi_legacy is defined %}
+{%             if vhost_config.users_apache_ssi_legacy %}
       SSILegacyExprParser on
-{%                 else %}
+{%             else %}
       SSILegacyExprParser off
-{%                 endif %}
 {%             endif %}
-{%             if vhost_config.users_apache_index is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_index is defined %}
       DirectoryIndex {{ vhost_config.users_apache_index | join(' ') }}
-{%             elif users_apache_index is defined %}
+{%         elif users_apache_index is defined %}
       DirectoryIndex {{ users_apache_index | join(' ') }}
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-{%                 if user.value.users_phpfpm_extensions is defined %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+{%             if user.value.users_phpfpm_extensions is defined %}
       DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
-{%                 elif users_phpfpm_extensions is defined %}
+{%             elif users_phpfpm_extensions is defined %}
       DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
-{%                 else %}
+{%             else %}
      DirectoryIndex index.php index.html index.htm index.shtml
-{%                 endif %}
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-{%                 if user.value.users_cgi_extensions is defined %}
+{%             endif %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+{%             if user.value.users_cgi_extensions is defined %}
       DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                 elif users_cgi_extensions is defined %}
+{%             elif users_cgi_extensions is defined %}
       DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                 else %}
-      DirectoryIndex index.cgi index.html index.htm index.shtml
-{%                 endif %}
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
-{%                 if user.value.users_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                 elif users_cgi_extensions is defined %}
-      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                 endif %}
-      DirectoryIndex index.cgi index.html index.htm index.shtml
 {%             else %}
+      DirectoryIndex index.cgi index.html index.htm index.shtml
+{%             endif %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+{%             if user.value.users_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%             elif users_cgi_extensions is defined %}
+      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%             endif %}
+      DirectoryIndex index.cgi index.html index.htm index.shtml
+{%         else %}
       DirectoryIndex index.html index.htm index.shtml
-{%             endif %}
-{%             if vhost_config.users_apache_override is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_override is defined %}
       AllowOverride {{ vhost_config.users_apache_override | join(' ') }}
-{%             elif users_apache_override is defined %}
+{%         elif users_apache_override is defined %}
       AllowOverride {{ users_apache_override | join(' ') }}
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-{%             elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-{%             else %}
+{%         else %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-{%             endif %}
-{%             if users_apache_add_output_filters is defined %}
-{%                 for filter in users_apache_add_output_filters %}
+{%         endif %}
+{%         if users_apache_add_output_filters is defined %}
+{%             for filter in users_apache_add_output_filters %}
       AddOutputFilter {{ filter }}
-{%                 endfor %}
-{%             endif %}
-{%             if vhost_config.users_apache_add_output_filters is defined %}
-{%                 for filter in vhost_config.users_apache_add_output_filters %}
+{%             endfor %}
+{%         endif %}
+{%         if vhost_config.users_apache_add_output_filters is defined %}
+{%             for filter in vhost_config.users_apache_add_output_filters %}
       AddOutputFilter {{ filter }}
-{%                 endfor %}
-{%             endif %}
-{%             if users_apache_add_type is defined %}
-{%                 for mimetype in users_apache_add_type %}
+{%             endfor %}
+{%         endif %}
+{%         if users_apache_add_type is defined %}
+{%             for mimetype in users_apache_add_type %}
       AddType "{{ mimetype.type }}" .{{ mimetype.ext }}
-{%                 endfor %}
-{%             endif %}
-{%             if vhost_config.users_apache_add_type is defined %}
-{%                 for mimetype in vhost_config.users_apache_add_type %}
+{%             endfor %}
+{%         endif %}
+{%         if vhost_config.users_apache_add_type is defined %}
+{%             for mimetype in vhost_config.users_apache_add_type %}
       AddType "{{ mimetype.type }}" .{{ mimetype.ext }}
-{%                 endfor %}
-{%             endif %}
-{%             if vhost_config.users_apache_filesmatch is defined %}
-{%                 for fm in vhost_config.users_apache_filesmatch %}
+{%             endfor %}
+{%         endif %}
+{%         if vhost_config.users_apache_filesmatch is defined %}
+{%             for fm in vhost_config.users_apache_filesmatch %}
       <FilesMatch "{{ fm.regex }}" >
-{%                     if fm.require is defined %}
-{%                         for req in fm.require %}
+{%                 if fm.require is defined %}
+{%                     for req in fm.require %}
         Require {{ req }}
-{%                         endfor %}
-{%                     else %}
+{%                     endfor %}
+{%                 else %}
         Require all denied
-{%                     endif %}
+{%                 endif %}
       </FilesMatch>
-{%                 endfor %}
-{%             endif %}
-{%             if "proxy_fcgi" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+{%             endfor %}
+{%         endif %}
+{%         if "proxy_fcgi" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
     {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
       <IfModule proxy_fcgi_module>
         <IfModule setenvif_module>
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
-{%                 if user.value.users_phpfpm_extensions is defined %}
+{%             if user.value.users_phpfpm_extensions is defined %}
         <FilesMatch "\.{{ user.value.users_phpfpm_extensions | join('|') }}$">
-{%                 elif users_phpfpm_extensions is defined %}
+{%             elif users_phpfpm_extensions is defined %}
         <FilesMatch "\.{{ users_phpfpm_extensions | join('|') }}$">
-{%                 else %}
+{%             else %}
         <FilesMatch "\.php$">
-{%                 endif %}
+{%             endif %}
           <If "-f %{REQUEST_FILENAME}">
-{%                 if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
+{%             if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
             SetHandler "proxy:fcgi://{{ user.key }}"
-{%                 elif users_phpfpm_system_version is defined %}
+{%             elif users_phpfpm_system_version is defined %}
             SetHandler "proxy:fcgi://localhost"
-{%                 endif %}
+{%             endif %}
           </If>
         </FilesMatch>
       </IfModule>
-{%             elif "cgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+{%         elif "cgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
       <IfModule cgid_module>
         <IfModule setenvif_module>
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
         <IfModule mime_module>
-{%                 if user.value.users_cgi_extensions is defined %}
+{%             if user.value.users_cgi_extensions is defined %}
           <FilesMatch "\.{{ user.value.users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
-{%                 elif users_cgi_extensions is defined %}
+{%             elif users_cgi_extensions is defined %}
           <FilesMatch "\.{{ users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
-{%                 else %}
+{%             else %}
           <FilesMatch "\.cgi$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
-{%                 endif %}
+{%             endif %}
         </IfModule>
       </IfModule>
-{%             elif "fcgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+{%         elif "fcgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
       <IfModule fcgid_module>
         <IfModule setenvif_module>
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
         <IfModule mime_module>
-{%                 if user.value.users_cgi_extensions is defined %}
+{%             if user.value.users_cgi_extensions is defined %}
           <FilesMatch "\.{{ user.value.users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
-{%                 elif users_cgi_extensions is defined %}
+{%             elif users_cgi_extensions is defined %}
           <FilesMatch "\.{{ users_cgi_extensions | join('|') }}$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
-{%                 else %}
+{%             else %}
           <FilesMatch "\.cgi$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
-{%                 endif %}
+{%             endif %}
         </IfModule>
       </IfModule>
-{%             endif %}
-{%             if vhost_config.users_apache_auth_name is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_auth_name is defined %}
       AuthName "{{ vhost_config.users_apache_auth_name }}"
-{%             endif %}
-{%             if vhost_config.users_apache_auth_type is defined %}
+{%         endif %}
+{%         if vhost_config.users_apache_auth_type is defined %}
       AuthType "{{ vhost_config.users_apache_auth_type }}"
-{%                 if vhost_config.users_apache_auth_type == "Basic" %}
-{%                     if users_apache_chroot is defined and users_apache_chroot %}
+{%             if vhost_config.users_apache_auth_type == "Basic" %}
+{%                 if users_apache_chroot is defined and users_apache_chroot %}
       AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
-{%                     else %}
+{%                 else %}
       AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
-{%                     endif %}
 {%                 endif %}
-{%             else %}
+{%             endif %}
+{%         else %}
       AuthType "None"
-{%             endif %}
-{%             if vhost_config.users_apache_require is defined and vhost_config.users_apache_require != [] %}
-{%                 for req in vhost_config.users_apache_require %}
+{%         endif %}
+{%         if vhost_config.users_apache_require is defined and vhost_config.users_apache_require != [] %}
+{%             for req in vhost_config.users_apache_require %}
       Require {{ req }}
-{%                 endfor %}
-{%             else %}
+{%             endfor %}
+{%         else %}
       Require all granted
-{%             endif %}
-{%             if vhost_config.users_apache_expires is defined %}
-{%                 if vhost_config.users_apache_expires == "active" %}
+{%         endif %}
+{%         if vhost_config.users_apache_expires is defined %}
+{%             if vhost_config.users_apache_expires == "active" %}
       <IfFile "/etc/apache2/conf-available/expires-active.conf">
         IncludeOptional "/etc/apache2/conf-available/expires-active.conf"
       </IfFile>
-{%                 elif vhost_config.users_apache_expires == "medium" %}
+{%             elif vhost_config.users_apache_expires == "medium" %}
       <IfFile "/etc/apache2/conf-available/expires-medium.conf">
         IncludeOptional "/etc/apache2/conf-available/expires-medium.conf"
       </IfFile>
-{%                 elif vhost_config.users_apache_expires == "strict" %}
+{%             elif vhost_config.users_apache_expires == "strict" %}
       <IfFile "/etc/apache2/conf-available/expires-strict.conf">
         IncludeOptional "/etc/apache2/conf-available/expires-strict.conf"
       </IfFile>
-{%                 elif vhost_config.users_apache_expires == "forever" %}
+{%             elif vhost_config.users_apache_expires == "forever" %}
       <IfFile "/etc/apache2/conf-available/expires-forever.conf">
         IncludeOptional "/etc/apache2/conf-available/expires-forever.conf"
       </IfFile>
-{%                 endif %}
 {%             endif %}
+{%         endif %}
     </Directory>
   </IfFile>
-{%         endif %}
-{%         if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
-{%             for dir in vhost_config.users_apache_nophp_dirs %}
-{%                 if users_apache_chroot is defined and users_apache_chroot %}
+{%     endif %}
+{%     if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
+{%         for dir in vhost_config.users_apache_nophp_dirs %}
+{%             if users_apache_chroot is defined and users_apache_chroot %}
   # No PHP allowed in this directory
   <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
     <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-{%                 else %}
+{%             else %}
   # No PHP allowed in this directory
   <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
     <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-{%                 endif %}
-{%                 if users.value.users_phpfpm_extensions is defined %}
+{%             endif %}
+{%             if users.value.users_phpfpm_extensions is defined %}
       RemoveHandler {{ users.value.users_phpfpm_extensions | map('regex_replace', '^', '[.]') | join(' ') }}
-{%                 elif users_phpfpm_extensions is defined %}
+{%             elif users_phpfpm_extensions is defined %}
       RemoveHandler {{ users_phpfpm_extensions | map('regex_replace', '^', '[.]') | join(' ') }}
-{%                 else %}
+{%             else %}
       RemoveHandler .php
-{%                 endif %}
-{%                 if users.value.users_phpfpm_extensions is defined %}
+{%             endif %}
+{%             if users.value.users_phpfpm_extensions is defined %}
       <FilesMatch "\.{{ users.value.users_phpfpm_extensions | join('|') }}$">
-{%                 elif users_phpfpm_extensions is defined %}
+{%             elif users_phpfpm_extensions is defined %}
       <FilesMatch "\.{{ users_phpfpm_extensions | join('|') }}$">
-{%                 else %}
+{%             else %}
       <FilesMatch "\.php$">
-{%                 endif %}
+{%             endif %}
         <If "-f %{REQUEST_FILENAME}">
             Require all denied
         </If>
       </FilesMatch>
     </Directory>
   </IfFile>
-{%             endfor %}
-{%         endif %}
+{%         endfor %}
 {%     endif %}
 {%     if vhost_config.users_apache_deny_dirs is defined %}
 {%         for dir in vhost_config.users_apache_deny_dirs %}
