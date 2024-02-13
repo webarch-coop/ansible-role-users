@@ -420,9 +420,9 @@
       DirectoryIndex {{ users_apache_index | join(' ') }}
 {%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "php" %}
 {%                     if user.value.users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
+      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%                     elif users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
+      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%                     else %}
       DirectoryIndex index.php index.html index.htm index.shtml
 {%                     endif %}
@@ -655,12 +655,12 @@
 {%         if vhost_config.users_apache_index is defined %}
       DirectoryIndex {{ vhost_config.users_apache_index | join(' ') }}
 {%         elif users_apache_index is defined %}
-      DirectoryIndex {{ users_apache_index | join(' ') }}
+      DirectoryIndex {{ users_apache_index | join(' ') }} index.html index.htm index.shtml
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
 {%             if user.value.users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
+      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%             elif users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }}
+      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%             else %}
      DirectoryIndex index.php index.html index.htm index.shtml
 {%             endif %}
@@ -875,7 +875,7 @@
       <FilesMatch "\.php$">
 {%             endif %}
         <If "-f %{REQUEST_FILENAME}">
-            Require all denied
+          Require all denied
         </If>
       </FilesMatch>
     </Directory>
