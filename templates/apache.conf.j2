@@ -439,8 +439,9 @@
       DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%                     elif users_cgi_extensions is defined %}
       DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     endif %}
+{%                     else %}
       DirectoryIndex index.cgi index.html index.htm index.shtml
+{%                     endif %}
 {%                 else %}
       DirectoryIndex index.html index.htm index.shtml
 {%                 endif %}
@@ -677,8 +678,9 @@
       DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%             elif users_cgi_extensions is defined %}
       DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             endif %}
+{%             else %}
       DirectoryIndex index.cgi index.html index.htm index.shtml
+{%             endif %}
 {%         else %}
       DirectoryIndex index.html index.htm index.shtml
 {%         endif %}
