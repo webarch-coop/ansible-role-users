@@ -8,6 +8,10 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
+users_apache_docroot:
+  type: bool
+  required: false
+  description: Set the DocumentRoot to this directory.
 users_apache_options:
   type: list
   elements: str

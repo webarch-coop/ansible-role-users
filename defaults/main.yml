@@ -240,9 +240,11 @@ users_apache_php_proxy_timeout: 300
 #   - Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC
 #   - Nonfatal=Override
 #
-# The users_cgi_extensions array is for a list of files extensions to be
-# processed as CGI, it can also be set at a users level
-users_cgi_extensions:
+# Require CGI / FCGI scripts to have files extensions in order to be processed as CGI / FCGI
+users_apache_cgi_extension_match: true
+# The users_apache_cgi_extensions array is for a list of files extensions to be
+# processed as CGI by Apache, it can also be set at a users level
+users_apache_cgi_extensions:
   - cgi
   - pl
 users_phpfpm_request_terminate_timeout: 360

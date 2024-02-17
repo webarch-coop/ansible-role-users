@@ -22,10 +22,12 @@
   </Else>
 </VirtualHost>
 # {{ vhost_config.users_apache_server_name }} port 443
-{%     if users_apache_chroot is defined and users_apache_chroot %}
+{%     if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
+{%         if users_apache_chroot is defined and users_apache_chroot %}
 # {{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}
-{%     else %}
+{%         else %}
 # {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
+{%         endif %}
 {%     endif %}
 <IfModule md_module>
   MDomain {{ vhost_config.users_apache_server_name }}
@@ -351,12 +353,27 @@
 {%             for dir,dir_config in vhost_config.users_apache_directories.items() %}
 {%                 if users_apache_chroot is defined and users_apache_chroot | bool and dir is not regex('^[\/].*$') %}
   <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
+{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
+{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+    DocumentRoot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
+{%                         endif %}
+{%                     endif %}
     <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
 {%                 elif dir is regex('^[\/].*$') %}
   <IfFile "{{ dir }}">
+{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
+{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+    DocumentRoot "{{ dir }}"
+{%                         endif %}
+{%                     endif %}
     <Directory "{{ dir }}">
 {%                 else %}
   <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
+{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
+{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+    DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}"
+{%                         endif %}
+{%                     endif %}
     <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
 {%                 endif %}
 {%                 if dir_config.users_apache_options is defined %}
@@ -427,18 +444,18 @@
       DirectoryIndex index.php index.html index.htm index.shtml
 {%                     endif %}
 {%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "cgi" %}
-{%                     if user.value.users_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     elif users_cgi_extensions is defined %}
-      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     if user.value.users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     elif users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%                     else %}
       DirectoryIndex index.cgi index.html index.htm index.shtml
 {%                     endif %}
 {%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "fcgi" %}
-{%                     if user.value.users_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     elif users_cgi_extensions is defined %}
-      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     if user.value.users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%                     elif users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%                     else %}
       DirectoryIndex index.cgi index.html index.htm index.shtml
 {%                     endif %}
@@ -525,24 +542,43 @@
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
         <IfModule mime_module>
-{%                     if user.value.users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ user.value.users_cgi_extensions | join('|') }})$">
+{%                     if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
+
+{%                         if user.value.users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
-{%                     elif users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ users_cgi_extensions | join('|') }})$">
-            <If "-f %{REQUEST_FILENAME}">
-              SetHandler cgi-script
-            </If>
-          </FilesMatch>
-{%                     else %}
+{%                         else %}
           <FilesMatch "\.cgi$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
+{%                         endif %}
+{%                     elif user.value.users_apache_cgi_extension_match is defined and not user.value.users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler cgi-script
+          </If>
+{%                     elif users_apache_cgi_extension_match is not defined or users_apache_cgi_extension_match | bool %}
+{%                         if users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ users_apache_cgi_extensions | join('|') }})$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+{%                         else %}
+          <FilesMatch "\.cgi$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+{%                         endif %}
+{%                     elif users_apache_cgi_extension_match is defined and not users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler cgi-script
+          </If>
 {%                     endif %}
         </IfModule>
       </IfModule>
@@ -552,24 +588,43 @@
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
         <IfModule mime_module>
-{%                     if user.value.users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ user.value.users_cgi_extensions | join('|') }})$">
+{%                     if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
+
+{%                         if user.value.users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
-{%                     elif users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ users_cgi_extensions | join('|') }})$">
-            <If "-f %{REQUEST_FILENAME}">
-              SetHandler fcgid-script
-            </If>
-          </FilesMatch>
-{%                     else %}
+{%                         else %}
           <FilesMatch "\.cgi$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
+{%                         endif %}
+{%                     elif user.value.users_apache_cgi_extension_match is defined and not user.value.users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler fcgid-script
+          </If>
+{%                     elif users_apache_cgi_extension_match is not defined or users_apache_cgi_extension_match | bool %}
+{%                         if users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ users_apache_cgi_extensions | join('|') }})$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+{%                         else %}
+          <FilesMatch "\.cgi$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+{%                         endif %}
+{%                     elif users_apache_cgi_extension_match is defined and not users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler fcgid-script
+          </If>
 {%                     endif %}
         </IfModule>
       </IfModule>
@@ -666,18 +721,18 @@
      DirectoryIndex index.php index.html index.htm index.shtml
 {%             endif %}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-{%             if user.value.users_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             elif users_cgi_extensions is defined %}
-      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%             if user.value.users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%             elif users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%             else %}
       DirectoryIndex index.cgi index.html index.htm index.shtml
 {%             endif %}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
-{%             if user.value.users_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             elif users_cgi_extensions is defined %}
-      DirectoryIndex {{ users_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%             if user.value.users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
+{%             elif users_apache_cgi_extensions is defined %}
+      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
 {%             else %}
       DirectoryIndex index.cgi index.html index.htm index.shtml
 {%             endif %}
@@ -758,24 +813,43 @@
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
         <IfModule mime_module>
-{%             if user.value.users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ user.value.users_cgi_extensions | join('|') }})$">
+{%             if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
+
+{%                 if user.value.users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
-{%             elif users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ users_cgi_extensions | join('|') }})$">
-            <If "-f %{REQUEST_FILENAME}">
-              SetHandler cgi-script
-            </If>
-          </FilesMatch>
-{%             else %}
+{%                 else %}
           <FilesMatch "\.cgi$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler cgi-script
             </If>
           </FilesMatch>
+{%                 endif %}
+{%             elif user.value.users_apache_cgi_extension_match is defined and not user.value.users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler cgi-script
+          </If>
+{%             elif users_apache_cgi_extension_match is not defined or users_apache_cgi_extension_match | bool %}
+{%                 if users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ users_apache_cgi_extensions | join('|') }})$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+{%                 else %}
+          <FilesMatch "\.cgi$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler cgi-script
+            </If>
+          </FilesMatch>
+{%                 endif %}
+{%             elif users_apache_cgi_extension_match is defined and not users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler cgi-script
+          </If>
 {%             endif %}
         </IfModule>
       </IfModule>
@@ -785,24 +859,43 @@
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
         </IfModule>
         <IfModule mime_module>
-{%             if user.value.users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ user.value.users_cgi_extensions | join('|') }}i)$">
+{%             if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
+
+{%                 if user.value.users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
-{%             elif users_cgi_extensions is defined %}
-          <FilesMatch "\.({{ users_cgi_extensions | join('|') }})$">
-            <If "-f %{REQUEST_FILENAME}")>
-              SetHandler fcgid-script
-            </If>
-          </FilesMatch>
-{%             else %}
+{%                 else %}
           <FilesMatch "\.cgi$">
             <If "-f %{REQUEST_FILENAME}">
               SetHandler fcgid-script
             </If>
           </FilesMatch>
+{%                 endif %}
+{%             elif user.value.users_apache_cgi_extension_match is defined and not user.value.users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler fcgid-script
+          </If>
+{%             elif users_apache_cgi_extension_match is not defined or users_apache_cgi_extension_match | bool %}
+{%                 if users_apache_cgi_extensions is defined %}
+          <FilesMatch "\.({{ users_apache_cgi_extensions | join('|') }})$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+{%                 else %}
+          <FilesMatch "\.cgi$">
+            <If "-f %{REQUEST_FILENAME}">
+              SetHandler fcgid-script
+            </If>
+          </FilesMatch>
+{%                 endif %}
+{%             elif users_apache_cgi_extension_match is defined and not users_apache_cgi_extension_match | bool %}
+          <If "-f %{REQUEST_FILENAME}">
+            SetHandler fcgid-script
+          </If>
 {%             endif %}
         </IfModule>
       </IfModule>

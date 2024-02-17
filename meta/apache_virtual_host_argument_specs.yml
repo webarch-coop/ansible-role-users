@@ -1512,7 +1512,7 @@ users_apache_type:
 users_apache_vhost_docroot:
   type: bool
   required: false
-  description: Omit a DocuemntRoot from the Apache configuration.
+  description: Omit a default DocuemntRoot from the Apache configuration.
 users_cms:
   type: str
   required: false

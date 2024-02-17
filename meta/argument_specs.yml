@@ -26,6 +26,15 @@ argument_specs:
         type: str
         required: false
         description: Email address to send monthly bandwidth emails to.
+      users_apache_cgi_extensions:
+        type: list
+        elements: str
+        required: false
+        description: A list of file extensions, without a leading dot, that will be processed as CGI / FCGI by Apache.
+      users_apache_cgi_extension_match:
+        type: bool
+        required: false
+        description: Process files with matching extensions as CGI / FCGI by Apache.
       users_apache_chroot:
         type: bool
         required: false
@@ -90,11 +99,6 @@ argument_specs:
         type: str
         required: false
         description: Directory for HTTPS certificates.
-      users_cgi_extensions:
-        type: list
-        elements: str
-        required: false
-        description: A list of file extension, without a leading dot, that will be processes as CGI.
       users_chroot:
         type: bool
         required: true
