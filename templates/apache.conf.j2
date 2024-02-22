@@ -543,7 +543,6 @@
         </IfModule>
         <IfModule mime_module>
 {%                     if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
-
 {%                         if user.value.users_apache_cgi_extensions is defined %}
           <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
@@ -589,7 +588,6 @@
         </IfModule>
         <IfModule mime_module>
 {%                     if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
-
 {%                         if user.value.users_apache_cgi_extensions is defined %}
           <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
@@ -814,7 +812,6 @@
         </IfModule>
         <IfModule mime_module>
 {%             if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
-
 {%                 if user.value.users_apache_cgi_extensions is defined %}
           <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
@@ -860,7 +857,6 @@
         </IfModule>
         <IfModule mime_module>
 {%             if user.value.users_apache_cgi_extension_match is not defined or user.value.users_apache_cgi_extension_match | bool %}
-
 {%                 if user.value.users_apache_cgi_extensions is defined %}
           <FilesMatch "\.({{ user.value.users_apache_cgi_extensions | join('|') }})$">
             <If "-f %{REQUEST_FILENAME}">
