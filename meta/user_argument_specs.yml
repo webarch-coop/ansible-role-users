@@ -204,7 +204,7 @@ users_phpfpm_open_basedir:
 users_phpfpm_output_buffering:
   type: int
   required: false
-  descripion: An interger for output_buffering, zero to disable or a positive number of bytes ro limit the size of the buffer.
+  descripion: An integer for output_buffering, zero to disable or a positive number of bytes ro limit the size of the buffer.
 users_phpfpm_pm:
   type: str
   required: false

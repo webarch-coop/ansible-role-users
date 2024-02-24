@@ -298,180 +298,210 @@
 
       when: user.value.users_mariadb_database_privileges is defined
 
-    - name: Debug users_phpfpm_versions
-      ansible.builtin.debug:
-        var: users_phpfpm_versions
-        verbosity: 2
+    - name: System PHP checks
 
-    - name: Debug user.value.users_phpfpm_version
-      ansible.builtin.debug:
-        var: user.value.users_phpfpm_version
-        verbosity: 2
-      when: user.value.users_phpfpm_version is defined
-
-    - name: Check that user.value.users_phpfpm_version is a string or interger and a number followed by a dot and another number and is in users_phpfpm_versions when defined
-      ansible.builtin.assert:
-        that:
-          - ( user.value.users_phpfpm_version | type_debug == "str" ) or ( user.value.users_phpfpm_version | type_debug != "int" )
-          - user.value.users_phpfpm_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
-          - user.value.users_phpfpm_version is in users_phpfpm_versions
-        fail_msg: "The users_phpfpm_version variable needs to be quoted to ensure it is a string not a interger and the version of PHP required must already be installed, it is set to '{{ user.value.users_phpfpm_version }}' and the type is '{{ user.value.users_phpfpm_version | type_debug }}'."
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when:
-        - ( "phpfpm" in getent_group )
-        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-        - user.value.users_phpfpm_version is defined
-
-    - name: "Check that users_phpfpm_log_level is set to a valid value if defined if {{ user.key }} is in the phpfpm group"
-      ansible.builtin.assert:
-        that:
-          - user.value.users_phpfpm_log_level is regex("^alert|error|warning|notice|debug$")
-      when:
-        - ( "phpfpm" in getent_group )
-        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-        - ( user.value.users_phpfpm_log_level is defined )
-
-    - name: "Check that PHP-FPM pm.max_children is greater than 1 for {{ user.key }} if defined"
-      ansible.builtin.assert:
-        that:
-          - user.value.users_phpfpm_pm_max_children | int >= 1
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_phpfpm_pm_max_children is defined
-
-    - name: "Check the PHP-FPM pm dynamic pool settings for {{ user.key }} if defined"
+    - name: User PHP checks
       block:
 
-        - name: "Check PHP-FPM pm.start_servers for {{ user.key }} if defined"
+        - name: Don't set users_phpfpm_ variables when a user is not www-data or not in the phpfpm group
           ansible.builtin.assert:
             that:
-              - user.value.users_phpfpm_pm_start_servers | int >= 1
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when: user.value.users_phpfpm_pm_start_servers is defined
+              - user.value.users_groups is defined
+              - ( "phpfpm" in user.value.users_groups )
+            fail_msg: "To configure PHP-FPM for {{ user.key }} the phpfpm group needs to be in the users_groups list for the user."
+          when: >-
+            ( user.key != "www-data" ) and
+            ( ( user.value.users_phpfpm_disable_functions is defined ) or
+            ( user.value.users_phpfpm_max_children is defined ) or
+            ( user.value.users_phpfpm_mysqli_allow_local_infile is defined ) or
+            ( user.value.users_phpfpm_open_basedir is defined ) or
+            ( user.value.users_phpfpm_output_buffering is defined ) or
+            ( user.value.users_phpfpm_pm is defined ) or
+            ( user.value.users_phpfpm_pm_max_spare_servers is defined ) or
+            ( user.value.users_phpfpm_pm_min_spare_servers is defined ) or
+            ( user.value.users_phpfpm_pm_start_servers is defined ) or
+            ( user.value.users_phpfpm_request_terminate_timeout is defined ) or
+            ( user.value.users_phpfpm_sendmail_from is defined ) or
+            ( user.value.users_phpfpm_version is defined ) )
 
-        - name: "Check the PHP-FPM pm.min_spare_servers for {{ user.key }} if defined"
+        - name: Debug users_phpfpm_versions
+          ansible.builtin.debug:
+            var: users_phpfpm_versions
+            verbosity: 2
+
+        - name: Debug user.value.users_phpfpm_version
+          ansible.builtin.debug:
+            var: user.value.users_phpfpm_version
+            verbosity: 2
+          when: user.value.users_phpfpm_version is defined
+
+        - name: Check that user.value.users_phpfpm_version is a string or integer and a number followed by a dot and another number and is in users_phpfpm_versions when defined
           ansible.builtin.assert:
             that:
-              - user.value.users_phpfpm_pm_min_spare_servers | int >= 1
+              - ( user.value.users_phpfpm_version | type_debug == "str" ) or ( user.value.users_phpfpm_version | type_debug != "int" )
+              - user.value.users_phpfpm_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+              - user.value.users_phpfpm_version is in users_phpfpm_versions
+            fail_msg: "The users_phpfpm_version variable needs to be quoted to ensure it is a string not a integer and the version of PHP required must already be installed, it is set to '{{ user.value.users_phpfpm_version }}' and the type is '{{ user.value.users_phpfpm_version | type_debug }}'."
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when: user.value.users_phpfpm_pm_min_spare_servers is defined
+          when:
+            - ( "phpfpm" in getent_group )
+            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
+            - user.value.users_phpfpm_version is defined
 
-        - name: "Check the PHP-FPM pm.max_spare_servers for {{ user.key }} if defined"
+        - name: "Check that users_phpfpm_log_level is set to a valid value if defined if {{ user.key }} is in the phpfpm group"
           ansible.builtin.assert:
             that:
-              - user.value.users_phpfpm_pm_max_spare_servers | int >= 1
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when: user.value.users_phpfpm_pm_max_spare_servers is defined
+              - user.value.users_phpfpm_log_level is regex("^alert|error|warning|notice|debug$")
+          when:
+            - ( "phpfpm" in getent_group )
+            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
+            - ( user.value.users_phpfpm_log_level is defined )
 
-        - name: "Check the PHP-FPM users_phpfpm_pm_max_children for {{ user.key }} if defined"
+        - name: "Check that PHP-FPM pm.max_children is greater than 1 for {{ user.key }} if defined"
           ansible.builtin.assert:
             that:
               - user.value.users_phpfpm_pm_max_children | int >= 1
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: user.value.users_phpfpm_pm_max_children is defined
 
-        - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.start_servers for {{ user.key }} if defined"
+        - name: "Check the PHP-FPM pm dynamic pool settings for {{ user.key }} if defined"
+          block:
+
+            - name: "Check PHP-FPM pm.start_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_start_servers | int >= 1
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when: user.value.users_phpfpm_pm_start_servers is defined
+
+            - name: "Check the PHP-FPM pm.min_spare_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_min_spare_servers | int >= 1
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when: user.value.users_phpfpm_pm_min_spare_servers is defined
+
+            - name: "Check the PHP-FPM pm.max_spare_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_max_spare_servers | int >= 1
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when: user.value.users_phpfpm_pm_max_spare_servers is defined
+
+            - name: "Check the PHP-FPM users_phpfpm_pm_max_children for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_max_children | int >= 1
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when: user.value.users_phpfpm_pm_max_children is defined
+
+            - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.start_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_start_servers | int
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when:
+                - user.value.users_phpfpm_pm_max_children is defined
+                - user.value.users_phpfpm_pm_start_servers is defined
+
+            - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.min_spare_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when:
+                - user.value.users_phpfpm_pm_max_children is defined
+                - user.value.users_phpfpm_pm_min_spare_servers is defined
+
+            - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.max_spare_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_max_spare_servers | int
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when:
+                - user.value.users_phpfpm_pm_max_children is defined
+                - user.value.users_phpfpm_pm_max_spare_servers is defined
+
+            - name: "Check the PHP-FPM pm.start_servers is greater than pm.min_spare_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_start_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when:
+                - user.value.users_phpfpm_pm_start_servers is defined
+                - user.value.users_phpfpm_pm_min_spare_servers is defined
+
+            - name: "Check the PHP-FPM pm.start_servers must less than or equal to pm.max_spare_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_start_servers | int <= user.value.users_phpfpm_pm_max_spare_servers | int
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when:
+                - user.value.users_phpfpm_pm_start_servers is defined
+                - user.value.users_phpfpm_pm_max_spare_servers is defined
+
+            - name: "Check the PHP-FPM pm.max_spare_servers must be greater than pm.min_spare_servers for {{ user.key }} if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_pm_max_spare_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              when:
+                - user.value.users_phpfpm_pm_max_spare_servers is defined
+                - user.value.users_phpfpm_pm_min_spare_servers is defined
+
+          when: ( user.value.users_phpfpm_pm is defined ) and ( user.value.users_phpfpm_pm == "dynamic" )
+
+        - name: Check that users_phpfpm_mysqli_allow_local_infile is a boolean if defined
           ansible.builtin.assert:
             that:
-              - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_start_servers | int
+              - user.value.users_phpfpm_mysqli_allow_local_infile | type_debug == "bool"
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when:
-            - user.value.users_phpfpm_pm_max_children is defined
-            - user.value.users_phpfpm_pm_start_servers is defined
+          when: user.value.users_phpfpm_mysqli_allow_local_infile is defined
 
-        - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.min_spare_servers for {{ user.key }} if defined"
+        - name: Check that users_phpfpm_disable_functions is a list if defined
           ansible.builtin.assert:
             that:
-              - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+              - user.value.users_phpfpm_enable_disable_functions | type_debug == "list"
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when:
-            - user.value.users_phpfpm_pm_max_children is defined
-            - user.value.users_phpfpm_pm_min_spare_servers is defined
+          when: user.value.users_phpfpm_enable_disable_functions is defined
 
-        - name: "Check the PHP-FPM pm.max_children must be greater than or equal to pm.max_spare_servers for {{ user.key }} if defined"
+        - name: Check that users_phpfpm_open_basedir is a list if defined
           ansible.builtin.assert:
             that:
-              - user.value.users_phpfpm_pm_max_children | int >= user.value.users_phpfpm_pm_max_spare_servers | int
+              - user.value.users_phpfpm_open_basedir | type_debug == "list"
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when:
-            - user.value.users_phpfpm_pm_max_children is defined
-            - user.value.users_phpfpm_pm_max_spare_servers is defined
+          when: user.value.users_phpfpm_open_basedir is defined
 
-        - name: "Check the PHP-FPM pm.start_servers is greater than pm.min_spare_servers for {{ user.key }} if defined"
+        - name: "Check that users_phpfpm_output_buffering is set to an integer if defined"
           ansible.builtin.assert:
             that:
-              - user.value.users_phpfpm_pm_start_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
+              - user.value.users_phpfpm_output_buffering | type_debug == "int"
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when:
-            - user.value.users_phpfpm_pm_start_servers is defined
-            - user.value.users_phpfpm_pm_min_spare_servers is defined
+          when: user.value.users_phpfpm_output_buffering is defined
 
-        - name: "Check the PHP-FPM pm.start_servers must less than or equal to pm.max_spare_servers for {{ user.key }} if defined"
-          ansible.builtin.assert:
-            that:
-              - user.value.users_phpfpm_pm_start_servers | int <= user.value.users_phpfpm_pm_max_spare_servers | int
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when:
-            - user.value.users_phpfpm_pm_start_servers is defined
-            - user.value.users_phpfpm_pm_max_spare_servers is defined
+        - name: Checks for users_phpfpm_extensions
+          block:
 
-        - name: "Check the PHP-FPM pm.max_spare_servers must be greater than pm.min_spare_servers for {{ user.key }} if defined"
-          ansible.builtin.assert:
-            that:
-              - user.value.users_phpfpm_pm_max_spare_servers | int >= user.value.users_phpfpm_pm_min_spare_servers | int
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when:
-            - user.value.users_phpfpm_pm_max_spare_servers is defined
-            - user.value.users_phpfpm_pm_min_spare_servers is defined
+            - name: "Check that users_phpfpm_extensions for {{ user.key }} is an array if defined"
+              ansible.builtin.assert:
+                that:
+                  - user.value.users_phpfpm_extensions | type_debug == "list"
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
-      when: ( user.value.users_phpfpm_pm is defined ) and ( user.value.users_phpfpm_pm == "dynamic" )
+            - name: "Check that users_phpfpm_extensions for {{ user.key }} is an array if defined"
+              ansible.builtin.assert:
+                that:
+                  - ext is regex('^[a-zA-Z0-9_-]{1,6}$')
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+              loop: "{{ user.value.users_phpfpm_extensions }}"
+              loop_control:
+                loop_var: ext
 
-    - name: Check that users_phpfpm_mysqli_allow_local_infile is a boolean if defined
-      ansible.builtin.assert:
-        that:
-          - user.value.users_phpfpm_mysqli_allow_local_infile | type_debug == "bool"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_phpfpm_mysqli_allow_local_infile is defined
+          when: user.value.users_phpfpm_extensions is defined
 
-    - name: Check that users_phpfpm_disable_functions is a list if defined
-      ansible.builtin.assert:
-        that:
-          - user.value.users_phpfpm_enable_disable_functions | type_debug == "list"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_phpfpm_enable_disable_functions is defined
-
-    - name: Check that users_phpfpm_open_basedir is a list if defined
-      ansible.builtin.assert:
-        that:
-          - user.value.users_phpfpm_open_basedir | type_debug == "list"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_phpfpm_open_basedir is defined
-
-    - name: "Check that users_phpfpm_output_buffering is set to an integer if defined"
-      ansible.builtin.assert:
-        that:
-          - user.value.users_phpfpm_output_buffering | type_debug == "int"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_phpfpm_output_buffering is defined
-
-    - name: Checks for users_phpfpm_extensions
-      block:
-
-        - name: "Check that users_phpfpm_extensions for {{ user.key }} is an array if defined"
-          ansible.builtin.assert:
-            that:
-              - user.value.users_phpfpm_extensions | type_debug == "list"
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-
-        - name: "Check that users_phpfpm_extensions for {{ user.key }} is an array if defined"
-          ansible.builtin.assert:
-            that:
-              - ext is regex('^[a-zA-Z0-9_-]{1,6}$')
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ user.value.users_phpfpm_extensions }}"
-          loop_control:
-            loop_var: ext
-
-      when: user.value.users_phpfpm_extensions is defined
+      when: >-
+        ( user.key == "www-data" ) or
+        ( ( users_phpfpm is defined ) and ( users_phpfpm ) )
 
     - name: "Check that the users_daily_scripts array for {{ user.key }} is a non-empty list if defined"
       ansible.builtin.assert:

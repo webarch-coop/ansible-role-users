@@ -433,36 +433,31 @@
 {%                     endif %}
 {%                 endif %}
 {%                 if dir_config.users_apache_index is defined %}
-      DirectoryIndex {{ dir_config.users_apache_index | join(' ') }}
+{%                     set users_apache_template_directory_index = dir_config.users_apache_index %}
 {%                 elif users_apache_index is defined %}
-      DirectoryIndex {{ users_apache_index | join(' ') }}
-{%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "php" %}
-{%                     if user.value.users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     elif users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     else %}
-      DirectoryIndex index.php index.html index.htm index.shtml
-{%                     endif %}
-{%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "cgi" %}
-{%                     if user.value.users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     elif users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     else %}
-      DirectoryIndex index.cgi index.html index.htm index.shtml
-{%                     endif %}
-{%                 elif dir_config.users_apache_type is defined and dir_config.users_apache_type == "fcgi" %}
-{%                     if user.value.users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     elif users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%                     else %}
-      DirectoryIndex index.cgi index.html index.htm index.shtml
-{%                     endif %}
+{%                     set users_apache_template_directory_index = users_apache_index %}
 {%                 else %}
-      DirectoryIndex index.html index.htm index.shtml
+{%                     set users_apache_template_directory_index = ['index.html', 'index.htm', 'index.shtml'] %}
+{%                     if dir_config.users_apache_type is defined and dir_config.users_apache_type is regex('^php') %}
+{%                         if dir_config.users_phpfpm_extensions is defined %}
+{%                             set users_apache_template_directory_index = dir_config.users_phpfpm_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                         elif user.value.users_phpfpm_extensions is defined %}
+{%                             set users_apache_template_directory_index = user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                         else %}
+{%                             set users_apache_template_directory_index = ['index.php'] + users_apache_template_directory_index %}
+{%                         endif %}
+{%                     endif %}
+{%                     if dir_config.users_apache_type is defined and dir_config.users_apache_type is regex('cgi$') %}
+{%                         if dir_config.users_apache_cgi_extensions is defined %}
+{%                             set users_apache_template_directory_index = dir_config.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                         elif user.value.users_apache_cgi_extensions is defined %}
+{%                             set users_apache_template_directory_index = user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                         else %}
+{%                             set users_apache_template_directory_index = ['index.cgi', 'index.pl'] + users_apache_template_directory_index %}
+{%                         endif %}
+{%                     endif %}
 {%                 endif %}
+      DirectoryIndex {{ users_apache_template_directory_index | join(' ') }}
 {%                 if dir_config.users_apache_override is defined %}
       AllowOverride {{ dir_config.users_apache_override | join(' ') }}
 {%                 else %}
@@ -705,36 +700,31 @@
 {%             endif %}
 {%         endif %}
 {%         if vhost_config.users_apache_index is defined %}
-      DirectoryIndex {{ vhost_config.users_apache_index | join(' ') }}
+{%             set users_apache_template_directory_index = vhost_config.users_apache_index %}
 {%         elif users_apache_index is defined %}
-      DirectoryIndex {{ users_apache_index | join(' ') }} index.html index.htm index.shtml
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-{%             if user.value.users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             elif users_phpfpm_extensions is defined %}
-      DirectoryIndex {{ users_phpfpm_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             else %}
-     DirectoryIndex index.php index.html index.htm index.shtml
-{%             endif %}
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-{%             if user.value.users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             elif users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             else %}
-      DirectoryIndex index.cgi index.html index.htm index.shtml
-{%             endif %}
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
-{%             if user.value.users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             elif users_apache_cgi_extensions is defined %}
-      DirectoryIndex {{ users_apache_cgi_extensions | map('regex_replace', '^', 'index.') | join(' ') }} index.html index.htm index.shtml
-{%             else %}
-      DirectoryIndex index.cgi index.html index.htm index.shtml
-{%             endif %}
+{%             set users_apache_template_directory_index = users_apache_index %}
 {%         else %}
-      DirectoryIndex index.html index.htm index.shtml
+{%             set users_apache_template_directory_index = ['index.html', 'index.htm', 'index.shtml'] %}
+{%             if vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^php') %}
+{%                 if vhost_config.users_phpfpm_extensions is defined %}
+{%                     set users_apache_template_directory_index = vhost_config.users_phpfpm_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                 elif user.value.users_phpfpm_extensions is defined %}
+{%                     set users_apache_template_directory_index = user.value.users_phpfpm_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                 else %}
+{%                     set users_apache_template_directory_index = ['index.php'] + users_apache_template_directory_index %}
+{%                 endif %}
+{%             endif %}
+{%             if vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('cgi$') %}
+{%                 if vhost_config.users_apache_cgi_extensions is defined %}
+{%                     set users_apache_template_directory_index = vhost_config.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                 elif user.value.users_apache_cgi_extensions is defined %}
+{%                     set users_apache_template_directory_index = user.value.users_apache_cgi_extensions | map('regex_replace', '^', 'index.') + users_apache_template_directory_index %}
+{%                 else %}
+{%                     set users_apache_template_directory_index = ['index.cgi', 'index.pl'] + users_apache_template_directory_index %}
+{%                 endif %}
+{%             endif %}
 {%         endif %}
+      DirectoryIndex {{ users_apache_template_directory_index | join(' ') }}
 {%         if vhost_config.users_apache_override is defined %}
       AllowOverride {{ vhost_config.users_apache_override | join(' ') }}
 {%         elif users_apache_override is defined %}
