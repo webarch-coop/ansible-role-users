@@ -14,7 +14,7 @@
     - name: "Check that required MediaWiki variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.users_apache_type == "php"
+          - vhost.value.users_apache_type is regex('^php')
           - ( vhost.value.mediawiki_dbname is defined ) and ( vhost.value.mediawiki_dbname in user.value.users_mariadb_databases )
           - ( vhost.value.mediawiki_wikiname is defined ) and ( vhost.value.mediawiki_wikiname is regex("^[a-zA-Z0-9-_ ]*$") )
           - ( vhost.value.mediawiki_semver is defined ) and ( vhost.value.mediawiki_semver is version('1.31.0', '>=') )

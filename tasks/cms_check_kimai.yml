@@ -14,7 +14,7 @@
     - name: "Check that required Kimai variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.users_apache_type == "php"
+          - vhost.value.users_apache_type is regex('^php')
           - ( vhost.value.users_apache_robots is defined ) and ( vhost.value.users_apache_robots == "deny" )
           - ( vhost.value.kimai_dbname is defined ) and ( vhost.value.kimai_dbname in user.value.users_mariadb_databases )
           - vhost.value.kimai_version is defined

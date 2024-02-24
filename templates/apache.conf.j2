@@ -279,7 +279,7 @@
 {%         endfor %}
   </IfModule>
 {%     endif %}
-{%     if "proxy_fcgi" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+{%     if "proxy_fcgi" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^php') %}
   <IfModule proxy_fcgi_module>
 {%         if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
 {%             if "chroot" in user.value.users_groups %}
@@ -340,8 +340,9 @@
 {%             endif %}
     </Proxy>
 {%         else %}
-    # Something went wrong the users_phpfpm_system_version variable needs to be
-    # set to the PHP version in order for SetHandler path to the socket
+    # PHP-FPM has not been enabled -- something went wrong perhaps the {{ user.key }}
+    # user is not in the phpfpm group or the users_phpfpm_system_version variable
+    # needs to be set to the PHP version in order for SetHandler path to the socket
     # to be set for the www-data user
 {%         endif %}
   </IfModule>
@@ -514,7 +515,7 @@
 {%                 else %}
       Require all granted
 {%                 endif %}
-{%                 if "proxy_fcgi" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type == "php" %}
+{%                 if "proxy_fcgi" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type is regex('^php') %}
     {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
       <IfModule proxy_fcgi_module>
         <IfModule setenvif_module>
@@ -536,7 +537,8 @@
           </If>
         </FilesMatch>
       </IfModule>
-{%                 elif "cgid" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type == "cgi" %}
+{%                 endif %}
+{%                 if "cgid" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type is regex('^cgi|php[+]cgi$') %}
       <IfModule cgid_module>
         <IfModule setenvif_module>
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
@@ -581,7 +583,7 @@
 {%                     endif %}
         </IfModule>
       </IfModule>
-{%                 elif "fcgid" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type == "fcgi" %}
+{%                 elif "fcgid" in users_apache_modules_loaded and dir_config.users_apache_type is defined and dir_config.users_apache_type is regex('fcgi$') %}
       <IfModule fcgid_module>
         <IfModule setenvif_module>
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
@@ -665,11 +667,7 @@
       Options {{ vhost_config.users_apache_options | join(' ') }}
 {%         elif users_apache_options is defined %}
       Options {{ users_apache_options | join(' ') }}
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
-      Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-      Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('cgi$') %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC +ExecCGI
 {%         else %}
       Options -Indexes +SymlinksIfOwnerMatch -MultiViews +IncludesNOEXEC -ExecCGI
@@ -743,9 +741,7 @@
       AllowOverride {{ users_apache_override | join(' ') }}
 {%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-      AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
-{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+{%         elif vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('cgi$') %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=ExecCGI,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
 {%         else %}
       AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,IncludesNOEXEC Nonfatal=All
@@ -783,7 +779,7 @@
       </FilesMatch>
 {%             endfor %}
 {%         endif %}
-{%         if "proxy_fcgi" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" %}
+{%         if "proxy_fcgi" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^php') %}
     {#- https://wiki.apache.org/httpd/PHP-FPM#Proxy_via_handler #}
       <IfModule proxy_fcgi_module>
         <IfModule setenvif_module>
@@ -805,7 +801,8 @@
           </If>
         </FilesMatch>
       </IfModule>
-{%         elif "cgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
+{%         endif %}
+{%         if "cgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^cgi|php[+]cgi$') %}
       <IfModule cgid_module>
         <IfModule setenvif_module>
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
@@ -850,7 +847,7 @@
 {%             endif %}
         </IfModule>
       </IfModule>
-{%         elif "fcgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "fcgi" %}
+{%         elif "fcgid" in users_apache_modules_loaded and vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^fcgi|php[+]fcgi$') %}
       <IfModule fcgid_module>
         <IfModule setenvif_module>
           SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
@@ -940,7 +937,7 @@
     </Directory>
   </IfFile>
 {%     endif %}
-{%     if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "php" and vhost_config.users_apache_nophp_dirs is defined %}
+{%     if vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^php') and vhost_config.users_apache_nophp_dirs is defined %}
 {%         for dir in vhost_config.users_apache_nophp_dirs %}
 {%             if users_apache_chroot is defined and users_apache_chroot %}
   # No PHP allowed in this directory
@@ -1082,15 +1079,19 @@
   <IfFile {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs>
     ErrorLog  {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.error.log
     CustomLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.access.log combined
-{%         if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-    ScriptLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.cgi.log
+{%         if vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^cgi|php[+]cgi$') %}
+    # Uncomment the ScriptLog for CGI debugging
+    # https://httpd.apache.org/docs/current/mod/mod_cgi.html#scriptlog
+    # ScriptLog {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/apache.cgi.log
 {%         endif %}
   </IfFile>
 {%     else %}
   ErrorLog ${APACHE_LOG_DIR}/{{ vhost_config.users_apache_server_name }}.error.log
   CustomLog ${APACHE_LOG_DIR}/{{ vhost_config.users_apache_server_name }}.access.log combined
-{%         if vhost_config.users_apache_type is defined and vhost_config.users_apache_type == "cgi" %}
-  ScriptLog ${APACHE_LOG_DIR}/{{ vhost_config.users_apache_server_name }}.cgi.log
+{%         if vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^cgi|php[+]cgi$') %}
+  # Uncomment the ScriptLog for CGI debugging
+  # https://httpd.apache.org/docs/current/mod/mod_cgi.html#scriptlog
+  # ScriptLog ${APACHE_LOG_DIR}/{{ vhost_config.users_apache_server_name }}.cgi.log
 {%         endif %}
 {%     endif %}
 </VirtualHost>

@@ -120,6 +120,8 @@ users_apache_type:
     - cgi
     - fcgi
     - php
+    - php+cgi
+    - php+fcgi
     - static
 users_apache_ssl_options:
   type: list

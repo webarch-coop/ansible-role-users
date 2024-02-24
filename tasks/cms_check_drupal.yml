@@ -14,7 +14,7 @@
     - name: "Check that required Drupal variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.users_apache_type == "php"
+          - vhost.value.users_apache_type is regex('^php')
           - ( vhost.value.drupal_dbname is defined ) and ( vhost.value.drupal_dbname in user.value.users_mariadb_databases )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 

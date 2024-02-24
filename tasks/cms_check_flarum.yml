@@ -14,7 +14,7 @@
     - name: "Check that required Flarum variables are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.users_apache_type == "php"
+          - vhost.value.users_apache_type is regex('^php')
           - vhost.key | basename == "public"
           - vhost.value.flarum_version is defined
           - ( vhost.value.flarum_dbname is defined ) and ( vhost.value.flarum_dbname in user.value.users_mariadb_databases )

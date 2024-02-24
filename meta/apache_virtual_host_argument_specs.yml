@@ -1508,6 +1508,8 @@ users_apache_type:
     - cgi
     - fcgi
     - php
+    - php+cgi
+    - php+fcgi
     - static
 users_apache_vhost_docroot:
   type: bool

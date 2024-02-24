@@ -83,10 +83,10 @@
 
       when: vhost.value.users_apache_allow_encoded_slashes is defined
 
-    - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
+    - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, php+cgi, fcgi, cgi or static if it is defined"
       ansible.builtin.assert:
         that:
-          - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
+          - vhost.value.users_apache_type is regex('^php|php[+]cgi|php[+]fcgi|cgi|fcgi|static$')
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_type is defined
 
@@ -476,7 +476,7 @@
         - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
           ansible.builtin.assert:
             that:
-              - vhost.value.users_apache_type is regex("php|cgi|fcgi|static")
+              - vhost.value.users_apache_type is regex('^php|php[+]cgi|php[+]fcgi|cgi|fcgi|static$')
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when: vhost.value.users_apache_type is defined
 
