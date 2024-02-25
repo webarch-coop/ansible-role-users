@@ -394,9 +394,8 @@ chrooted and running suEXEC to ensure the the processes run as the user
 specified and have limited access to the host.
 
 Support for enabling several `users_apache_type`'s is to be implemended and the
-variable might be renamed to a more sensible `users_apache_handlers`.
-
-For now the `users_apache_type` options are:
+variable might be renamed to a more sensible `users_apache_handlers`, but for
+now the `users_apache_type` options are:
 
 * `cgi`
 * `fcgi`
@@ -404,6 +403,16 @@ For now the `users_apache_type` options are:
 * `php+cgi`
 * `php+fcgi`
 * `static`
+
+The optional Apache configuration arrays `users_apache_cgi_extensions` and
+`users_phpfpm_extensions` can be used at a role, `VirtualHost` or `Directory`
+level to change the defaults from `cgi` and `pl` for CGI / FCGI and `php` for
+PHP-FPM.
+
+The optional Apache configuration boolean `users_apache_cgi_extension_match`
+can be set to `false` to enable all files for a user, `VirtualHost` or
+`Directory` to be processed as CGI / FCGI, this is needed some things like a
+Munin Master.
 
 The arrays, `users_apache_options`, `users_apache_index` and
 `users_apache_override` can also be set by `VirtualHost` aand if they are these
