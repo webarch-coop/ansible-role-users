@@ -298,8 +298,6 @@
 
       when: user.value.users_mariadb_database_privileges is defined
 
-    - name: System PHP checks
-
     - name: User PHP checks
       block:
 
