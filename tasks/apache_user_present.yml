@@ -619,6 +619,7 @@
         nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
         nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+        nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
         nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
         users_nextcloud_trusted_domains: |-
@@ -693,6 +694,7 @@
         nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
         nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
         nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+        nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
         nextcloud_version: "{{ vhost.value.nextcloud_version }}"
         nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
         users_nextcloud_trusted_domains: |-
