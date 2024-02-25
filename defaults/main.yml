@@ -243,13 +243,15 @@ users_apache_php_proxy_timeout: 300
 # Require CGI / FCGI scripts to have files extensions in order to be processed as CGI / FCGI
 users_apache_cgi_extension_match: true
 # The users_apache_cgi_extensions array is for a list of files extensions to be
-# processed as CGI by Apache, it can also be set at a users level
+# processed as CGI by Apache, it can also be set at a users and directory level
+# the commented values below are the default set in the apache.conf.j2 template
 # users_apache_cgi_extensions:
 #   - cgi
 #   - pl
 users_phpfpm_request_terminate_timeout: 360
 # The users_phpfpm_extensions array is for a list of files extensions to be
-# processed for PHP commands, it can also be set at a users level
+# processed for PHP commands, it can also be set at a users and directory level
+# the commented value below is the default set in the apache.conf.j2 template
 # users_phpfpm_extensions:
 #   - php
 # PHP expands $pool to the pool name and in this case it is the same as the username

@@ -396,6 +396,15 @@ specified and have limited access to the host.
 Support for enabling several `users_apache_type`'s is to be implemended and the
 variable might be renamed to a more sensible `users_apache_handlers`.
 
+For now the `users_apache_type` options are:
+
+* `cgi`
+* `fcgi`
+* `php`
+* `php+cgi`
+* `php+fcgi`
+* `static`
+
 The arrays, `users_apache_options`, `users_apache_index` and
 `users_apache_override` can also be set by `VirtualHost` aand if they are these
 overrule the other settings for the `DocumentRoot` directory, see the [Apache
