@@ -29,6 +29,16 @@
         owner: root
         group: root
 
+    # /chroot/run/php
+    - name: "Directory for PHP sockets present in the chroot, {{ users_chroot_dir }}/run/php"
+      ansible.builtin.file:
+        path: "{{ users_chroot_dir }}/run/php"
+        state: directory
+        mode: "0755"
+        owner: www-data
+        group: www-data
+
+
     - name: Apache suEXEC configuration
       block:
 

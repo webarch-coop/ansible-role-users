@@ -431,7 +431,7 @@ for MediaWiki (the `VisualEditor` needs access via the `localhost`):
           - ip 127.0.0.1
 ```
 
-The same `users_apache_htauth_users` array is used for the usernaes and
+The same `users_apache_htauth_users` array is used for the usernames and
 passwords as documented below.
 
 ### SetEnv
