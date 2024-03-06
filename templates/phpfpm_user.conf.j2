@@ -136,7 +136,7 @@ php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '
 
 {% if user.value.users_phpfpm_admin_flags is defined %}
 {%     for users_phpfpm_admin_flag in user.value.users_phpfpm_admin_flags %}
-php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = {{ users_phpfpm_admin_flag.value }}
+php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = {{ users_phpfpm_admin_flag.value | lower }}
 {%     endfor %}
 {% endif %}
 
