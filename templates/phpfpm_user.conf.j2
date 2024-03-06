@@ -1,15 +1,15 @@
-; {# j2lint: disable=jinja-statements-indentation j2lint: disable=single-statement-per-line #}{{ ansible_managed }}
+; {{ ansible_managed }}
 
 [{{ user.key }}]
 user = {{ user.key }}
 group = {{ user.value.users_group | default(user.key) }}
-{% if users_chroot is defined and users_chroot and users_chroot_dir is defined and users_chroot_dir_check.stat.exists and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
+{% if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
 chroot = {{ users_chroot_users_dir }}/{{ user.key }}
-{% if users_apache_chroot is defined and users_apache_chroot %}
+{%     if users_apache_chroot is defined and users_apache_chroot | bool %}
 listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
-{% else %}
+{%     else %}
 listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-{% endif %}
+{%     endif %}
 access.log = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
 slowlog = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
 php_admin_value[error_log] = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
@@ -28,7 +28,7 @@ listen.allowed_clients = 127.0.0.1
 ; Error log level. Possible values: alert, error, warning, notice, debug. Default value: notice.
 php_admin_value[log_level] = {{ user.value.users_phpfpm_log_level | default('notice') }}
 
-{% if users_apache_chroot is defined and users_apache_chroot %}
+{% if users_apache_chroot is defined and users_apache_chroot | bool %}
 env[TMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
 env[TMPDIR] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
 env[TEMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
@@ -43,7 +43,11 @@ chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
 {% endif %}
 
 {% if user.value.users_phpfpm_output_buffering is defined %}
-php_admin_value[output_buffering] = {% if user.value.users_phpfpm_output_buffering == 0 %}Off{% else %}{ user.value.users_phpfpm_output_buffering }}{% endif %}
+{%     if user.value.users_phpfpm_output_buffering == 0 %}
+php_admin_value[output_buffering] = off
+{%     else %}
+php_admin_value[output_buffering] = {{ user.value.users_phpfpm_output_buffering }}
+{%     endif %}
 {% endif %}
 
 ; PHP settings passed with php_value or php_flag will overwrite php.ini values
@@ -91,19 +95,19 @@ php_admin_value[open_basedir] = "{{ users_phpfpm_open_basedir | join(',') }}"
 ; php_admin_value[open_basedir] =
 {% endif %}
 
-{% if user.value.users_phpfpm_mysqli_allow_local_infile is defined and user.value.users_phpfpm_mysqli_allow_local_infile %}
+{% if user.value.users_phpfpm_mysqli_allow_local_infile is defined and user.value.users_phpfpm_mysqli_allow_local_infile | bool %}
 ; Matomo needs mysqli.allow_local_infile enabled
-php_admin_value[mysqli.allow_local_infile] = 1
-{% if users_apache_chroot is defined and users_apache_chroot %}
+php_admin_value[mysqli.allow_local_infile] = yes
+{%     if users_apache_chroot is defined and users_apache_chroot | bool %}
 php_admin_value[mysqli.local_infile_directory] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}
-{% else %}
+{%     else %}
 php_admin_value[mysqli.local_infile_directory] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
-{% endif %}
+{%     endif %}
 {% else %}
-php_admin_value[mysqli.allow_local_infile] = 0
+php_admin_value[mysqli.allow_local_infile] = no
 {% endif %}
 
-{% if users_apache_chroot is defined and users_apache_chroot %}
+{% if users_apache_chroot is defined and users_apache_chroot | bool %}
 php_admin_value[session.save_path] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
 php_admin_value[upload_tmp_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
 php_admin_value[sys_temp_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
@@ -136,7 +140,11 @@ php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '
 
 {% if user.value.users_phpfpm_admin_flags is defined %}
 {%     for users_phpfpm_admin_flag in user.value.users_phpfpm_admin_flags %}
-php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = {{ users_phpfpm_admin_flag.value | lower }}
+{%         if users_phpfpm_admin_flag.value | bool %}
+php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = yes
+{%         else %}
+php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = no
+{%         endif %}
 {%     endfor %}
 {% endif %}
 
