@@ -183,6 +183,19 @@ users_notify_passwd:
   type: bool
   required: false
   description: Send a email to the user containing their password.
+users_phpfpm_admin_flags:
+  type: list
+  required: false
+  description: A list of php_admin_flag names and values for the PHP-FPM pool configuration.
+  options:
+    name:
+      type: str
+      required: true
+      description: The name of the PHP variable.
+    value:
+      type: bool
+      required: true
+      description: The value for the PHP variable.
 users_phpfpm_disable_functions:
   type: list
   elements: str

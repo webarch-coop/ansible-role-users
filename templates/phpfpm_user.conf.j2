@@ -134,6 +134,12 @@ php_admin_value[sendmail_from] = {{ user.key }}@{{ inventory_hostname }}
 {% endif %}
 php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log
 
+{% if user.value.users_phpfpm_admin_flags is defined %}
+{%     for users_phpfpm_admin_flag in user.value.users_phpfpm_admin_flags %}
+php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = {{ users_phpfpm_admin_flag.value }}
+{%     endfor %}
+{% endif %}
+
 pm = {{ user.value.users_phpfpm_pm | default('ondemand') }}
 pm.max_children = {{ user.value.users_phpfpm_max_children | default('2') }}
 {% if user.value.users_phpfpm_pm == "dynamic" %}
