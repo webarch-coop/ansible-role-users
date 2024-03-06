@@ -1224,6 +1224,29 @@ Setting `memory_limit = -1` overides the default of 128M, this is required for t
 
 By default, for users in the `phpfpm` group, the PHP socket is created in the `$HOME` directory as `~/php-fpm.sock`, the use of this path by the Apache configuratoon can be overridden when Apache is not chrooted and the users is not chrooted, per `VirtualHost` by setting `users_apache_php_socket_path` to a path to another socket _however_ this variable is not used by this roles PHP tasks, the socket configuration needs to be done by the [PHP role](https://git.coop/webarch/php).
 
+The optional `users_phpfpm_admin_flags` array can be used to set per-pool configuration, for example Nextcloud uses [SabreDav](https://sabre.io/dav/webservers/#apache) so requires the following in the PHP-FPM `pool.d` file:
+
+```ini
+php_admin_flag[always_populate_raw_post_data] = no
+php_admin_flag[magic_quotes_gpc] = no
+php_admin_flag[mbstring.func_overload] = no
+php_admin_flag[output_buffering] = no
+```
+
+This can be achieved by setting the following at a user level:
+
+```yaml
+    users_phpfpm_admin_flags:
+      - name: always_populate_raw_post_data
+        value: false
+      - name: magic_quotes_gpc
+        value: false
+      - name: mbstring.func_overload
+        value: false
+      - name: output_buffering
+        value: false
+```
+
 ### Example Apache VirtualHost
 
 If a user has a set of variables like this:
