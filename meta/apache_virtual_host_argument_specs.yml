@@ -1687,10 +1687,6 @@ wordpress_notify_from:
   type: str
   required: false
   description: The name to go with the from email address in account notification emails.
-wordpress_notify_from_name:
-  type: str
-  required: false
-  description: The email address for the from header in account notification emails.
 wordpress_notify_headers:
   type: list
   required: false
