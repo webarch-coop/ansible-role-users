@@ -236,6 +236,10 @@ ansible-galaxy install -r requirements.yml --force && \
   ansible-playbook users.yml --extra-vars "users_update_strategy=check"
 ```
 
+## Password notification
+
+The boolean variable `users_notify_passwd` can be used to trigger the setting and sending of a SSH password to the `users_email` address, the password will only be sent one and the date it was sent and the email address it was sent to is recorded in a `~/.notify_passwd` file, this is also used to ensure that a email is not sent twice -- if the file exists a new password will not be sent, to trigger the sending of a new password delete the `~/.notify_passwd` file.
+
 ## Cron jobs
 
 If `users_cron` is defined and true, at a server level then for users that are
