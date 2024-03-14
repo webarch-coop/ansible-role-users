@@ -42,14 +42,6 @@ env[TEMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }
 chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
 {% endif %}
 
-{% if user.value.users_phpfpm_output_buffering is defined %}
-{%     if user.value.users_phpfpm_output_buffering == 0 %}
-php_admin_value[output_buffering] = off
-{%     else %}
-php_admin_value[output_buffering] = {{ user.value.users_phpfpm_output_buffering }}
-{%     endif %}
-{% endif %}
-
 ; PHP settings passed with php_value or php_flag will overwrite php.ini values
 ; but defining disable_functions or disable_classes will not overwrite
 ; previously defined php.ini values, but will append the new value instead.

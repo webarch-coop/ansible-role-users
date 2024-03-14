@@ -214,10 +214,6 @@ users_phpfpm_open_basedir:
   elements: str
   required: false
   descripion: A list of directories in which PHP is allowed to run, php_admin_value[open_basedir].
-users_phpfpm_output_buffering:
-  type: int
-  required: false
-  descripion: An integer for output_buffering, zero to disable or a positive number of bytes to limit the size of the buffer.
 users_phpfpm_pm:
   type: str
   required: false
