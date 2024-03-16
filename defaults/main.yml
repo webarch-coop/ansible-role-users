@@ -395,7 +395,7 @@ users_phpfpm_disable_functions_matomo:
   - dl
   - exec
   # fsockopen is used by CiviCRM to send email
-  - fsockopen
+  # - fsockopen
   - passthru
   - pcntl_alarm
   - pcntl_fork
@@ -451,7 +451,7 @@ users_phpfpm_disable_functions_mediawiki:
   - dl
   - exec
   # fsockopen is used by CiviCRM to send email
-  - fsockopen
+  # - fsockopen
   - passthru
   - pcntl_alarm
   - pcntl_fork
@@ -506,7 +506,7 @@ users_phpfpm_disable_functions_nextcloud:
   - dl
   - exec
   # fsockopen is used by CiviCRM to send email
-  - fsockopen
+  # - fsockopen
   - passthru
   - pcntl_alarm
   - pcntl_fork
