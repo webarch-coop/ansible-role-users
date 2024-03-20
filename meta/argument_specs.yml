@@ -216,26 +216,6 @@ argument_specs:
         elements: str
         required: false
         description: A list of PHP-FPM functions to disable, note they are appended, they do not overwrite previously defined php.ini values.
-      users_phpfpm_disable_functions_civicrm:
-        type: list
-        elements: str
-        required: false
-        description: A list of PHP-FPM functions to disable for CiviCRM.
-      users_phpfpm_disable_functions_matomo:
-        type: list
-        elements: str
-        required: false
-        description: A list of PHP-FPM functions to disable for Matomo.
-      users_phpfpm_disable_functions_mediawiki:
-        type: list
-        elements: str
-        required: false
-        description: A list of PHP-FPM functions to disable for MediaWiki.
-      users_phpfpm_disable_functions_nextcloud:
-        type: list
-        elements: str
-        required: false
-        description: A list of PHP-FPM functions to disable for Nextcloud.
       users_phpfpm_extensions:
         type: list
         elements: str
@@ -246,11 +226,6 @@ argument_specs:
         elements: str
         required: false
         description: A list of directories to use for php_admin_value[open_basedir] in users PHP-FPM pool.d files.
-      users_phpfpm_open_basedir_mediawiki:
-        type: list
-        elements: str
-        required: false
-        description: A list of directories to use for php_admin_value[open_basedir] for MediaWiki in users PHP-FPM pool.d files.
       users_phpfpm_pm:
         type: str
         required: false
