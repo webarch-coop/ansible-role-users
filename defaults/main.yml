@@ -249,7 +249,7 @@ users_apache_php_proxy_timeout: 300
 # users_apache_cgi_extensions:
 #   - cgi
 #   - pl
-# Best set the max_execution_time for the PHP-FPM config rather than
+# Best set the max_execution_time in the PHP-FPM config rather than
 # request_terminate_timeout, zero is off:
 users_phpfpm_request_terminate_timeout: 0
 # The users_phpfpm_extensions array is for a list of files extensions to be
