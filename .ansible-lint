@@ -10,13 +10,13 @@
 ---
 # https://ansible-lint.readthedocs.io/rules/
 skip_list:
-  - args[module]
   - command-instead-of-module
   - key-order[task]
   - name[casing]
   - name[template]
   - no-changed-when
   - no-handler
-  - schema[tasks]
+# TODO:
+# var_naming_pattern: "^[users|molecule]_?[a-z0-9_]*$"
 # vim: syntax=yaml
 ...

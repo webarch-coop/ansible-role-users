@@ -527,7 +527,7 @@
     - name: "Apache config check for {{ user.key }}"
       block:
 
-        - name: "Check that www-data is a member of the primary gropu for user {{ user.key }} when Apache VirtualHosts are defined"
+        - name: "Check that www-data is a member of the primary group for user {{ user.key }} when Apache VirtualHosts are defined"
           ansible.builtin.assert:
             that:
               - ( "www-data" in user.value.users_group_members )
