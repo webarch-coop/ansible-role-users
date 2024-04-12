@@ -134,6 +134,19 @@
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "sshkeys" )
 
+    - name: Update Matomo sites and users
+      block:
+
+        - name: The users_matomo variable need to be True in order for this role to configure Matomo sites and users
+          ansible.builtin.assert:
+            that:
+              - users_matomo | bool
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "matomo"
+
     - name: Update quotas for users present
       block:
 
