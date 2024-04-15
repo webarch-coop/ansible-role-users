@@ -1,0 +1,119 @@
+# Copyright 2018-2024 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Matomo tasks
+  block:
+
+    - name: Matomo variables are required in order for this role to configure Matomo sites and users
+      ansible.builtin.assert:
+        that:
+          - users_matomo | bool
+          - ( matomo_user is defined ) and ( matomo_user | length > 0 )
+          - ( matomo_password is defined ) and ( matomo_password | length > 0 )
+          - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+    - name: Get all users
+      ansible.builtin.getent:
+        database: passwd
+        split: ':'
+
+    - name: When the Matomo user is present check if a Matomo config file exists
+      block:
+
+        - name: "Stat {{ matomo_html }}/config/config.ini.php"
+          ansible.builtin.stat:
+            path: "{{ matomo_html }}/config/config.ini.php"
+          check_mode: false
+          register: user_matomo_config
+
+        - name: "Matomo user login account tasks for {{ user.key }}"
+          block:
+
+            - name: Set a fact for the Matomo users PHP version
+              ansible.builtin.set_fact:
+                users_matomo_php_version: "{{ users | community.general.json_query(users_matomo_php_version_jpq) | string }}"
+              vars:
+                users_matomo_php_version_jpq: '["{{ matomo_user }}"]|[0].users_phpfpm_version'
+
+            - name: Check that the Matomo users PHP version is available
+              ansible.builtin.assert:
+                that:
+                  - users_matomo_php_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+                  - users_matomo_php_version in users_phpfpm_versions
+                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+            - name: Include Matomo version check tasks
+              ansible.builtin.include_role:
+                name: matomo
+                tasks_from: check_version.yml
+              vars:
+                matomo_php: "/usr/bin/php{{ users_matomo_php_version }}"
+              when:
+                - users_matomo_php_version is defined
+                - users_matomo_php_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+
+            - name: Check the Matomo superuser access
+              block:
+
+                - name: Include admin user authentication checks
+                  ansible.builtin.include_role:
+                    name: matomo
+                    tasks_from: check_auth.yml
+                  vars:
+                    matomo_php: "/usr/bin/php{{ users_matomo_php_version }}"
+
+                # Don't use Ansible to delete Matomo user accounts -- this is best done manually
+                # - name: Include Matomo user absent tasks
+                #   ansible.builtin.include_tasks: matomo_user_absent.yml
+                #   when:
+                #     - user.key != "root"
+                #     - user.value.users_matomo_account is defined
+                #     - not user.value.users_matomo_account | bool
+                #   loop: "{{ users | dict2items }}"
+                #   loop_control:
+                #     loop_var: user
+                #     label: "{{ user.key }}"
+
+                - name: Include Matomo user present tasks
+                  ansible.builtin.include_tasks: matomo_user_present.yml
+                  when:
+                    - user.key != "root"
+                    - ( user.value.users_state is not defined ) or ( ( user.value.users_state is defined ) and ( user.value.users_state == "present" ) )
+                    - ( user.value.users_system is not defined ) or ( ( user.value.users_system is defined ) and ( not user.value.users_system | bool ) )
+                    - user.value.users_email is defined
+                    - ( ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account | bool ) ) or ( user.value.users_matomo_account is not defined )
+                  loop: "{{ users | dict2items }}"
+                  loop_control:
+                    loop_var: user
+                    label: "{{ user.key }}"
+
+                - name: Include Matomo sites tasks
+                  ansible.builtin.include_tasks: matomo_sites.yml
+                  when:
+                    - user.key != "root"
+                    - ( "apache2" in ansible_facts.packages )
+                    - ( users_apache is defined ) and ( users_apache | bool )
+                    - ( user.value.users_state is not defined ) or ( ( user.value.users_state is defined ) and ( user.value.users_state == "present" ) )
+                    - ( user.value.users_system is not defined ) or ( ( user.value.users_system is defined ) and ( not user.value.users_system | bool ) )
+                    - user.value.users_email is defined
+                    - ( ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account | bool ) ) or ( user.value.users_matomo_account is not defined )
+                  loop: "{{ users | dict2items }}"
+                  loop_control:
+                    loop_var: user
+                    label: "{{ user.key }}"
+
+          when: user_matomo_config.stat.exists | bool
+
+      when: matomo_user in getent_passwd.keys()
+
+  tags:
+    - users
+...

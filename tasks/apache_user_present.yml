@@ -332,7 +332,7 @@
 
   when:
     - ( user.key != "root" )
-    - ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account )
+    - ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account | bool )
     - ( user.value.users_email is defined )
     - ( matomo_user is defined ) and ( matomo_user | length > 0 )
     - ( matomo_password is defined ) and ( matomo_password | length > 0 )

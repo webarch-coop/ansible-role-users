@@ -137,11 +137,17 @@
     - name: Update Matomo sites and users
       block:
 
-        - name: The users_matomo variable need to be True in order for this role to configure Matomo sites and users
+        - name: Matomo variables are required in order for this role to configure Matomo sites and users
           ansible.builtin.assert:
             that:
               - users_matomo | bool
+              - ( matomo_user is defined ) and ( matomo_user | length > 0 )
+              - ( matomo_password is defined ) and ( matomo_password | length > 0 )
+              - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        - name: Include Matomo tasks
+          ansible.builtin.include_tasks: matomo.yml
 
       when:
         - users_update_strategy is defined

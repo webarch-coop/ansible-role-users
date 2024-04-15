@@ -308,6 +308,7 @@ argument_specs:
           - changed
           - check
           - groups
+          - matomo
           - phpfpm
           - quotas
           - sshkeys

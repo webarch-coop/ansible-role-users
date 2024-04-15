@@ -199,7 +199,7 @@
 
       when:
         - ( user.key != "root" )
-        - ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account )
+        - ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account | bool )
         - ( user.value.users_email is defined )
         - ( matomo_user is defined ) and ( matomo_user | length > 0 )
         - ( matomo_password is defined ) and ( matomo_password | length > 0 )
@@ -209,7 +209,7 @@
       ansible.builtin.include_tasks: apache_user_present.yml
       when:
         - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
-        - ( users_apache is defined ) and ( users_apache )
+        - ( users_apache is defined ) and ( users_apache | bool )
         - ( user.value.users_apache_virtual_hosts is defined )
 
     - name: "Include daily script tasks for {{ user.key }}"
