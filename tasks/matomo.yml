@@ -11,15 +11,6 @@
 - name: Matomo tasks
   block:
 
-    - name: Matomo variables are required in order for this role to configure Matomo sites and users
-      ansible.builtin.assert:
-        that:
-          - users_matomo | bool
-          - ( matomo_user is defined ) and ( matomo_user | length > 0 )
-          - ( matomo_password is defined ) and ( matomo_password | length > 0 )
-          - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-
     - name: Get all users
       ansible.builtin.getent:
         database: passwd
@@ -114,6 +105,10 @@
 
       when: matomo_user in getent_passwd.keys()
 
+  when:
+    - ( matomo_user is defined ) and ( matomo_user | length > 0 )
+    - ( matomo_password is defined ) and ( matomo_password | length > 0 )
+    - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
   tags:
     - users
 ...
