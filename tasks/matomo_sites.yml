@@ -8,115 +8,45 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: "Matomo site tasks for {{ user.key }}"
+- name: Matomo site tasks
   block:
 
-    - name: Get all users
-      ansible.builtin.getent:
-        database: passwd
-        split: ':'
-
-    - name: Debug matomo_user
+    - name: "Debug matomo addsite for {{ user.key }}"
       ansible.builtin.debug:
-        var: matomo_user
-        verbosity: 2
-      when: matomo_user is defined
+        msg:
+          - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
+          - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
+          - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}{% else %}[]{% endif %}"
+          - "matomo_login: {{ user.key }}"
+          - "matomo_login_email: {{ user.value.users_email }}"
+          - "users_cms: {{ vhost.value.users_cms | default('') }}"
+        verbosity: 1
+      when:
+        - ( vhost.value.users_matomo_site is not defined ) or ( vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site )
+        - ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$') )
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
 
-    - name: Debug getent_passwd.keys()
-      ansible.builtin.debug:
-        var: getent_passwd.keys()
-        verbosity: 3
-      when: getent_passwd.keys() is defined
-
-    - name: "Matomo site tasks for {{ user.key }}"
-      block:
-
-        - name: Check if Matomo config file exists
-          ansible.builtin.stat:
-            path: "{{ matomo_html }}/config/config.ini.php"
-          check_mode: false
-          register: user_matomo_config
-
-        - name: If Matomo is installed
-          block:
-
-            - name: Set a fact for the Matomo users PHP version
-              ansible.builtin.set_fact:
-                users_matomo_php_version: "{{ users | community.general.json_query(users_matomo_php_version_jpq) | string }}"
-              vars:
-                users_matomo_php_version_jpq: '["{{ matomo_user }}"]|[0].users_phpfpm_version'
-
-            - name: Check that the Matomo users PHP version is available
-              ansible.builtin.assert:
-                that:
-                  - users_matomo_php_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
-                  - users_matomo_php_version in users_phpfpm_versions
-                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-
-            - name: Include Matomo version check tasks
-              ansible.builtin.include_role:
-                name: matomo
-                tasks_from: check_version.yml
-              vars:
-                matomo_php: "/usr/bin/php{{ users_matomo_php_version }}"
-
-            - name: Check the Matomo superuser access and add the site
-              block:
-
-                - name: Include admin user authentication checks
-                  ansible.builtin.include_role:
-                    name: matomo
-                    tasks_from: check_auth.yml
-                  vars:
-                    matomo_php: "/usr/bin/php{{ users_matomo_php_version }}"
-
-                - name: Matomo site present
-                  block:
-
-                    - name: "Debug matomo addsite for {{ user.key }}"
-                      ansible.builtin.debug:
-                        msg:
-                          - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
-                          - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
-                          - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}{% else %}[]{% endif %}"
-                          - "matomo_login: {{ user.key }}"
-                          - "matomo_login_email: {{ user.value.users_email }}"
-                          - "users_cms: {{ vhost.value.users_cms | default('') }}"
-                        verbosity: 1
-                      when:
-                        - ( vhost.value.users_matomo_site is not defined ) or ( vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site )
-                        - ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$') )
-                      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-                      loop_control:
-                        loop_var: vhost
-                        label: "{{ vhost.key }}"
-
-                    - name: "Matomo sites present for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
-                      ansible.builtin.include_role:
-                        name: matomo
-                        tasks_from: site_present.yml
-                      when:
-                        - ( vhost.value.users_matomo_site is not defined ) or ( vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site )
-                        - ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$') )
-                      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-                      loop_control:
-                        loop_var: vhost
-                        label: "{{ vhost.key }}"
-                      vars:
-                        matomo_login: "{{ user.key }}"
-                        matomo_login_email: "{{ user.value.users_email }}"
-                        matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
-                        matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
-                        # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
-                        matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}{% else %}[]{% endif %}"
-
-                  when: ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
-
-              when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
-
-          when: user_matomo_config.stat.exists
-
-      when: matomo_user in getent_passwd.keys()
+    - name: "Matomo sites present for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
+      ansible.builtin.include_role:
+        name: matomo
+        tasks_from: site_present.yml
+      when:
+        - ( vhost.value.users_matomo_site is not defined ) or ( vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site )
+        - ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$') )
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+      vars:
+        matomo_login: "{{ user.key }}"
+        matomo_login_email: "{{ user.value.users_email }}"
+        matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
+        matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
+        # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
+        matomo_site_urls: "{% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}{% else %}[]{% endif %}"
 
   when:
     - ( user.key != "root" )
@@ -125,6 +55,10 @@
     - ( matomo_user is defined ) and ( matomo_user | length > 0 )
     - ( matomo_password is defined ) and ( matomo_password | length > 0 )
     - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
+    - matomo_user in getent_passwd.keys()
+    - user_matomo_config.stat.exists
+    - ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
+    - ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
   tags:
     - users
 ...
