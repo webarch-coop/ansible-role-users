@@ -116,7 +116,7 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
       register: users_myclirc_conf
 
-    - name: "Edit myclir config file ~/.myclirc for {{ user.key }}"
+    - name: "Edit myclirc config file ~/.myclirc for {{ user.key }}"
       community.general.ini_file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.myclirc"
         section: alias_dsn
