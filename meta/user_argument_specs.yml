@@ -201,6 +201,11 @@ users_phpfpm_disable_functions:
   elements: str
   required: false
   descripion: List for php_admin_value[disable_functions].
+users_phpfpm_extensions:
+  type: list
+  elements: str
+  required: false
+  description: A list of file extensions, without a leading dot, to be processed for PHP commands.
 users_phpfpm_max_children:
   type: int
   required: false

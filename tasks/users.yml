@@ -96,7 +96,7 @@
 
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
-        - ( users_apache is defined ) and ( users_apache )
+        - ( users_apache is defined ) and ( users_apache | bool )
 
     - name: Update PHP-FPM config for users present
       block:
