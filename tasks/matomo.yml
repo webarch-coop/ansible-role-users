@@ -77,7 +77,7 @@
                   ansible.builtin.include_tasks: matomo_user_present.yml
                   when:
                     - user.key != "root"
-                    - ( "sudo" not in user.value.users_groups )
+                    - ( user.value.users_groups is not defined ) or ( ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups ) )
                     - ( user.value.users_state is not defined ) or ( ( user.value.users_state is defined ) and ( user.value.users_state == "present" ) )
                     - ( user.value.users_system is not defined ) or ( ( user.value.users_system is defined ) and ( not user.value.users_system | bool ) )
                     - user.value.users_email is defined
@@ -91,7 +91,7 @@
                   ansible.builtin.include_tasks: matomo_sites.yml
                   when:
                     - user.key != "root"
-                    - ( "sudo" not in user.value.users_groups )
+                    - ( user.value.users_groups is not defined ) or ( ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups ) )
                     - ( "apache2" in ansible_facts.packages )
                     - ( users_apache is defined ) and ( users_apache | bool )
                     - ( user.value.users_state is not defined ) or ( ( user.value.users_state is defined ) and ( user.value.users_state == "present" ) )
