@@ -25,8 +25,12 @@
     - name: Include Matomo user present tasks
       ansible.builtin.include_tasks: matomo_user_present.yml
       when:
-        - ( user.value.users_state is not defined ) or ( user.value.users_state is defiend and user.value.users_state == "present" )
+        - user.key != "root"
+        - ( "sudo" not in user.value.users_groups )
+        - ( user.value.users_state is not defined ) or ( ( user.value.users_state is defined ) and ( user.value.users_state == "present" ) )
+        - ( user.value.users_system is not defined ) or ( ( user.value.users_system is defined ) and ( not user.value.users_system | bool ) )
         - user.value.users_email is defined
+        - ( ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account | bool ) ) or ( user.value.users_matomo_account is not defined )
 
   tags:
     - users
