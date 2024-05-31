@@ -180,6 +180,7 @@
             url: "{{ url }}"
             method: HEAD
             return_content: true
+            http_agent: "{{ users_http_agent }}"
           register: users_ssh_public_key_headers
           check_mode: false
           failed_when: users_ssh_public_key_headers.status != 200

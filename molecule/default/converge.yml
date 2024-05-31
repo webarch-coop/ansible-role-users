@@ -1,30 +1,79 @@
+# Copyright 2018-2024 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: Lint
-  become: false
+- name: Run as root
+  # become: true
   connection: local
-  gather_facts: false
+  # gather_facts: true
   hosts:
     - localhost
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   tasks:
 
-    - name: Check Jinja2 syntax
-      ansible.builtin.command: find -type f -name '*.j2' -exec ansiblej2lint.py {} +
-      check_mode: false
-      args:
-        chdir: ../..
-      changed_when: false
+    - name: Debug ansible_effective_user_id
+      ansible.builtin.debug:
+        var: ansible_effective_user_id
 
-    - name: YAML lint
-      ansible.builtin.command: yamllint -f colored -c .yamllint .
-      check_mode: false
-      args:
-        chdir: ../..
-      changed_when: false
+    - name: Debug ansible_user_id
+      ansible.builtin.debug:
+        var: ansible_user_id
 
-    - name: Ansible lint
-      ansible.builtin.command: ansible-lint -c .ansible-lint --force-color .
-      check_mode: false
-      args:
-        chdir: ../..
-      changed_when: false
+    - name: Debug ansible_user_dir
+      ansible.builtin.debug:
+        var: ansible_user_dir
+
+    - name: Include Skel role as root
+      ansible.builtin.include_role:
+        name: skel
+      vars:  # noqa var-naming[no-role-prefix]
+        skel: true
+
+    - name: Include MariaDB role as root
+      ansible.builtin.include_role:
+        name: mariadb
+      vars:  # noqa var-naming[no-role-prefix]
+        mariadb: true
+
+    - name: Include Users role as root
+      ansible.builtin.include_role:
+        name: users
+      vars:  # noqa var-naming[no-role-prefix]
+        users_apache: false
+        users_chroot: false
+        users_mariadb: true
+        users_matomo: false
+        users:
+          root:
+            users_state: present
+            users_home: /root
+            users_email: chris@webarchitects.co.uk
+            users_editor: vim
+            users_home_mode: "0700"
+          nagios:
+            users_state: present
+            users_system: true
+            users_shell: /usr/sbin/nologin
+            users_home: /var/lib/nagios
+            users_mariadb_notify_passwd: false
+            users_mariadb_databases:
+              - nagios
+            users_home_mode: "0755"
+          chris:
+            users_state: present
+            users_name: Chris Croome
+            users_email: chris@webarchitects.co.uk
+            users_ssh_public_keys:
+              - https://git.coop/chris.keys
+            users_groups:
+              - sudo
+            users_editor: vim
+            users_home_mode: "0750"
 ...
