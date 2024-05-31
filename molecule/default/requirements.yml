@@ -8,6 +8,11 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
+- name: apt
+  src: https://git.coop/webarch/apt.git
+  version: 4.3.1  # apt
+  scm: git
+
 - name: mariadb
   src: https://git.coop/webarch/mariadb.git
   version: 3.5.1  # mariadb
