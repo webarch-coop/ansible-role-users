@@ -175,14 +175,15 @@
               - user.value.users_ssh_public_keys[0] is defined
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
-        - name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }}"
+        - name: "Check that users_ssh_public_keys array contains valid URLs for {{ user.key }} using a HTTP GET with HTTP_AGENT {{ users_http_agent }}"
           ansible.builtin.uri:
             url: "{{ url }}"
-            method: HEAD
+            method: GET
             return_content: true
             http_agent: "{{ users_http_agent }}"
-          register: users_ssh_public_key_headers
           check_mode: false
+          changed_when: false
+          register: users_ssh_public_key_headers
           failed_when: users_ssh_public_key_headers.status != 200
           loop: "{{ user.value.users_ssh_public_keys }}"
           loop_control:

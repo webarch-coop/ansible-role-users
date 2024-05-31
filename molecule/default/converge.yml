@@ -41,6 +41,7 @@
         name: mariadb
       vars:  # noqa var-naming[no-role-prefix]
         mariadb: true
+        mariadb_underscore_autoupdate: true
 
     - name: Include Users role as root
       ansible.builtin.include_role:
