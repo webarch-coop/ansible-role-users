@@ -36,6 +36,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
             force: true
+            http_agent: "{{ users_http_agent }}"
           loop: "{{ user.value.users_ssh_public_keys }}"
           loop_control:
             loop_var: key_url

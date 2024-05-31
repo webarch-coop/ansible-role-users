@@ -339,5 +339,7 @@ users_ssh_authorized_keys_file_name: authorized_keys
 # last option in /etc/shells ending in /bash, so set it manually if this isn't
 # what is wanted
 # users_bash: /usr/bin/bash
+# HTTP UserAgent for the get_url and uri modules
+users_http_agent: "Lynx/2.9.0dev.6 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/3.7.1"
 users_verify: true
 ...
