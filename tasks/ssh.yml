@@ -28,7 +28,7 @@
       block:
 
         # TODO Add a check that content is returned
-        - name: "SSH public keys downloaded for {{ user.key }}"
+        - name: "SSH public keys downloaded for {{ user.key }} using a HTTP GET with HTTP_AGENT {{ users_http_agent }}"
           ansible.builtin.get_url:
             url: "{{ key_url }}"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
@@ -36,6 +36,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
             force: true
+            http_agent: "{{ users_http_agent }}"
           loop: "{{ user.value.users_ssh_public_keys }}"
           loop_control:
             loop_var: key_url

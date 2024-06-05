@@ -153,6 +153,10 @@ argument_specs:
         type: str
         required: true
         description: A sub-directory of $HOME for users scripts.
+      users_http_agent:
+        type: str
+        required: true
+        description: The HTTP UserAgent for web requests.
       users_mariadb:
         type: bool
         required: true
