@@ -298,6 +298,10 @@ matomo_autoupdate:
   type: bool
   required: false
   description: Automatically update Matomo.
+matomo_db_config:
+  type: str
+  required: false
+  description: Path to the MariaDB ~/.my.cnf file.
 matomo_dbname:
   type: str
   required: false

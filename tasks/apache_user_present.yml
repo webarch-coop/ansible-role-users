@@ -843,6 +843,7 @@
         matomo_html: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
         matomo_private: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
         matomo_logs: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/private"
+        matomo_db_config: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
         matomo_db_username: "{{ user.key }}"
         matomo_db_pass: "{{ users_mariadb_password }}"
         matomo_db_host: localhost
@@ -860,7 +861,6 @@
         matomo_notify_signature: "{{ users_notify_signature }}"
         matomo_version: "{{ vhost.value.matomo_version | default('') }}"
         matomo_autoupdate: "{{ vhost.value.matomo_autoupdate | default(true) | bool }}"
-        matomo_mysql_conf: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}.my.cnf"
         matomo_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
