@@ -440,7 +440,7 @@ mediawiki_group:
   description: Mediawiki group.
 mediawiki_htaccess_images:
   type: bool
-  required: true
+  required: false
   description: Template the images/.htaccess file.
 mediawiki_locale:
   type: str
