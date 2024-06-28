@@ -10,23 +10,19 @@
 ---
 # TODO Include Tasks to check Apache variables
 
-- name: Check Apache status
-  ansible.builtin.command: service apache2 status
-  check_mode: false
-  changed_when: false
-  register: users_apache2_status
-  tags:
-    - users
-
-- name: Fail if Apache is not running
-  ansible.builtin.fail:
-    msg: "Apache is not running!"
-  when: users_apache2_status.rc == 3
-  tags:
-    - users
-
-- name: Generate Apache config files
+- name: Geenrate Apache config and enable / disable the config and restart Apache
   block:
+
+    - name: Check Apache status
+      ansible.builtin.command: service apache2 status
+      check_mode: false
+      changed_when: false
+      register: users_apache2_status
+
+    - name: Fail if Apache is not running
+      ansible.builtin.fail:
+        msg: "Apache is not running!"
+      when: users_apache2_status.rc == 3
 
     - name: "Check if the Apache config for {{ user.key }} exists"
       ansible.builtin.stat:
@@ -53,20 +49,19 @@
         owner: root
         group: root
       register: users_apache_conf
-      when: user.key != "www-data"
 
     - name: "Check the Apache sites-enabled symlink for {{ user.key }}"
       ansible.builtin.stat:
         path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
       register: users_apache_conf_site_enabled_symlink
 
-    - name: Apache configtest
+    - name: Enable Apache sites, configtest and restart
       block:
 
         - name: "Apache {{ user.key }} sites-enabled symlink present"
           ansible.builtin.command: "a2ensite {{ user.key }}"
           register: users_a2ensite
-          changed_when: '"already enabled" not in users_a2ensite.stdout'
+          changed_when: ( "already enabled" not in users_a2ensite.stdout )
 
         - name: "apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
           ansible.builtin.command: apache2ctl configtest
@@ -170,8 +165,48 @@
               - "The configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
 
       when: >-
-        ( users_apache_conf.changed | bool ) or
-        ( not users_apache_conf_site_enabled_symlink.stat.exists | bool )
+        ( ( users_apache_conf.changed | bool ) or
+        ( not users_apache_conf_site_enabled_symlink.stat.exists | bool ) ) and
+        ( ( user.value.users_apache_virtual_hosts_enabled is not defined ) or
+        ( user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool ) )
+
+    - name: Disable Apache sites, configtest and restart
+      block:
+
+        - name: "Apache {{ user.key }} sites-enabled symlink absent"
+          ansible.builtin.command: "a2dissite {{ user.key }}"
+          register: users_a2dissite
+          changed_when: ( "already disabled" not in users_a2dissite.stdout )
+
+        - name: Restart Apache
+          block:
+
+            - name: Apache restart
+              ansible.builtin.service:
+                name: apache2
+                state: restarted
+
+            - name: Pause to allow Apache to sort itself out
+              ansible.builtin.pause:
+                seconds: 4
+
+            - name: Check Apache status
+              ansible.builtin.command: service apache2 status
+              check_mode: false
+              changed_when: false
+              register: users_apache2_status
+
+            - name: Fail if Apache is not running
+              ansible.builtin.fail:
+                msg: "Apache is not running, for a temp fix try: a2dissite {{ user.key }} && service apache2 start"
+              when: users_apache2_status.rc == 3
+
+          when: users_a2dissite.changed | bool
+
+      when:
+        - user.value.users_apache_virtual_hosts_enabled is defined
+        - not user.value.users_apache_virtual_hosts_enabled | bool
+        - users_apache_conf_site_enabled_symlink.stat.exists | bool
 
   tags:
     - users

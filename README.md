@@ -311,6 +311,11 @@ with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`.
 
 ## Apache
 
+When `users_apache_virtual_hosts_enabled` is not defined for a user or it is
+set to `True` the Apache config generate for the user will be anabled using
+`a2ensite`, when `users_apache_virtual_hosts_enabled` is set to `False` then
+`a2dissite` will be run for the user.
+
 By default a `DocumentRoot` and `Directory` set of directives are generated for
 each `VirtualHost` based on the YAML dictionaries defined by
 `users_apache_virtual_hosts`. This `DocumentRoot` and `Directory` will be

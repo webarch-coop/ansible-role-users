@@ -21,6 +21,10 @@ users_apache_virtual_hosts:
   type: dict
   required: false
   description: A dictionary of Apache VirtualHosts.
+users_apache_virtual_hosts_enabled:
+  type: bool
+  required: false
+  description: Enable or disable the Apache virtual hosts for this user, when disabled the /etc/apache2/sites-enabled symlink is deleted.
 users_cron_jobs:
   type: list
   elements: dict

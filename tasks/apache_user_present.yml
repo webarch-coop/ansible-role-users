@@ -174,15 +174,17 @@
   tags:
     - users
 
-- name: "Apache {{ user.key }} sites-enabled symlink absent"
+- name: "Apache {{ user.key }} sites-enabled symlink absent as the certs are absent or the sites are not set to be enabled"
   ansible.builtin.file:
     path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
     state: absent
-  when: not users_apache_certs_present
+  when: >-
+    ( not users_apache_certs_present | bool ) or
+    ( user.value.users_apache_virtual_hosts_enabled is defined and not user.value.users_apache_virtual_hosts_enabled | bool )
   tags:
     - users
 
-- name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists already"
+- name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists"
   ansible.builtin.stat:
     path: "/etc/apache2/sites-available/{{ user.key }}.conf"
   register: users_apache_conf_check
@@ -206,17 +208,16 @@
   when:
     - user.key == "www-data"
     - users_apache_certs_present is defined
-    - users_apache_certs_present
+    - users_apache_certs_present | bool
   tags:
     - users
 
-- name: "Generate and enable Apache VirtualHosts for {{ user.key }}"
+- name: "Generate and enable or disable Apache VirtualHosts for {{ user.key }}"
   ansible.builtin.include_tasks: apache_user_vhosts_present.yml
   when:
     - user.key != "www-data"
     - users_apache_certs_present is defined
-    - users_apache_certs_present
-    # - ( users_apache_conf is defined )
+    - users_apache_certs_present | bool
   tags:
     - users
 
@@ -353,7 +354,7 @@
 #     - vhost.value.users_cms_roles is defined
 #     - vhost.value.users_cms_roles | length > 0
 
-- name: CMS roles included when MariaDB databases are defined
+- name: CMS roles included when MariaDB databases are defined and Apache VirtualHosts are enabled
   block:
 
     # The users_mariadb_password shoudl already be set from mariadb_user_present.yml
@@ -901,6 +902,7 @@
     - ( vhost.value.users_cms is defined )
     - ( users_mariadb is defined ) and ( users_mariadb | bool )
     - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+    - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool )
   tags:
     - users
 
