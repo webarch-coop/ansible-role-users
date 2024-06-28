@@ -438,6 +438,10 @@ mediawiki_group:
   type: str
   required: false
   description: Mediawiki group.
+mediawiki_htaccess_images:
+  type: bool
+  required: true
+  description: Template the images/.htaccess file.
 mediawiki_locale:
   type: str
   required: false
