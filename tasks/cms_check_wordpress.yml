@@ -33,12 +33,12 @@
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_dbuser is defined
 
-    - name: "Check that the wordpress_dbprefix is less than 8 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: "Check that the wordpress_dbprefix is less than 16 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.wordpress_dbprefix | length
+          - vhost.value.wordpress_dbprefix | length > 0
           - vhost.value.wordpress_dbprefix is regex("^[a-zA-Z0-9_]*$")
-          - vhost.value.wordpress_dbprefix is regex("^.{1,8}$")
+          - vhost.value.wordpress_dbprefix is regex("^.{1,16}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_dbprefix is defined
 
