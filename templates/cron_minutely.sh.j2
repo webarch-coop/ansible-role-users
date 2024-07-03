@@ -2,6 +2,13 @@
 #
 # {{ ansible_managed }}
 #
+HOME="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+MYSQL_HISTFILE="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.mysql/history"
+PATH="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.local/bin:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+TEMP="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+TMP="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+TMPDIR="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+#
 # The scripts listed in this file will be run every minute
 #
 # BEGIN ANSIBLE SCRIPTS
