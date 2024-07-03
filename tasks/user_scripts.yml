@@ -33,23 +33,50 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
       register: users_cron_daily_path
 
-    - name: "Daily scripts in place for {{ user.key }}"
-      ansible.builtin.blockinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
-        block: |
-          {% if user.value.users_daily_scripts is defined %}
-          {% for users_daily_script in user.value.users_daily_scripts %}
-          {{ users_daily_script }}
-          {% endfor %}
-          {% else %}
-          # None
-          {% endif %}
-        state: present
-        create: false
-        marker: "# {mark} ANSIBLE SCRIPTS"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
-        mode: "0700"
+    - name: Daily scripts in place and tested
+      block:
+
+        - name: "Daily scripts in place for {{ user.key }}"
+          ansible.builtin.blockinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
+            block: |
+              {% if user.value.users_daily_scripts is defined %}
+              {% for users_daily_script in user.value.users_daily_scripts %}
+              {{ users_daily_script }}
+              {% endfor %}
+              {% else %}
+              # None
+              {% endif %}
+            state: present
+            create: false
+            marker: "# {mark} ANSIBLE SCRIPTS"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+            mode: "0750"
+
+        - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script using /bin/sh as {{ user.key }}"
+          ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
+          args:
+            executable: /usr/bin/sh
+            chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+          become: true
+          become_user: "{{ user.key }}"
+          register: users_cron_daily_test_run
+
+        - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
+          ansible.builtin.debug:
+            var: users_cron_daily_test_run.stdout_lines
+          when:
+            - users_cron_daily_test_run.stdout_lines is defined
+            - users_cron_daily_test_run.stdout_lines | length > 0
+
+        - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
+          ansible.builtin.debug:
+            var: users_cron_daily_test_run.stderr_lines
+          when:
+            - users_cron_daily_test_run.stderr_lines is defined
+            - users_cron_daily_test_run.stderr_lines | length > 0
+
       when:
         - ( users_home_bin_path.stat.exists | bool )
         - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
@@ -72,23 +99,50 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
       register: users_cron_hourly_path
 
-    - name: "Hourly scripts in place for {{ user.key }}"
-      ansible.builtin.blockinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
-        block: |
-          {% if user.value.users_hourly_scripts is defined %}
-          {% for users_hourly_script in user.value.users_hourly_scripts %}
-          {{ users_hourly_script }}
-          {% endfor %}
-          {% else %}
-          # None
-          {% endif %}
-        state: present
-        create: false
-        marker: "# {mark} ANSIBLE SCRIPTS"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
-        mode: "0750"
+    - name: Hourly scripts in place and tested
+      block:
+
+        - name: "Hourly scripts in place for {{ user.key }}"
+          ansible.builtin.blockinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
+            block: |
+              {% if user.value.users_hourly_scripts is defined %}
+              {% for users_hourly_script in user.value.users_hourly_scripts %}
+              {{ users_hourly_script }}
+              {% endfor %}
+              {% else %}
+              # None
+              {% endif %}
+            state: present
+            create: false
+            marker: "# {mark} ANSIBLE SCRIPTS"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+            mode: "0750"
+
+        - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script using /bin/sh as {{ user.key }}"
+          ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
+          args:
+            executable: /usr/bin/sh
+            chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+          become: true
+          become_user: "{{ user.key }}"
+          register: users_cron_hourly_test_run
+
+        - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
+          ansible.builtin.debug:
+            var: users_cron_hourly_test_run.stdout_lines
+          when:
+            - users_cron_hourly_test_run.stdout_lines is defined
+            - users_cron_hourly_test_run.stdout_lines | length > 0
+
+        - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
+          ansible.builtin.debug:
+            var: users_cron_hourly_test_run.stderr_lines
+          when:
+            - users_cron_hourly_test_run.stderr_lines is defined
+            - users_cron_hourly_test_run.stderr_lines | length > 0
+
       when:
         - ( users_home_bin_path.stat.exists | bool )
         - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
@@ -111,23 +165,50 @@
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
       register: users_cron_minutely_path
 
-    - name: "Minutely scripts in place for {{ user.key }}"
-      ansible.builtin.blockinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
-        block: |
-          {% if user.value.users_minutely_scripts is defined %}
-          {% for users_minutely_script in user.value.users_minutely_scripts %}
-          {{ users_minutely_script }}
-          {% endfor %}
-          {% else %}
-          # None
-          {% endif %}
-        state: present
-        create: false
-        marker: "# {mark} ANSIBLE SCRIPTS"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
-        mode: "0750"
+    - name: Minutely scripts in place and tested
+      block:
+
+        - name: "Minutely scripts in place for {{ user.key }}"
+          ansible.builtin.blockinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+            block: |
+              {% if user.value.users_minutely_scripts is defined %}
+              {% for users_minutely_script in user.value.users_minutely_scripts %}
+              {{ users_minutely_script }}
+              {% endfor %}
+              {% else %}
+              # None
+              {% endif %}
+            state: present
+            create: false
+            marker: "# {mark} ANSIBLE SCRIPTS"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+            mode: "0750"
+
+        - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script using /bin/sh as {{ user.key }}"
+          ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+          args:
+            executable: /usr/bin/sh
+            chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+          become: true
+          become_user: "{{ user.key }}"
+          register: users_cron_minutely_test_run
+
+        - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
+          ansible.builtin.debug:
+            var: users_cron_minutely_test_run.stdout_lines
+          when:
+            - users_cron_minutely_test_run.stdout_lines is defined
+            - users_cron_minutely_test_run.stdout_lines | length > 0
+
+        - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
+          ansible.builtin.debug:
+            var: users_cron_minutely_test_run.stderr_lines
+          when:
+            - users_cron_minutely_test_run.stderr_lines is defined
+            - users_cron_minutely_test_run.stderr_lines | length > 0
+
       when:
         - ( users_home_bin_path.stat.exists | bool )
         - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )

@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 #
 # {{ ansible_managed }}
 #
 HOME="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
 MYSQL_HISTFILE="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.mysql/history"
-PATH="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.local/bin:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+PATH="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/bin:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
 TEMP="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
 TMP="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
 TMPDIR="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
@@ -15,3 +15,4 @@ TMPDIR="{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tm
 # END ANSIBLE SCRIPTS
 #
 # Add your own scripts below
+{# vim: syntax=jinja2 #}
