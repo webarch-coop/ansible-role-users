@@ -38,7 +38,8 @@
         ( users_pkgs_installed.changed | bool ) or
         ( ( ansible_local.dpkg.arch is not defined ) or
         ( ansible_local.gpg.version is not defined ) or
-        ( ansible_local.bash.path is not defined ) )
+        ( ansible_local.bash.path is not defined ) or
+        ( ansible_local.sh.path is not defined ) )
 
     - name: Check which shells are present
       ansible.builtin.slurp:
