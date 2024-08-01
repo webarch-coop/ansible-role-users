@@ -1327,6 +1327,10 @@ users_apache_locations:
       type: str
       required: false
       description: A ProxyPass URL to use within the Location directive.
+    preserve_host:
+      type: bool
+      required: false
+      description: ProxyPreserveHost directive.
     redirect:
       type: str
       required: false

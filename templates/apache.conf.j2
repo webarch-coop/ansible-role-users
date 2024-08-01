@@ -178,6 +178,13 @@
     Alias "{{ loc.alias }}"
 {%                 elif loc.proxy_pass is defined %}
     <IfModule proxy_module>
+{%                     if loc.preserve_host is defined %}
+{%                         if loc.preserve_host | bool %}
+    ProxyPreserveHost on
+{%                         else %}
+    ProxyPreserveHost off
+{%                         endif %}
+{%                     endif %}
       ProxyPass "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ]','" "') }}"
 {%                     if loc.reverse is defined and loc.reverse | bool %}
       ProxyPassReverse "{{ loc.proxy_pass }}"
