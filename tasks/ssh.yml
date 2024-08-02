@@ -24,17 +24,19 @@
         group: "{{ user.value.users_home_group | default(user.key) }}"
       register: user_ssh_authorized_keys_d
 
+    - name: TMPDIR for SSH public keys to be downloaded to present
+      ansible.builtin.tempfile:
+        state: directory
+      register: user_ssh_tmpdir
+
     - name: SSH keys present when ~/.ssh/authorized_keys.d exists
       block:
 
-        # TODO Add a check that content is returned
-        - name: "SSH public keys downloaded for {{ user.key }} using a HTTP GET with HTTP_AGENT {{ users_http_agent }}"
+        - name: "SSH public keys downloaded for {{ user.key }} using a HTTP GET with HTTP_AGENT {{ users_http_agent }} to {{user_ssh_tmpdir }}/{{ key_idex }}"
           ansible.builtin.get_url:
             url: "{{ key_url }}"
-            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
+            dest: "{{ user_ssh_tmpdir.path }}/{{ key_idex }}"
             mode: "0600"
-            owner: "{{ user.key }}"
-            group: "{{ user.value.users_home_group | default(user.key) }}"
             force: true
             http_agent: "{{ users_http_agent }}"
           loop: "{{ user.value.users_ssh_public_keys }}"
@@ -43,7 +45,22 @@
             index_var: key_idex
             label: "{{ key_url }}"
 
-        - name: "Assemble all the ~/authorized_keys_d/authorized_keys_* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
+        - name: "Check and copy SSH public keys from {{ user_ssh_tmpdir.path }} to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
+          ansible.builtin.copy:
+            src: "{{ user_ssh_tmpdir.path }}/{{ key_idex }}"
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
+            remote_src: true
+            mode: "0600"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
+            validate: ssh-keygen -lf %s
+          loop: "{{ user.value.users_ssh_public_keys }}"
+          loop_control:
+            loop_var: key_url
+            index_var: key_idex
+            label: "{{ key_url }}"
+
+        - name: "Assemble all the {{ user_ssh_tmpdir.path }}/* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
           ansible.builtin.assemble:
             src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
@@ -61,7 +78,13 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
 
+        - name: "TMPDIR for SSH public keys absent {{ user_ssh_tmpdir.path }}"
+          ansible.builtin.file:
+            path: "{{ user_ssh_tmpdir.path }}"
+            state: absent
+
       when:
+        - user_ssh_tmpdir.path is defined
         - user_ssh_authorized_keys_d.state is defined
         - user_ssh_authorized_keys_d.state == "directory"
 
