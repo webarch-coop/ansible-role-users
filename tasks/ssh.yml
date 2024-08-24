@@ -27,6 +27,7 @@
     - name: TMPDIR for SSH public keys to be downloaded to present
       ansible.builtin.tempfile:
         state: directory
+      changed_when: false
       register: user_ssh_tmpdir
 
     - name: SSH keys present when ~/.ssh/authorized_keys.d exists
@@ -44,6 +45,7 @@
             loop_var: key_url
             index_var: key_idex
             label: "{{ key_url }}"
+          changed_when: false
 
         - name: "Check and copy SSH public keys from {{ user_ssh_tmpdir.path }} to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
           ansible.builtin.copy:
@@ -82,6 +84,7 @@
           ansible.builtin.file:
             path: "{{ user_ssh_tmpdir.path }}"
             state: absent
+          changed_when: false
 
       when:
         - user_ssh_tmpdir.path is defined
