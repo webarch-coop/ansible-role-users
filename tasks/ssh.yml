@@ -33,7 +33,7 @@
     - name: SSH keys present when ~/.ssh/authorized_keys.d exists
       block:
 
-        - name: "SSH public keys downloaded for {{ user.key }} using a HTTP GET with HTTP_AGENT {{ users_http_agent }} to {{user_ssh_tmpdir }}/{{ key_idex }}"
+        - name: SSH public keys downloaded
           ansible.builtin.get_url:
             url: "{{ key_url }}"
             dest: "{{ user_ssh_tmpdir.path }}/{{ key_idex }}"
