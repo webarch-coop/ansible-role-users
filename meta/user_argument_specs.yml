@@ -74,6 +74,10 @@ users_cron_tmpdir_clean:
   type: bool
   required: false
   description: Disable the daily cron job to clear the ~/tmp directory.
+users_cron_tmpdir_max_age_days:
+  type: int
+  required: false
+  description: The maximum ages TMPDIR files and directories can reach before they are deleted.
 users_daily_scripts:
   type: list
   elements: str

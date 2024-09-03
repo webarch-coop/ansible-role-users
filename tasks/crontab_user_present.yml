@@ -118,8 +118,8 @@
             hour: "*"
 
       when:
-        - ( users_home_bin_path.stat.exists )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system )
+        - ( users_home_bin_path.stat.exists | bool )
+        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
         - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
 
     - name: Crontabs present for non-chrooted users
@@ -203,10 +203,24 @@
             insertafter: USER
             state: "{% if users_home_tmp_path.stat.exists %}present{% else %}absent{% endif %}"
 
-        - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old enabled"
+        - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days }} days old enabled"
           ansible.builtin.cron:
             name: "Daily deletion of TMPDIR files for {{ user.key }}"
-            job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days | default('2') }} -delete &>/dev/null"
+            job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ users_cron_tmpdir_max_age_days }} -delete &>/dev/null"
+            state: present
+            user: "{{ user.key }}"
+            minute: "{{ users_cron_min }}"
+            hour: "{{ users_cron_tmpdir_hour }}"
+          when:
+            - ( users_home_tmp_path.stat.exists | bool )
+            - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
+            - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean | bool )
+            - ( user.value.users_cron_tmpdir_max_age_days is not defined )
+
+        - name: "Daily deletion of users TMPDIR files and directories which are older than {{ user.value.users_cron_tmpdir_max_age_days }} days old enabled"
+          ansible.builtin.cron:
+            name: "Daily deletion of TMPDIR files for {{ user.key }}"
+            job: "find -P {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp -mindepth 1 -type f,d -mtime +{{ user.value.users_cron_tmpdir_max_age_days }} -delete &>/dev/null"
             state: present
             user: "{{ user.key }}"
             minute: "{{ users_cron_min }}"
@@ -214,7 +228,8 @@
           when:
             - ( users_home_tmp_path.stat.exists )
             - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-            - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean )
+            - ( user.value.users_cron_tmpdir_clean is not defined ) or ( user.value.users_cron_tmpdir_clean | bool )
+            - ( user.value.users_cron_tmpdir_max_age_days is defined )
 
         - name: "Daily deletion of users TMPDIR files and directories which are older than {{ users_cron_tmpdir_max_age_days | default('2') }} days old disabled"
           ansible.builtin.cron:
@@ -225,7 +240,7 @@
             hour: "{{ users_cron_tmpdir_hour }}"
           when:
             - ( users_cron_tmpdir_hour is defined ) and ( "false" not in users_cron_tmpdir_hour )
-            - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean )
+            - ( user.value.users_cron_tmpdir_clean is defined ) and ( not user.value.users_cron_tmpdir_clean | bool )
 
         - name: "HOME env var added to {{ user.key }} crontab"
           ansible.builtin.cron:
