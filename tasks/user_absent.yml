@@ -13,6 +13,13 @@
   tags:
     - users
 
+- name: "Nextcloud logrotate config absent for {{ user.key }}"
+  ansible.builtin.file:
+    path: "/etc/logrotate.d/nextcloud_{{ user.key }}"
+    state: absent
+  tags:
+    - users
+
 - name: "Crontab absent for user {{ user.key }}"
   ansible.builtin.include_tasks: crontab_user_absent.yml
   tags:
