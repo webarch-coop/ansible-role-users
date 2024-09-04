@@ -347,7 +347,7 @@
 
     - name: List the updated users
       ansible.builtin.debug:
-        msg: "Users updated: {{ users_update }}"
+        msg: "Users updated: {{ users_update | join(', ') }}"
       when:
         - users_update != []
         - users_update_strategy != "sshkeys"
