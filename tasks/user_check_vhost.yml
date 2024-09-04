@@ -389,7 +389,7 @@
           loop: "{{ vhost.value.users_apache_locations }}"
           loop_control:
             loop_var: loc
-            label: "{{ loc }}"
+            label: "{{ loc.location | default(loc) }}"
 
       when: vhost.value.users_apache_locations is defined
 

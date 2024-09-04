@@ -156,7 +156,7 @@
   loop: "{{ users_private_files }}"
   loop_control:
     loop_var: file
-    label: "{{ file }}"
+    label: "{{ file.path }}"
   tags:
     - users
 
