@@ -308,6 +308,7 @@
             that:
               - user.value.users_groups is defined
               - ( "phpfpm" in user.value.users_groups )
+            quiet: "{% if ansible_check_mode or ansible_verbosity >= 1 %}false{% else %}true{% endif %}"
             fail_msg: "To configure PHP-FPM for {{ user.key }} the phpfpm group needs to be in the users_groups list for the user."
           when: >-
             ( user.key != "www-data" ) and
@@ -533,6 +534,7 @@
           ansible.builtin.assert:
             that:
               - ( "www-data" in user.value.users_group_members )
+            quiet: "{% if ansible_check_mode or ansible_verbosity >= 1 %}false{% else %}true{% endif %}"
           when:
             - user.value.users_group_members is defined
             - user.value.users_group_members != []

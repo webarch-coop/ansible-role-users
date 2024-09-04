@@ -221,7 +221,7 @@
 
         - name: Print the changed users to update
           ansible.builtin.debug:
-            msg: "User to update: {{ users_update }}"
+            msg: "User to update: {{ users_update | join(', ') }}"
 
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )

@@ -112,7 +112,10 @@
 
         - name: Run Apache logrotation config
           ansible.builtin.command: /usr/sbin/logrotate -v /etc/logrotate.d/apache_users_logrotate
-          changed_when: true
+          register: users_apache_logrotate_run
+          changed_when:
+            - ( "not running prerotate script, since no logs will be rotated" not in users_apache_logrotate_run.stderr )
+            - ( "not running postrotate script, since no logs were rotated" not in users_apache_logrotate_run.stderr )
 
       when: users_apache_logrotate.stat.exists | bool
 

@@ -76,7 +76,7 @@
           - "The next task will include the acmesh role, users the tasks from letsencrypt.yml with the following variables:"
           - "acmesh: {{ acmesh }}"
           - "acmesh_common_name: {{ acmesh_common_name }}"
-          - "acmesh_subject_alt_names: {{ acmesh_subject_alt_names }}"
+          - "acmesh_subject_alt_names: {{ acmesh_subject_alt_names | join(', ') }}"
           - "acmesh_reloadcmd: {{ acmesh_reloadcmd }}"
       vars:  # noqa var-naming[no-role-prefix]
         acmesh: true
