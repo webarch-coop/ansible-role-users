@@ -442,7 +442,7 @@ for MediaWiki (the `VisualEditor` needs access via the `localhost`):
         users_apache_auth_type: Basic
         users_apache_require:
           - valid-user
-          - ip "{{ ansible_default_ipv4.address }}"
+          - ip "{{ ansible_facts.default_ipv4.address }}"
           - ip 127.0.0.1
 ```
 

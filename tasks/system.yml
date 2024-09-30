@@ -97,7 +97,7 @@
 
     - name: Set a fact for the Debian version
       ansible.builtin.set_fact:
-        users_debian_version: "{{ ansible_distribution_release }}"
+        users_debian_version: "{{ ansible_facts.distribution_release }}"
 
     - name: Load package information as facts
       ansible.builtin.package_facts:

@@ -27,7 +27,7 @@
   ansible.builtin.set_fact:
     users_update: "{{ users_update | default([]) + [user.key] }}"
   when:
-    - ansible_version.full is version('2.13.0', '>=')
+    - ansible_facts.version.full is version('2.13.0', '>=')
     - not users_current_state.stat.exists | bool
   tags:
     - users

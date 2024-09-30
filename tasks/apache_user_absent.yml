@@ -63,20 +63,20 @@
 
     - name: "Certcheck crontab for {{ user.key }} absent"
       ansible.builtin.cron:
-        name: "Cert check for {{ user.key }}.{{ ansible_fqdn }}"
-        job: "ssl-cert-check -qac {{ users_cert_dir }}/{{ user.key }}.{{ ansible_fqdn }}.cert.pem -e 'root@localhost'"
+        name: "Cert check for {{ user.key }}.{{ ansible_facts.fqdn }}"
+        job: "ssl-cert-check -qac {{ users_cert_dir }}/{{ user.key }}.{{ ansible_facts.fqdn }}.cert.pem -e 'root@localhost'"
         state: absent
 
-    - name: "Keys and certs for {{ user.key }}.{{ ansible_fqdn }} absent"
+    - name: "Keys and certs for {{ user.key }}.{{ ansible_facts.fqdn }} absent"
       ansible.builtin.file:
         path: "{{ path }}"
         state: absent
       loop:
-        - "/root/.acme.sh/{{ user.key }}.{{ ansible_fqdn }}_ecc"
-        - "/etc/ssl/le/{{ user.key }}.{{ ansible_fqdn }}.cert.pem"
-        - "/etc/ssl/le/{{ user.key }}.{{ ansible_fqdn }}.fullchain.pem"
-        - "/etc/ssl/le/{{ user.key }}.{{ ansible_fqdn }}.key.pem"
-        - "/etc/ssl/le/{{ user.key }}.{{ ansible_fqdn }}.ca.pem"
+        - "/root/.acme.sh/{{ user.key }}.{{ ansible_facts.fqdn }}_ecc"
+        - "/etc/ssl/le/{{ user.key }}.{{ ansible_facts.fqdn }}.cert.pem"
+        - "/etc/ssl/le/{{ user.key }}.{{ ansible_facts.fqdn }}.fullchain.pem"
+        - "/etc/ssl/le/{{ user.key }}.{{ ansible_facts.fqdn }}.key.pem"
+        - "/etc/ssl/le/{{ user.key }}.{{ ansible_facts.fqdn }}.ca.pem"
       loop_control:
         loop_var: path
         label: "{{ path }}"
