@@ -303,6 +303,7 @@
     - name: User PHP checks
       block:
 
+        # TODO This doesn't currently allow a PHP CLI only user to exist!
         - name: Don't set users_phpfpm_ variables when a user is not www-data or not in the phpfpm group
           ansible.builtin.assert:
             that:
