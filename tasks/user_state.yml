@@ -8,60 +8,56 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: Set users_current_state and users_proposed_state to empty variables
-  ansible.builtin.set_fact:
-    users_current_state: ""
-    users_proposed_state: ""
+- name: User state
+  block:
+
+    - name: Set users_current_state and users_proposed_state to empty variables
+      ansible.builtin.set_fact:
+        users_current_state: ""
+        users_proposed_state: ""
+
+    - name: "Check current state file for {{ user.key }}"
+      ansible.builtin.stat:
+        path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
+        checksum_algorithm: sha256
+      register: users_current_state
+
+    - name: "{{ user.key }} needs adding"
+      ansible.builtin.set_fact:
+        users_update: "{{ users_update | default([]) + [user.key] }}"
+      when:
+        - ansible_version.full is version('2.13.0', '>=')
+        - not users_current_state.stat.exists | bool
+
+    - name: "Check the proposed state file for {{ user.key }}"
+      ansible.builtin.stat:
+        path: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
+        checksum_algorithm: sha256
+      register: users_proposed_state
+
+    - name: "{{ user.key }} needs updating"
+      ansible.builtin.set_fact:
+        users_update: "{{ users_update | default([]) + [user.key] }}"
+      when:
+        - ( user.value.users_state is not defined ) or ( user.value.users_state != "ignore" )
+        - users_current_state.stat.exists | bool
+        - users_current_state.stat.checksum != users_proposed_state.stat.checksum
+
+    # - name: "Debug current state checksum for {{ user.key }}"
+    #   debug:
+    #     msg: "users_current_state checksum for {{ user.key }}: {{ users_current_state.stat.checksum }}"
+    #     verbosity: 1
+    #
+    # - name: "Debug proposed state checksum for {{ user.key }}"
+    #   debug:
+    #     msg: "users_proposed_state checksum for {{ user.key }}: {{ users_proposed_state.stat.checksum }}"
+    #     verbosity: 1
+    #
+    # - name: "Debug users_update array for {{ user.key }}"
+    #   debug:
+    #     msg: "users_update: {{ users_update }}"
+    #     verbosity: 1
+
   tags:
     - users
-
-- name: "Check current state file for {{ user.key }}"
-  ansible.builtin.stat:
-    path: "{{ users_state_dir }}/current/{{ user.key }}.yml"
-    checksum_algorithm: sha256
-  register: users_current_state
-  tags:
-    - users
-
-- name: "{{ user.key }} needs adding"
-  ansible.builtin.set_fact:
-    users_update: "{{ users_update | default([]) + [user.key] }}"
-  when:
-    - ansible_facts.version.full is version('2.13.0', '>=')
-    - not users_current_state.stat.exists | bool
-  tags:
-    - users
-
-- name: "Check the proposed state file for {{ user.key }}"
-  ansible.builtin.stat:
-    path: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
-    checksum_algorithm: sha256
-  register: users_proposed_state
-  tags:
-    - users
-
-- name: "{{ user.key }} needs updating"
-  ansible.builtin.set_fact:
-    users_update: "{{ users_update | default([]) + [user.key] }}"
-  when:
-    - ( user.value.users_state is not defined ) or ( user.value.users_state != "ignore" )
-    - users_current_state.stat.exists | bool
-    - users_current_state.stat.checksum != users_proposed_state.stat.checksum
-  tags:
-    - users
-
-# - name: "Debug current state checksum for {{ user.key }}"
-#   debug:
-#     msg: "users_current_state checksum for {{ user.key }}: {{ users_current_state.stat.checksum }}"
-#     verbosity: 1
-#
-# - name: "Debug proposed state checksum for {{ user.key }}"
-#   debug:
-#     msg: "users_proposed_state checksum for {{ user.key }}: {{ users_proposed_state.stat.checksum }}"
-#     verbosity: 1
-#
-# - name: "Debug users_update array for {{ user.key }}"
-#   debug:
-#     msg: "users_update: {{ users_update }}"
-#     verbosity: 1
 ...
