@@ -43,7 +43,7 @@
       - "SSH public key URLs:{% if user.value.users_ssh_public_keys is defined %}{% for url in user.value.users_ssh_public_keys %} {{ url }}{% endfor %}{% endif %}"
     verbosity: 2
 
-# TODO Check that the user doesn't already exist in getent_passwd
+# TODO Check that the user doesn't already exist in ansible_facts.getent_passwd
 - name: "User account for {{ user.key }} present"
   ansible.builtin.user:
     name: "{{ user.key }}"

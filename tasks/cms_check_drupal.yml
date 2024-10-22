@@ -23,7 +23,7 @@
         that:
           - ( "phpfpm" in user.value.users_groups )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: ( "phpfpm" in getent_group )
+      when: ( "phpfpm" in ansible_facts.getent_group )
 
     - name: "Check the drupal_url for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:

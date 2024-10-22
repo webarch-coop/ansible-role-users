@@ -55,7 +55,7 @@
     - ( matomo_user is defined ) and ( matomo_user | length > 0 )
     - ( matomo_password is defined ) and ( matomo_password | length > 0 )
     - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
-    - matomo_user in getent_passwd.keys()
+    - matomo_user in ansible_facts.getent_passwd.keys()
     - user_matomo_config.stat.exists
     - ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
     - ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
