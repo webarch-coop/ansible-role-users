@@ -235,11 +235,11 @@
         verbosity: 2
       when: matomo_user is defined
 
-    - name: Debug getent_passwd.keys()
+    - name: Debug ansible_facts.getent_passwd.keys()
       ansible.builtin.debug:
-        var: getent_passwd.keys()
+        var: ansible_facts.getent_passwd.keys()
         verbosity: 3
-      when: getent_passwd.keys() is defined
+      when: ansible_facts.getent_passwd.keys() is defined
 
     - name: "Matomo site tasks for {{ user.key }}"
       block:
@@ -329,7 +329,7 @@
 
           when: user_matomo_config.stat.exists
 
-      when: matomo_user in getent_passwd.keys()
+      when: matomo_user in ansible_facts.getent_passwd.keys()
 
   when:
     - ( user.key != "root" )

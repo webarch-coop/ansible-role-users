@@ -311,8 +311,8 @@
           when:
             - users_phpfpm_versions is defined
             - users_phpfpm_default_version is defined
-            - ( "phpfpm" in getent_group )
-            - ( "chroot" in getent_group )
+            - ( "phpfpm" in ansible_facts.getent_group )
+            - ( "chroot" in ansible_facts.getent_group )
 
       when:
         - ( users_update is defined ) and ( users_update != [] )

@@ -195,7 +195,7 @@
 
               when: user_matomo_config.stat.exists | bool
 
-          when: matomo_user in getent_passwd.keys()
+          when: matomo_user in ansible_facts.getent_passwd.keys()
 
       when:
         - ( user.key != "root" )

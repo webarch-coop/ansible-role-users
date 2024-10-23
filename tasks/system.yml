@@ -80,9 +80,9 @@
         database: group
         split: ':'
 
-    - name: Debug getent_group
+    - name: Debug ansible_facts.getent_group
       ansible.builtin.debug:
-        var: getent_group
+        var: ansible_facts.getent_group
         verbosity: 2
 
     - name: Get all users
@@ -90,9 +90,9 @@
         database: passwd
         split: ':'
 
-    - name: Debug getent_passwd
+    - name: Debug ansible_facts.getent_passwd
       ansible.builtin.debug:
-        var: getent_passwd
+        var: ansible_facts.getent_passwd
         verbosity: 2
 
     - name: Set a fact for the Debian version

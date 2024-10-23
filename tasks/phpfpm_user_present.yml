@@ -11,9 +11,9 @@
 - name: "PHP FPM config present for {{ user.key }}"
   block:
 
-    - name: Debug getent_group
+    - name: Debug ansible_facts.getent_group
       ansible.builtin.debug:
-        var: getent_group
+        var: ansible_facts.getent_group
         verbosity: 3
 
     - name: Debug users_phpfpm_versions

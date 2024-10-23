@@ -31,7 +31,7 @@
         that:
           - ( "phpfpm" in user.value.users_groups )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: ( "phpfpm" in getent_group )
+      when: ( "phpfpm" in ansible_facts.getent_group )
 
     - name: "Check that the moodle_dbuser is {{ user.key }} is defined for {{ vhost.key }} VirtualHost"
       ansible.builtin.assert:
