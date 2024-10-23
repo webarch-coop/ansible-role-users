@@ -340,9 +340,13 @@
           ansible.builtin.assert:
             that:
               - ( user.value.users_phpfpm_version | type_debug == "str" ) or ( user.value.users_phpfpm_version | type_debug != "int" )
-              - user.value.users_phpfpm_version is regex('^[0-9]{1,2}[.][0-9]{1,2}$')
+              - user.value.users_phpfpm_version is ansible.builtin.regex('^[0-9]{1,2}[.][0-9]{1,2}$')
               - user.value.users_phpfpm_version is in users_phpfpm_versions
-            fail_msg: "The users_phpfpm_version variable needs to be quoted to ensure it is a string not a integer and the version of PHP required must already be installed, it is set to '{{ user.value.users_phpfpm_version }}' and the type is '{{ user.value.users_phpfpm_version | type_debug }}'."
+            fail_msg: >-
+              There is a problem with PHP version for the user {{ user.key }}
+              {% if user.value.users_phpfpm_version | type_debug == "int" %}the users_phpfpm_version variable, {{ user.value.users_phpfpm_version }} must be quoted to ensure it is a string not a {{ user.value.users_phpfpm_version | type_debug }}{% endif %}
+              {% if user.value.users_phpfpm_version is not ansible.builtin.regex('^[0-9]{1,2}[.][0-9]{1,2}$') %}the users_phpfpm_version variable must be a number, followed by a dot and anotyher number{% endif %}
+              {% if user.value.users_phpfpm_version not in users_phpfpm_versions %}the users_phpfpm_version variable, {{ user.value.users_phpfpm_version }} must be installed, the version(s) present are {{ users_phpfpm_versions | join(', ') }}{% endif %}
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           when:
             - ( "phpfpm" in getent_group )
