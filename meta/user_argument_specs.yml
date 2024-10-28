@@ -255,6 +255,10 @@ users_phpfpm_sendmail_from:
   type: str
   required: false
   description: The users From email header.
+users_phpfpm_sendmail_path:
+  type: str
+  required: false
+  description: The users sendmail path.
 users_phpfpm_version:
   type: str
   required: false

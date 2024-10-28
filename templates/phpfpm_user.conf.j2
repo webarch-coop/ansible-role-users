@@ -115,18 +115,19 @@ php_admin_value[uploadprogress.file.contents_template] = {{ user.value.users_hom
 php_admin_value[uploadprogress.file.filename_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt
 {% endif %}
 
+; PHP >= 8.0 requires UNIX line endings, see https://github.com/php/php-src/issues/8086
 {% if user.value.users_phpfpm_sendmail_path is defined and user.value.users_phpfpm_sendmail_from is defined %}
-php_admin_value[sendmail_path] = {{ user.value.users_phpfpm_sendmail_path }} -f{{ user.value.users_phpfpm_sendmail_from }}
-php_admin_value[sendmail_from] = {{ user.value.users_phpfpm_sendmail_from }}
+php_admin_value[sendmail_path] = "{{ user.value.users_phpfpm_sendmail_path }} -f{{ user.value.users_phpfpm_sendmail_from }}"
+php_admin_value[sendmail_from] = "{{ user.value.users_phpfpm_sendmail_from }}"
 {% elif user.value.users_phpfpm_sendmail_path is defined and user.value.users_phpfpm_sendmail_from is not defined %}
-php_admin_value[sendmail_path] = {{ user.value.users_phpfpm_sendmail_path }} -f{{ user.key }}@{{ inventory_hostname }}
-php_admin_value[sendmail_from] = {{ user.key }}@{{ inventory_hostname }}
+php_admin_value[sendmail_path] = "{{ user.value.users_phpfpm_sendmail_path }} -f{{ user.key }}@{{ inventory_hostname }}
+php_admin_value[sendmail_from] = "{{ user.key }}@{{ inventory_hostname }}"
 {% elif user.value.users_phpfpm_sendmail_path is not defined and user.value.users_phpfpm_sendmail_from is defined %}
-php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ user.value.users_phpfpm_sendmail_from }}
-php_admin_value[sendmail_from] = {{ user.value.users_phpfpm_sendmail_from }}
+php_admin_value[sendmail_path] = "/usr/bin/dos2unix -u | /usr/sbin/sendmail -t -i -f{{ user.value.users_phpfpm_sendmail_from }}"
+php_admin_value[sendmail_from] = {{ user.value.users_phpfpm_sendmail_from }}"
 {% else %}
-php_admin_value[sendmail_path] = /usr/sbin/sendmail -t -i -f{{ user.key }}@{{ inventory_hostname }}
-php_admin_value[sendmail_from] = {{ user.key }}@{{ inventory_hostname }}
+php_admin_value[sendmail_path] = "/usr/bin/dos2unix -u | /usr/sbin/sendmail -t -i -f{{ user.key }}@{{ inventory_hostname }}"
+php_admin_value[sendmail_from] = "{{ user.key }}@{{ inventory_hostname }}"
 {% endif %}
 php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log
 

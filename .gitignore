@@ -1,3 +1,9 @@
-[._]*.sw[a-p]
-*.retry
+# Vim temp files
 *~
+
+# Vim swap files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+
+# Ansible retry files
+*.retry
