@@ -172,7 +172,7 @@
   register: users_ssh_dir
 
 - name: "Generate SSH ECDSA keypair for {{ user.key }}"
-  ansible.builtin.command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "ansible-generated on {{ ansible_hostname }}"
+  ansible.builtin.command: ssh-keygen -q -t ed25519 -f "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519" -q -N "" -C "ansible-generated on {{ inventory_hostname }}"
   args:
     creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
   become: true
