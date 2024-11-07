@@ -1,45 +1,45 @@
 ; {{ ansible_managed }}
 
 [{{ user.key }}]
-user = {{ user.key }}
-group = {{ user.value.users_group | default(user.key) }}
+user = "{{ user.key }}"
+group = "{{ user.value.users_group | default(user.key) }}"
 {% if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
-chroot = {{ users_chroot_users_dir }}/{{ user.key }}
+chroot = "{{ users_chroot_users_dir }}/{{ user.key }}"
 {%     if users_apache_chroot is defined and users_apache_chroot | bool %}
-listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
+listen = "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
 {%     else %}
-listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+listen = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
 {%     endif %}
-access.log = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
-slowlog = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
-php_admin_value[error_log] = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
+access.log = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
+slowlog = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
+php_admin_value[error_log] = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log"
 {% else %}
-listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-access.log = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log
-slowlog = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log
-php_admin_value[error_log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log
+listen = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+access.log = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
+slowlog = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
+php_admin_value[error_log] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log"
 {% endif %}
 listen.owner = root
-listen.group = {{ user.key }}
+listen.group = "{{ user.key }}"
 listen.mode = 0660
 ;listen.acl_users =
 ;listen.acl_groups =
 listen.allowed_clients = 127.0.0.1
 ; Error log level. Possible values: alert, error, warning, notice, debug. Default value: notice.
-php_admin_value[log_level] = {{ user.value.users_phpfpm_log_level | default('notice') }}
+php_admin_value[log_level] = "{{ user.value.users_phpfpm_log_level | default('notice') }}"
 
 {% if users_apache_chroot is defined and users_apache_chroot | bool %}
-env[TMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
-env[TMPDIR] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
-env[TEMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
+env[TMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+env[TMPDIR] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+env[TEMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
 
-chdir = {{ users_apache_chroot_users_basedir }}/{{ user.key }}
+chdir = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
 {% else %}
-env[TMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-env[TMPDIR] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-env[TEMP] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
+env[TMP] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+env[TMPDIR] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+env[TEMP] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
 
-chdir = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
+chdir = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
 {% endif %}
 
 ; PHP settings passed with php_value or php_flag will overwrite php.ini values
@@ -91,28 +91,28 @@ php_admin_value[open_basedir] = "{{ users_phpfpm_open_basedir | join(',') }}"
 ; Matomo needs mysqli.allow_local_infile enabled
 php_admin_value[mysqli.allow_local_infile] = yes
 {%     if users_apache_chroot is defined and users_apache_chroot | bool %}
-php_admin_value[mysqli.local_infile_directory] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}
+php_admin_value[mysqli.local_infile_directory] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
 {%     else %}
-php_admin_value[mysqli.local_infile_directory] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}
+php_admin_value[mysqli.local_infile_directory] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
 {%     endif %}
 {% else %}
 php_admin_value[mysqli.allow_local_infile] = no
 {% endif %}
 
 {% if users_apache_chroot is defined and users_apache_chroot | bool %}
-php_admin_value[session.save_path] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
-php_admin_value[upload_tmp_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
-php_admin_value[sys_temp_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
-php_admin_value[soap.wsdl_cache_dir] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp
-php_admin_value[uploadprogress.file.contents_template] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upload_contents_%s
-php_admin_value[uploadprogress.file.filename_template] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upt_%s.txt
+php_admin_value[session.save_path] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+php_admin_value[upload_tmp_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+php_admin_value[sys_temp_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+php_admin_value[soap.wsdl_cache_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+php_admin_value[uploadprogress.file.contents_template] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upload_contents_%s"
+php_admin_value[uploadprogress.file.filename_template] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upt_%s.txt"
 {% else %}
-php_admin_value[session.save_path] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-php_admin_value[upload_tmp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-php_admin_value[sys_temp_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-php_admin_value[soap.wsdl_cache_dir] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
-php_admin_value[uploadprogress.file.contents_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upload_contents_%s
-php_admin_value[uploadprogress.file.filename_template] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt
+php_admin_value[session.save_path] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+php_admin_value[upload_tmp_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+php_admin_value[sys_temp_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+php_admin_value[soap.wsdl_cache_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+php_admin_value[uploadprogress.file.contents_template] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upload_contents_%s"
+php_admin_value[uploadprogress.file.filename_template] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt"
 {% endif %}
 
 ; PHP >= 8.0 requires UNIX line endings, see https://github.com/php/php-src/issues/8086
@@ -120,16 +120,16 @@ php_admin_value[uploadprogress.file.filename_template] = {{ user.value.users_hom
 php_admin_value[sendmail_path] = "{{ user.value.users_phpfpm_sendmail_path }} -f{{ user.value.users_phpfpm_sendmail_from }}"
 php_admin_value[sendmail_from] = "{{ user.value.users_phpfpm_sendmail_from }}"
 {% elif user.value.users_phpfpm_sendmail_path is defined and user.value.users_phpfpm_sendmail_from is not defined %}
-php_admin_value[sendmail_path] = "{{ user.value.users_phpfpm_sendmail_path }} -f{{ user.key }}@{{ inventory_hostname }}
+php_admin_value[sendmail_path] = "{{ user.value.users_phpfpm_sendmail_path }} -f{{ user.key }}@{{ inventory_hostname }}"
 php_admin_value[sendmail_from] = "{{ user.key }}@{{ inventory_hostname }}"
 {% elif user.value.users_phpfpm_sendmail_path is not defined and user.value.users_phpfpm_sendmail_from is defined %}
 php_admin_value[sendmail_path] = "/usr/bin/dos2unix -u | /usr/sbin/sendmail -t -i -f{{ user.value.users_phpfpm_sendmail_from }}"
-php_admin_value[sendmail_from] = {{ user.value.users_phpfpm_sendmail_from }}"
+php_admin_value[sendmail_from] = "{{ user.value.users_phpfpm_sendmail_from }}"
 {% else %}
 php_admin_value[sendmail_path] = "/usr/bin/dos2unix -u | /usr/sbin/sendmail -t -i -f{{ user.key }}@{{ inventory_hostname }}"
 php_admin_value[sendmail_from] = "{{ user.key }}@{{ inventory_hostname }}"
 {% endif %}
-php_admin_value[mail.log] = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log
+php_admin_value[mail.log] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.mail.log"
 
 {% if user.value.users_phpfpm_admin_flags is defined %}
 {%     for users_phpfpm_admin_flag in user.value.users_phpfpm_admin_flags %}
@@ -141,8 +141,8 @@ php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = no
 {%     endfor %}
 {% endif %}
 
-pm = {{ user.value.users_phpfpm_pm | default('ondemand') }}
-pm.max_children = {{ user.value.users_phpfpm_max_children | default('2') }}
+pm = "{{ user.value.users_phpfpm_pm | default('ondemand') }}"
+pm.max_children = "{{ user.value.users_phpfpm_max_children | default('2') }}"
 {% if user.value.users_phpfpm_pm == "dynamic" %}
 pm.start_servers = {{ user.value.users_phpfpm_pm_start_servers | default('1') }}
 pm.min_spare_servers = {{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}
@@ -150,7 +150,7 @@ pm.max_spare_servers = {{ user.value.users_phpfpm_pm_max_spare_servers | default
 {% endif %}
 pm.process_idle_timeout = 10s;
 pm.max_requests = 1000
-pm.status_path = /phpfpm-{{ user.key }}-status
+pm.status_path = "/phpfpm-{{ user.key }}-status"
 ;ping.path = /ping
 
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
@@ -189,9 +189,9 @@ clear_env = yes
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5 .php7
 {% if user.value.users_phpfpm_extensions is defined %}
-security.limit_extensions = {{ user.value.users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}
+security.limit_extensions = "{{ user.value.users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}"
 {% elif users_phpfpm_extensions is defined %}
-security.limit_extensions = {{ users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}
+security.limit_extensions = "{{ users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}"
 {% else %}
 security.limit_extensions = .php
 {% endif %}
