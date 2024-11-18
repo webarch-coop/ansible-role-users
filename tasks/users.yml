@@ -98,6 +98,27 @@
         - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
         - ( users_apache is defined ) and ( users_apache | bool )
 
+    - name: Update MariaDB config for users present
+      block:
+
+        - name: Include MariaDB user present tasks
+          ansible.builtin.include_tasks: mariadb_user_present.yml
+          loop: "{{ users | dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key != "root" )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+            - ( users_mariadb is defined ) and ( users_mariadb )
+            - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "mariadb"
+        - users_mariadb is defined
+        - users_mariadb | bool
+
     - name: Update PHP-FPM config for users present
       block:
 

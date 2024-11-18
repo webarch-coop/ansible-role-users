@@ -63,6 +63,12 @@ ansible-playbook users.yml --extra-vars "users_update_strategy=changed"
 ansible-playbook users.yml --extra-vars "users_update_strategy=apache"
 ```
 
+## Only update users MariaDB configuration
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=mariadb"
+```
+
 ## Only update users Matomo configuration
 
 ```bash

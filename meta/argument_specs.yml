@@ -312,6 +312,7 @@ argument_specs:
           - changed
           - check
           - groups
+          - mariadb
           - matomo
           - phpfpm
           - quotas
