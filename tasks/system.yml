@@ -24,6 +24,7 @@
           - python3-dnspython
           - python3-passlib
           - pwgen
+          - quota
           - slay
           - texlive
           - vim
