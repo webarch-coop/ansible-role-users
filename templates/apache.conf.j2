@@ -4,7 +4,7 @@
 {%     if users_cert == "user" %}
 <IfModule md_module>
   <IfFile /etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem>
-  MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
+    MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
   </IfFile>
   <IfFile ! /etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem>
     <IfFile /etc/ssl/le/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem>
