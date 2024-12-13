@@ -143,6 +143,7 @@
         insertafter: '^\/dev\/'
       register: users_apache_fstab_chroot
 
+    # NOTE This might require a reboot rather than a daemon-reload
     - name: Systemd daemon-reload  # noqa: no-handler
       ansible.builtin.systemd_service:
         daemon_reload: true
