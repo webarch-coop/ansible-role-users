@@ -33,16 +33,23 @@
         - "{{ users_chroot_users_dir }}/www-data/run/chroot"
         - "{{ users_chroot_users_dir }}/www-data/run/mysqld"
         - "{{ users_chroot_users_dir }}/www-data/run/php"
+        - "{{ users_chroot_users_dir }}/etc/apache2/md"
         - "{{ users_chroot_users_dir }}/www-data"
       loop_control:
         loop_var: users_mount_path
-        label: "{{ users_mount_path | basename }}"
+        label: "{{ users_mount_path | ansible.builtin.basename }}"
 
     - name: Apache chroot mounts absent from /etc/fstab
       ansible.builtin.blockinfile:
         path: /etc/fstab
         state: absent
         marker: "# {mark} APACHE CHROOT"
+      register: users_apache_fstab_chroot
+
+    - name: Systemd daemon-reload  # noqa: no-handler
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+      when: users_apache_fstab_chroot.changed | bool
 
   tags:
     - users

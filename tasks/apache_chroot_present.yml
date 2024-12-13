@@ -38,14 +38,27 @@
         owner: www-data
         group: www-data
 
+    - name: Apache mod_md configuration
+      block:
+
+        # /chroot/etc/apache2/md
+        - name: "Mount point {{ users_chroot_dir }}/etc/apache/md present"
+          ansible.builtin.file:
+            path: "{{ users_chroot_dir }}/etc/apache2/md"
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+
+      when: ( "md" in users_apache_modules_loaded )
 
     - name: Apache suEXEC configuration
       block:
 
         # /chroot/etc/apache2/suexec
-        - name: "Mount point {{ users_chroot_dir }}/etc/apache/suexec present"
+        - name: "Mount point {{ users_chroot_dir }}/etc/apache2/suexec present"
           ansible.builtin.file:
-            path: "{{ users_chroot_dir }}/etc/apache/suexec"
+            path: "{{ users_chroot_dir }}/etc/apache2/suexec"
             state: directory
             mode: "0750"
             owner: root
@@ -97,8 +110,12 @@
       ansible.builtin.blockinfile:
         path: /etc/fstab
         block: |
-          # Read only chroot mounted for Apache
+          # Apache chroot
           {{ users_chroot_dir }} {{ users_apache_chroot_dir }} ext4 ro,nosuid,bind,private 0 0
+          {% if "md" in users_apache_modules_loaded %}
+          # mod_md needs rw access to /etc/apache2/md
+          /etc/apache2/md {{ users_apache_chroot_dir }}/etc/apache2/md ext4 rw,nodev,nosuid,bind,private 0 0
+          {% endif %}
           {% if users_apache_chroot_suexec and "suexec" in users_apache_modules_loaded %}
           # suEXEC with suid mounted in the Apache chroot
           /usr/lib/apache2 {{ users_apache_chroot_dir }}/usr/lib/apache2 ext4 ro,bind,private 0 0
@@ -124,6 +141,12 @@
           /run/php {{ users_apache_chroot_dir }}/run/php ext4 ro,nodev,nosuid,noexec,bind,private 0 0
         marker: "# {mark} APACHE CHROOT"
         insertafter: '^\/dev\/'
+      register: users_apache_fstab_chroot
+
+    - name: Systemd daemon-reload  # noqa: no-handler
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+      when: users_apache_fstab_chroot.changed | bool
 
     - name: Debug first set of chroot directories to be mounted for Apache
       ansible.builtin.debug:
@@ -139,6 +162,10 @@
           path: "{{ users_apache_chroot_dir }}"
           opts: ro,nosuid,bind,private
           state: mounted
+        - src: /etc/apache2/md
+          path: "{{ users_apache_chroot_dir }}/etc/apache2/md"
+          opts: rw,nodev,nosuid,bind,private
+          state: "{% if 'md' in users_apache_modules_loaded %}mounted{% else %}absent{% endif %}"
         - src: /usr/lib/apache2
           path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
           opts: ro,bind,private
@@ -203,6 +230,10 @@
           path: "{{ users_apache_chroot_dir }}"
           opts: ro,nosuid,bind,private
           state: mounted
+        - src: /etc/apache2/md
+          path: "{{ users_apache_chroot_dir }}/etc/apache2/md"
+          opts: rw,nodev,nosuid,bind,private
+          state: "{% if 'md' in users_apache_modules_loaded %}mounted{% else %}absent{% endif %}"
         - src: /usr/lib/apache2
           path: "{{ users_apache_chroot_dir }}/usr/lib/apache2"
           opts: ro,bind,private

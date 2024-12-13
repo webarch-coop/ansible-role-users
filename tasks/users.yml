@@ -83,6 +83,9 @@
     - name: Update Apache config for users present
       block:
 
+        - name: Include Apache tasks
+          ansible.builtin.include_tasks: apache.yml
+
         - name: Include Apache user tasks
           ansible.builtin.include_tasks: apache_user_vhosts_present.yml
           loop: "{{ users | dict2items }}"
@@ -90,13 +93,13 @@
             loop_var: user
             label: "{{ user.key }}"
           when:
-            - ( user.key != "root" ) and ( "apache2" in ansible_local.dpkg.installed )
+            - ( user.key != "root" )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
             - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
-
       when:
         - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
         - ( users_apache is defined ) and ( users_apache | bool )
+        - ( "apache2" in ansible_local.dpkg.installed )
 
     - name: Update MariaDB config for users present
       block:
