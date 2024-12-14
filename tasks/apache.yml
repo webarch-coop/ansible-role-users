@@ -35,18 +35,10 @@
             var: users_apache_modules_check.stdout_lines
             verbosity: 3
 
-        - name: Set users_apache_modules_loaded to an empty array
-          ansible.builtin.set_fact:
-            users_apache_modules_loaded: []
-
-        # TODO Replace this loop with map https://git.coop/-/snippets/111
         - name: Set an array of the loaded modules
           ansible.builtin.set_fact:
-            users_apache_modules_loaded: "{{ users_apache_modules_loaded + [line.split(' ')[0]] }}"
-          loop: "{{ users_apache_modules_check.stdout_lines }}"
-          loop_control:
-            loop_var: line
-            label: "{{ line }}"
+            users_apache_modules_loaded: >-
+              {{- users_apache_modules_check.stdout_lines | map('ansible.builtin.regex_replace', '[ ].*$') | sort -}}
 
       when:
         - users_apache_modules_check.stdout is defined

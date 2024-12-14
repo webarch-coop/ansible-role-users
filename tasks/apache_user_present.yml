@@ -63,7 +63,7 @@
   tags:
     - users
 
-- name: One cert per VirtualHost
+- name: One cert per VirtualHost when mod_md not in use
   block:
 
     - name: Set a fact for a regular expression to match the commonName to be used for the cert
@@ -104,12 +104,13 @@
       when: not ansible_check_mode
 
   when:
+    - ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded )
     - users_cert is defined
     - users_cert == "vhost"
   tags:
     - users
 
-- name: One cert per user
+- name: One cert per user when mod_md not in use
   block:
 
     - name: Set a fact for a regular expression to match the commonName to be used for the cert
@@ -142,6 +143,7 @@
       when: not ansible_check_mode
 
   when:
+    - ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded )
     - users_cert is defined
     - users_cert == "user"
   tags:
@@ -170,7 +172,9 @@
 
 - name: "Check that the SSL certs for {{ user.key }} are present"
   ansible.builtin.include_tasks: apache_cert_check.yml
-  when: ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
+  when:
+    - ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded )
+    - ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
   tags:
     - users
 
@@ -179,6 +183,7 @@
     path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
     state: absent
   when: >-
+    ( ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded ) ) and
     ( not users_apache_certs_present | bool ) or
     ( user.value.users_apache_virtual_hosts_enabled is defined and not user.value.users_apache_virtual_hosts_enabled | bool )
   tags:
