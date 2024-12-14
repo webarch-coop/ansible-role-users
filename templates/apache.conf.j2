@@ -112,6 +112,7 @@
       </IfFile>
       <IfFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem>
         SSLCertificateKeyFile         {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
+      </IfFile>
       <IfFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem>
         SSLCertificateChainFile       {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
       </IfFile>
