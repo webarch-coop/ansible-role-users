@@ -63,7 +63,9 @@
             loop_var: domain
             label: "{{ domain }}"
 
-      when: vhost.value.users_apache_server_aliases is defined
+      when:
+        - vhost.value.users_apache_server_aliases is defined
+        - vhost.value.users_apache_server_aliases != []
 
     - name: users_apache_allow_encoded_slashes checks
       block:

@@ -38,6 +38,9 @@ users_disallowed_usernames:
   - html
   - localhost
   - wsh
+# Either don't set users_domain_check or set it to "slack" for warnings rather
+# than failures when domains don't resolve to one of the servers IPv4 addresses
+# users_domain_check: strict
 # Users home directories to be created as sub-directories of users_basedir
 # NOTE that you can set an individual users_home to override this, for example
 # for www-data set users_home: /var/www and for root set users_home: /root

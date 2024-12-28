@@ -63,7 +63,7 @@
   tags:
     - users
 
-- name: One cert per VirtualHost when mod_md not in use
+- name: One cert per VirtualHost when mod_md is not in use
   block:
 
     - name: Set a fact for a regular expression to match the commonName to be used for the cert
@@ -110,7 +110,7 @@
   tags:
     - users
 
-- name: One cert per user when mod_md not in use
+- name: One cert per user when mod_md is not in use
   block:
 
     - name: Set a fact for a regular expression to match the commonName to be used for the cert
