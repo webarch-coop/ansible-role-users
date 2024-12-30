@@ -211,7 +211,7 @@
 
         - name: Print the users to update if users_update_strategy is not set or set to all
           ansible.builtin.debug:
-            msg: "User to update: {{ users_update }}"
+            msg: "User to update: {{ users_update | join(', ') }}"
 
       when:
         - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
@@ -231,7 +231,7 @@
 
         - name: Print the users in the groups to update
           ansible.builtin.debug:
-            msg: "User to update: {{ users_update }}"
+            msg: "User to update: {{ users_update | join(', ') }}"
 
       when:
         - ( users_update_strategy is defined ) or ( users_update_strategy == "groups" )
