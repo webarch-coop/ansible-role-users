@@ -10,7 +10,7 @@
 ---
 - name: apt
   src: https://git.coop/webarch/apt.git
-  version: 4.6.0  # apt
+  version: 4.7.0  # apt
   scm: git
 
 - name: mariadb
@@ -25,6 +25,6 @@
 
 - name: systemd
   src: https://git.coop/webarch/systemd.git
-  version: 2.5.0  # systemd
+  version: 2.5.2  # systemd
   scm: git
 ...

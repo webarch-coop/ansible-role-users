@@ -1,0 +1,122 @@
+# Copyright 2018-2024 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Users acmesh role includes
+  block:
+
+    - name: One acmesh cert per VirtualHost
+      block:
+
+        - name: Set a fact for a regular expression to match the commonName to be used for the cert
+          ansible.builtin.set_fact:
+            users_common_name_regex: "^{{ user.key }}[.]{{ inventory_hostname | ansible.builtin.regex_escape }}$"
+
+        - name: "Debug Let's Encrypt cert per vhost acmesh role include for {{ user.key }}"  # noqa var-naming[no-role-prefix]
+          ansible.builtin.debug:
+            msg:
+              - "The next task will include the acmesh role, users the tasks from letsencrypt.yml with the following variables:"
+              - "acmesh: {{ acmesh }}"
+              - "acmesh_common_name: {{ acmesh_common_name }}"
+              - "acmesh_subject_alt_names: {{ acmesh_subject_alt_names | join(', ') }}"
+              - "acmesh_reloadcmd: {{ acmesh_reloadcmd }}"
+          vars:  # noqa var-naming[no-role-prefix]
+            acmesh: true
+            acmesh_common_name: "{{ vhost.value.users_apache_server_name }}"
+            acmesh_subject_alt_names: >-
+              {{- vhost.value.users_apache_server_aliases |
+              default([]) |
+              reject('ansible.builtin.regex', '^[*][.]') |
+              reject('ansible.builtin.regex', users_common_name_regex) |
+              unique |
+              sort -}}
+            acmesh_reloadcmd: "service apache2 reload"
+          loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: vhost
+            label: "{{ vhost.key }}"
+
+        - name: "Let's Encrypt cert per vhost acmesh role included for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
+          ansible.builtin.include_role:
+            name: acmesh
+            tasks_from: letsencrypt.yml
+          vars:  # noqa var-naming[no-role-prefix]
+            acmesh: true
+            acmesh_common_name: "{{ vhost.value.users_apache_server_name }}"
+            acmesh_subject_alt_names: >-
+              {{- vhost.value.users_apache_server_aliases |
+              default([]) |
+              reject('ansible.builtin.regex', '^[*][.]') |
+              reject('ansible.builtin.regex', users_common_name_regex) |
+              unique |
+              sort -}}
+            acmesh_reloadcmd: "service apache2 reload"
+          loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: vhost
+            label: "{{ vhost.key }}"
+          when: not ansible_check_mode
+
+      when:
+        - users_cert is defined
+        - users_cert == "vhost"
+
+    - name: One acmesh cert per user
+      block:
+
+        - name: Set a fact for a regular expression to match the commonName to be used for the cert
+          ansible.builtin.set_fact:
+            users_common_name_regex: "^{{ user.key }}[.]{{ inventory_hostname | regex_escape }}$"
+
+        - name: "Debug Let's Encrypt cert per user role included for {{ user.key }}"  # noqa var-naming[no-role-prefix]
+          ansible.builtin.debug:
+            msg:
+              - "The next task will include the acmesh role, users the tasks from letsencrypt.yml with the following variables:"
+              - "acmesh: {{ acmesh }}"
+              - "acmesh_common_name: {{ acmesh_common_name }}"
+              - "acmesh_subject_alt_names: {{ acmesh_subject_alt_names }}"
+              - "acmesh_reloadcmd: {{ acmesh_reloadcmd }}"
+          vars:  # noqa var-naming[no-role-prefix]
+            acmesh: true
+            acmesh_common_name: "{{ user.key }}.{{ inventory_hostname }}"
+            acmesh_subject_alt_names: >-
+              {{- user.value.users_apache_virtual_hosts |
+              ansible.builtin.dict2items |
+              ansible.builtin.json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') |
+              reject('ansible.builtin.regex', '^[*][.]') |
+              reject('ansible.builtin.regex', users_common_name_regex) |
+              unique |
+              sort -}}
+            acmesh_reloadcmd: "service apache2 reload"
+
+        - name: "Let's Encrypt cert per user role included for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
+          ansible.builtin.include_role:
+            name: acmesh
+            tasks_from: letsencrypt.yml
+          vars:  # noqa var-naming[no-role-prefix]
+            acmesh: true
+            acmesh_common_name: "{{ user.key }}.{{ inventory_hostname }}"
+            acmesh_subject_alt_names: >-
+              {{- user.value.users_apache_virtual_hosts |
+              ansible.builtin.dict2items |
+              ansible.builtin.json_query('[].value.[users_apache_server_name, users_apache_server_aliases][][]') |
+              reject('ansible.builtin.regex', '^[*][.]') |
+              reject('ansible.builtin.regex', users_common_name_regex) |
+              unique |
+              sort -}}
+            acmesh_reloadcmd: "service apache2 reload"
+          when: not ansible_check_mode
+
+      when:
+        - users_cert is defined
+        - users_cert == "user"
+
+  tags:
+    - users
+...
