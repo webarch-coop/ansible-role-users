@@ -17,7 +17,9 @@
       check_mode: false
       changed_when: false
       register: users_mount_check
-      failed_when: ( not users_mount_check.stat.exists ) or ( not users_mount_check.stat.isdir )
+      failed_when: >-
+        ( not users_mount_check.stat.exists | bool ) or
+        ( not users_mount_check.stat.isdir | bool )
 
     - name: "Check if {{ users_mount_path }} exists"
       ansible.builtin.stat:
@@ -25,7 +27,9 @@
       check_mode: false
       changed_when: false
       register: users_mount_path_check
-      failed_when: ( not users_mount_path_check.stat.exists ) or ( not users_mount_path_check.stat.isdir )
+      failed_when: >-
+        ( not users_mount_path_check.stat.exists | bool ) or
+        ( not users_mount_path_check.stat.isdir | bool )
 
     - name: Check if mounted and mount filesystem if not
       block:
@@ -37,7 +41,7 @@
           register: users_findmnt
           failed_when: users_findmnt.rc is not regex('^0|1$')
 
-        - name: "Disk {{ users_mount_path }} mounted"
+        - name: "Disk {{ users_mount_path }} {{ users_mount_state }}"
           ansible.posix.mount:
             src: "{{ users_mount_src }}"
             path: "{{ users_mount_path }}"
@@ -46,8 +50,11 @@
             state: "{{ users_mount_state | default('mounted') }}"
           when: users_findmnt.rc == 1
 
-      when: ( users_mount_path_check.stat.exists ) and ( users_mount_path_check.stat.exists )
+      when:
+        - users_mount_path_check.stat.exists | bool
+        - users_mount_path_check.stat.exists | bool
 
+  when: users_mount_state == "mounted"
   tags:
     - users
 ...
