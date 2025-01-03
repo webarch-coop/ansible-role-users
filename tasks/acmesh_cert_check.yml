@@ -14,7 +14,7 @@
     - name: "Check that the SSL certs for {{ user.key }} are present"
       ansible.builtin.include_tasks: acmesh_cert_check_vhost.yml
       register: apache_vhost_cert_check_vhosts
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
@@ -55,26 +55,29 @@
     - name: Set a fact for the results if any cert is missing
       ansible.builtin.set_fact:
         users_apache_certs_present: false
-      when: ( not users_apache_tls_cert_check.stat.exists ) or ( not users_apache_tls_key_check.stat.exists ) or ( not users_apache_tls_ca_check.stat.exists )
+      when: >-
+        ( not users_apache_tls_cert_check.stat.exists | bool ) or
+        ( not users_apache_tls_key_check.stat.exists | bool ) or
+        ( not users_apache_tls_ca_check.stat.exists | bool )
 
     - name: Set a fact for the results if a cert exists and users_apache_certs_present is not defined
       ansible.builtin.set_fact:
         users_apache_certs_present: true
       when:
         - users_apache_certs_present is not defined
-        - users_apache_tls_cert_check.stat.exists
-        - users_apache_tls_key_check.stat.exists
-        - users_apache_tls_ca_check.stat.exists
+        - users_apache_tls_cert_check.stat.exists | bool
+        - users_apache_tls_key_check.stat.exists | bool
+        - users_apache_tls_ca_check.stat.exists | bool
 
     - name: Set a fact for the results if a cert exists and users_apache_certs_present is not false
       ansible.builtin.set_fact:
         users_apache_certs_present: true
       when:
         - users_apache_certs_present is defined
-        - users_apache_certs_present
-        - users_apache_tls_cert_check.stat.exists
-        - users_apache_tls_key_check.stat.exists
-        - users_apache_tls_ca_check.stat.exists
+        - users_apache_certs_present | bool
+        - users_apache_tls_cert_check.stat.exists | bool
+        - users_apache_tls_key_check.stat.exists | bool
+        - users_apache_tls_ca_check.stat.exists | bool
 
   when: users_cert == "user"
   tags:

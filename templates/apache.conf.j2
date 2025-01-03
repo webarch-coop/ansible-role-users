@@ -20,8 +20,6 @@
   </IfFile>
 </IfModule>
 {%     endif %}
-{%     if users_cert == "vhost" %}
-{%     endif %}
 {% endif %}
 
 {% for vhost,vhost_config in user.value.users_apache_virtual_hosts.items() %}
@@ -53,6 +51,7 @@
 # {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
 {%         endif %}
 {%     endif %}
+
 {%     if users_cert is defined %}
 {%         if users_cert == "vhost" %}
 <IfModule md_module>
@@ -73,6 +72,7 @@
 </IfModule>
 {%         endif %}
 {%     endif %}
+
 <VirtualHost *:443>
   ServerName {{ vhost_config.users_apache_server_name }}
 {%     if vhost_config.users_apache_server_aliases is defined %}

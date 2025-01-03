@@ -8,49 +8,77 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: Set a fact for the PHP system version for the user to use
-  ansible.builtin.set_fact:
-    users_phpfpm_system_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
-  when:
-    - users_phpfpm_versions is defined
-    - users_phpfpm_versions != []
-    - users_phpfpm_default_version is defined
-  tags:
-    - users
+- name: One config file per VirtualHost for www-data
+  block:
 
-- name: Debug some apache.conf.j2 template variables
-  ansible.builtin.debug:
-    msg:
-      - "user.key: {{ user.key }}"
-      - "user.value.users_groups: {% if user.value.users_groups is defined %}{{ user.value.users_groups }}{% endif %}"
-      - "users_sites_dir: {{ users_sites_dir }}"
-      - "users_phpfpm_system_version: {% if users_phpfpm_system_version is defined %}{{ users_phpfpm_system_version }}{% endif %}"
-      - "vhost.key: {{ vhost.key }}"
-      - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
-      - "vhost.value.users_apache_vhost_docroot: {% if vhost.value.users_apache_vhost_docroot is defined %}{{ vhost.value.users_apache_vhost_docroot }}{% endif %}"
-      - "vhost.value.users_apache_server_aliases: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }}{% endif %}"
-      - "vhost.value.users_apache_type: {% if vhost.value.users_apache_type is defined %}{{ vhost.value.users_apache_type }}{% endif %}"
-    verbosity: 2
-  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-    label: "{{ vhost.key }}"
-  tags:
-    - users
+    - name: Set a fact for the PHP system version for the user to use
+      ansible.builtin.set_fact:
+        users_phpfpm_system_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+      when:
+        - users_phpfpm_versions is defined
+        - users_phpfpm_versions != []
+        - users_phpfpm_default_version is defined
 
-- name: VirtualHosts files present for www-data
-  ansible.builtin.template:
-    src: apache.conf.j2
-    dest: "/etc/apache2/sites-available/{{ vhost.key }}.conf"
-    trim_blocks: false
-    lstrip_blocks: true
-    mode: "0644"
-    owner: root
-    group: root
-  loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-  loop_control:
-    loop_var: vhost
-    label: "{{ vhost.key }}"
+    - name: Debug some apache.conf.j2 template variables
+      ansible.builtin.debug:
+        msg:
+          - "user.key: {{ user.key }}"
+          - "user.value.users_groups: {% if user.value.users_groups is defined %}{{ user.value.users_groups }}{% endif %}"
+          - "users_sites_dir: {{ users_sites_dir }}"
+          - "users_phpfpm_system_version: {% if users_phpfpm_system_version is defined %}{{ users_phpfpm_system_version }}{% endif %}"
+          - "vhost.key: {{ vhost.key }}"
+          - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
+          - "vhost.value.users_apache_vhost_docroot: {% if vhost.value.users_apache_vhost_docroot is defined %}{{ vhost.value.users_apache_vhost_docroot }}{% endif %}"
+          - "vhost.value.users_apache_server_aliases: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases }}{% endif %}"
+          - "vhost.value.users_apache_type: {% if vhost.value.users_apache_type is defined %}{{ vhost.value.users_apache_type }}{% endif %}"
+        verbosity: 2
+      loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+
+    - name: VirtualHosts files present for www-data
+      ansible.builtin.template:
+        src: apache.conf.j2
+        dest: "/etc/apache2/sites-available/{{ vhost.key }}.conf"
+        trim_blocks: false
+        lstrip_blocks: true
+        mode: "0644"
+        owner: root
+        group: root
+      loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
+
+    - name: Cert check for mod_md
+      block:
+
+        - name: Check if a mod_md certificate is present
+          ansible.builtin.stat:
+            path: "/etc/apache2/md/domains/{{ vhost.key }}/pubcert.pem"
+          loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: vhost
+            label: "{{ vhost.key }}"
+          register: users_apache_md_certs
+
+        - name: Cert check crontab in place for mod_md
+          ansible.builtin.cron:
+            name: "Cert check for {{ vhost.key }}"
+            minute: 45
+            hour: 8
+            job: "ssl-cert-check -qac /etc/apache2/md/domains/{{ vhost.key }}/pubcert.pem -e 'root@localhost'"
+          loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: vhost
+            label: "{{ vhost.key }}"
+          when: users_apache_md_cert.stat.exists | bool
+
+      when:
+        - users_apache_modules_loaded is defined
+        - ( "md" in users_apache_modules_loaded )
+
   tags:
     - users
 ...

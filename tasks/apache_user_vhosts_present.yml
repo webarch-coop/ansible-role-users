@@ -10,7 +10,7 @@
 ---
 # TODO Include Tasks to check Apache variables
 
-- name: Geenrate Apache config and enable / disable the config and restart Apache
+- name: Generate Apache config and enable / disable the config and reload Apache
   block:
 
     - name: Check Apache status
@@ -55,7 +55,7 @@
         path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
       register: users_apache_conf_site_enabled_symlink
 
-    - name: Enable Apache sites, configtest and restart
+    - name: Enable Apache sites, configtest and reload
       block:
 
         - name: "Apache {{ user.key }} sites-enabled symlink present"
@@ -69,10 +69,10 @@
           changed_when: false
           register: users_apache2ctl_configtest
 
-        - name: Apache restart
+        - name: Apache reloaded
           ansible.builtin.service:
             name: apache2
-            state: restarted
+            state: reloaded
           when:
             - not ansible_check_mode
             - users_apache2ctl_configtest is defined
@@ -107,7 +107,7 @@
               - "apache2ctl configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
             verbosity: 1
 
-        - name: "Apache configtest or restart failed, writing failed config to /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
+        - name: "Apache configtest or reload failed, writing failed config to /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
           ansible.builtin.copy:
             src: "/etc/apache2/sites-available/{{ user.key }}.conf"
             dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
@@ -121,7 +121,7 @@
             path: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
           register: users_apache_conf_backup_check
 
-        - name: "Apache configtest or restart failed, reverting to previous config from /etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+        - name: "Apache configtest or reload failed, reverting to previous config from /etc/apache2/sites-available/.{{ user.key }}.conf.bak"
           ansible.builtin.copy:
             src: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
             dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
@@ -137,10 +137,10 @@
           changed_when: '"already enabled" not in users_a2dissite.stdout'
           when: not users_apache_conf_backup_check.stat.exists
 
-        - name: Apache restart
+        - name: Apache reloaded
           ansible.builtin.service:
             name: apache2
-            state: restarted
+            state: reloaded
 
         - name: Pause to allow Apache to sort itself out
           ansible.builtin.pause:
@@ -157,10 +157,10 @@
             msg: "Apache is not running, for a temp fix try: a2dissite {{ user.key }} && service apache2 start"
           when: users_apache2_status.rc == 3
 
-        - name: Fail as apache2ctl configtest or apache2ctl restart failed
+        - name: Fail as apache2ctl configtest or apache2ctl reload failed
           ansible.builtin.fail:
             msg:
-              - "apache2ctl configtest or restart failed for {{ user.key }} and as a result changes that might prevent a restart have been reverted."
+              - "apache2ctl configtest or reload failed for {{ user.key }} and as a result changes that might prevent a reload have been reverted."
               - "The broken config is available in /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
               - "The configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
 
@@ -170,7 +170,7 @@
         ( ( user.value.users_apache_virtual_hosts_enabled is not defined ) or
         ( user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool ) )
 
-    - name: Disable Apache sites, configtest and restart
+    - name: Disable Apache sites, configtest and reload
       block:
 
         - name: "Apache {{ user.key }} sites-enabled symlink absent"
@@ -181,10 +181,10 @@
         - name: Restart Apache
           block:
 
-            - name: Apache restart
+            - name: Apache reloaded
               ansible.builtin.service:
                 name: apache2
-                state: restarted
+                state: reloaded
 
             - name: Pause to allow Apache to sort itself out
               ansible.builtin.pause:
@@ -207,6 +207,115 @@
         - user.value.users_apache_virtual_hosts_enabled is defined
         - not user.value.users_apache_virtual_hosts_enabled | bool
         - users_apache_conf_site_enabled_symlink.stat.exists | bool
+
+    - name: Cert checks for mod_md
+      block:
+
+        - name: Check check for mod_md when one cert per user
+          block:
+
+            - name: "Check if there is a mod_md certificate provisioned for {{ user.key }}"
+              ansible.builtin.stat:
+                path: "/etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem"
+              register: users_apache_md_cert
+
+            - name: Debug users_apache_md_cert
+              ansible.builtin.debug:
+                var: users_apache_md_cert
+                verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+            - name: Check and install a cert check cron job
+              block:
+
+                - name: "Check cert check for mod_md for {{ user.key }}"
+                  ansible.builtin.command: "ssl-cert-check -qac /etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem"
+                  check_mode: false
+                  changed_when: false
+
+                - name: "Cert check crontabs in place for mod_md for {{ user.key }}"
+                  ansible.builtin.cron:
+                    name: "Cert check for {{ user.key }}.{{ inventory_hostname }}"
+                    minute: 45
+                    hour: 8
+                    job: "ssl-cert-check -qac /etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem -e 'root@localhost'"
+
+              when: users_apache_md_cert.stat.exists | bool
+
+          when:
+            - users_cert is defined
+            - users_cert == "user"
+
+        - name: Check check for mod_md when one cert per vhost
+          block:
+
+            - name: Debug user.value.users_apache_virtual_hosts | ansible.builtin.dict2items
+              ansible.builtin.debug:
+                var: user.value.users_apache_virtual_hosts | ansible.builtin.dict2items
+                verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}2{% else %}3{% endif %}"
+
+            - name: "Check if there is a mod_md certificate provisioned for {{ user.key }}"
+              ansible.builtin.stat:
+                path: "/etc/apache2/md/domains/{{ vhost.value.users_apache_server_name }}/pubcert.pem"
+              loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+              loop_control:
+                loop_var: vhost
+                label: "{{ vhost.key }}"
+              register: users_apache_md_cert_paths
+
+            - name: Debug users_apache_md_cert
+              ansible.builtin.debug:
+                var: users_apache_md_cert_paths
+                verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+            - name: "Set a fact for the paths of the mod_md certificates that exist for {{ user.key }}"
+              ansible.builtin.set_fact:
+                users_apache_md_cert_paths_existing: >-
+                  {{- users_apache_md_cert_paths |
+                  community.general.json_query('results[?stat.exists].stat.path') -}}
+
+            - name: Debug users_apache_md_cert_paths_existing
+              ansible.builtin.debug:
+                var: users_apache_md_cert_paths_existing
+                verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+
+            - name: Check and install a cert check cron job(s)
+              block:
+
+                - name: "Check cert check command for {{ user.key }}"
+                  ansible.builtin.command: "ssl-cert-check -qac {{ users_apache_md_cert_path }} -e 'root@localhost'"
+                  vars:
+                    users_apache_md_cert_path: "/etc/apache2/md/domains/{{ vhost.value.users_apache_server_name }}/pubcert.pem"
+                  when: users_apache_md_cert_path in users_apache_md_cert_paths_existing
+                  loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+                  loop_control:
+                    loop_var: vhost
+                    label: "{{ vhost.key }}"
+                  check_mode: false
+                  changed_when: false
+
+                - name: "Cert check crontab in place for mod_md for {{ user.key }}"
+                  ansible.builtin.cron:
+                    name: "Cert check for {{ vhost.value.users_apache_server_name }}"
+                    minute: 45
+                    hour: 8
+                    job: "ssl-cert-check -qac {{ users_apache_md_cert_path }} -e 'root@localhost'"
+                  vars:
+                    users_apache_md_cert_path: "/etc/apache2/md/domains/{{ vhost.value.users_apache_server_name }}/pubcert.pem"
+                  when: users_apache_md_cert_path in users_apache_md_cert_paths_existing
+                  loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
+                  loop_control:
+                    loop_var: vhost
+                    label: "{{ vhost.key }}"
+
+              when: users_apache_md_cert_paths_existing != []
+
+          when:
+            - users_cert is defined
+            - users_cert == "vhost"
+
+      when:
+        - users_apache_modules_loaded is defined
+        - ( "md" in users_apache_modules_loaded )
 
   tags:
     - users

@@ -23,7 +23,7 @@
         - users_apache_site_enabled.stat.exists | bool
         - users_apache_site_enabled.stat.islnk | bool
 
-    - name: Conditional Apache restart
+    - name: Conditional Apache reload
       block:
 
         - name: "Run apache2ctl configtest to check deletion of /etc/apache2/sites-enabled/{{ user.key }}.conf"
@@ -32,10 +32,10 @@
           check_mode: false
           register: users_apache2ctl_configtest
 
-        - name: Apache restart
+        - name: Apache reloaded
           ansible.builtin.service:
             name: apache2
-            state: restarted
+            state: reloaded
           when:
             - users_apachectl_configtest is defined
             - ( "Syntax OK" in users_apachectl_configtest.stderr )

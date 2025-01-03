@@ -73,56 +73,62 @@
         msg: "Apache is not running!"
       when: users_apache2_status.rc == 3
 
-    - name: When mod_md is not in use include acmesh role tasks and checks
+    - name: When mod_md is not in use include acmesh role tasks and checks and generate and enable the Apache config
       block:
 
-        - name: Include the acmesh role imports when mod_md is not in use and users_cert is set to user or vhost
-          ansible.builtin.include_tasks: acmesh_user_present.yml
+        - name: Include the acmesh role when mod_md is not in use and users_cert is set to user or vhost
+          ansible.builtin.include_tasks: acmesh.yml
 
         - name: Include the acmesh cert checks when mod_md is not in use and users_cert is set to user or vhost
           ansible.builtin.include_tasks: acmesh_cert_check.yml
+
+        - name: "Apache {{ user.key }} sites-enabled symlink absent as the acmesh certs are absent"
+          ansible.builtin.file:
+            path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
+            state: absent
+          when:
+            - users_apache_certs_present is defined
+            - not users_apache_certs_present | bool
+
+        - name: "Apache {{ user.key }} sites-available generated and enabled as the acmesh certs are present"
+          block:
+
+            - name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
+              ansible.builtin.include_tasks: apache_user_www_data_vhosts_present.yml
+              when: user.key == "www-data"
+
+            - name: "Generate and enable or disable Apache VirtualHosts for {{ user.key }}"
+              ansible.builtin.include_tasks: apache_user_vhosts_present.yml
+              when: user.key != "www-data"
+
+          when:
+            - users_apache_certs_present is defined
+            - users_apache_certs_present | bool
 
       when:
         - ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded )
         - ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
 
-    - name: "Apache {{ user.key }} sites-enabled symlink absent as the certs are absent or the sites are not set to be enabled"
+    - name: "Apache {{ user.key }} sites-enabled symlink absent as the sites are not set to be enabled"
       ansible.builtin.file:
         path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
         state: absent
-      when: >-
-        ( ( ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded ) ) and
-        ( ( users_apache_certs_present is defined ) and ( not users_apache_certs_present | bool ) ) ) or
-        ( user.value.users_apache_virtual_hosts_enabled is defined and not user.value.users_apache_virtual_hosts_enabled | bool )
-
-    - name: "Check if /etc/apache2/sites-available/{{ user.key }}.conf exists"
-      ansible.builtin.stat:
-        path: "/etc/apache2/sites-available/{{ user.key }}.conf"
-      register: users_apache_conf_check
-
-    - name: "Apache {{ user.key }} sites-available file copied"
-      ansible.builtin.copy:
-        src: "/etc/apache2/sites-available/{{ user.key }}.conf"
-        dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
-        remote_src: true
-        mode: "0644"
-        owner: root
-        group: root
-      when: users_apache_conf_check.stat.exists | bool
-
-    - name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
-      ansible.builtin.include_tasks: apache_user_www_data_vhosts_present.yml
       when:
-        - user.key == "www-data"
-        - users_apache_certs_present is defined
-        - users_apache_certs_present | bool
+        - user.value.users_apache_virtual_hosts_enabled is defined
+        - not user.value.users_apache_virtual_hosts_enabled | bool
 
-    - name: "Generate and enable or disable Apache VirtualHosts for {{ user.key }}"
-      ansible.builtin.include_tasks: apache_user_vhosts_present.yml
-      when:
-        - user.key != "www-data"
-        - users_apache_certs_present is defined
-        - users_apache_certs_present | bool
+    - name: When mod_md is in use generate and enable the Apache config
+      block:
+
+        - name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
+          ansible.builtin.include_tasks: apache_user_www_data_vhosts_present.yml
+          when: user.key == "www-data"
+
+        - name: "Generate and enable or disable Apache VirtualHosts for {{ user.key }}"
+          ansible.builtin.include_tasks: apache_user_vhosts_present.yml
+          when: user.key != "www-data"
+
+      when: ( users_apache_modules_loaded is defined ) and ( "md" in users_apache_modules_loaded )
 
     - name: "Matomo site tasks for {{ user.key }}"
       block:
