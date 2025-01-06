@@ -2,19 +2,19 @@
 
 {% if users_cert is defined %}
 {%     if users_cert == "user" %}
-# mod_md for {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
+# one cert per user using mod_md for {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
 <IfModule md_module>
   <IfFile /etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem>
     MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
   </IfFile>
   <IfFile !/etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem>
-    <IfFile /etc/ssl/le/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem>
+    <IfFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem>
       <MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}>
-        MDCertificateFile /etc/ssl/le/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
+        MDCertificateFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
         MDCertificateKeyFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
       </MDomain>
     </IfFile>
-    <IfFile !/etc/ssl/le/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem>
+    <IfFile !{{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem>
       MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
     </IfFile>
   </IfFile>
@@ -54,6 +54,7 @@
 
 {%     if users_cert is defined %}
 {%         if users_cert == "vhost" %}
+# one cert per vhost using mod_md for {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
 <IfModule md_module>
   <IfFile /etc/apache2/md/domains/{{ vhost_config.users_apache_server_name }}/pubcert.pem>
     MDomain {{ vhost_config.users_apache_server_name }}
@@ -62,7 +63,7 @@
     <IfFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.fullchain.pem>
       <MDomain {{ vhost_config.users_apache_server_name }}>
         MDCertificateFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.fullchain.pem
-        MDCertificateKeyFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
+        MDCertificateKeyFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
       </MDomain>
     </IfFile>
     <IfFile !{{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.fullchain.pem>
@@ -93,28 +94,30 @@
   <IfModule ssl_module>
     SSLEngine on
 {%         if users_cert == "user" %}
+    # Legacy certs, one per user
     <IfModule !md_module>
       <IfFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem>
-        SSLCertificateFile            {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
+        SSLCertificateFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.cert.pem
       </IfFile>
       <IfFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem>
-        SSLCertificateKeyFile         {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
+        SSLCertificateKeyFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
       </IfFile>
       <IfFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem>
-        SSLCertificateChainFile       {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
+        SSLCertificateChainFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.ca.pem
       </IfFile>
     </IfModule>
 {%         endif %}
 {%         if users_cert == "vhost" %}
+    # Legacy certs, one per vhost
     <IfModule !md_module>
       <IfFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem>
-        SSLCertificateFile            {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
+        SSLCertificateFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.cert.pem
       </IfFile>
       <IfFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem>
-        SSLCertificateKeyFile         {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
+        SSLCertificateKeyFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.key.pem
       </IfFile>
       <IfFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem>
-        SSLCertificateChainFile       {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
+        SSLCertificateChainFile {{ users_cert_dir }}/{{ vhost_config.users_apache_server_name }}.ca.pem
       </IfFile>
     </IfModule>
 {%         endif %}
