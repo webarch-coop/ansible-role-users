@@ -80,7 +80,7 @@
 
         - name: Pause to allow Apache to sort itself out
           ansible.builtin.pause:
-            seconds: 4
+            seconds: 6
 
         - name: Check Apache status
           ansible.builtin.command: service apache2 status
@@ -144,7 +144,7 @@
 
         - name: Pause to allow Apache to sort itself out
           ansible.builtin.pause:
-            seconds: 4
+            seconds: 6
 
         - name: Check Apache status
           ansible.builtin.command: service apache2 status
@@ -188,7 +188,7 @@
 
             - name: Pause to allow Apache to sort itself out
               ansible.builtin.pause:
-                seconds: 4
+                seconds: 6
 
             - name: Check Apache status
               ansible.builtin.command: service apache2 status
