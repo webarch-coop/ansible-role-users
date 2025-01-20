@@ -78,48 +78,27 @@
       vars:
         users_apache_vhosts_server_aliases: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}"
 
-    - name: Check that there are no duplicate Apache ServerNames
-      ansible.builtin.assert:
-        that:
-          - users_apache_vhost_server_name != ansible_loop.previtem
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-        fail_msg: "Apache ServerNames must be unique but {{ ansible_loop.previtem }} is duplicated"
-      vars:
-        users_apache_vhosts_server_names: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}"
-        users_apache_vhosts_server_names_unique: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort | unique }}"
-        users_apache_vhosts_server_aliases: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}"
-      when:
-        - ( users_apache_vhosts_server_aliases is not defined ) or ( users_apache_vhosts_server_aliases == [] )
-        - users_apache_vhosts_server_names is defined
-        - users_apache_vhosts_server_names | length > 1
-        - ( users_apache_vhosts_server_names | length ) != ( users_apache_vhosts_server_names_unique | length )
-        - ansible_loop.previtem is defined
-      loop: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}"
-      loop_control:
-        extended: true
-        extended_allitems: false
-        loop_var: users_apache_vhost_server_name
+    - name: Set a fact for all the Apache ServerNames and ServerAlias
+      ansible.builtin.set_fact:
+        users_apache_vhosts_server_aliases_and_names: >-
+          {{ ( users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') ) +
+          ( users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') ) | sort }}
 
+    - name: Debug users_apache_vhosts_server_aliases_and_names
+      ansible.builtin.debug:
+        var: users_apache_vhosts_server_aliases_and_names
+        verbosity: 1
+
+    # https://forum.ansible.com/t/detecting-duplicate-items-in-an-aray/39697/2
     - name: Check that there are no duplicate Apache ServerName or ServerAlias
-      ansible.builtin.assert:
-        that:
-          - users_apache_vhost_domain_name != ansible_loop.previtem
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-        fail_msg: "There should be no duplicates in the Apache ServerName or ServerAliases but {{ ansible_loop.previtem }} is duplicated"
-      vars:
-        users_apache_vhosts_server_names: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}"
-        users_apache_vhosts_server_aliases: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}"
-      when:
-        - ( users_apache_vhosts_server_names is defined ) and ( users_apache_vhosts_server_names != [] ) and ( users_apache_vhosts_server_names | length >= 1 )
-        - ( users_apache_vhosts_server_aliases is defined ) and ( users_apache_vhosts_server_aliases != [] ) and ( users_apache_vhosts_server_aliases | length >= 1 )
-        - ( users_apache_vhosts_server_names + users_apache_vhosts_server_aliases ) | length > 1
-        - ansible_loop.previtem is defined
-      loop: "{{ users_apache_vhosts_server_names + users_apache_vhosts_server_aliases | sort }}"
-      loop_control:
-        extended: true
-        extended_allitems: false
-        loop_var: users_apache_vhost_domain_name
-        label: "{{ users_apache_vhost_domain_name }}"
+      ansible.builtin.fail:
+        msg: >-
+          There should be no duplicates in the Apache ServerName or ServerAliases but these duplicates are present
+          {{ users_apache_vhosts_server_aliases_and_names | community.general.counter | ansible.builtin.dict2items |
+          selectattr('value', '>', 1) | map(attribute='key') | join (', ') }}
+      when: >-
+        ( users_apache_vhosts_server_aliases_and_names | length ) !=
+        ( users_apache_vhosts_server_aliases_and_names | ansible.builtin.unique | length )
 
     - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
       ansible.builtin.include_tasks: validate_vhost.yml
