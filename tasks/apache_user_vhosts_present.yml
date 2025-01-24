@@ -10,10 +10,10 @@
 ---
 # TODO Include Tasks to check Apache variables
 
-- name: Generate Apache config and enable / disable the config and reload Apache
+- name: Generate Apache config and enable / disable the config and restart Apache
   block:
 
-    - name: Check Apache status
+    - name: "Check Apache status for {{ user.key }}"
       ansible.builtin.command: service apache2 status
       check_mode: false
       changed_when: false
@@ -24,12 +24,12 @@
         msg: "Apache is not running!"
       when: users_apache2_status.rc == 3
 
-    - name: "Check if the Apache config for {{ user.key }} exists"
+    - name: "Check if the Apache config exists for {{ user.key }}"
       ansible.builtin.stat:
         path: "/etc/apache2/sites-available/{{ user.key }}.conf"
       register: users_apache_conf_check
 
-    - name: "As the Apache config for {{ user.key }} exists create a backup of it"
+    - name: "As the Apache config exists create a backup of it for {{ user.key }}"
       ansible.builtin.copy:
         src: "/etc/apache2/sites-available/{{ user.key }}.conf"
         dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
@@ -39,7 +39,7 @@
         group: root
       when: users_apache_conf_check.stat.exists
 
-    - name: "Apache {{ user.key }} sites-available file present"
+    - name: "Apache sites-available file present for {{ user.key }}"
       ansible.builtin.template:
         src: apache.conf.j2
         dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
@@ -55,10 +55,10 @@
         path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
       register: users_apache_conf_site_enabled_symlink
 
-    - name: Enable Apache sites, configtest and reload
+    - name: Enable Apache sites, configtest and restart
       block:
 
-        - name: "Apache {{ user.key }} sites-enabled symlink present"
+        - name: "Apache sites-enabled symlink present for {{ user.key }}"
           ansible.builtin.command: "a2ensite {{ user.key }}"
           register: users_a2ensite
           changed_when: ( "already enabled" not in users_a2ensite.stdout )
@@ -69,45 +69,34 @@
           changed_when: false
           register: users_apache2ctl_configtest
 
-        - name: Apache reloaded
-          ansible.builtin.service:
+        - name: "Apache restarted for {{ user.key }}"
+          ansible.builtin.systemd_service:
             name: apache2
-            state: reloaded
+            state: restarted
+          register: users_apache_restarted
+          until:
+            - users_apache_restarted.status.SubState is defined
+            - users_apache_restarted.status.SubState == "running"
+            - users_apache_restarted.status.Result is defined
+            - users_apache_restarted.status.Result == "success"
+          retries: 2
+          delay: 10
           when:
             - not ansible_check_mode
             - users_apache2ctl_configtest is defined
             - ( "Syntax OK" in users_apache2ctl_configtest.stderr )
 
-        - name: Pause to allow Apache to sort itself out
-          ansible.builtin.pause:
-            seconds: 6
-
-        - name: Check Apache status
-          ansible.builtin.command: service apache2 status
-          check_mode: false
-          changed_when: false
-          register: users_apache2_status
-
-        - name: Fail if Apache is not running
-          ansible.builtin.fail:
-            msg: "Apache is not running, for a temp fix try: a2dissite {{ user.key }} && service apache2 start"
-          when: users_apache2_status.rc == 3
-
       rescue:
 
         - name: Standard out from apache2ctl configtest
           ansible.builtin.debug:
-            msg:
-              - "apache2ctl configtest stdout: {{ users_apache2ctl_configtest.stdout }}"
-            verbosity: 1
+            var: users_apache2ctl_configtest.stdout
 
         - name: Standard error from apache2ctl configtest
           ansible.builtin.debug:
-            msg:
-              - "apache2ctl configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
-            verbosity: 1
+            var: users_apache2ctl_configtest.stderr
 
-        - name: "Apache configtest or reload failed, writing failed config to /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
+        - name: "Apache configtest or restart failed, writing failed config to {{ users_apache_conf_broken }}"
           ansible.builtin.copy:
             src: "/etc/apache2/sites-available/{{ user.key }}.conf"
             dest: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
@@ -115,13 +104,15 @@
             mode: "0644"
             owner: root
             group: root
+          vars:
+            users_apache_conf_broken: "/etc/apache2/sites-available/.{{ user.key }}.conf.broken"
 
-        - name: "Check if a backup of the Apache config for {{ user.key }} exists"
+        - name: "Check if a backup of the Apache config exists for {{ user.key }}"
           ansible.builtin.stat:
             path: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
           register: users_apache_conf_backup_check
 
-        - name: "Apache configtest or reload failed, reverting to previous config from /etc/apache2/sites-available/.{{ user.key }}.conf.bak"
+        - name: "Apache configtest or restart failed, reverting to previous config from {{ users_apache_conf_backup }}"
           ansible.builtin.copy:
             src: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
             dest: "/etc/apache2/sites-available/{{ user.key }}.conf"
@@ -129,40 +120,35 @@
             mode: "0644"
             owner: root
             group: root
+          vars:
+            users_apache_conf_backup: "/etc/apache2/sites-available/.{{ user.key }}.conf.bak"
           when: users_apache_conf_backup_check.stat.exists
 
-        - name: "Apache {{ user.key }} sites-enabled symlink absent"
+        - name: "Apache sites-enabled symlink absent for {{ user.key }}"
           ansible.builtin.command: "a2dissite {{ user.key }}"
           register: users_a2dissite
           changed_when: '"already enabled" not in users_a2dissite.stdout'
           when: not users_apache_conf_backup_check.stat.exists
 
-        - name: Apache reloaded
-          ansible.builtin.service:
+        - name: "Apache restarted for {{ user.key }}"
+          ansible.builtin.systemd_service:
             name: apache2
-            state: reloaded
+            state: restarted
+          register: users_apache_restarted
+          until:
+            - users_apache_restarted.status.SubState is defined
+            - users_apache_restarted.status.SubState == "running"
+            - users_apache_restarted.status.Result is defined
+            - users_apache_restarted.status.Result == "success"
+          retries: 2
+          delay: 10
 
-        - name: Pause to allow Apache to sort itself out
-          ansible.builtin.pause:
-            seconds: 6
-
-        - name: Check Apache status
-          ansible.builtin.command: service apache2 status
-          check_mode: false
-          changed_when: false
-          register: users_apache2_status
-
-        - name: Fail if Apache is not running
+        - name: "Fail as apache2ctl configtest or apache2ctl restart failed for {{ user.key }}"
           ansible.builtin.fail:
-            msg: "Apache is not running, for a temp fix try: a2dissite {{ user.key }} && service apache2 start"
-          when: users_apache2_status.rc == 3
-
-        - name: Fail as apache2ctl configtest or apache2ctl reload failed
-          ansible.builtin.fail:
-            msg:
-              - "apache2ctl configtest or reload failed for {{ user.key }} and as a result changes that might prevent a reload have been reverted."
-              - "The broken config is available in /etc/apache2/sites-available/.{{ user.key }}.conf.broken"
-              - "The configtest stderr: {{ users_apache2ctl_configtest.stderr }}"
+            msg: >-
+              apache2ctl configtest or restart failed for {{ user.key }} and as a result changes that might prevent a restart have been reverted. The broken config is available in
+              /etc/apache2/sites-available/.{{ user.key }}.conf.broken
+              The configtest stderr output was {{ users_apache2ctl_configtest.stderr }}
 
       when: >-
         ( ( users_apache_conf.changed | bool ) or
@@ -170,37 +156,26 @@
         ( ( user.value.users_apache_virtual_hosts_enabled is not defined ) or
         ( user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool ) )
 
-    - name: Disable Apache sites, configtest and reload
+    - name: Disable Apache sites, configtest and restart
       block:
 
-        - name: "Apache {{ user.key }} sites-enabled symlink absent"
+        - name: "Apache sites-enabled symlink absent for {{ user.key }}"
           ansible.builtin.command: "a2dissite {{ user.key }}"
           register: users_a2dissite
           changed_when: ( "already disabled" not in users_a2dissite.stdout )
 
-        - name: Restart Apache
-          block:
-
-            - name: Apache reloaded
-              ansible.builtin.service:
-                name: apache2
-                state: reloaded
-
-            - name: Pause to allow Apache to sort itself out
-              ansible.builtin.pause:
-                seconds: 6
-
-            - name: Check Apache status
-              ansible.builtin.command: service apache2 status
-              check_mode: false
-              changed_when: false
-              register: users_apache2_status
-
-            - name: Fail if Apache is not running
-              ansible.builtin.fail:
-                msg: "Apache is not running, for a temp fix try: a2dissite {{ user.key }} && service apache2 start"
-              when: users_apache2_status.rc == 3
-
+        - name: "Apache restarted for {{ user.key }}"
+          ansible.builtin.systemd_service:
+            name: apache2
+            state: restarted
+          register: users_apache_restarted
+          until:
+            - users_apache_restarted.status.SubState is defined
+            - users_apache_restarted.status.SubState == "running"
+            - users_apache_restarted.status.Result is defined
+            - users_apache_restarted.status.Result == "success"
+          retries: 2
+          delay: 10
           when: users_a2dissite.changed | bool
 
       when:
