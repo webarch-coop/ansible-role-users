@@ -247,7 +247,7 @@
 {%                     endif %}
       ProxyPass "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ]','" "') }}"
 {%                     if loc.reverse is defined and loc.reverse | bool %}
-      ProxyPassReverse "{{ loc.proxy_pass }}"
+      ProxyPassReverse "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ].*$') }}"
 {%                     endif %}
     </IfModule>
 {%                 elif loc.redirect is defined %}
