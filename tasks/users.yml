@@ -78,6 +78,7 @@
       vars:
         users_apache_vhosts_server_aliases: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}"
 
+    # TODO This should exclude users that have users_apache_virtual_hosts_enabled set to false
     - name: Set a fact for all the Apache ServerNames and ServerAlias
       ansible.builtin.set_fact:
         users_apache_vhosts_server_aliases_and_names: >-
