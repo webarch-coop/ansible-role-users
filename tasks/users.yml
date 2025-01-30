@@ -57,38 +57,49 @@
         loop_var: user
         label: "{{ user.key }}"
 
-    - name: Debug Apache VirtualHosts
+    - name: Debug enabled Apache VirtualHosts
       ansible.builtin.debug:
         var: users_apache_vhosts
-        verbosity: 2
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}2{% else %}3{% endif %}"
       vars:
-        users_apache_vhosts: "{{ users | community.general.json_query('*.users_apache_virtual_hosts') }}"
+        users_apache_vhosts: >-
+          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict | community.general.json_query('*.users_apache_virtual_hosts') }}
 
-    - name: Debug Apache VirtualHost ServerNames
+    - name: Debug enabled Apache VirtualHost ServerNames
       ansible.builtin.debug:
         var: users_apache_vhosts_server_names
-        verbosity: 1
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
       vars:
-        users_apache_vhosts_server_names: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}"
+        users_apache_vhosts_server_names: >-
+          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}
 
-    - name: Debug Apache VirtualHost ServerAliases
+    - name: Debug enabled Apache VirtualHost ServerAliases
       ansible.builtin.debug:
         var: users_apache_vhosts_server_aliases
-        verbosity: 1
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
       vars:
-        users_apache_vhosts_server_aliases: "{{ users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}"
+        users_apache_vhosts_server_aliases: >-
+          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}
 
-    # TODO This should exclude users that have users_apache_virtual_hosts_enabled set to false
-    - name: Set a fact for all the Apache ServerNames and ServerAlias
+    - name: Set a fact for all the enabled Apache ServerNames and ServerAlias
       ansible.builtin.set_fact:
         users_apache_vhosts_server_aliases_and_names: >-
-          {{ ( users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') ) +
-          ( users | community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') ) | sort }}
+          {{ ( users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') ) +
+          ( users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') ) | sort }}
 
     - name: Debug users_apache_vhosts_server_aliases_and_names
       ansible.builtin.debug:
         var: users_apache_vhosts_server_aliases_and_names
-        verbosity: 1
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
     # https://forum.ansible.com/t/detecting-duplicate-items-in-an-aray/39697/2
     - name: Check that there are no duplicate Apache ServerName or ServerAlias
