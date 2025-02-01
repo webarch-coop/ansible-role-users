@@ -54,6 +54,9 @@
             group: "{{ user.value.users_group | default(user.key) }}"
             mode: "0750"
 
+        # TODO
+        # Slurp the script and only test it if there are lines that don't start with a #
+
         - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script using /bin/sh as {{ user.key }}"
           ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
           args:
@@ -120,6 +123,9 @@
             group: "{{ user.value.users_group | default(user.key) }}"
             mode: "0750"
 
+        # TODO
+        # Slurp the script and only test it if there are lines that don't start with a #
+
         - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script using /bin/sh as {{ user.key }}"
           ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
           args:
@@ -185,6 +191,9 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
             mode: "0750"
+
+        # TODO
+        # Slurp the script and only test it if there are lines that don't start with a #
 
         - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script using /bin/sh as {{ user.key }}"
           ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
