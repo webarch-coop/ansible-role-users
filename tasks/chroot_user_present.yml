@@ -105,6 +105,9 @@
             loop_var: mnt
             label: "{{ mnt.path }}"
 
+        # TODO
+        # Add Valkey run mount for socket per user
+
         - name: Additional mounts for user home directory under /var/www both within and outside the chroot when Apache is chrooted
           block:
 
