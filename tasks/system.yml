@@ -30,6 +30,8 @@
           - vim
           - whois
         state: present
+        update_cache: true
+        cache_valid_time: 300
       register: users_pkgs_installed
 
     - name: Include apt role local fact tasks if variables are not defined
@@ -116,6 +118,10 @@
       when:
         - ( "mariadb-server" in ansible_local.dpkg.installed )
         - ( users_mariadb is defined ) and ( users_apache )
+
+    - name: Include Valkey checks when one for more users are in the valkey group
+      ansible.builtin.include_tasks: valkey.yml
+      when: ( "valkey" in users | community.general.json_query('*.users_groups[]') )
 
     - name: PHP FPM checks and tasks
       block:
@@ -263,6 +269,10 @@
             owner: root
             group: root
           when: not users_chroot_users_dir_check.stat.exists
+
+        - name: Include Valkey chroot tasks when one for more users are in the valkey group
+          ansible.builtin.include_tasks: valkey_chroot.yml
+          when: ( "valkey" in users | community.general.json_query('*.users_groups[]') )
 
       when: ( users_chroot is defined ) and ( users_chroot )
 

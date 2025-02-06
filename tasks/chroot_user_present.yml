@@ -105,6 +105,28 @@
             loop_var: mnt
             label: "{{ mnt.path }}"
 
+        - name: Valkey socket directory present and mounted
+          block:
+
+            - name: Valkey socket directory present
+              ansible.builtin.file:
+                path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/valkey-{{ user.key }}"
+                state: directory
+                mode: "0750"
+                owner: valkey
+                group: valkey
+
+            - name: Valkey socket directory mounted in the chroot
+              ansible.builtin.include_tasks: mount.yml
+              vars:
+                users_mount_src: "/run/valkey-{{ user.key }}"
+                users_mount_path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/valkey-{{ user.key }}"
+                users_mount_opts: ro,nodev,nosuid,noexec,bind,private
+                users_mount_fstype: ext4
+                users_mount_state: mounted
+
+          when: ( "valkey" in user.users_groups )
+
         # TODO
         # Add Valkey run mount for socket per user
 

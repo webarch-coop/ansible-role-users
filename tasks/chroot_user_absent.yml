@@ -31,6 +31,7 @@
         - "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
         - "{{ users_chroot_users_dir }}/{{ user.key }}/run/chroot"
         - "{{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld"
+        - "{{ users_chroot_users_dir }}/{{ user.key }}/run/valkey-{{ user.key }}"
         - "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
         - "{{ users_chroot_users_dir }}/{{ user.key }}"
       loop_control:

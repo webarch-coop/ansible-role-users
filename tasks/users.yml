@@ -89,12 +89,12 @@
     - name: Set a fact for all the enabled Apache ServerNames and ServerAlias
       ansible.builtin.set_fact:
         users_apache_vhosts_server_aliases_and_names: >-
-          {{ ( users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          {{ (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
           ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') ) +
-          ( users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]')) +
+          (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
           ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') ) | sort }}
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]')) | sort }}
 
     - name: Debug users_apache_vhosts_server_aliases_and_names
       ansible.builtin.debug:
@@ -106,8 +106,8 @@
       ansible.builtin.fail:
         msg: >-
           There should be no duplicates in the Apache ServerName or ServerAliases but these duplicates are present
-          {{ users_apache_vhosts_server_aliases_and_names | community.general.counter | ansible.builtin.dict2items |
-          selectattr('value', '>', 1) | map(attribute='key') | join (', ') }}
+          {{ users_apache_vhosts_server_aliases_and_names | community.general.counter | ansible.builtin.dict2items | selectattr('value', '>', 1) | map(attribute='key') | join(', ') }}
+
       when: >-
         ( users_apache_vhosts_server_aliases_and_names | length ) !=
         ( users_apache_vhosts_server_aliases_and_names | ansible.builtin.unique | length )

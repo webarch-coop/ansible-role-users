@@ -16,6 +16,7 @@
   loop:
     - "^/run/chroot {{ users_chroot_users_dir }}/{{ user.key }}/run/chroot ext4 "
     - "^/run/mysqld {{ users_chroot_users_dir }}/{{ user.key }}/run/mysqld ext4 "
+    - "^/run/valkey-{{ user.key }} {{ users_chroot_users_dir }}/{{ user.key }}/run/valkey-{{ user.key }}"
     - "^{{ user.value.users_home | default(users_basedir + '/' + user.key) }} {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }} ext4 "
     - "^{{ users_chroot_dir }} {{ users_chroot_users_dir }}/{{ user.key }} ext4 "
   loop_control:

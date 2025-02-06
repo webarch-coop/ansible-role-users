@@ -1,0 +1,34 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Valkey user checks
+  block:
+
+    - name: "Stat the Valkey socket directories for the users in the valkey and group when they are chrooted for {{ user.key }}"
+      ansible.builtin.stat:
+        path: "/run/valkey-{{ user.key }}/valkey-server.sock"
+      register: users_valkey_socket
+
+    - name: Debug users_valkey_socket
+      ansible.builtin.debug:
+        var: users_valkey_socket
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+    - name: "The users Valkey socket needs to exist before it can be mounted in the chroot for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - users_valkey_socket.stat.exists | bool
+          - users_valkey_socket.stat.issock | bool
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: "Please run the Valkey role with instance config for {{ user.key }}"
+
+  tags:
+    - users
+...

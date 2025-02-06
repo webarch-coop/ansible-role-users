@@ -1,0 +1,46 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Valkey chroot tasks
+  block:
+
+    - name: Read valkey entry from /etc/passwd
+      ansible.builtin.command: "grep ^valkey: /etc/passwd"
+      check_mode: false
+      changed_when: false
+      register: users_etc_passwd_valkey
+
+    - name: "Valkey user present in {{ users_chroot_dir }}/etc/passwd"
+      ansible.builtin.lineinfile:
+        path: "{{ users_chroot_dir }}/etc/passwd"
+        line: "{{ users_etc_passwd_valkey.stdout }}"
+        state: present
+        mode: "0644"
+        owner: root
+        group: root
+
+    - name: Valkey group entry from /etc/group"
+      ansible.builtin.command: "grep ^valkey: /etc/group"
+      check_mode: false
+      changed_when: false
+      register: users_etc_group_valkey
+
+    - name: "Valkey group present in {{ users_chroot_dir }}/etc/group"
+      ansible.builtin.lineinfile:
+        path: "{{ users_chroot_dir }}/etc/group"
+        line: "{{ users_etc_group_valkey.stdout }}"
+        state: present
+        mode: "0644"
+        owner: root
+        group: root
+
+  tags:
+    - users
+...
