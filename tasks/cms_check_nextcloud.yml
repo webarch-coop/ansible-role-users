@@ -118,6 +118,42 @@
         - ( vhost.value.nextcloud_onlyoffice_documentserver is defined )
         - ( vhost.value.nextcloud_onlyoffice_documentserver | length > 0 )
 
+    - name: Valkey checks when the user is in the valkey group
+      block:
+
+        # TODO Use ansible.builtin.stat to check the socket path
+        - name: "The Valkey / Redis host is a IPv4 address or socket path for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.assert:
+            that: >-
+              ( vhost.value.nextcloud_redis_host | ansible.utils.ipaddr | bool ) or
+              ( vhost.value.nextcloud_redis_host is ansible.builtin.regex('^\/.*[.]sock$') )
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          when: vhost.value.nextcloud_redis_host is defined
+
+        # TODO Use community.general.listen_ports_facts module to check the port
+        - name: "The Valkey / Redis port is a 1 to 5 digit number for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.assert:
+            that:
+              - vhost.value.nextcloud_redis_port is ansible.builtin.regex('^[0-9]{1,5}$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          when: vhost.value.nextcloud_redis_port is defined
+
+        - name: "The Valkey / Redis password is required for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.assert:
+            that:
+              - vhost.value.nextcloud_redis_password is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        # TODO Check that the service is running
+        # - name: "The Valkey / Redis service name is required when notify_push is enabled for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        #   ansible.builtin.assert:
+        #     that:
+        #       - vhost.value.nextcloud_redis_service is defined
+        #     quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        #   when: ( "notify_push" in vhost.value.nextcloud_app_enable )
+
+      when: ( "valkey" in user.users_group )
+
   tags:
     - users
 ...

@@ -879,11 +879,19 @@ nextcloud_private:
 nextcloud_redis_host:
   type: str
   required: false
-  description: Redis server IP address.
+  description: Redis / Valker server IP address or socket path.
+nextcloud_redis_password:
+  type: str
+  required: false
+  description: Redis / Valkey server pasword.
 nextcloud_redis_port:
   type: int
   required: false
-  description: Redis server port.
+  description: Redis / Valkey server port.
+nextcloud_redis_service:
+  type: str
+  required: false
+  description: Redis / Valkey service name.
 nextcloud_requirements:
   type: list
   elements: dict

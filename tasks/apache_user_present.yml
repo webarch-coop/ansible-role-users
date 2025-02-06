@@ -475,7 +475,7 @@
             label: "{{ vhost.key }}"
           when: ( vhost.value.users_cms == "moodle" )
 
-        - name: "Debug Nextcloud trusted domains"
+        - name: "Debug Nextcloud trusted domains for {{ user.key }} with default apps"
           ansible.builtin.debug:
             var: users_nextcloud_trusted_domains
             verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
@@ -548,7 +548,62 @@
             - ( vhost.value.nextcloud_app_disable is not defined )
             - ( vhost.value.nextcloud_app_enable is not defined )
 
-        - name: "Debug Nextcloud trusted domains"
+        - name: "Include Nextcloud role for {{ user.key }} with default apps and valkey config"  # noqa: var-naming[no-role-prefix]
+          ansible.builtin.include_role:
+            name: nextcloud
+          vars:
+            nextcloud: true
+            nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
+            nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
+            nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
+            nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
+            nextcloud_datadir: "{{ vhost.value.nextcloud_datadir | default(users_basedir + '/' + user.key + '/' + users_sites_dir + '/' + vhost.key + '/data') }}"
+            nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+            nextcloud_dbpass: "{{ users_mariadb_password }}"
+            nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('oc_') }}"
+            nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
+            nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+            nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
+            nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
+            nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
+            nextcloud_notify_from: "{{ users_notify_from }}"
+            nextcloud_notify_headers: "{{ users_notify_headers }}"
+            nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
+            nextcloud_notify_signature: "{{ users_notify_signature }}"
+            nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+            nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
+            nextcloud_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+            nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
+            nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
+            nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+            nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+            nextcloud_version: "{{ vhost.value.nextcloud_version }}"
+            nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
+            nextcloud_redis_host: "{{ vhost.value.nextcloud_redis_host | default('/run/valkey-' + user.key + '/valkey-server.sock') }}"
+            nextcloud_redis_port: "{{ vhost.value.nextcloud_redis_port | default(0) }}"
+            nextcloud_redis_password: "{{ vhost.value.nextcloud_redis_password }}"
+            nextcloud_redis_service: "{{ vhost.value.nextcloud_redis_service | default('valkey-server@' + user.key) }}"
+            users_nextcloud_trusted_domains: |-
+              [
+                "localhost",
+                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
+                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
+                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
+              ]
+          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+          loop_control:
+            loop_var: vhost
+            label: "{{ vhost.key }}"
+          when:
+            - ( vhost.value.users_cms == "nextcloud" )
+            - ( "valkey" in user.users_groups )
+            - ( vhost.value.nextcloud_app_remove is not defined )
+            - ( vhost.value.nextcloud_app_install is not defined )
+            - ( vhost.value.nextcloud_app_disable is not defined )
+            - ( vhost.value.nextcloud_app_enable is not defined )
+
+        - name: "Debug Nextcloud trusted domains for {{ user.key }} with custom apps"
           ansible.builtin.debug:
             var: users_nextcloud_trusted_domains
             verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
@@ -569,7 +624,7 @@
             - ( vhost.value.users_cms == "nextcloud" )
             - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
 
-        - name: "Include Nextcloud role for {{ user.key }} with custom apps for Ansible"  # noqa: var-naming[no-role-prefix]
+        - name: "Include Nextcloud role for {{ user.key }} with custom apps"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
             name: nextcloud
           vars:
@@ -618,6 +673,62 @@
             label: "{{ vhost.key }}"
           when:
             - ( vhost.value.users_cms == "nextcloud" )
+            - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
+
+        - name: "Include Nextcloud role for {{ user.key }} with custom apps and valkey config"  # noqa: var-naming[no-role-prefix]
+          ansible.builtin.include_role:
+            name: nextcloud
+          vars:
+            nextcloud: true
+            nextcloud_admin_email: "{{ vhost.value.nextcloud_admin_email | default(user.value.users_email) }}"
+            nextcloud_admin_user: "{{ vhost.value.nextcloud_admin_user | default(user.key) }}"
+            nextcloud_app_disable: "{{ vhost.value.nextcloud_app_disable | default([]) }}"
+            nextcloud_app_enable: "{{ vhost.value.nextcloud_app_enable | default([]) }}"
+            nextcloud_app_install: "{{ vhost.value.nextcloud_app_install | default([]) }}"
+            nextcloud_app_remove: "{{ vhost.value.nextcloud_app_remove | default([]) }}"
+            nextcloud_autoupdate: "{{ vhost.value.nextcloud_autoupdate | default(false) | bool }}"
+            nextcloud_cron: "{{ vhost.value.nextcloud_cron | default(none) }}"
+            nextcloud_datadir: "{{ vhost.value.nextcloud_datadir | default(users_basedir + '/' + user.key + '/' + users_sites_dir + '/' + vhost.key + '/data') }}"
+            nextcloud_dbname: "{% if vhost.value.nextcloud_dbname is defined %}{{ vhost.value.nextcloud_dbname }}{% else %}{{ user.value.users_mariadb_databases[0] }}{% endif %}"
+            nextcloud_dbpass: "{{ users_mariadb_password }}"
+            nextcloud_dbprefix: "{{ vhost.value.nextcloud_dbprefix | default('oc_') }}"
+            nextcloud_dbuser: "{{ vhost.value.nextcloud_dbuser | default(user.key) }}"
+            nextcloud_docroot: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost.key }}"
+            nextcloud_domain: "{{ vhost.value.nextcloud_domain | default(vhost.value.users_apache_server_name) }}"
+            nextcloud_group: "{{ vhost.value.nextcloud_group | default(user.value.users_group) | default(user.key) }}"
+            nextcloud_home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            nextcloud_notify: "{{ vhost.value.nextcloud_notify | default(true) | bool }}"
+            nextcloud_notify_from: "{{ users_notify_from }}"
+            nextcloud_notify_headers: "{{ users_notify_headers }}"
+            nextcloud_notify_reply_to: "{{ users_notify_reply_to }}"
+            nextcloud_notify_signature: "{{ users_notify_signature }}"
+            nextcloud_notify_subject_tag: "{{ users_notify_subject_tag | default('webarchitects') }}"
+            nextcloud_onlyoffice_documentserver: "{{ vhost.value.nextcloud_onlyoffice_documentserver | default('') }}"
+            nextcloud_php_version: "{{ user.value.users_phpfpm_version | default(users_phpfpm_default_version) }}"
+            nextcloud_title: "{{ vhost.value.nextcloud_title | default(vhost.value.users_apache_server_name) }}"
+            nextcloud_url: "{% if vhost.value.nextcloud_url is defined %}{{ vhost.value.nextcloud_url }}{% elif vhost.value.nextcloud_domain is defined %}https://{{ vhost.value.nextcloud_domain }}{% else %}https://{{ vhost.value.users_apache_server_name }}{% endif %}"
+            nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+            nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
+            nextcloud_version: "{{ vhost.value.nextcloud_version }}"
+            nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
+            nextcloud_redis_host: "{{ vhost.value.nextcloud_redis_host | default('/run/valkey-' + user.key + '/valkey-server.sock') }}"
+            nextcloud_redis_port: "{{ vhost.value.nextcloud_redis_port | default(0) }}"
+            nextcloud_redis_password: "{{ vhost.value.nextcloud_redis_password }}"
+            nextcloud_redis_service: "{{ vhost.value.nextcloud_redis_service | default('valkey-server@' + user.key) }}"
+            users_nextcloud_trusted_domains: |-
+              [
+                "localhost",
+                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
+                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
+                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
+              ]
+          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+          loop_control:
+            loop_var: vhost
+            label: "{{ vhost.key }}"
+          when:
+            - ( vhost.value.users_cms == "nextcloud" )
+            - ( "valkey" in user.users_groups )
             - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
 
         - name: "Include Flarum role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
