@@ -152,7 +152,7 @@
         #     quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
         #   when: ( "notify_push" in vhost.value.nextcloud_app_enable )
 
-      when: ( "valkey" in user.users_group )
+      when: ( "valkey" in user.users_groups )
 
   tags:
     - users
