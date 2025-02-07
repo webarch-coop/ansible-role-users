@@ -58,16 +58,6 @@
             owner: "{{ user.value.users_home_owner | default(user.key) }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
 
-        # /chroot/run/valkey-USER
-        - name: "Chroot Valkey run dir present for {{ user.key }}"
-          ansible.builtin.file:
-            path: "{{ users_chroot_dir }}/run/valkey-{{ user.key }}"
-            state: directory
-            mode: "u=rwx,g=rx+s,o=rx"
-            owner: valkey
-            group: valkey
-          when: ( "valkey" in user.value.users_groups )
-
         # /chroots/USER
         - name: "Check if the ro chroot is mounted for {{ user.key }}"
           ansible.builtin.command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"
@@ -115,14 +105,15 @@
             loop_var: mnt
             label: "{{ mnt.path }}"
 
-        - name: Valkey socket directory present and mounted
+        - name: Valkey directory present in the chroot image and mounted in the users chroot
           block:
 
-            - name: Valkey socket directory present
+            # /chroot/run/valkey-USER
+            - name: "Chroot Valkey run dir present for {{ user.key }}"
               ansible.builtin.file:
-                path: "{{ users_chroot_users_dir }}/{{ user.key }}/run/valkey-{{ user.key }}"
+                path: "{{ users_chroot_dir }}/run/valkey-{{ user.key }}"
                 state: directory
-                mode: "0750"
+                mode: "u=rwx,g=rx+s,o=rx"
                 owner: valkey
                 group: valkey
 
@@ -136,9 +127,6 @@
                 users_mount_state: mounted
 
           when: ( "valkey" in user.value.users_groups )
-
-        # TODO
-        # Add Valkey run mount for socket per user
 
         - name: Additional mounts for user home directory under /var/www both within and outside the chroot when Apache is chrooted
           block:
