@@ -597,7 +597,7 @@
             label: "{{ vhost.key }}"
           when:
             - ( vhost.value.users_cms == "nextcloud" )
-            - ( "valkey" in user.users_groups )
+            - ( "valkey" in user.value.users_groups )
             - ( vhost.value.nextcloud_app_remove is not defined )
             - ( vhost.value.nextcloud_app_install is not defined )
             - ( vhost.value.nextcloud_app_disable is not defined )
@@ -728,7 +728,7 @@
             label: "{{ vhost.key }}"
           when:
             - ( vhost.value.users_cms == "nextcloud" )
-            - ( "valkey" in user.users_groups )
+            - ( "valkey" in user.value.users_groups )
             - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
 
         - name: "Include Flarum role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]

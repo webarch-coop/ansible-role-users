@@ -125,7 +125,7 @@
                 users_mount_fstype: ext4
                 users_mount_state: mounted
 
-          when: ( "valkey" in user.users_groups )
+          when: ( "valkey" in user.value.users_groups )
 
         # TODO
         # Add Valkey run mount for socket per user
