@@ -58,6 +58,16 @@
             owner: "{{ user.value.users_home_owner | default(user.key) }}"
             group: "{{ user.value.users_home_group | default(user.key) }}"
 
+        # /chroot/run/valkey-USER
+        - name: "Chroot Valkey run dir present for {{ user.key }}"
+          ansible.builtin.file:
+            path: "{{ users_chroot_dir }}/run/valkey-{{ user.key }}"
+            state: directory
+            mode: "u=rwx,g=rx+s,o=rx"
+            owner: valkey
+            group: valkey
+          when: ( "valkey" in user.value.users_groups )
+
         # /chroots/USER
         - name: "Check if the ro chroot is mounted for {{ user.key }}"
           ansible.builtin.command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"

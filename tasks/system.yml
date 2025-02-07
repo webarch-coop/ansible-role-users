@@ -268,13 +268,13 @@
             mode: "0755"
             owner: root
             group: root
-          when: not users_chroot_users_dir_check.stat.exists
+          when: not users_chroot_users_dir_check.stat.exists | bool
 
         - name: Include Valkey chroot tasks when one for more users are in the valkey group
           ansible.builtin.include_tasks: valkey_chroot.yml
           when: ( "valkey" in users | community.general.json_query('*.users_groups[]') )
 
-      when: ( users_chroot is defined ) and ( users_chroot )
+      when: ( users_chroot is defined ) and ( users_chroot | bool )
 
     - name: Quota tasks
       block:
