@@ -54,31 +54,47 @@
             group: "{{ user.value.users_group | default(user.key) }}"
             mode: "0750"
 
-        # TODO
-        # Slurp the script and only test it if there are lines that don't start with a #
+        - name: "Slurp the daily script file for {{ user.key }}"
+          ansible.builtin.slurp:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
+          register: users_cron_daily_script_b64encoded
 
-        - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script using /bin/sh as {{ user.key }}"
-          ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
-          args:
-            executable: "{{ ansible_local.sh.path | default('/bin/sh') }}"
-            chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-          become: true
-          become_user: "{{ user.key }}"
-          register: users_cron_daily_test_run
+        - name: "Set a fact for the content of the daily script file for {{ user.key }}"
+          ansible.builtin.set_fact:
+            users_cron_daily_script_lines: "{{ (users_cron_daily_script_b64encoded | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
 
-        - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
+        - name: Debug users_cron_daily_script_lines
           ansible.builtin.debug:
-            var: users_cron_daily_test_run.stdout_lines
-          when:
-            - users_cron_daily_test_run.stdout_lines is defined
-            - users_cron_daily_test_run.stdout_lines | length > 0
+            var: users_cron_daily_script_lines
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
-        - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
-          ansible.builtin.debug:
-            var: users_cron_daily_test_run.stderr_lines
-          when:
-            - users_cron_daily_test_run.stderr_lines is defined
-            - users_cron_daily_test_run.stderr_lines | length > 0
+        - name: Test run the users daily script when it contains content
+          block:
+
+            - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script using /bin/sh as {{ user.key }}"
+              ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
+              args:
+                executable: "{{ ansible_local.sh.path | default('/bin/sh') }}"
+                chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+              become: true
+              become_user: "{{ user.key }}"
+              register: users_cron_daily_test_run
+
+            - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
+              ansible.builtin.debug:
+                var: users_cron_daily_test_run.stdout_lines
+              when:
+                - users_cron_daily_test_run.stdout_lines is defined
+                - users_cron_daily_test_run.stdout_lines | length > 0
+
+            - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
+              ansible.builtin.debug:
+                var: users_cron_daily_test_run.stderr_lines
+              when:
+                - users_cron_daily_test_run.stderr_lines is defined
+                - users_cron_daily_test_run.stderr_lines | length > 0
+
+          when: users_cron_daily_script_lines != []
 
       when:
         - ( users_home_bin_path.stat.exists | bool )
@@ -123,31 +139,47 @@
             group: "{{ user.value.users_group | default(user.key) }}"
             mode: "0750"
 
-        # TODO
-        # Slurp the script and only test it if there are lines that don't start with a #
+        - name: "Slurp the hourly script file for {{ user.key }}"
+          ansible.builtin.slurp:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
+          register: users_cron_hourly_script_b64encoded
 
-        - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script using /bin/sh as {{ user.key }}"
-          ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
-          args:
-            executable: "{{ ansible_local.sh.path | default('/bin/sh') }}"
-            chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-          become: true
-          become_user: "{{ user.key }}"
-          register: users_cron_hourly_test_run
+        - name: "Set a fact for the content of the hourly script file for {{ user.key }}"
+          ansible.builtin.set_fact:
+            users_cron_hourly_script_lines: "{{ (users_cron_hourly_script_b64encoded | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
 
-        - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
+        - name: Debug users_cron_hourly_script_lines
           ansible.builtin.debug:
-            var: users_cron_hourly_test_run.stdout_lines
-          when:
-            - users_cron_hourly_test_run.stdout_lines is defined
-            - users_cron_hourly_test_run.stdout_lines | length > 0
+            var: users_cron_hourly_script_lines
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
-        - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
-          ansible.builtin.debug:
-            var: users_cron_hourly_test_run.stderr_lines
-          when:
-            - users_cron_hourly_test_run.stderr_lines is defined
-            - users_cron_hourly_test_run.stderr_lines | length > 0
+        - name: Test run the users daily script when it contains content
+          block:
+
+            - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script using /bin/sh as {{ user.key }}"
+              ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
+              args:
+                executable: "{{ ansible_local.sh.path | default('/bin/sh') }}"
+                chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+              become: true
+              become_user: "{{ user.key }}"
+              register: users_cron_hourly_test_run
+
+            - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
+              ansible.builtin.debug:
+                var: users_cron_hourly_test_run.stdout_lines
+              when:
+                - users_cron_hourly_test_run.stdout_lines is defined
+                - users_cron_hourly_test_run.stdout_lines | length > 0
+
+            - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
+              ansible.builtin.debug:
+                var: users_cron_hourly_test_run.stderr_lines
+              when:
+                - users_cron_hourly_test_run.stderr_lines is defined
+                - users_cron_hourly_test_run.stderr_lines | length > 0
+
+          when: users_cron_hourly_script_lines != []
 
       when:
         - ( users_home_bin_path.stat.exists | bool )
@@ -192,31 +224,47 @@
             group: "{{ user.value.users_group | default(user.key) }}"
             mode: "0750"
 
-        # TODO
-        # Slurp the script and only test it if there are lines that don't start with a #
+        - name: "Slurp the minutely script file for {{ user.key }}"
+          ansible.builtin.slurp:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+          register: users_cron_minutely_script_b64encoded
 
-        - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script using /bin/sh as {{ user.key }}"
-          ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
-          args:
-            executable: "{{ ansible_local.sh.path | default('/bin/sh') }}"
-            chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-          become: true
-          become_user: "{{ user.key }}"
-          register: users_cron_minutely_test_run
+        - name: "Set a fact for the content of the minutely script file for {{ user.key }}"
+          ansible.builtin.set_fact:
+            users_cron_minutely_script_lines: "{{ (users_cron_minutely_script_b64encoded | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
 
-        - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
+        - name: Debug users_cron_minutely_script_lines
           ansible.builtin.debug:
-            var: users_cron_minutely_test_run.stdout_lines
-          when:
-            - users_cron_minutely_test_run.stdout_lines is defined
-            - users_cron_minutely_test_run.stdout_lines | length > 0
+            var: users_cron_minutely_script_lines
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
-        - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
-          ansible.builtin.debug:
-            var: users_cron_minutely_test_run.stderr_lines
-          when:
-            - users_cron_minutely_test_run.stderr_lines is defined
-            - users_cron_minutely_test_run.stderr_lines | length > 0
+        - name: Test run the users minutely script when it contains content
+          block:
+
+            - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script using /bin/sh as {{ user.key }}"
+              ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+              args:
+                executable: "{{ ansible_local.sh.path | default('/bin/sh') }}"
+                chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+              become: true
+              become_user: "{{ user.key }}"
+              register: users_cron_minutely_test_run
+
+            - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
+              ansible.builtin.debug:
+                var: users_cron_minutely_test_run.stdout_lines
+              when:
+                - users_cron_minutely_test_run.stdout_lines is defined
+                - users_cron_minutely_test_run.stdout_lines | length > 0
+
+            - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
+              ansible.builtin.debug:
+                var: users_cron_minutely_test_run.stderr_lines
+              when:
+                - users_cron_minutely_test_run.stderr_lines is defined
+                - users_cron_minutely_test_run.stderr_lines | length > 0
+
+          when: users_cron_hourly_script_lines != []
 
       when:
         - ( users_home_bin_path.stat.exists | bool )
