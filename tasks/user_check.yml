@@ -533,7 +533,7 @@
         loop_var: job
       when: user.value.users_cron_jobs is defined
 
-    - name: "Apache config check for {{ user.key }}"
+    - name: Apache VirtualHost config check when enabled
       block:
 
         - name: "Check that www-data is a member of the primary group for user {{ user.key }} when Apache VirtualHosts are defined"
@@ -551,7 +551,9 @@
         - name: "Include the loop for Apache VirtualHosts for {{ user.key }}"
           ansible.builtin.include_tasks: user_check_vhosts.yml
 
-      when: user.value.users_apache_virtual_hosts is defined
+      when:
+        - user.value.users_apache_virtual_hosts is defined
+        - ( users_apache_virtual_hosts_enabled is defined and users_apache_virtual_hosts_enabled | bool ) or ( users_apache_virtual_hosts_enabled is not defined )
 
   tags:
     - users
