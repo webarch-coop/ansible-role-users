@@ -543,6 +543,7 @@
             label: "{{ vhost.key }}"
           when:
             - ( vhost.value.users_cms == "nextcloud" )
+            - ( "valkey" not in user.value.users_groups )
             - ( vhost.value.nextcloud_app_remove is not defined )
             - ( vhost.value.nextcloud_app_install is not defined )
             - ( vhost.value.nextcloud_app_disable is not defined )
@@ -673,6 +674,7 @@
             label: "{{ vhost.key }}"
           when:
             - ( vhost.value.users_cms == "nextcloud" )
+            - ( "valkey" not in user.value.users_groups )
             - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
 
         - name: "Include Nextcloud role for {{ user.key }} with custom apps and valkey config"  # noqa: var-naming[no-role-prefix]
