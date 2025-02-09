@@ -61,7 +61,7 @@
 
         - name: "Set a fact for the content of the daily script file for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_cron_daily_script_lines: "{{ (users_cron_daily_script_b64encoded | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
+            users_cron_daily_script_lines: "{{ (users_cron_daily_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
 
         - name: Debug users_cron_daily_script_lines
           ansible.builtin.debug:
@@ -146,7 +146,7 @@
 
         - name: "Set a fact for the content of the hourly script file for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_cron_hourly_script_lines: "{{ (users_cron_hourly_script_b64encoded | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
+            users_cron_hourly_script_lines: "{{ (users_cron_hourly_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
 
         - name: Debug users_cron_hourly_script_lines
           ansible.builtin.debug:
@@ -231,7 +231,7 @@
 
         - name: "Set a fact for the content of the minutely script file for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_cron_minutely_script_lines: "{{ (users_cron_minutely_script_b64encoded | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
+            users_cron_minutely_script_lines: "{{ (users_cron_minutely_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
 
         - name: Debug users_cron_minutely_script_lines
           ansible.builtin.debug:
