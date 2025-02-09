@@ -137,6 +137,9 @@ users_private_files:
   - path: .local
     mode: "0700"
     state: directory
+  - path: .moosh
+    mode: "0700"
+    state: directory
   - path: .mycli-audit.log
     mode: "0600"
     state: touch
