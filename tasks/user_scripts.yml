@@ -59,9 +59,9 @@
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
           register: users_cron_daily_script_b64encoded
 
-        - name: "Set a fact for the content of the daily script file for {{ user.key }}"
+        - name: "Set a fact for the content of the daily script file omitting comments and env vars for {{ user.key }} "
           ansible.builtin.set_fact:
-            users_cron_daily_script_lines: "{{ (users_cron_daily_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
+            users_cron_daily_script_lines: "{{ (users_cron_daily_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('ansible.builtin.regex', '^[#]') | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}"
 
         - name: Debug users_cron_daily_script_lines
           ansible.builtin.debug:
@@ -144,9 +144,9 @@
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
           register: users_cron_hourly_script_b64encoded
 
-        - name: "Set a fact for the content of the hourly script file for {{ user.key }}"
+        - name: "Set a fact for the content of the hourly script file omitting comments and env vars for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_cron_hourly_script_lines: "{{ (users_cron_hourly_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
+            users_cron_hourly_script_lines: "{{ (users_cron_hourly_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('ansible.builtin.regex', '^[#]')  | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}"
 
         - name: Debug users_cron_hourly_script_lines
           ansible.builtin.debug:
@@ -229,9 +229,9 @@
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
           register: users_cron_minutely_script_b64encoded
 
-        - name: "Set a fact for the content of the minutely script file for {{ user.key }}"
+        - name: "Set a fact for the content of the minutely script file omitting comments and env vars for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_cron_minutely_script_lines: "{{ (users_cron_minutely_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('regex', '^[#]') }}"
+            users_cron_minutely_script_lines: "{{ (users_cron_minutely_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('ansible.builtin.regex', '^[#]')  | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}"
 
         - name: Debug users_cron_minutely_script_lines
           ansible.builtin.debug:
