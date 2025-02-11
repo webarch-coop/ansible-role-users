@@ -879,7 +879,7 @@ nextcloud_private:
 nextcloud_redis_host:
   type: str
   required: false
-  description: Redis / Valker server IP address or socket path.
+  description: Redis / Valkey server IP address or socket path.
 nextcloud_redis_password:
   type: str
   required: false
