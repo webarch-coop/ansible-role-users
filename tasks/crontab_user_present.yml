@@ -175,7 +175,7 @@
 
         - name: "Set a variable from the crontab contents for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_crontab: "{{ users_crontab_list.stdout | string | community.general.jc('crontab_u') }}"
+            users_crontab: "{{ users_crontab_list.stdout | string | community.general.jc('crontab') }}"
 
         - name: "Debug the crontab for {{ user.key }}"
           ansible.builtin.debug:
