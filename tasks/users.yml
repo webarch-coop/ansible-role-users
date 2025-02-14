@@ -11,28 +11,12 @@
 - name: Users tasks
   block:
 
-    - name: Check that usernames are unique
-      ansible.builtin.assert:
-        that:
-          - ( users_names | length ) == ( users_names_unique | length )
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-        fail_msg: >-
-          Usernames must be unique but there is one or more duplicates
-          {{ users_names | ansible.builtin.difference(users_names_unique) | join(', ') }}.
-      vars:
-        users_names: "{{ users.keys() }}"
-        users_names_unique: "{{ users.keys() | unique }}"
-
-    - name: Check that usernames are between 2 and 17 ascii letters, numbers and dashes
-      ansible.builtin.assert:
-        that:
-          - user.key is ansible.builtin.regex('^[a-zA-Z0-9-]{2,17}$')
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-        fail_msg: "Usernames can only be between 2 and 17 ascii letters, numbers and dashes"
-      loop: "{{ users | ansible.builtin.dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
+    - name: User names must be 2 to 17 ascii letters, numbers and dashes
+      ansible.builtin.fail:
+        msg: >-
+          The user name(s) {{ users.keys() | reject('ansible.builtin.regex', '^[a-zA-Z0-9-]{2,17}$') | join(', ') }}
+          either contain disallowed characters or are shorter or longer than the allowed limit.
+      when: users.keys() | reject('ansible.builtin.regex', '^[a-zA-Z0-9-]{2,17}$') != []
 
     - name: Debug meta/user_argument_specs.yml
       ansible.builtin.debug:
@@ -130,7 +114,7 @@
     - name: Debug enabled Apache VirtualHost ServerNames
       ansible.builtin.debug:
         var: users_apache_vhosts_server_names
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       vars:
         users_apache_vhosts_server_names: >-
           {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
@@ -140,7 +124,7 @@
     - name: Debug enabled Apache VirtualHost ServerAliases
       ansible.builtin.debug:
         var: users_apache_vhosts_server_aliases
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       vars:
         users_apache_vhosts_server_aliases: >-
           {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
@@ -160,7 +144,7 @@
     - name: Debug users_apache_vhosts_server_aliases_and_names
       ansible.builtin.debug:
         var: users_apache_vhosts_server_aliases_and_names
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
 
     # https://forum.ansible.com/t/detecting-duplicate-items-in-an-aray/39697/2
     - name: Check that there are no duplicate Apache ServerName or ServerAlias
@@ -175,11 +159,16 @@
 
     - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
       ansible.builtin.include_tasks: validate_vhost.yml
-      when: user.value.users_apache_virtual_hosts is defined
       loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
+      when:
+        - users_apache is defined
+        - users_apache | bool
+        - ( "apache2" in ansible_local.dpkg.installed )
+        - user.value.users_apache_virtual_hosts is defined
+        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
 
     - name: System setup and checks
       ansible.builtin.include_tasks: system.yml
@@ -377,7 +366,7 @@
         - users_update_groups is defined
         - users_update_groups != []
 
-    - name: Check which users accounts are changed
+    - name: Check which users accounts are changed and set them to be updated
       block:
 
         - name: Check users changed
@@ -428,8 +417,6 @@
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is not defined ) or ( user.value.users_state != "ignore" )
-            # - ( user.value.users_state is not defined ) or ( user.value.users_state is not regex('^absent|ignore$') )
-            # - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
           loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
@@ -448,7 +435,6 @@
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
-            # - ( user.value.users_state != "ignore" ) and ( user.value.users_state != "present" )
           loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
@@ -459,9 +445,6 @@
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-            # - ( user.value.users_state is not defined ) or ( user.value.users_state is not regex('^absent|ignore$') )
-            # - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
-            # - ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
           loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
@@ -472,8 +455,6 @@
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
-            # - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
-            # - ( user.value.users_state != "ignore" ) and ( user.value.users_state != "absent" )
           loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
