@@ -297,6 +297,10 @@ argument_specs:
         type: str
         required: true
         description: The path to use for the directory that is used to record the users state.
+      users_update:
+        type: list
+        required: true
+        description: A list of users to update that starts as an empty array and is set as the role runs.
       users_update_groups:
         type: list
         elements: str
@@ -317,6 +321,11 @@ argument_specs:
           - phpfpm
           - quotas
           - sshkeys
+          - users
+      users_update_users:
+        type: str
+        required: false
+        description: A comma seperated list of users to update, to be used with users_update_strategy being set to users.
       users_verify:
         type: bool
         required: false

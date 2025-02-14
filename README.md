@@ -37,6 +37,22 @@ dictionary, will be updated.
 Alternative update strategies can be specified by setting the
 `users_update_strategy` variable to a few optional values as explained below.
 
+### Update changed users
+
+This is the default:
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=changed"
+```
+
+### Update specific users
+
+Supply a comma separated list of users (or just one user name):
+
+```bash
+ansible-playbook wsh.yml --extra-vars "users_update_strategy=users users_update_users=foo,bar"
+```
+
 ### Update all users
 
 ```bash
@@ -47,14 +63,6 @@ ansible-playbook wsh.yml --extra-vars "users_update_strategy=all"
 
 ```bash
 ansible-playbook users.yml --extra-vars "users_update_strategy=check"
-```
-
-### Only update changed users
-
-This is the default:
-
-```bash
-ansible-playbook users.yml --extra-vars "users_update_strategy=changed"
 ```
 
 ### Only update users Apache sites-available files

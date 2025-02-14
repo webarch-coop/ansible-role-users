@@ -18,7 +18,7 @@
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
         fail_msg: >-
           Usernames must be unique but there is one or more duplicates
-          {{ users_names | ansible.builtin.difference(users_names_unique) | join(', ') }}
+          {{ users_names | ansible.builtin.difference(users_names_unique) | join(', ') }}.
       vars:
         users_names: "{{ users.keys() }}"
         users_names_unique: "{{ users.keys() | unique }}"
@@ -26,33 +26,94 @@
     - name: Check that usernames are between 2 and 17 ascii letters, numbers and dashes
       ansible.builtin.assert:
         that:
-          - user.key is regex("^[a-zA-Z0-9-]{2,17}$")
+          - user.key is ansible.builtin.regex('^[a-zA-Z0-9-]{2,17}$')
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
         fail_msg: "Usernames can only be between 2 and 17 ascii letters, numbers and dashes"
-      loop: "{{ users | dict2items }}"
+      loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
 
     - name: Debug meta/user_argument_specs.yml
       ansible.builtin.debug:
-        msg: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | from_yaml }}"
-        verbosity: 2
+        msg: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | ansible.builtin.from_yaml }}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
 
     - name: Debug users dict
       ansible.builtin.debug:
         var: user.value
-        verbosity: 2
-      loop: "{{ users | dict2items }}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
 
+    - name: Check update specified users variables
+      block:
+
+        - name: A users_update_users user name or comma seperated user names is required
+          ansible.builtin.assert:
+            that:
+              - users_update_users is defined
+              - users_update_users is ansible.builtin.regex('^[a-zA-Z0-9,-]{2,10000}$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+            fail_msg: >-
+              Please specify which users are to be updated using the users_update_users variable.
+              This accepts a comma seperated list of user names, for example
+              --extra-vars "users_update_strategy=users users_update_users=foo,bar"
+
+        - name: Debug users to be updated
+          ansible.builtin.debug:
+            var: users_update_user
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          loop: "{{ users_update_users | ansible.builtin.split(',') }}"
+          loop_control:
+            loop_var: users_update_user
+          when: users_update_users is ansible.builtin.regex('[,]') | bool
+
+        - name: Debug users.keys()
+          ansible.builtin.debug:
+            var: users.keys()
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+        - name: Users to be updated need to be defined in the users dictionary
+          ansible.builtin.assert:
+            that:
+              - users_update_user in users.keys()
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+            fail_msg: >-
+              The user {{ users_update_user }} is not defined in the users dictionary, the defined users are
+              {{ users.keys() | join(', ') }}.
+          loop: "{{ users_update_users | ansible.builtin.split(',') }}"
+          loop_control:
+            loop_var: users_update_user
+          when: users_update_users is ansible.builtin.regex('[,]') | bool
+
+        - name: Debug user to be updated
+          ansible.builtin.debug:
+            var: users_update_users
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          when: not users_update_users is ansible.builtin.regex('[,]') | bool
+
+        - name: User to be updated need to be defined in the users dictionary
+          ansible.builtin.assert:
+            that:
+              - users_update_user in users.keys()
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+            fail_msg: >-
+              The user {{ users_update_user }} is not defined in the users dictionary, the defined users are
+              {{ users.keys() | join(', ') }}.
+          vars:
+            users_update_user: "{{ users_update_users }}"
+          when: not users_update_users is ansible.builtin.regex('[,]') | bool
+
+      when: ( users_update_strategy is defined ) and ( users_update_strategy == "users" )
+
     - name: Check individual user variables using meta/user_argument_specs.yml
       ansible.builtin.validate_argument_spec:
-        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | from_yaml }}"
+        argument_spec: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | ansible.builtin.from_yaml }}"
         provided_arguments: "{{ user.value }}"
-      loop: "{{ users | dict2items }}"
+      loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
@@ -115,7 +176,7 @@
     - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
       ansible.builtin.include_tasks: validate_vhost.yml
       when: user.value.users_apache_virtual_hosts is defined
-      loop: "{{ users | dict2items }}"
+      loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
@@ -132,7 +193,7 @@
             ( user.value.users_state is not defined ) or
             ( user.value.users_state != "absent" ) or
             ( user.value.users_state != "ignore" )
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -140,12 +201,9 @@
         - name: End as checks completed
           ansible.builtin.meta: end_play
 
-      when: ( users_update_strategy is defined ) and ( users_update_strategy == "check" )
-
-    - name: Set an empty users_update array
-      ansible.builtin.set_fact:
-        users_update: []
-      when: users_update is not defined
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "check"
 
     - name: Update Apache config for users present
       block:
@@ -155,7 +213,7 @@
 
         - name: Include Apache user tasks
           ansible.builtin.include_tasks: apache_user_vhosts_present.yml
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -164,8 +222,10 @@
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
             - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
       when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "apache" )
-        - ( users_apache is defined ) and ( users_apache | bool )
+        - users_update_strategy is defined
+        - users_update_strategy == "apache"
+        - users_apache is defined
+        - users_apache | bool
         - ( "apache2" in ansible_local.dpkg.installed )
 
     - name: Update MariaDB config for users present
@@ -173,15 +233,18 @@
 
         - name: Include MariaDB user present tasks
           ansible.builtin.include_tasks: mariadb_user_present.yml
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
           when:
-            - ( user.key != "root" )
-            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
-            - ( users_mariadb is defined ) and ( users_mariadb )
-            - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+            - user.key != "root"
+            - user.value.users_state is defined
+            - user.value.users_state == "present"
+            - users_mariadb is defined
+            - users_mariadb | bool
+            - user.value.users_mariadb_databases is defined
+            - user.value.users_mariadb_databases != []
 
       when:
         - users_update_strategy is defined
@@ -194,14 +257,16 @@
 
         - name: Include PHP-FPM user config tasks
           ansible.builtin.include_tasks: phpfpm_user_present.yml
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
           when:
-            - ( user.key != "root" )
-            - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
-            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+            - user.key != "root"
+            - user.value.users_groups is defined
+            - ( "phpfpm" in user.value.users_groups )
+            - user.value.users_state is defined
+            - user.value.users_state == "present"
 
       when:
         - users_update_strategy is defined
@@ -214,16 +279,19 @@
 
         - name: Include SSH keys tasks
           ansible.builtin.include_tasks: ssh.yml
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
           when:
-            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
-            - ( user.value.users_ssh_public_keys is defined ) and ( user.value.users_ssh_public_keys != [] )
+            - user.value.users_state is defined
+            - user.value.users_state == "present"
+            - user.value.users_ssh_public_keys is defined
+            - user.value.users_ssh_public_keys != []
 
       when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "sshkeys" )
+        - users_update_strategy is defined
+        - users_update_strategy == "sshkeys"
 
     - name: Update Matomo sites and users
       block:
@@ -249,7 +317,7 @@
 
         - name: Quotas set for users
           ansible.builtin.include_tasks: quota.yml
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -259,8 +327,11 @@
             - ( user.value.users_quota is defined ) and ( user.value.users_quota | length > 0 )
 
       when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "quotas" )
-        - ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
+        - users_update_strategy is defined
+        - users_update_strategy == "quotas"
+        - users_quotaon is defined
+        - users_quotaon | bool
+        - quota_dir is defined
 
     - name: Set users to update to all
       block:
@@ -271,7 +342,7 @@
           when: >-
             ( user.value.users_state is not defined ) or
             ( user.value.users_state != "ignore" )
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -280,8 +351,9 @@
           ansible.builtin.debug:
             msg: "User to update: {{ users_update | join(', ') }}"
 
-      when:
-        - ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
+      when: >-
+        ( users_update_strategy is not defined ) or
+        ( users_update_strategy == "all" )
 
     - name: Set users to update by group
       block:
@@ -291,7 +363,7 @@
           when:
             - ( user.value.users_groups is defined and user.value.users_groups != [] ) or ( user.key in users_update_groups )
             - ( user.key not in users_update ) and ( user.value.users_state != "ignore" )
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -301,8 +373,9 @@
             msg: "User to update: {{ users_update | join(', ') }}"
 
       when:
-        - ( users_update_strategy is defined ) or ( users_update_strategy == "groups" )
-        - ( users_update_groups is defined ) and ( users_update_groups != [] )
+        - users_update_strategy == "groups"
+        - users_update_groups is defined
+        - users_update_groups != []
 
     - name: Check which users accounts are changed
       block:
@@ -315,23 +388,60 @@
             msg: "User to update: {{ users_update | join(', ') }}"
 
       when:
-        - ( users_update_strategy is defined ) and ( users_update_strategy == "changed" )
+        - users_update_strategy is defined
+        - users_update_strategy == "changed"
+
+    - name: Define the users to update when specifically specified
+      block:
+
+        - name: Set users_update array for multiple users when users_update_strategy is users
+          ansible.builtin.set_fact:
+            users_update: "{{ users_update_users | ansible.builtin.split(',') }}"
+          when: users_update_users is ansible.builtin.regex(',')
+
+        - name: Set users_update array for one user when users_update_strategy is users
+          ansible.builtin.set_fact:
+            users_update:
+              - "{{ users_update_users }}"
+          when: users_update_users is not ansible.builtin.regex(',')
+
+        - name: Print the specified users to update
+          ansible.builtin.debug:
+            msg: "User to update: {{ users_update | join(', ') }}"
+
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "users"
+
+    - name: Debug users_update
+      ansible.builtin.debug:
+        var: users_update
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
     - name: Update users tasks
       block:
 
         - name: Print users to update
           ansible.builtin.debug:
-            msg: "User to update: {{ user }}"
-            verbosity: 1
+            var: user
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
           when:
             - ( user.key is defined ) and ( user.key in users_update )
+            - ( user.value.users_state is not defined ) or ( user.value.users_state != "ignore" )
             # - ( user.value.users_state is not defined ) or ( user.value.users_state is not regex('^absent|ignore$') )
             # - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
+
+        - name: Print users that won't be changes as their state is set to ignore
+          ansible.builtin.debug:
+            var: user
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          when:
+            - ( user.key is defined ) and ( user.key in users_update )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "ignore" )
 
         - name: User absent loop
           ansible.builtin.include_tasks: user_absent.yml
@@ -339,7 +449,7 @@
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "absent" )
             # - ( user.value.users_state != "ignore" ) and ( user.value.users_state != "present" )
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -352,7 +462,7 @@
             # - ( user.value.users_state is not defined ) or ( user.value.users_state is not regex('^absent|ignore$') )
             # - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
             # - ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -364,7 +474,7 @@
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
             # - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
             # - ( user.value.users_state != "ignore" ) and ( user.value.users_state != "absent" )
-          loop: "{{ users | dict2items }}"
+          loop: "{{ users | ansible.builtin.dict2items }}"
           loop_control:
             loop_var: user
             label: "{{ user.key }}"
@@ -407,7 +517,8 @@
         #     - ( "chroot" in ansible_facts.getent_group )
 
       when:
-        - ( users_update is defined ) and ( users_update != [] )
+        - users_update is defined
+        - users_update != []
 
     - name: Users quota CSV file updated
       block:
@@ -435,7 +546,10 @@
             ( users_repquota_md5sum_before is not defined ) or
             ( users_repquota_md5sum_before is defined and users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout )
 
-      when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
+      when:
+        - users_quotaon is defined
+        - users_quotaon | bool
+        - quota_dir is defined
 
     - name: List the updated users
       ansible.builtin.debug:
