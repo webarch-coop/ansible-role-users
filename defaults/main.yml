@@ -173,6 +173,12 @@ users_private_files:
   - path: .profile
     mode: "0600"
     state: touch
+  - path: .rediscli_history
+    mode: "0600"
+    state: touch
+  - path: .redisclirc
+    mode: "0600"
+    state: touch
   - path: .selected_editor
     mode: "0600"
     state: touch
@@ -185,6 +191,12 @@ users_private_files:
   - path: .terminfo
     mode: "0700"
     state: directory
+  - path: .valkeycli_history
+    mode: "0600"
+    state: touch
+  - path: .valkeyclirc
+    mode: "0600"
+    state: touch
   - path: .vim
     mode: "0700"
     state: directory
