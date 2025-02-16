@@ -553,7 +553,9 @@
 
       when:
         - user.value.users_apache_virtual_hosts is defined
-        - ( users_apache_virtual_hosts_enabled is defined and users_apache_virtual_hosts_enabled | bool ) or ( users_apache_virtual_hosts_enabled is not defined )
+        - >-
+          ( user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool ) or
+          ( users_apache_virtual_hosts_enabled is not defined )
 
   tags:
     - users

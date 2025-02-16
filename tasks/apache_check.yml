@@ -1,0 +1,81 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Apache ServerName and ServerAlias checks
+  block:
+
+    - name: Debug enabled Apache VirtualHosts
+      ansible.builtin.debug:
+        var: users_apache_vhosts
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}2{% else %}3{% endif %}"
+      vars:
+        users_apache_vhosts: >-
+          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict | community.general.json_query('*.users_apache_virtual_hosts') }}
+
+    - name: Debug enabled Apache VirtualHost ServerNames
+      ansible.builtin.debug:
+        var: users_apache_vhosts_server_names
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      vars:
+        users_apache_vhosts_server_names: >-
+          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}
+
+    - name: Debug enabled Apache VirtualHost ServerAliases
+      ansible.builtin.debug:
+        var: users_apache_vhosts_server_aliases
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      vars:
+        users_apache_vhosts_server_aliases: >-
+          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}
+
+    - name: Set a fact for all the enabled Apache ServerNames and ServerAlias
+      ansible.builtin.set_fact:
+        users_apache_vhosts_server_aliases_and_names: >-
+          {{ (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]')) +
+          (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
+          ansible.builtin.items2dict |
+          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]')) | sort }}
+
+    - name: Debug users_apache_vhosts_server_aliases_and_names
+      ansible.builtin.debug:
+        var: users_apache_vhosts_server_aliases_and_names
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+    # https://forum.ansible.com/t/detecting-duplicate-items-in-an-aray/39697/2
+    - name: Check that there are no duplicate Apache ServerName or ServerAlias
+      ansible.builtin.fail:
+        msg: >-
+          There should be no duplicates in the Apache ServerName or ServerAliases but these duplicates are present
+          {{ users_apache_vhosts_server_aliases_and_names | community.general.counter | ansible.builtin.dict2items | selectattr('value', '>', 1) | map(attribute='key') | join(', ') }}
+
+      when: >-
+        ( users_apache_vhosts_server_aliases_and_names | length ) !=
+        ( users_apache_vhosts_server_aliases_and_names | ansible.builtin.unique | length )
+
+    - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
+      ansible.builtin.include_tasks: validate_vhost.yml
+      loop: "{{ users | ansible.builtin.dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.value.users_apache_virtual_hosts is defined
+        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
+
+  tags:
+    - users
+...

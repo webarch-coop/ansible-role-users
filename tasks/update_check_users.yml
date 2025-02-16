@@ -1,0 +1,72 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Checks for when update strategy is set to users
+  block:
+
+    - name: A users_update_users user name or comma seperated user names is required
+      ansible.builtin.assert:
+        that:
+          - users_update_users is defined
+          - users_update_users is ansible.builtin.regex('^[a-zA-Z0-9,-]{2,10000}$')
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          Please specify which users are to be updated using the users_update_users variable.
+          This accepts a comma seperated list of user names, for example
+          --extra-vars "users_update_strategy=users users_update_users=foo,bar"
+
+    - name: Debug users to be updated
+      ansible.builtin.debug:
+        var: users_update_user
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      loop: "{{ users_update_users | ansible.builtin.split(',') }}"
+      loop_control:
+        loop_var: users_update_user
+      when: users_update_users is ansible.builtin.regex('[,]') | bool
+
+    - name: Debug users.keys()
+      ansible.builtin.debug:
+        var: users.keys()
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+    - name: Users to be updated need to be defined in the users dictionary
+      ansible.builtin.assert:
+        that:
+          - users_update_user in users.keys()
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          The user {{ users_update_user }} is not defined in the users dictionary, the defined users are
+          {{ users.keys() | join(', ') }}.
+      loop: "{{ users_update_users | ansible.builtin.split(',') }}"
+      loop_control:
+        loop_var: users_update_user
+      when: users_update_users is ansible.builtin.regex('[,]') | bool
+
+    - name: Debug user to be updated
+      ansible.builtin.debug:
+        var: users_update_users
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      when: not users_update_users is ansible.builtin.regex('[,]') | bool
+
+    - name: User to be updated need to be defined in the users dictionary
+      ansible.builtin.assert:
+        that:
+          - users_update_user in users.keys()
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          The user {{ users_update_user }} is not defined in the users dictionary, the defined users are
+          {{ users.keys() | join(', ') }}.
+      vars:
+        users_update_user: "{{ users_update_users }}"
+      when: not users_update_users is ansible.builtin.regex('[,]') | bool
+
+  tags:
+    - users
+...

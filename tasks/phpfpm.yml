@@ -1,0 +1,127 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: PHP-FPM checks
+  block:
+
+    - name: Check that php-fpm is installed
+      ansible.builtin.assert:
+        that: >-
+          ( "php5.6-fpm" in ansible_local.dpkg.installed ) or
+          ( "php7.0-fpm" in ansible_local.dpkg.installed ) or
+          ( "php7.1-fpm" in ansible_local.dpkg.installed ) or
+          ( "php7.2-fpm" in ansible_local.dpkg.installed ) or
+          ( "php7.3-fpm" in ansible_local.dpkg.installed ) or
+          ( "php7.4-fpm" in ansible_local.dpkg.installed ) or
+          ( "php8.0-fpm" in ansible_local.dpkg.installed ) or
+          ( "php8.1-fpm" in ansible_local.dpkg.installed ) or
+          ( "php8.2-fpm" in ansible_local.dpkg.installed ) or
+          ( "php8.3-fpm" in ansible_local.dpkg.installed ) or
+          ( "php8.4-fpm" in ansible_local.dpkg.installed ) or
+          ( "php-fpm" in ansible_local.dpkg.installed )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+    - name: Query the version of PHP using phpquery -V
+      ansible.builtin.command: phpquery -V
+      args:
+        strip_empty_ends: true
+      check_mode: false
+      changed_when: false
+      register: users_phpquery
+
+    - name: Set a fact for the PHP-FPM versions
+      ansible.builtin.set_fact:
+        users_phpfpm_versions: "{{ users_phpquery.stdout_lines | trim }}"
+
+    - name: Debug users_phpfpm_versions
+      ansible.builtin.debug:
+        var: users_phpfpm_versions
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+
+    - name: Check the values of the list of users_phpfpm_versions
+      ansible.builtin.assert:
+        that:
+          - users_phpfpm_versions | reject('ansible.builtin.regex', '^[0-9]{1,2}[.][0-9]$') == []
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+    - name: Run update-alternatives to find the default version of PHP
+      ansible.builtin.command: update-alternatives --query php
+      args:
+        strip_empty_ends: true
+      check_mode: false
+      changed_when: false
+      register: apache_update_alternatives_query_php
+
+    - name: Set a fact for the default version of PHP
+      ansible.builtin.set_fact:
+        users_phpfpm_update_alt_q: "{{ apache_update_alternatives_query_php.stdout | string | community.general.jc('update_alt_q') }}"
+
+    - name: Debug PHP update-alternatives --query php | jc --update-alt-q | jp value
+      ansible.builtin.debug:
+        var: users_phpfpm_update_alt_q.value
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+    - name: Check if the default version of PHP is a symlink
+      ansible.builtin.stat:
+        path: "{{ users_phpfpm_update_alt_q.value }}"
+      register: users_phpfpm_update_alt_q_value_path
+
+    - name: Debug PHP default version path
+      ansible.builtin.debug:
+        var: users_phpfpm_update_alt_q_value_path.stat
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+
+    - name: Set a fact for the default version of PHP when it is a symlink
+      ansible.builtin.set_fact:
+        users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q_value_path.stat.lnk_target | ansible.builtin.regex_replace('^php') }}"
+      when: users_phpfpm_update_alt_q_value_path.stat.islnk | bool
+
+    - name: Set a fact for the default version of PHP when it is a not symlink
+      ansible.builtin.set_fact:
+        users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q.value | ansible.builtin.regex_replace('^/usr/bin/php') }}"
+      when: not users_phpfpm_update_alt_q_value_path.stat.islnk | bool
+
+    - name: A default PHP version is required
+      ansible.builtin.assert:
+        that:
+          - users_phpfpm_default_version is regex('^[5-9][.][0-9]')
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+    - name: Debug PHP default version
+      ansible.builtin.debug:
+        var: users_phpfpm_default_version
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+
+    - name: Legacy /etc/logrotate.d/phpfpm_users_logrotate absent
+      ansible.builtin.file:
+        path: /etc/logrotate.d/phpfpm_users_logrotate
+        state: absent
+
+    - name: /etc/apache2/localhost.d present
+      ansible.builtin.file:
+        path: /etc/apache2/localhost.d
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      when: ( "apache2" in ansible_local.dpkg.installed )
+
+    - name: /etc/nginx/localhost.d present
+      ansible.builtin.file:
+        path: /etc/nginx/localhost.d
+        state: directory
+        mode: "0755"
+        owner: root
+        group: root
+      when: ( "nginx" in ansible_local.dpkg.installed )
+
+  tags:
+    - users
+...

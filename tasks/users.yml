@@ -32,66 +32,11 @@
         loop_var: user
         label: "{{ user.key }}"
 
-    - name: Check update specified users variables
-      block:
-
-        - name: A users_update_users user name or comma seperated user names is required
-          ansible.builtin.assert:
-            that:
-              - users_update_users is defined
-              - users_update_users is ansible.builtin.regex('^[a-zA-Z0-9,-]{2,10000}$')
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-            fail_msg: >-
-              Please specify which users are to be updated using the users_update_users variable.
-              This accepts a comma seperated list of user names, for example
-              --extra-vars "users_update_strategy=users users_update_users=foo,bar"
-
-        - name: Debug users to be updated
-          ansible.builtin.debug:
-            var: users_update_user
-            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
-          loop: "{{ users_update_users | ansible.builtin.split(',') }}"
-          loop_control:
-            loop_var: users_update_user
-          when: users_update_users is ansible.builtin.regex('[,]') | bool
-
-        - name: Debug users.keys()
-          ansible.builtin.debug:
-            var: users.keys()
-            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
-
-        - name: Users to be updated need to be defined in the users dictionary
-          ansible.builtin.assert:
-            that:
-              - users_update_user in users.keys()
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-            fail_msg: >-
-              The user {{ users_update_user }} is not defined in the users dictionary, the defined users are
-              {{ users.keys() | join(', ') }}.
-          loop: "{{ users_update_users | ansible.builtin.split(',') }}"
-          loop_control:
-            loop_var: users_update_user
-          when: users_update_users is ansible.builtin.regex('[,]') | bool
-
-        - name: Debug user to be updated
-          ansible.builtin.debug:
-            var: users_update_users
-            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
-          when: not users_update_users is ansible.builtin.regex('[,]') | bool
-
-        - name: User to be updated need to be defined in the users dictionary
-          ansible.builtin.assert:
-            that:
-              - users_update_user in users.keys()
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-            fail_msg: >-
-              The user {{ users_update_user }} is not defined in the users dictionary, the defined users are
-              {{ users.keys() | join(', ') }}.
-          vars:
-            users_update_user: "{{ users_update_users }}"
-          when: not users_update_users is ansible.builtin.regex('[,]') | bool
-
-      when: ( users_update_strategy is defined ) and ( users_update_strategy == "users" )
+    - name: Include checks for when update strategy is set to users
+      ansible.builtin.include_tasks: update_check_users.yml
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "users"
 
     - name: Check individual user variables using meta/user_argument_specs.yml
       ansible.builtin.validate_argument_spec:
@@ -102,78 +47,17 @@
         loop_var: user
         label: "{{ user.key }}"
 
-    - name: Debug enabled Apache VirtualHosts
-      ansible.builtin.debug:
-        var: users_apache_vhosts
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}2{% else %}3{% endif %}"
-      vars:
-        users_apache_vhosts: >-
-          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict | community.general.json_query('*.users_apache_virtual_hosts') }}
-
-    - name: Debug enabled Apache VirtualHost ServerNames
-      ansible.builtin.debug:
-        var: users_apache_vhosts_server_names
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
-      vars:
-        users_apache_vhosts_server_names: >-
-          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}
-
-    - name: Debug enabled Apache VirtualHost ServerAliases
-      ansible.builtin.debug:
-        var: users_apache_vhosts_server_aliases
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
-      vars:
-        users_apache_vhosts_server_aliases: >-
-          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}
-
-    - name: Set a fact for all the enabled Apache ServerNames and ServerAlias
-      ansible.builtin.set_fact:
-        users_apache_vhosts_server_aliases_and_names: >-
-          {{ (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]')) +
-          (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]')) | sort }}
-
-    - name: Debug users_apache_vhosts_server_aliases_and_names
-      ansible.builtin.debug:
-        var: users_apache_vhosts_server_aliases_and_names
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
-
-    # https://forum.ansible.com/t/detecting-duplicate-items-in-an-aray/39697/2
-    - name: Check that there are no duplicate Apache ServerName or ServerAlias
-      ansible.builtin.fail:
-        msg: >-
-          There should be no duplicates in the Apache ServerName or ServerAliases but these duplicates are present
-          {{ users_apache_vhosts_server_aliases_and_names | community.general.counter | ansible.builtin.dict2items | selectattr('value', '>', 1) | map(attribute='key') | join(', ') }}
-
-      when: >-
-        ( users_apache_vhosts_server_aliases_and_names | length ) !=
-        ( users_apache_vhosts_server_aliases_and_names | ansible.builtin.unique | length )
-
-    - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
-      ansible.builtin.include_tasks: validate_vhost.yml
-      loop: "{{ users | ansible.builtin.dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
+    - name: Apache ServerName and ServerAlias checks
+      ansible.builtin.include_tasks: apache_check.yml
       when:
         - users_apache is defined
         - users_apache | bool
         - ( "apache2" in ansible_local.dpkg.installed )
-        - user.value.users_apache_virtual_hosts is defined
-        - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
 
     - name: System setup and checks
       ansible.builtin.include_tasks: system.yml
 
-    - name: Check config only
+    - name: Check users config only
       block:
 
         - name: Run checks on users
@@ -210,6 +94,10 @@
             - ( user.key != "root" )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
             - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
+
+        - name: End as Apache config updated for users present
+          ansible.builtin.meta: end_play
+
       when:
         - users_update_strategy is defined
         - users_update_strategy == "apache"
@@ -235,6 +123,9 @@
             - user.value.users_mariadb_databases is defined
             - user.value.users_mariadb_databases != []
 
+        - name: End as MariaDB config updated for users present
+          ansible.builtin.meta: end_play
+
       when:
         - users_update_strategy is defined
         - users_update_strategy == "mariadb"
@@ -257,6 +148,9 @@
             - user.value.users_state is defined
             - user.value.users_state == "present"
 
+        - name: End as PHP-FPM config updated for users present
+          ansible.builtin.meta: end_play
+
       when:
         - users_update_strategy is defined
         - users_update_strategy == "phpfpm"
@@ -278,6 +172,9 @@
             - user.value.users_ssh_public_keys is defined
             - user.value.users_ssh_public_keys != []
 
+        - name: End as SSH keys updated for users present
+          ansible.builtin.meta: end_play
+
       when:
         - users_update_strategy is defined
         - users_update_strategy == "sshkeys"
@@ -297,6 +194,9 @@
         - name: Include Matomo tasks
           ansible.builtin.include_tasks: matomo.yml
 
+        - name: End as Matomo sites and users updated
+          ansible.builtin.meta: end_play
+
       when:
         - users_update_strategy is defined
         - users_update_strategy == "matomo"
@@ -314,6 +214,9 @@
             - user.key != "root"
             - ( user.value.users_state is not defined ) or ( user.value.users_state == "present" )
             - ( user.value.users_quota is defined ) and ( user.value.users_quota | length > 0 )
+
+        - name: End as quotas updated for users present
+          ansible.builtin.meta: end_play
 
       when:
         - users_update_strategy is defined
