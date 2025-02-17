@@ -66,7 +66,7 @@
         ( users_apache_vhosts_server_aliases_and_names | length ) !=
         ( users_apache_vhosts_server_aliases_and_names | ansible.builtin.unique | length )
 
-    - name: Loop through the users to include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
+    - name: Loop through the users to update include meta/apache_virtual_host_argument_specs.yml for Apache VirtualHost dictionaries
       ansible.builtin.include_tasks: validate_vhost.yml
       loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
@@ -74,6 +74,7 @@
         label: "{{ user.key }}"
       when:
         - user.value.users_apache_virtual_hosts is defined
+        - user.key in users_update
         - ( user.value.users_state is not defined ) or ( user.value.users_state != "absent" ) or ( user.value.users_state != "ignore" )
 
   tags:

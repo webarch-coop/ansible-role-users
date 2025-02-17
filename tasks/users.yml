@@ -11,19 +11,7 @@
 - name: Users tasks
   block:
 
-    - name: User names must be 2 to 17 ascii letters, numbers and dashes
-      ansible.builtin.fail:
-        msg: >-
-          The user name(s) {{ users.keys() | reject('ansible.builtin.regex', '^[a-zA-Z0-9-]{2,17}$') | join(', ') }}
-          either contain disallowed characters or are shorter or longer than the allowed limit.
-      when: users.keys() | reject('ansible.builtin.regex', '^[a-zA-Z0-9-]{2,17}$') != []
-
-    - name: Debug meta/user_argument_specs.yml
-      ansible.builtin.debug:
-        msg: "{{ lookup('ansible.builtin.file', 'meta/user_argument_specs.yml') | ansible.builtin.from_yaml }}"
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
-
-    - name: Debug users dict
+    - name: Debug users
       ansible.builtin.debug:
         var: user.value
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
@@ -32,11 +20,148 @@
         loop_var: user
         label: "{{ user.key }}"
 
-    - name: Include checks for when update strategy is set to users
-      ansible.builtin.include_tasks: update_check_users.yml
+    - name: User names must be 2 to 17 ascii letters, numbers and dashes
+      ansible.builtin.fail:
+        msg: >-
+          The user name(s) {{ users.keys() | reject('ansible.builtin.regex', '^[a-zA-Z0-9-]{2,17}$') | join(', ') }}
+          either contain disallowed characters or are shorter or longer than the allowed limit.
+      when: users.keys() | reject('ansible.builtin.regex', '^[a-zA-Z0-9-]{2,17}$') != []
+
+    - name: Directories for users state files present
+      ansible.builtin.file:
+        path: "{{ users_state_dir }}/{{ users_state_file_dir }}"
+        state: directory
+        mode: "0700"
+        owner: root
+        group: root
+      loop:
+        - current
+        - previous
+        - proposed
+      loop_control:
+        loop_var: users_state_file_dir
+
+    - name: Write users state files when the update strategy is undefined, all or changed
+      block:
+
+        - name: Proposed users state files present
+          ansible.builtin.template:
+            src: user_state.yml.j2
+            dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
+            mode: "0600"
+            owner: root
+            group: root
+          check_mode: false
+          register: users_state_file
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+      when: ( users_update_strategy is not defined ) or ( users_update_strategy == "all" ) or ( users_update_strategy == "changed" )
+
+    - name: Check which users accounts are changed and set them to be updated
+      block:
+
+        - name: Check users current state files
+          ansible.builtin.include_tasks: user_state.yml
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+        - name: Print the changed users to update
+          ansible.builtin.debug:
+            msg: "User{% if users_update | length > 1 %}s{% endif %} to update: {{ users_update | join(', ') }}"
+
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "changed"
+
+    - name: Set users to update to all
+      block:
+
+        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
+          ansible.builtin.set_fact:
+            users_update: "{{ users_update | default([]) + [user.key] }}"
+          when: ( user.value.users_state is not defined ) or ( user.value.users_state != "ignore" )
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+        - name: Print the users to update if users_update_strategy is not set or set to all
+          ansible.builtin.debug:
+            msg: "User{% if users_update | length > 1 %}s{% endif %} to update: {{ users_update | join(', ') }}"
+
+      when: ( users_update_strategy is not defined ) or ( users_update_strategy == "all" )
+
+    - name: Check and define the users to update when update strategy is users
+      block:
+
+        - name: Include checks for when update strategy is set to users
+          ansible.builtin.include_tasks: update_check_users.yml
+
+        - name: Set users_update array for multiple users when users_update_strategy is users
+          ansible.builtin.set_fact:
+            users_update: "{{ users_update_users | ansible.builtin.split(',') }}"
+          when: users_update_users is ansible.builtin.regex(',')
+
+        - name: Set users_update array for one user when users_update_strategy is users
+          ansible.builtin.set_fact:
+            users_update:
+              - "{{ users_update_users }}"
+          when: users_update_users is not ansible.builtin.regex(',')
+
+        - name: Print the specified users to update
+          ansible.builtin.debug:
+            msg: "User{% if users_update | length > 1 %}s{% endif %} to update: {{ users_update | join(', ') }}"
+
+        - name: Proposed users to update state files present
+          ansible.builtin.template:
+            src: user_state.yml.j2
+            dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
+            mode: "0600"
+            owner: root
+            group: root
+          check_mode: false
+          when: user.key in users_update
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          register: users_state_file
+
       when:
         - users_update_strategy is defined
         - users_update_strategy == "users"
+
+    - name: Set users to update by group
+      block:
+
+        - name: Loop through the users with additional groups
+          ansible.builtin.include_tasks: users_groups.yml
+          when:
+            - ( user.value.users_groups is defined and user.value.users_groups != [] ) or ( user.key in users_update_groups )
+            - ( user.key not in users_update ) and ( user.value.users_state != "ignore" )
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+        - name: Print the users in the groups to update
+          ansible.builtin.debug:
+            msg: "User{% if users_update | length > 1 %}s{% endif %} to update: {{ users_update | join(', ') }}"
+
+      when:
+        - users_update_strategy == "groups"
+        - users_update_groups is defined
+        - users_update_groups != []
+
+    - name: Debug users_update
+      ansible.builtin.debug:
+        var: users_update
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
     - name: Check individual user variables using meta/user_argument_specs.yml
       ansible.builtin.validate_argument_spec:
@@ -46,6 +171,7 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
+      when: user.key in users_update
 
     - name: Apache ServerName and ServerAlias checks
       ansible.builtin.include_tasks: apache_check.yml
@@ -225,91 +351,6 @@
         - users_quotaon | bool
         - quota_dir is defined
 
-    - name: Set users to update to all
-      block:
-
-        - name: Add all the users to the users_update array as users_update_strategy is not set or set to all
-          ansible.builtin.set_fact:
-            users_update: "{{ users_update | default([]) + [user.key] }}"
-          when: >-
-            ( user.value.users_state is not defined ) or
-            ( user.value.users_state != "ignore" )
-          loop: "{{ users | ansible.builtin.dict2items }}"
-          loop_control:
-            loop_var: user
-            label: "{{ user.key }}"
-
-        - name: Print the users to update if users_update_strategy is not set or set to all
-          ansible.builtin.debug:
-            msg: "User to update: {{ users_update | join(', ') }}"
-
-      when: >-
-        ( users_update_strategy is not defined ) or
-        ( users_update_strategy == "all" )
-
-    - name: Set users to update by group
-      block:
-
-        - name: Loop through the users with additional groups
-          ansible.builtin.include_tasks: users_groups.yml
-          when:
-            - ( user.value.users_groups is defined and user.value.users_groups != [] ) or ( user.key in users_update_groups )
-            - ( user.key not in users_update ) and ( user.value.users_state != "ignore" )
-          loop: "{{ users | ansible.builtin.dict2items }}"
-          loop_control:
-            loop_var: user
-            label: "{{ user.key }}"
-
-        - name: Print the users in the groups to update
-          ansible.builtin.debug:
-            msg: "User to update: {{ users_update | join(', ') }}"
-
-      when:
-        - users_update_strategy == "groups"
-        - users_update_groups is defined
-        - users_update_groups != []
-
-    - name: Check which users accounts are changed and set them to be updated
-      block:
-
-        - name: Check users changed
-          ansible.builtin.include_tasks: users_changed.yml
-
-        - name: Print the changed users to update
-          ansible.builtin.debug:
-            msg: "User to update: {{ users_update | join(', ') }}"
-
-      when:
-        - users_update_strategy is defined
-        - users_update_strategy == "changed"
-
-    - name: Define the users to update when specifically specified
-      block:
-
-        - name: Set users_update array for multiple users when users_update_strategy is users
-          ansible.builtin.set_fact:
-            users_update: "{{ users_update_users | ansible.builtin.split(',') }}"
-          when: users_update_users is ansible.builtin.regex(',')
-
-        - name: Set users_update array for one user when users_update_strategy is users
-          ansible.builtin.set_fact:
-            users_update:
-              - "{{ users_update_users }}"
-          when: users_update_users is not ansible.builtin.regex(',')
-
-        - name: Print the specified users to update
-          ansible.builtin.debug:
-            msg: "User to update: {{ users_update | join(', ') }}"
-
-      when:
-        - users_update_strategy is defined
-        - users_update_strategy == "users"
-
-    - name: Debug users_update
-      ansible.builtin.debug:
-        var: users_update
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
-
     - name: Update users tasks
       block:
 
@@ -325,7 +366,7 @@
             loop_var: user
             label: "{{ user.key }}"
 
-        - name: Print users that won't be changes as their state is set to ignore
+        - name: Print users that won't be changed as their state is set to ignore
           ansible.builtin.debug:
             var: user
             verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
@@ -333,7 +374,7 @@
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "ignore" )
 
-        - name: User absent loop
+        - name: Delete users when they are set to be absent
           ansible.builtin.include_tasks: user_absent.yml
           when:
             - ( user.key is defined ) and ( user.key in users_update )
