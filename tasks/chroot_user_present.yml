@@ -21,6 +21,7 @@
     - name: "Skipping adding user to the chroot as user account doesn't exist yet for {{ user.key }}"
       ansible.builtin.debug:
         msg: "Skipping chroot tasks for {{ user.key }}"
+      when: users_etc_passwd.rc == 1
 
     - name: Update chroot when the user is present
       block:
