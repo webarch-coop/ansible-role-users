@@ -78,7 +78,7 @@
     - name: Debug ansible_facts.getent_group
       ansible.builtin.debug:
         var: ansible_facts.getent_group
-        verbosity: 2
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
     - name: Get all users
       ansible.builtin.getent:
@@ -88,7 +88,7 @@
     - name: Debug ansible_facts.getent_passwd
       ansible.builtin.debug:
         var: ansible_facts.getent_passwd
-        verbosity: 2
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
     - name: Set a fact for the Debian version
       ansible.builtin.set_fact:
@@ -102,19 +102,19 @@
       ansible.builtin.include_tasks: apache.yml
       when:
         - ( "apache2" in ansible_local.dpkg.installed )
-        - ( users_apache is defined ) and ( users_apache )
+        - ( users_apache is defined ) and ( users_apache | bool )
 
     - name: Include MariaDB tasks
       ansible.builtin.include_tasks: mariadb.yml
       when:
         - ( "mariadb-server" in ansible_local.dpkg.installed )
-        - ( users_mariadb is defined ) and ( users_apache )
+        - ( users_mariadb is defined ) and ( users_mariadb | bool )
 
     - name: Include Valkey checks when one for more users are in the valkey group
       ansible.builtin.include_tasks: valkey.yml
       when: ( "valkey" in users | community.general.json_query('*.users_groups[]') )
 
-    - name: PHP FPM checks and tasks
+    - name: Include PHP-FPM tasks
       ansible.builtin.include_tasks: phpfpm.yml
       when: ( users_phpfpm is defined ) and ( users_phpfpm | bool )
 
@@ -168,9 +168,9 @@
 
         - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
           ansible.builtin.command: "md5sum {{ quota_dir }}/quota_user.csv"
-          register: users_repquota_md5sum_before
           check_mode: false
           changed_when: false
+          register: users_repquota_md5sum_before
 
         - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
           ansible.builtin.shell: |
@@ -181,8 +181,8 @@
           args:
             chdir: "{{ quota_dir | dirname }}"
             executable: "{{ users_bash }}"
-          register: users_repquota_md5sum_after
           check_mode: false
+          register: users_repquota_md5sum_after
           changed_when: users_repquota_md5sum_before.stdout != users_repquota_md5sum_after.stdout
 
         - name: Users quotas fetched
@@ -191,35 +191,37 @@
             dest: /tmp/
           check_mode: false
 
-      when: ( users_quotaon is defined ) and ( users_quotaon ) and ( quota_dir is defined )
+      when: ( users_quotaon is defined ) and ( users_quotaon | bool ) and ( quota_dir is defined )
 
-    - name: Directories for users state files present
-      ansible.builtin.file:
-        path: "{{ users_state_dir }}/{{ dir }}"
-        state: directory
-        mode: "0700"
-        owner: root
-        group: root
-      loop:
-        - current
-        - previous
-        - proposed
-      loop_control:
-        loop_var: dir
+    # These tasks have been moved to the users.yml file
+    #
+    # - name: Directories for users state files present
+    #   ansible.builtin.file:
+    #     path: "{{ users_state_dir }}/{{ dir }}"
+    #     state: directory
+    #     mode: "0700"
+    #     owner: root
+    #     group: root
+    #   loop:
+    #     - current
+    #     - previous
+    #     - proposed
+    #   loop_control:
+    #     loop_var: dir
 
-    - name: Proposed users state files present
-      ansible.builtin.template:
-        src: user_state.yml.j2
-        dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
-        mode: "0600"
-        owner: root
-        group: root
-      check_mode: false
-      register: users_state_file
-      loop: "{{ users | ansible.builtin.dict2items }}"
-      loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
+    # - name: Proposed users state files present
+    #   ansible.builtin.template:
+    #     src: user_state.yml.j2
+    #     dest: "{{ users_state_dir }}/proposed/{{ user.key }}.yml"
+    #     mode: "0600"
+    #     owner: root
+    #     group: root
+    #   check_mode: false
+    #   register: users_state_file
+    #   loop: "{{ users | ansible.builtin.dict2items }}"
+    #   loop_control:
+    #     loop_var: user
+    #     label: "{{ user.key }}"
 
   tags:
     - users

@@ -220,6 +220,7 @@
             - ( user.key != "root" )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
             - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
+            - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( user.value.users_apache_virtual_hosts_enabled | bool )
 
         - name: End as Apache config updated for users present
           ansible.builtin.meta: end_play
