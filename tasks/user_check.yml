@@ -20,14 +20,6 @@
       loop_control:
         loop_var: users_disallowed_username
 
-    - name: "Check state for {{ user.key }}"
-      ansible.builtin.assert:
-        that:
-          - user.value.users_state | length
-          - ( user.value.users_state == "present" ) or ( user.value.users_state == "absent" ) or ( user.value.users_state == "ignore" )
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_state is defined
-
     - name: "Check that the group for {{ user.key }} contains only ascii letters, numbers and dashes"
       ansible.builtin.assert:
         that:
@@ -37,20 +29,6 @@
 
     - name: "Check the groups for {{ user.key }}"
       block:
-
-        - name: "Check that the groups for {{ user.key }} is a non-empty array"
-          ansible.builtin.assert:
-            that:
-              - user.value.users_groups | length
-              - user.value.users_groups[0] is defined
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-
-        - name: "Debug users groups for {{ user.key }}"
-          ansible.builtin.debug:
-            var: user.value.users_groups
-            verbosity: 2
-          tags:
-            - debug
 
         - name: "Check that the groups for {{ user.key }} contain only ascii letters, numbers and dashes"
           ansible.builtin.assert:
@@ -77,7 +55,7 @@
               ansible.builtin.assert:
                 that:
                   - users_chroot_dir is defined
-                  - users_chroot_dir_check.stat.exists
+                  - users_chroot_dir_check.stat.exists | bool
                 quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
             # NOTE users_chroot_users_dir_check is defined via a task in system.yml
@@ -85,7 +63,7 @@
               ansible.builtin.assert:
                 that:
                   - users_chroot_users_dir is defined
-                  - users_chroot_users_dir_check.stat.exists
+                  - users_chroot_users_dir_check.stat.exists | bool
                 quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
           when: ( "chroot" in user.value.users_groups )
@@ -98,7 +76,7 @@
         - name: "Check that the members of {{ user.key }} group is a non-empty array"
           ansible.builtin.assert:
             that:
-              - user.value.users_group_members | length
+              - user.value.users_group_members | length > 0
               - user.value.users_group_members[0] is defined
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
@@ -155,13 +133,6 @@
     # TODO users_home_mode
     # TODO check users_editor
 
-    - name: "Check generate_ssh_key for {{ user.key }} is true or false"
-      ansible.builtin.assert:
-        that:
-          - ( user.value.users_generate_ssh_key ) or ( not user.value.users_generate_ssh_key )
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_generate_ssh_key is defined
-
     - name: "Check email address for {{ user.key }}"
       ansible.builtin.assert:
         that:
@@ -175,7 +146,7 @@
         - name: "Check users_ssh_public_keys is a non-empty array for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - user.value.users_ssh_public_keys | length
+              - user.value.users_ssh_public_keys | length > 0
               - user.value.users_ssh_public_keys[0] is defined
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
@@ -238,20 +209,13 @@
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_notify_passwd is defined
 
-    - name: "Check that users_mariadb_notify_passwd for {{ user.key }} is true or false"
-      ansible.builtin.assert:
-        that:
-          - ( user.value.users_mariadb_notify_passwd ) or ( not user.value.users_mariadb_notify_passwd )
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_mariadb_notify_passwd is defined
-
     - name: "MariaDB users_mariadb_databases array checks for {{ user.key }}"
       block:
 
         - name: "Check users_mariadb_databases is a non-empty array for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - user.value.users_mariadb_databases | length
+              - user.value.users_mariadb_databases | length > 0
               - user.value.users_mariadb_databases[0] is defined
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
@@ -286,7 +250,7 @@
         - name: "Check users_mariadb_database_privileges is a non-empty array for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - user.value.users_mariadb_database_privileges | length
+              - user.value.users_mariadb_database_privileges | length > 0
               - user.value.users_mariadb_database_privileges[0] is defined
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
@@ -465,35 +429,8 @@
 
           when: ( user.value.users_phpfpm_pm is defined ) and ( user.value.users_phpfpm_pm == "dynamic" )
 
-        - name: Check that users_phpfpm_mysqli_allow_local_infile is a boolean if defined
-          ansible.builtin.assert:
-            that:
-              - user.value.users_phpfpm_mysqli_allow_local_infile | type_debug == "bool"
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when: user.value.users_phpfpm_mysqli_allow_local_infile is defined
-
-        - name: Check that users_phpfpm_disable_functions is a list if defined
-          ansible.builtin.assert:
-            that:
-              - user.value.users_phpfpm_enable_disable_functions | type_debug == "list"
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when: user.value.users_phpfpm_enable_disable_functions is defined
-
-        - name: Check that users_phpfpm_open_basedir is a list if defined
-          ansible.builtin.assert:
-            that:
-              - user.value.users_phpfpm_open_basedir | type_debug == "list"
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when: user.value.users_phpfpm_open_basedir is defined
-
         - name: Checks for users_phpfpm_extensions
           block:
-
-            - name: "Check that users_phpfpm_extensions for {{ user.key }} is an array if defined"
-              ansible.builtin.assert:
-                that:
-                  - user.value.users_phpfpm_extensions | type_debug == "list"
-                quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
             - name: "Check that users_phpfpm_extensions for {{ user.key }} is an array if defined"
               ansible.builtin.assert:
@@ -533,13 +470,6 @@
           - user.value.users_minutely_scripts | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: user.value.users_minutely_scripts is defined
-
-    - name: Check the entries in the users_cron_jobs array if defined
-      ansible.builtin.include_tasks: user_check_cron.yml
-      loop: "{{ user.value.users_cron_jobs }}"
-      loop_control:
-        loop_var: job
-      when: user.value.users_cron_jobs is defined
 
     - name: Apache VirtualHost config check when enabled
       block:

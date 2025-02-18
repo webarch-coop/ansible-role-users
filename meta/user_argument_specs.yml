@@ -41,7 +41,7 @@ users_cron_jobs:
       description: Disable the users cron job.
     job:
       type: str
-      required: false
+      required: true
       description: A task for the users cron job.
     hour:
       type: str
@@ -63,6 +63,14 @@ users_cron_jobs:
       type: str
       required: false
       description: A special time for the users cron job.
+      choices:
+        - '@annually'
+        - '@yearly'
+        - '@monthly'
+        - '@weekly'
+        - '@daily'
+        - '@hourly'
+        - '@reboot'
     state:
       type: str
       required: false

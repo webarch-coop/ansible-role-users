@@ -97,14 +97,14 @@
     - name: "Check that drupal_autoupdate is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - ( vhost.value.drupal_autoupdate ) or ( not vhost.value.wordpress_notify )
+          - ( vhost.value.drupal_autoupdate | bool ) or ( not vhost.value.wordpress_notify | bool )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.drupal_autoupdate is defined
 
     - name: "Check that drupal_notify is true or false if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - ( vhost.value.drupal_notify ) or ( not vhost.value.wordpress_notify )
+          - ( vhost.value.drupal_notify | bool ) or ( not vhost.value.wordpress_notify | bool )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.drupal_notify is defined
 

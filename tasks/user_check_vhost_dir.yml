@@ -100,55 +100,6 @@
 
       when: dir.value.users_apache_index_options is defined
 
-    - name: "Check that the IndexHeadInsert is a string, which doesn't contain single quotes if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_index_head_insert | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_index_head_insert is defined
-
-    - name: "Check that the HeaderName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_header_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_header_name is defined
-
-    - name: "Check that the ReadmeName is a string if defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_readme_name | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_readme_name is defined
-
-    - name: "Check that SSILegacyExprParser is true or false for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_ssi_legacy | type_debug == "bool"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_ssi_legacy is defined
-
-    - name: "Check that SSILastModified is true or false for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_ssi_modified | type_debug == "bool"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_ssi_modified is defined
-
-    - name: "Check that AddOutputFilter for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_add_output_filters | type_debug == "list"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_add_output_filters is defined
-
-    - name: "Check that AddType for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_add_type | type_debug == "list"
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_add_type is defined
-
     - name: "Check that only valid AllowOverride directives are listed for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
 
@@ -193,22 +144,8 @@
 
       when: dir.value.users_apache_index is defined
 
-    - name: "Check that AuthType is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
-      ansible.builtin.assert:
-        that:
-          - dir.value.users_apache_auth_type | type_debug is regex("str|AnsibleUnicode|AnsibleUnsafeText")
-          - dir.value.users_apache_auth_type is regex("None|Basic|Digest|Form")
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: dir.value.users_apache_auth_type is defined
-
     - name: "Check that Require is valid for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       block:
-
-        - name: "Check that users_apache_require is a list for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - dir.value.users_apache_require | type_debug == "list"
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that that values other than method for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
@@ -222,27 +159,6 @@
             label: "{{ req }}"
 
       when: ( dir.value.users_apache_require is defined ) and ( dir.value.users_apache_require != [] )
-
-    - name: "FilesMatch checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      block:
-
-        - name: "Check that users_apache_filesmatch is an array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - dir.value.users_apache_filesmatch | type_debug == "list"
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-
-        - name: "Check that regex is defined for FilesMatch for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - fm.regex is defined
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ dir.value.users_apache_filesmatch }}"
-          loop_control:
-            loop_var: fm
-            label: "{{ fm }}"
-
-      when: dir.value.users_apache_filesmatch is defined
 
   tags:
     - users

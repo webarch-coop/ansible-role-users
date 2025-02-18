@@ -1436,6 +1436,15 @@ users_apache_redirects:
       type: str
       required: false
       description: The redirect status.
+      choices:
+        - "301"
+        - "302"
+        - "303"
+        - "410"
+        - permanent
+        - temp
+        - seeother
+        - gone
     url:
       type: str
       required: false
