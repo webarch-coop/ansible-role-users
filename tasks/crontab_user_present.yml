@@ -181,6 +181,8 @@
           ansible.builtin.debug:
             var: users_crontab
             verbosity: 1
+          tags:
+            - debug
 
         - name: "USER env var added to {{ user.key }} crontab"
           ansible.builtin.cron:

@@ -32,6 +32,8 @@
       when:
         - ( users_domain_check is defined )
         - ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
+      tags:
+        - debug
 
     - name: Debug domain name and IP address
       ansible.builtin.debug:
@@ -45,6 +47,8 @@
       when:
         - ( users_domain_check is defined )
         - ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
+      tags:
+        - debug
 
     - name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
       ansible.builtin.debug:
@@ -68,6 +72,8 @@
         - users_domain_dig[0] not in ansible_facts.all_ipv4_addresses
         - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check != "strict" )
         - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
+      tags:
+        - debug
 
     - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
       ansible.builtin.fail:

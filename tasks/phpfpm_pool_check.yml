@@ -29,6 +29,8 @@
           - "users_check_php_pm_min_spare_servers is a {{ users_check_php_pm_min_spare_servers | type_debug }} with the value {{ users_check_php_pm_min_spare_servers }}"
           - "users_check_php_pm_max_spare_servers is a {{ users_check_php_pm_max_spare_servers | type_debug }} with the value: {{ users_check_php_pm_max_spare_servers }}"
         verbosity: 2
+      tags:
+        - debug
 
     - name: Ensure that pm is set to static, ondemand or dynamic
       ansible.builtin.assert:

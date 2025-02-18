@@ -29,6 +29,8 @@
     - name: Don't fail, print a warning, this role might need to be run again
       ansible.builtin.debug:
         msg: "The {{ member }} user hasn't yet been created so skipping"
+      tags:
+        - debug
 
   tags:
     - users

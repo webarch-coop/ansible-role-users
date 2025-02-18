@@ -28,6 +28,8 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+      tags:
+        - debug
 
     - name: "Matomo sites present for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
       ansible.builtin.include_role:

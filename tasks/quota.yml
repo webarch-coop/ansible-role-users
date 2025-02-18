@@ -74,6 +74,8 @@
           - "inode-hardlimit: {{ users_quota_inode_hardlimit }}"
         verbosity: 2
       check_mode: false
+      tags:
+        - debug
 
     - name: Set facts for lookups on the existing limits
       ansible.builtin.set_fact:
@@ -96,6 +98,8 @@
         msg:
           - "setquota {{ user.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"
         verbosity: 2
+      tags:
+        - debug
 
     - name: "Setquota for {{ user.key }}"
       ansible.builtin.command: "setquota {{ user.key }} {{ users_quota_block_softlimit }} {{ users_quota_block_hardlimit }} {{ users_quota_inode_softlimit }} {{ users_quota_inode_hardlimit }} {{ quota_dir }}"

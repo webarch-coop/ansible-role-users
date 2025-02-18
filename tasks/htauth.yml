@@ -18,6 +18,8 @@
           - "vhost.key: {{ vhost.key }}"
           - "vhost.value.users_apache_server_name: {{ vhost.value.users_apache_server_name }}"
         verbosity: 2
+      tags:
+        - debug
 
     - name: Debug users_apache_htauth_users loop
       ansible.builtin.debug:
@@ -30,6 +32,8 @@
       loop_control:
         loop_var: htauth
         label: "{{ htauth.name }}"
+      tags:
+        - debug
 
     - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd directory present"
       ansible.builtin.file:

@@ -143,12 +143,16 @@
             var: matomo_user
             verbosity: 2
           when: matomo_user is defined
+          tags:
+            - debug
 
         - name: Debug ansible_facts.getent_passwd.keys()
           ansible.builtin.debug:
             var: ansible_facts.getent_passwd.keys()
             verbosity: 3
           when: ansible_facts.getent_passwd.keys() is defined
+          tags:
+            - debug
 
         - name: "Matomo site tasks for {{ user.key }}"
           block:
@@ -212,6 +216,8 @@
                           loop_control:
                             loop_var: vhost
                             label: "{{ vhost.key }}"
+                          tags:
+                            - debug
 
                         - name: "Matomo sites present for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
                           ansible.builtin.include_role:
@@ -497,6 +503,8 @@
             - ( vhost.value.nextcloud_app_install is not defined )
             - ( vhost.value.nextcloud_app_disable is not defined )
             - ( vhost.value.nextcloud_app_enable is not defined )
+          tags:
+            - debug
 
         - name: "Include Nextcloud role for {{ user.key }} with default apps"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -624,6 +632,8 @@
           when:
             - ( vhost.value.users_cms == "nextcloud" )
             - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
+          tags:
+            - debug
 
         - name: "Include Nextcloud role for {{ user.key }} with custom apps"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:

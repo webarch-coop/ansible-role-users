@@ -18,6 +18,7 @@
     label: "{{ group }}"
   tags:
     - users
+    - debug
 
 - name: Add group
   ansible.builtin.group:

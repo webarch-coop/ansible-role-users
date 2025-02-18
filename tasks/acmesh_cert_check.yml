@@ -23,12 +23,16 @@
       ansible.builtin.debug:
         var: apache_vhost_cert_check_vhosts.results
         verbosity: 2
+      tags:
+        - debug
 
     - name: Debug users_apache_certs_present
       ansible.builtin.debug:
         var: users_apache_certs_present
         verbosity: 1
       when: users_apache_certs_present is defined
+      tags:
+        - debug
 
   when: users_cert == "vhost"
   tags:

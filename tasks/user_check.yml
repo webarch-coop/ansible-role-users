@@ -49,6 +49,8 @@
           ansible.builtin.debug:
             var: user.value.users_groups
             verbosity: 2
+          tags:
+            - debug
 
         - name: "Check that the groups for {{ user.key }} contain only ascii letters, numbers and dashes"
           ansible.builtin.assert:
@@ -104,6 +106,8 @@
           ansible.builtin.debug:
             var: user.value.users_group_members
             verbosity: 2
+          tags:
+            - debug
 
         - name: "Check that the group members for {{ user.key }} contain only ascii letters, numbers and dashes"
           ansible.builtin.assert:
@@ -330,12 +334,16 @@
           ansible.builtin.debug:
             var: users_phpfpm_versions
             verbosity: 2
+          tags:
+            - debug
 
         - name: Debug user.value.users_phpfpm_version
           ansible.builtin.debug:
             var: user.value.users_phpfpm_version
             verbosity: 2
           when: user.value.users_phpfpm_version is defined
+          tags:
+            - debug
 
         - name: Check that user.value.users_phpfpm_version is a string or integer and a number followed by a dot and another number and is in users_phpfpm_versions when defined
           ansible.builtin.assert:

@@ -19,6 +19,8 @@
       loop_control:
         loop_var: user
         label: "{{ user.key }}"
+      tags:
+        - debug
 
     - name: User names must be 2 to 17 ascii letters, numbers and dashes
       ansible.builtin.fail:

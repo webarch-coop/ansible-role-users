@@ -17,6 +17,8 @@
           - job.name is defined
           - job.name | type_debug is regex('^(str|AnsibleUnicode|AnsibleUnsafeText)$')
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      tags:
+        - debug
 
     - name: Ensure that a job is defined for the cron job
       ansible.builtin.assert:

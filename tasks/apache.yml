@@ -34,6 +34,8 @@
           ansible.builtin.debug:
             var: users_apache_modules_check.stdout_lines
             verbosity: 3
+          tags:
+            - debug
 
         - name: Set an array of the loaded modules
           ansible.builtin.set_fact:
@@ -48,6 +50,8 @@
       ansible.builtin.debug:
         var: users_apache_modules_loaded
         verbosity: 3
+      tags:
+        - debug
 
     - name: Check that Apache suexec is enabled when users_apache_chroot_suexec is true
       ansible.builtin.assert:
@@ -68,6 +72,8 @@
         var: users_apache_chroot
         verbosity: 3
       when: users_apache_chroot is defined
+      tags:
+        - debug
 
     - name: Apache chroot present configuration
       ansible.builtin.include_tasks: apache_chroot_present.yml

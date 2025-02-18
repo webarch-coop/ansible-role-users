@@ -91,10 +91,14 @@
         - name: Standard out from apache2ctl configtest
           ansible.builtin.debug:
             var: users_apache2ctl_configtest.stdout
+          tags:
+            - debug
 
         - name: Standard error from apache2ctl configtest
           ansible.builtin.debug:
             var: users_apache2ctl_configtest.stderr
+          tags:
+            - debug
 
         - name: "Apache configtest or restart failed, writing failed config to {{ users_apache_conf_broken }}"
           ansible.builtin.copy:
@@ -198,6 +202,8 @@
               ansible.builtin.debug:
                 var: users_apache_md_cert
                 verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+              tags:
+                - debug
 
             - name: Check and install a cert check cron job
               block:
@@ -227,6 +233,8 @@
               ansible.builtin.debug:
                 var: user.value.users_apache_virtual_hosts | ansible.builtin.dict2items
                 verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}2{% else %}3{% endif %}"
+              tags:
+                - debug
 
             - name: "Check if there is a mod_md certificate provisioned for {{ user.key }}"
               ansible.builtin.stat:
@@ -241,6 +249,8 @@
               ansible.builtin.debug:
                 var: users_apache_md_cert_paths
                 verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+              tags:
+                - debug
 
             - name: "Set a fact for the paths of the mod_md certificates that exist for {{ user.key }}"
               ansible.builtin.set_fact:
@@ -252,6 +262,8 @@
               ansible.builtin.debug:
                 var: users_apache_md_cert_paths_existing
                 verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+              tags:
+                - debug
 
             - name: Check and install a cert check cron job(s)
               block:

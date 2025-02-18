@@ -69,6 +69,8 @@
           - "Available shells: {{ users_shells | join(' ') }}"
           - "Path to Bash: {{ users_bash }}"
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: Get all groups
       ansible.builtin.getent:
@@ -79,6 +81,8 @@
       ansible.builtin.debug:
         var: ansible_facts.getent_group
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: Get all users
       ansible.builtin.getent:
@@ -89,6 +93,8 @@
       ansible.builtin.debug:
         var: ansible_facts.getent_passwd
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: Set a fact for the Debian version
       ansible.builtin.set_fact:

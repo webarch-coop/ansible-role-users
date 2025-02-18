@@ -18,6 +18,7 @@
     ( users is defined and users | ansible.builtin.type_debug != "dict" ) or
     ( users is defined and users == {} )
   tags:
+    - debug
     - users
 
 - name: Webarchitects Ansible User Role
@@ -28,17 +29,23 @@
         var: usersvarnames
         verbosity: 3
       when: usersvarnames is defined
+      tags:
+        - debug
 
     - name: Debug the hostvars variable names that start with users_
       ansible.builtin.debug:
         var: usershostvars
         verbosity: 2
       when: usershostvars is defined
+      tags:
+        - debug
 
     - name: Debug the users dictionary
       ansible.builtin.debug:
         var: users
         verbosity: 2
+      tags:
+        - debug
 
     - name: Check users_ variables using meta/argument_specs.yml
       ansible.builtin.validate_argument_spec:

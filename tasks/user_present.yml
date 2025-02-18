@@ -51,6 +51,8 @@
         - quota_dir is defined
         - users_quotaon is defined
         - user.value.users_quota is defined
+      tags:
+        - debug
 
     - name: "Quotas set for {{ user.key }}"
       ansible.builtin.include_tasks: quota.yml

@@ -19,6 +19,8 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+      tags:
+        - debug
 
     - name: "Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml for {{ user.key }}"
       ansible.builtin.validate_argument_spec:
@@ -40,6 +42,8 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+      tags:
+        - debug
 
     - name: "Check users_apache_directories variables using meta/apache_directories_argument_specs.yml for {{ user.key }}"
       ansible.builtin.include_tasks: validate_vhost_dirs.yml

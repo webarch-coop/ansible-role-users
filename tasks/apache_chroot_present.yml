@@ -202,6 +202,8 @@
       loop_control:
         loop_var: mnt
         label: "{{ mnt.path | basename }}"
+      tags:
+        - debug
 
     - name: Debug second set of chroot directories to be mounted for Apache
       ansible.builtin.debug:
@@ -217,6 +219,8 @@
         loop_var: dir
         label: "{{ dir }}"
       when: ( users_apache_chroot_mount_dirs is defined ) and ( users_apache_chroot_mount_dirs != [] )
+      tags:
+        - debug
 
     - name: First set of chroot directories mounted for Apache
       ansible.builtin.include_tasks: mount.yml
@@ -295,6 +299,8 @@
           loop: "{{ users_apache_chroot_mount_dirs }}"
           loop_control:
             loop_var: dir
+          tags:
+            - debug
 
         - name: Chroot /var/www directories mounted for Apache
           ansible.builtin.include_tasks: mount.yml

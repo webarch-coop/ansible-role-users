@@ -55,6 +55,8 @@
         var: users_apache_certs_present
         verbosity: 1
       when: users_apache_certs_present is defined
+      tags:
+        - debug
 
   tags:
     - users

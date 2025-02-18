@@ -22,6 +22,8 @@
       ansible.builtin.debug:
         msg: "Skipping chroot tasks for {{ user.key }}"
       when: users_etc_passwd.rc == 1
+      tags:
+        - debug
 
     - name: Update chroot when the user is present
       block:

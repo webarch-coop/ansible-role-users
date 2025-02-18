@@ -41,6 +41,8 @@
           - "generate ssh key: {{ user.value.users_generate_ssh_key | default('false') }}"
           - "SSH public key URLs:{% if user.value.users_ssh_public_keys is defined %}{% for url in user.value.users_ssh_public_keys %} {{ url }}{% endfor %}{% endif %}"
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     # TODO Check that the user doesn't already exist in ansible_facts.getent_passwd
     - name: "User account for {{ user.key }} present"
@@ -96,6 +98,8 @@
       loop_control:
         loop_var: file
         label: "{{ file.path }}"
+      tags:
+        - debug
 
     - name: "Private directories and files present for non-sudoer {{ user.key }}"
       ansible.builtin.file:

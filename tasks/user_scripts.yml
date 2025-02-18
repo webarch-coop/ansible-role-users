@@ -67,6 +67,8 @@
           ansible.builtin.debug:
             var: users_cron_daily_script_lines
             verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          tags:
+            - debug
 
         - name: Test run the users daily script when it contains content
           block:
@@ -86,6 +88,8 @@
               when:
                 - users_cron_daily_test_run.stdout_lines is defined
                 - users_cron_daily_test_run.stdout_lines | length > 0
+              tags:
+                - debug
 
             - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
               ansible.builtin.debug:
@@ -93,6 +97,8 @@
               when:
                 - users_cron_daily_test_run.stderr_lines is defined
                 - users_cron_daily_test_run.stderr_lines | length > 0
+              tags:
+                - debug
 
           when: users_cron_daily_script_lines != []
 
@@ -152,6 +158,8 @@
           ansible.builtin.debug:
             var: users_cron_hourly_script_lines
             verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          tags:
+            - debug
 
         - name: Test run the users daily script when it contains content
           block:
@@ -171,6 +179,8 @@
               when:
                 - users_cron_hourly_test_run.stdout_lines is defined
                 - users_cron_hourly_test_run.stdout_lines | length > 0
+              tags:
+                - debug
 
             - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
               ansible.builtin.debug:
@@ -178,6 +188,8 @@
               when:
                 - users_cron_hourly_test_run.stderr_lines is defined
                 - users_cron_hourly_test_run.stderr_lines | length > 0
+              tags:
+                - debug
 
           when: users_cron_hourly_script_lines != []
 
@@ -237,6 +249,8 @@
           ansible.builtin.debug:
             var: users_cron_minutely_script_lines
             verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          tags:
+            - debug
 
         - name: Test run the users minutely script when it contains content
           block:
@@ -256,6 +270,8 @@
               when:
                 - users_cron_minutely_test_run.stdout_lines is defined
                 - users_cron_minutely_test_run.stdout_lines | length > 0
+              tags:
+                - debug
 
             - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
               ansible.builtin.debug:
@@ -263,6 +279,8 @@
               when:
                 - users_cron_minutely_test_run.stderr_lines is defined
                 - users_cron_minutely_test_run.stderr_lines | length > 0
+              tags:
+                - debug
 
           when: users_cron_hourly_script_lines != []
 

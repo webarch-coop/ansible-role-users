@@ -41,6 +41,8 @@
           loop_control:
             loop_var: vhost
             label: "{{ vhost.key }}"
+          tags:
+            - debug
 
         - name: "Let's Encrypt cert per vhost acmesh role included for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -94,6 +96,8 @@
               unique |
               sort -}}
             acmesh_reloadcmd: "service apache2 reload"
+          tags:
+            - debug
 
         - name: "Let's Encrypt cert per user role included for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:

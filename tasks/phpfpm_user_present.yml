@@ -15,16 +15,22 @@
       ansible.builtin.debug:
         var: ansible_facts.getent_group
         verbosity: 3
+      tags:
+        - debug
 
     - name: Debug users_phpfpm_versions
       ansible.builtin.debug:
         var: users_phpfpm_versions
         verbosity: 2
+      tags:
+        - debug
 
     - name: Debug users_phpfpm_default_version
       ansible.builtin.debug:
         var: users_phpfpm_default_version
         verbosity: 2
+      tags:
+        - debug
 
     - name: "Set a fact for the PHP version for {{ user.key }}"
       ansible.builtin.set_fact:
@@ -36,6 +42,8 @@
       ansible.builtin.debug:
         var: users_phpfpm_version
         verbosity: 2
+      tags:
+        - debug
 
     - name: "Set facts for PHP package names for version {{ users_phpfpm_version }}"
       ansible.builtin.set_fact:
@@ -52,6 +60,8 @@
       ansible.builtin.debug:
         var: users_phpfpm_versions_absent
         verbosity: 2
+      tags:
+        - debug
 
     - name: "Include tasks to remove PHP-FPM pool.d files for PHP versions other than the default one for {{ user.key }}"
       ansible.builtin.include_tasks: phpfpm_pool_file_absent.yml

@@ -30,11 +30,15 @@
       loop_control:
         loop_var: users_update_user
       when: users_update_users is ansible.builtin.regex('[,]') | bool
+      tags:
+        - debug
 
     - name: Debug users.keys()
       ansible.builtin.debug:
         var: users.keys()
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      tags:
+        - debug
 
     - name: Users to be updated need to be defined in the users dictionary
       ansible.builtin.assert:
@@ -54,6 +58,8 @@
         var: users_update_users
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
       when: not users_update_users is ansible.builtin.regex('[,]') | bool
+      tags:
+        - debug
 
     - name: User to be updated need to be defined in the users dictionary
       ansible.builtin.assert:

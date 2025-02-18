@@ -38,6 +38,8 @@
       ansible.builtin.debug:
         var: users_host_ipv4s
         verbosity: 2
+      tags:
+        - debug
 
     - name: Check that users_host_ipv4s is an array if defined
       ansible.builtin.assert:
