@@ -2,20 +2,20 @@
 
 {% if users_cert is defined %}
 {%     if users_cert == "user" %}
-# one cert per user using mod_md for {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
+# One cert per user using mod_md for {{ users_apache_mdomains | join(' ') }}
 <IfModule md_module>
   <IfFile /etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem>
-    MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
+    MDomain {{ users_apache_mdomains | join(' ') }}
   </IfFile>
   <IfFile !/etc/apache2/md/domains/{{ user.key }}.{{ inventory_hostname }}/pubcert.pem>
     <IfFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem>
-      <MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}>
+      <MDomain {{ users_apache_mdomains | join(' ') }}>
         MDCertificateFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem
         MDCertificateKeyFile {{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.key.pem
       </MDomain>
     </IfFile>
     <IfFile !{{ users_cert_dir }}/{{ user.key }}.{{ inventory_hostname }}.fullchain.pem>
-      MDomain {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
+      MDomain {{ users_apache_mdomains | join(' ') }}
     </IfFile>
   </IfFile>
 </IfModule>
@@ -54,7 +54,7 @@
 
 {%     if users_cert is defined %}
 {%         if users_cert == "vhost" %}
-# one cert per vhost using mod_md for {{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | join(' ') }}
+# One cert per vhost using mod_md for {{ vhost_config.users_apache_server_name }}
 <IfModule md_module>
   <IfFile /etc/apache2/md/domains/{{ vhost_config.users_apache_server_name }}/pubcert.pem>
     MDomain {{ vhost_config.users_apache_server_name }}
