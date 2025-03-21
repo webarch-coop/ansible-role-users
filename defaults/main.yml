@@ -270,6 +270,9 @@ users_apache_php_proxy_timeout: 300
 # Best set the max_execution_time in the PHP-FPM config rather than
 # request_terminate_timeout, zero is off:
 users_phpfpm_request_terminate_timeout: 0
+# PHP-FPM slow log timeout, requests that take longer than this, in seconds, will be logged to
+# the ~/logs/php-fpm.slow.log
+users_phpfpm_slowlog_terminate_timeout: 10
 # The users_phpfpm_extensions array is for a list of files extensions to be
 # processed for PHP commands, it can also be set at a users and directory level
 # the commented value below is the default set in the apache.conf.j2 template

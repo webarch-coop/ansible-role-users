@@ -154,7 +154,7 @@ pm.status_path = "/phpfpm-{{ user.key }}-status"
 ;ping.path = /ping
 
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-request_slowlog_timeout = 30
+request_slowlog_timeout = {{ user.value.users_phpfpm_request_slowlog_timeout | default(users_phpfpm_slowlog_terminate_timeout) }}
 request_terminate_timeout = {{ user.value.users_phpfpm_request_terminate_timeout | default(users_phpfpm_request_terminate_timeout) }}
 
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and

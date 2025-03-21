@@ -242,6 +242,10 @@ argument_specs:
         type: int
         required: false
         description: The default PHP-FPM request_terminate_timeout to use in users pool.d files.
+      users_phpfpm_request_slowlog_timeout:
+        type: int
+        required: false
+        description: The default PHP-FPM request_slowlog_timeout to use in users pool.d files.
       users_private_dirs_mode:
         type: str
         required: false
