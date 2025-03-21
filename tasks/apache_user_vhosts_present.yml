@@ -13,28 +13,20 @@
 - name: Generate Apache config and enable / disable the config and restart Apache
   block:
 
-    - name: Set a fact for MDomain when users_cert is user
-      block:
+    - name: "Set a fact for the Apache MDomains to be used when users_cert is user for {{ user.key }}"
+      ansible.builtin.set_fact:
+        users_apache_mdomains: "{{ users_apache_mdomain_first + (users_apache_server_names | ansible.builtin.difference(users_apache_mdomain_first)) }}"
+      vars:
+        users_apache_mdomain_first:
+          - "{{ user.key }}.{{ inventory_hostname }}"
+        users_apache_server_names: "{{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') }}"
 
-        - name: "Set a fact for the Apache MDomains when users_cert is user for {{ user.key }}"
-          ansible.builtin.set_fact:
-            users_apache_mdomains: "{{ users_apache_mdomain_first + (users_apache_server_names | ansible.builtin.difference(users_apache_mdomain_first)) }}"
-          vars:
-            users_apache_mdomain_first:
-              - "{{ user.key }}.{{ inventory_hostname }}"
-            users_apache_server_names: "{{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') }}"
-
-        - name: Debug users_apache_mdomains
-          ansible.builtin.debug:
-            var: users_apache_mdomains
-            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
-          tags:
-            - debug
-      when:
-        - users_cert is defined
-        - users_cert == "user"
-        - users_apache_modules_loaded is defined
-        - ( "md" in users_apache_modules_loaded )
+    - name: Debug users_apache_mdomains
+      ansible.builtin.debug:
+        var: users_apache_mdomains
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: "Check Apache status for {{ user.key }}"
       ansible.builtin.command: service apache2 status
