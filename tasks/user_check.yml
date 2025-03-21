@@ -290,7 +290,7 @@
             ( user.value.users_phpfpm_pm_min_spare_servers is defined ) or
             ( user.value.users_phpfpm_pm_start_servers is defined ) or
             ( user.value.users_phpfpm_request_terminate_timeout is defined ) or
-            ( user.value.users_phpfpm_request_slowlog_timeout is defined ) or
+            ( user.value.users_phpfpm_slowlog_terminate_timeout is defined ) or
             ( user.value.users_phpfpm_sendmail_from is defined ) or
             ( user.value.users_phpfpm_sendmail_path is defined ) or
             ( user.value.users_phpfpm_version is defined ) )

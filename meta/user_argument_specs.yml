@@ -259,7 +259,7 @@ users_phpfpm_request_terminate_timeout:
   type: int
   required: false
   description: The default PHP-FPM request_terminate_timeout to use in users pool.d files.
-users_phpfpm_request_slowlog_timeout:
+users_phpfpm_slowlog_terminate_timeout:
   type: int
   required: false
   description: The default PHP-FPM request_slowlog_timeout to use in users pool.d files.
