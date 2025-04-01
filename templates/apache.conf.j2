@@ -350,7 +350,7 @@
   <IfModule proxy_fcgi_module>
 {%         if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
 {%             if "chroot" in user.value.users_groups %}
-{%                 if users_apache_chroot is defined and users_apache_chroot %}
+{%                 if users_apache_chroot is defined and users_apache_chroot | bool %}
     <Proxy "unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://{{ user.key }}">
 {%                     if vhost_config.users_apache_php_proxy_timeout is defined %}
       ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
