@@ -108,6 +108,7 @@
       when:
         - ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded )
         - ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
+        - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( ( user.value.users_apache_virtual_hosts_enabled is defined ) and ( user.value.users_apache_virtual_hosts_enabled | bool ) )
 
     - name: "Apache {{ user.key }} sites-enabled symlink absent as the sites are not set to be enabled"
       ansible.builtin.file:
