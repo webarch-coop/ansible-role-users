@@ -15,11 +15,11 @@
 
     - name: "Set a fact for the Apache MDomains to be used when users_cert is user for {{ user.key }}"
       ansible.builtin.set_fact:
-        users_apache_mdomains: "{{ users_apache_mdomain_first + (users_apache_server_names | ansible.builtin.difference(users_apache_mdomain_first)) }}"
+        users_apache_mdomains: "{{ users_apache_mdomain_first + (users_apache_server_names | ansible.builtin.difference(users_apache_mdomain_first) | sort) }}"
       vars:
         users_apache_mdomain_first:
           - "{{ user.key }}.{{ inventory_hostname }}"
-        users_apache_server_names: "{{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') }}"
+        users_apache_server_names: "{{ user.value.users_apache_virtual_hosts | community.general.json_query('*.users_apache_server_name') | sort }}"
 
     - name: Debug users_apache_mdomains
       ansible.builtin.debug:
