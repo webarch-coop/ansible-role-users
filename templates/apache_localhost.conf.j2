@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 <Location /phpfpm-{{ user.key }}-status>
-{% if "chroot" in user.value.users_groups %}
+{% if users_chroot is defined and users_chroot | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
 {%     if users_apache_chroot is defined and users_apache_chroot | bool %}
   SetHandler "proxy:unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://localhost/"
 {%     else %}
