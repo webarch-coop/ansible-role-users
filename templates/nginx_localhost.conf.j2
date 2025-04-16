@@ -2,9 +2,9 @@
 
 location /phpfpm-{{ user.key }}-status {
   include fastcgi.conf;
-  fastcgi_pass unix:/users/{{ user.key }}{{ users_basedir }}/stats/php-fpm.sock;
+  fastcgi_pass unix:{{ users_phpfpm_socket }}
   allow 127.0.0.1;
   deny all;
 }
 
-# vim: syntax=nginx
+# vim: syntax=nginx{# vim: syntax=jinja2 #}

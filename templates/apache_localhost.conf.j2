@@ -1,19 +1,7 @@
 # {{ ansible_managed }}
 
 <Location /phpfpm-{{ user.key }}-status>
-{% if users_chroot is defined and users_chroot | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
-{%     if users_apache_chroot is defined and users_apache_chroot | bool %}
-  SetHandler "proxy:unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://localhost/"
-{%     else %}
-  SetHandler "proxy:unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost/"
-{%     endif %}
-{% else %}
-{%     if vhost_config.users_apache_php_socket_path is defined %}
-  SetHandler "proxy:unix:{{ vhost_config.users_apache_php_socket_path }}|fcgi://localhost/"
-{%     else %}
-  SetHandler "proxy:unix:{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost/"
-{%     endif %}
-{% endif %}
+  SetHandler "proxy:unix:{{ users_phpfpm_apache_socket }}|fcgi://localhost/"
   Require host localhost 127.0.0.1 ::1
 </Location>
 

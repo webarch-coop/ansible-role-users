@@ -3,13 +3,13 @@
 [{{ user.key }}]
 user = "{{ user.key }}"
 group = "{{ user.value.users_group | default(user.key) }}"
-{% if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
+
+{% if users_phpfpm_chroot | bool %}
 chroot = "{{ users_chroot_users_dir }}/{{ user.key }}"
-{%     if users_apache_chroot is defined and users_apache_chroot | bool %}
-listen = "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
-{%     else %}
-listen = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
-{%     endif %}
+{% endif %}
+listen = "{{ users_phpfpm_socket }}
+
+{% if users_phpfpm_chroot | bool %}
 access.log = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
 slowlog = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
 php_admin_value[error_log] = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log"
@@ -28,7 +28,7 @@ listen.allowed_clients = 127.0.0.1
 ; Error log level. Possible values: alert, error, warning, notice, debug. Default value: notice.
 php_admin_value[log_level] = "{{ user.value.users_phpfpm_log_level | default('notice') }}"
 
-{% if users_apache_chroot is defined and users_apache_chroot | bool %}
+{% if users_phpfpm_chroot | bool %}
 env[TMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
 env[TMPDIR] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
 env[TEMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
@@ -144,18 +144,18 @@ php_admin_flag[{{ users_phpfpm_admin_flag.name }}] = no
 pm = "{{ user.value.users_phpfpm_pm | default('ondemand') }}"
 pm.max_children = "{{ user.value.users_phpfpm_max_children | default('2') }}"
 {% if user.value.users_phpfpm_pm == "dynamic" %}
-pm.start_servers = {{ user.value.users_phpfpm_pm_start_servers | default('1') }}
-pm.min_spare_servers = {{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}
-pm.max_spare_servers = {{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}
+pm.start_servers = "{{ user.value.users_phpfpm_pm_start_servers | default('1') }}"
+pm.min_spare_servers = "{{ user.value.users_phpfpm_pm_min_spare_servers | default('1') }}"
+pm.max_spare_servers = "{{ user.value.users_phpfpm_pm_max_spare_servers | default('1') }}"
 {% endif %}
-pm.process_idle_timeout = 10s;
-pm.max_requests = 1000
+pm.process_idle_timeout = "10s"
+pm.max_requests = "1000"
 pm.status_path = "/phpfpm-{{ user.key }}-status"
 ;ping.path = /ping
 
 access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
-request_slowlog_timeout = {{ user.value.users_phpfpm_slowlog_terminate_timeout | default(users_phpfpm_slowlog_terminate_timeout) }}
-request_terminate_timeout = {{ user.value.users_phpfpm_request_terminate_timeout | default(users_phpfpm_request_terminate_timeout) }}
+request_slowlog_timeout = "{{ user.value.users_phpfpm_slowlog_terminate_timeout | default(users_phpfpm_slowlog_terminate_timeout) }}"
+request_terminate_timeout = "{{ user.value.users_phpfpm_request_terminate_timeout | default(users_phpfpm_request_terminate_timeout) }}"
 
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and
 ; stderr will be redirected to /dev/null according to FastCGI specs.
@@ -228,4 +228,4 @@ env[PATH] = /usr/local/bin:/usr/bin:/bin
 ;php_admin_flag[log_errors] = on
 ;php_admin_value[memory_limit] = 32M
 
-; vim: syntax=dosini
+; vim: syntax=dosini{# vim: syntax=jinja2 #}
