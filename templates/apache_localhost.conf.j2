@@ -2,7 +2,8 @@
 
 <Location /phpfpm-{{ user.key }}-status>
   SetHandler "proxy:unix:{{ users_phpfpm_apache_socket }}|fcgi://localhost/"
-  Require host localhost 127.0.0.1 ::1
+  Require host local
+  Require ip 127.0.0.1 ::1
 </Location>
 
 # vim: syntax=apache{# vim: syntax=jinja2 #}
