@@ -67,13 +67,33 @@
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: users_phpfpm
 
-    - name: Debug Apache chroot variable
+    - name: Dump Apache configuration using apache2ctl -t -D DUMP_RUN_CFG
+      ansible.builtin.command: apache2ctl -t -D DUMP_RUN_CFG
+      check_mode: false
+      changed_when: false
+      register: users_apache_dump_run_cfg
+
+    - name: Set a fact for the Apache run config
+      ansible.builtin.set_fact:
+        users_apache_run_cfg: "{{ users_apache_dump_run_cfg.stdout | community.general.jc('ini') }}"
+
+    - name: Debug users_apache_run_cfg
+      ansible.builtin.debug:
+        var: users_apache_run_cfg
+        # verbosity: 3
+      when: users_apache_run_cfg is defined
+      tags:
+        - debug
+
+    - name: Debug users_apache_chroot
       ansible.builtin.debug:
         var: users_apache_chroot
         verbosity: 3
       when: users_apache_chroot is defined
       tags:
         - debug
+
+    # - fail:
 
     - name: Apache chroot present configuration
       ansible.builtin.include_tasks: apache_chroot_present.yml
