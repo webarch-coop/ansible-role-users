@@ -1,0 +1,61 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Check running Apache configuration
+  block:
+
+    - name: Dump Apache configuration using apache2ctl -t -D DUMP_RUN_CFG
+      ansible.builtin.command: apache2ctl -t -D DUMP_RUN_CFG
+      check_mode: false
+      changed_when: false
+      register: users_apache_dump_run_cfg
+
+    - name: Set a fact for the Apache run config
+      ansible.builtin.set_fact:
+        users_apache_run_cfg: "{{ users_apache_dump_run_cfg.stdout | community.general.jc('ini') }}"
+
+    - name: Debug users_apache_run_cfg
+      ansible.builtin.debug:
+        var: users_apache_run_cfg
+        # verbosity: 3
+      when: users_apache_run_cfg is defined
+      tags:
+        - debug
+
+    - name: Debug users_apache_chroot
+      ansible.builtin.debug:
+        var: users_apache_chroot
+        # verbosity: 3
+      when: users_apache_chroot is defined
+      tags:
+        - debug
+
+    - name: Set a fact to indicate the Apache chroot state
+      ansible.builtin.set_fact:
+        users_apache_chroot_state: >-
+          {%- if users_apache_run_cfg.ChrootDir is defined -%}
+          active
+          {%- elif users_apache_chroot is defined and users_apache_chroot | bool -%}
+          inactive
+          {%- else -%}
+          disabled
+          {%- endif -%}
+
+    - name: Debug users_apache_chroot_state
+      ansible.builtin.debug:
+        var: users_apache_chroot_state
+        # verbosity: 3
+      when: users_apache_chroot_state is defined
+      tags:
+        - debug
+
+  tags:
+    - users
+...

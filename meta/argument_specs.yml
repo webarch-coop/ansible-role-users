@@ -37,11 +37,11 @@ argument_specs:
         description: Process files with matching extensions as CGI / FCGI by Apache.
       users_apache_chroot:
         type: bool
-        required: false
+        required: true
         description: Apache is chrooted.
       users_apache_chroot_dir:
         type: str
-        required: false
+        required: true
         description: Directory for Apache to be chrooted into.
       users_apache_chroot_mount_dirs:
         type: list
@@ -54,7 +54,7 @@ argument_specs:
         description: Chroot Apache suEXEC to enable CGI and SSI to run using IDs other than www-data.
       users_apache_chroot_users_basedir:
         type: str
-        required: false
+        required: true
         description: The directory used to mount chrooted users home directories, it needs to be a sub-directory of /var/www for suEXEC.
       users_apache_index:
         type: list

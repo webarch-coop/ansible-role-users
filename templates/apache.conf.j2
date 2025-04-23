@@ -45,10 +45,12 @@
 </VirtualHost>
 # {{ vhost_config.users_apache_server_name }} port 443
 {%     if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
-{%         if users_apache_chroot is defined and users_apache_chroot %}
-# {{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}
+# If Apache is chrooted, the DocumentRoot is {{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}
+# If Apache is not chrooted, the DocumentRoot is {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
+{%         if users_apache_chroot is defined and users_apache_chroot | bool and users_apache_chroot_state is defined and users_apache_chroot_state == "active" %}
+# When this file was generated Apache was set to be chrooted to {{ users_apache_chroot_dir }}
 {%         else %}
-# {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
+# When this file was generated Apache was not set to be chrooted
 {%         endif %}
 {%     endif %}
 
@@ -209,10 +211,16 @@
 {%             elif loc.authtype is not defined and loc.redirect is defined %}
     # Redirect Location so no AuthUserFile
 {%             else %}
+    <IfDefine users_apache_chroot>
+      AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+    </IfDefine>
+    <IfDefine !users_apache_chroot>
+      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+    </IfDefine>
 {%                 if users_apache_chroot is defined and users_apache_chroot %}
-    AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+    # AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 else %}
-    AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+    # AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 endif %}
 {%             endif %}
 {%             if loc.alias is not defined and loc.redirect is not defined and loc.proxy_pass is not defined and loc.proxy_pass_reverse is not defined %}
@@ -350,26 +358,48 @@
   <IfModule proxy_fcgi_module>
 {%         if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
 {%             if "chroot" in user.value.users_groups %}
+    <IfDefine users_apache_chroot>
+      <Proxy "unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://{{ user.key }}">
+{%                 if vhost_config.users_apache_php_proxy_timeout is defined %}
+        ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+{%                 elif user.value.users_apache_php_proxy_timeout is defined %}
+        ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+{%                 elif users_apache_php_proxy_timeout is defined %}
+        ProxySet timeout={{ users_apache_php_proxy_timeout }}
+{%                 endif %}
+      </Proxy>
+    </IfDefine>
+    <IfDefine !users_apache_chroot>
+      <Proxy "unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://{{ user.key }}">
+{%                 if vhost_config.users_apache_php_proxy_timeout is defined %}
+        ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+{%                 elif user.value.users_apache_php_proxy_timeout is defined %}
+        ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+{%                 elif users_apache_php_proxy_timeout is defined %}
+        ProxySet timeout={{ users_apache_php_proxy_timeout }}
+{%                 endif %}
+      </Proxy>
+    </IfDefine>
 {%                 if users_apache_chroot is defined and users_apache_chroot | bool %}
-    <Proxy "unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://{{ user.key }}">
+    # <Proxy "unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://{{ user.key }}">
 {%                     if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+    #   ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
 {%                     elif user.value.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+    #   ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
 {%                     elif users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ users_apache_php_proxy_timeout }}
+    #   ProxySet timeout={{ users_apache_php_proxy_timeout }}
 {%                     endif %}
-    </Proxy>
+    # </Proxy>
 {%                 else %}
-    <Proxy "unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://{{ user.key }}">
+    # <Proxy "unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://{{ user.key }}">
 {%                     if vhost_config.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
+    #   ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
 {%                     elif user.value.users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
+    #   ProxySet timeout={{ user.value.users_apache_php_proxy_timeout }}
 {%                     elif users_apache_php_proxy_timeout is defined %}
-      ProxySet timeout={{ users_apache_php_proxy_timeout }}
+    #   ProxySet timeout={{ users_apache_php_proxy_timeout }}
 {%                     endif %}
-    </Proxy>
+    # </Proxy>
 {%                 endif %}
 {%             else %}
 {%                 if vhost_config.users_apache_php_socket_path is defined %}
@@ -1073,20 +1103,36 @@
 {%     endif %}
 {%     if vhost_config.users_apache_deny_dirs is defined %}
 {%         for dir in vhost_config.users_apache_deny_dirs %}
+  <IfDefine users_apache_chroot>
+    # No access allowed for this directory
+    <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+      <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+        Require all denied
+      </Directory>
+    </IfFile>
+  </IfDefine>
+  <IfDefine !users_apache_chroot>
+    # No access allowed for this directory
+    <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+      <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+        Require all denied
+      </Directory>
+    </IfFile>
+  </IfDefine>
 {%             if users_apache_chroot is defined and users_apache_chroot %}
   # No access allowed for this directory
-  <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-    <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-      Require all denied
-    </Directory>
-  </IfFile>
+  # <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+  #   <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+  #     Require all denied
+  #   </Directory>
+  # </IfFile>
 {%             else %}
   # No access allowed for this directory
-  <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-    <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-      Require all denied
-    </Directory>
-  </IfFile>
+  # <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+  #   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+  #     Require all denied
+  #   </Directory>
+  # </IfFile>
 {%             endif %}
 {%         endfor %}
 {%     endif %}
@@ -1152,10 +1198,16 @@
 {%                 else %}
       AuthName "Authorised Users"
 {%                 endif %}
+      <IfDefine users_apache_chroot>
+        AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      </IfDefine>
+      <IfDefine !users_apache_chroot>
+        AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      </IfDefine>
 {%                 if users_apache_chroot is defined and users_apache_chroot %}
-      AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      # AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 else %}
-      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      # AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 endif %}
 {%                 if proxy.require is defined %}
 {%                     for req in proxy.require %}
