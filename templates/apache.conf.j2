@@ -43,7 +43,15 @@
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
   </Else>
 </VirtualHost>
+
 # {{ vhost_config.users_apache_server_name }} port 443
+<IfDefine apache_chroot_dir>
+  Define users_apache_virtualhost_documentroot {{ users_apache_chroot_users_basedir ~ '/' ~ user.key ~ '/' ~ users_sites_dir ~ '/' ~ vhost }}
+</IfDefine>
+<IfDefine !apache_chroot_dir>
+  Define users_apache_virtualhost_documentroot {{ user.value.users_home | default(users_basedir ~ '/' ~ user.key) ~ '/' ~ users_sites_dir ~ '/' ~ vhost }}
+</IfDefine>
+
 {%     if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
 # If Apache is chrooted, the DocumentRoot is {{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}
 # If Apache is not chrooted, the DocumentRoot is {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}
@@ -53,6 +61,7 @@
 # When this file was generated Apache was not set to be chrooted
 {%         endif %}
 {%     endif %}
+
 
 {%     if users_cert is defined %}
 {%         if users_cert == "vhost" %}
