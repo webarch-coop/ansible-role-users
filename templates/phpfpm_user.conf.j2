@@ -1,5 +1,10 @@
 ; {{ ansible_managed }}
 
+; These envvars are set by Apache
+; ${HOME}
+; ${PHPFPM_SOCKET}
+; ${TMPDIR}
+
 [{{ user.key }}]
 user = "{{ user.key }}"
 group = "{{ user.value.users_group | default(user.key) }}"
@@ -7,7 +12,8 @@ group = "{{ user.value.users_group | default(user.key) }}"
 {% if users_phpfpm_chroot | bool %}
 chroot = "{{ users_chroot_users_dir }}/{{ user.key }}"
 {% endif %}
-listen = "{{ users_phpfpm_socket }}"
+; listen = "{{ users_phpfpm_socket }}"
+listen = "${PHPFPM_SOCKET}"
 
 {% if users_phpfpm_chroot | bool %}
 access.log = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
@@ -29,18 +35,23 @@ listen.allowed_clients = 127.0.0.1
 php_admin_value[log_level] = "{{ user.value.users_phpfpm_log_level | default('notice') }}"
 
 {% if users_phpfpm_chroot | bool %}
-env[TMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
-env[TMPDIR] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
-env[TEMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+; env[TMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+; env[TMPDIR] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+; env[TEMP] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
 
-chdir = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+; chdir = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
 {% else %}
-env[TMP] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-env[TMPDIR] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-env[TEMP] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+; env[TMP] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+; env[TMPDIR] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+; env[TEMP] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
 
-chdir = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+; chdir = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
 {% endif %}
+
+env[TMP] = "${TMPDIR}"
+env[TMPDIR] = "${TMPDIR}"
+env[TEMP] = "${TMPDIR}"
+chdir = "${HOME}"
 
 ; PHP settings passed with php_value or php_flag will overwrite php.ini values
 ; but defining disable_functions or disable_classes will not overwrite
@@ -91,29 +102,37 @@ php_admin_value[open_basedir] = "{{ users_phpfpm_open_basedir | join(',') }}"
 ; Matomo needs mysqli.allow_local_infile enabled
 php_admin_value[mysqli.allow_local_infile] = yes
 {%     if users_apache_chroot is defined and users_apache_chroot | bool %}
-php_admin_value[mysqli.local_infile_directory] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+; php_admin_value[mysqli.local_infile_directory] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
 {%     else %}
-php_admin_value[mysqli.local_infile_directory] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+; php_admin_value[mysqli.local_infile_directory] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+php_admin_value[mysqli.local_infile_directory] = "${HOME}"
 {%     endif %}
 {% else %}
 php_admin_value[mysqli.allow_local_infile] = no
 {% endif %}
 
 {% if users_apache_chroot is defined and users_apache_chroot | bool %}
-php_admin_value[session.save_path] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
-php_admin_value[upload_tmp_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
-php_admin_value[sys_temp_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
-php_admin_value[soap.wsdl_cache_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
-php_admin_value[uploadprogress.file.contents_template] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upload_contents_%s"
-php_admin_value[uploadprogress.file.filename_template] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upt_%s.txt"
+; php_admin_value[session.save_path] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+; php_admin_value[upload_tmp_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+; php_admin_value[sys_temp_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+; php_admin_value[soap.wsdl_cache_dir] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+; php_admin_value[uploadprogress.file.contents_template] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upload_contents_%s"
+; php_admin_value[uploadprogress.file.filename_template] = "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp/upt_%s.txt"
 {% else %}
-php_admin_value[session.save_path] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-php_admin_value[upload_tmp_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-php_admin_value[sys_temp_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-php_admin_value[soap.wsdl_cache_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-php_admin_value[uploadprogress.file.contents_template] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upload_contents_%s"
-php_admin_value[uploadprogress.file.filename_template] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt"
+; php_admin_value[session.save_path] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+; php_admin_value[upload_tmp_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+; php_admin_value[sys_temp_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+; php_admin_value[soap.wsdl_cache_dir] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+; php_admin_value[uploadprogress.file.contents_template] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upload_contents_%s"
+; php_admin_value[uploadprogress.file.filename_template] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp/upt_%s.txt"
 {% endif %}
+
+php_admin_value[session.save_path] = "${TMPDIR}"
+php_admin_value[upload_tmp_dir] = "${TMPDIR}"
+php_admin_value[sys_temp_dir] = "${TMPDIR}"
+php_admin_value[soap.wsdl_cache_dir] = "${TMPDIR}"
+php_admin_value[uploadprogress.file.contents_template] = "${TMPDIR}/upload_contents_%s"
+php_admin_value[uploadprogress.file.filename_template] = "${TMPDIR}/upt_%s.txt"
 
 ; PHP >= 8.0 requires UNIX line endings, see https://github.com/php/php-src/issues/8086
 {% if user.value.users_phpfpm_sendmail_path is defined and user.value.users_phpfpm_sendmail_from is defined %}
