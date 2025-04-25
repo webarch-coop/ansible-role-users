@@ -759,6 +759,9 @@ The variables that can be used are the same as the ones for the `DocumentRoot`
 directory apart from `users_apache_type`, this can't be used to set the
 `Directory` type to `php` or `static`.
 
+Note that only relative paths will automatically be updated depending on Apache
+being chrooted or not.
+
 Prior to version `3.0.0` of this role `users_apache_directories` was used for
 an array of directories and when it was used the default `DocumentRoot` /
 `Directory` was omitted, from version `3.0.0` and up a dictionary rather than

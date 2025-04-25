@@ -45,12 +45,12 @@
 </VirtualHost>
 
 # {{ vhost_config.users_apache_server_name }} port 443
-<IfDefine apache_chroot_dir>
-  Define users_apache_virtualhost_documentroot {{ users_apache_chroot_users_basedir ~ '/' ~ user.key ~ '/' ~ users_sites_dir ~ '/' ~ vhost }}
-</IfDefine>
-<IfDefine !apache_chroot_dir>
-  Define users_apache_virtualhost_documentroot {{ user.value.users_home | default(users_basedir ~ '/' ~ user.key) ~ '/' ~ users_sites_dir ~ '/' ~ vhost }}
-</IfDefine>
+# <IfDefine apache_chroot_dir>
+#   Define users_apache_virtualhost_documentroot {{ users_apache_chroot_users_basedir ~ '/' ~ user.key ~ '/' ~ users_sites_dir ~ '/' ~ vhost }}
+# </IfDefine>
+# <IfDefine !apache_chroot_dir>
+#   Define users_apache_virtualhost_documentroot {{ user.value.users_home | default(users_basedir ~ '/' ~ user.key) ~ '/' ~ users_sites_dir ~ '/' ~ vhost }}
+# </IfDefine>
 
 {%     if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
 # If Apache is chrooted, the DocumentRoot is {{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}
@@ -226,11 +226,15 @@
     <IfDefine !users_apache_chroot>
       AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
     </IfDefine>
+
+
 {%                 if users_apache_chroot is defined and users_apache_chroot %}
     # AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 else %}
     # AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 endif %}
+
+
 {%             endif %}
 {%             if loc.alias is not defined and loc.redirect is not defined and loc.proxy_pass is not defined and loc.proxy_pass_reverse is not defined %}
 {%                 if loc.authname is defined %}
@@ -389,6 +393,8 @@
 {%                 endif %}
       </Proxy>
     </IfDefine>
+
+
 {%                 if users_apache_chroot is defined and users_apache_chroot | bool %}
     # <Proxy "unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://{{ user.key }}">
 {%                     if vhost_config.users_apache_php_proxy_timeout is defined %}
@@ -410,6 +416,8 @@
 {%                     endif %}
     # </Proxy>
 {%                 endif %}
+
+
 {%             else %}
 {%                 if vhost_config.users_apache_php_socket_path is defined %}
     <Proxy "unix:{{ vhost_config.users_apache_php_socket_path }}|fcgi://{{ user.key }}">
@@ -458,31 +466,55 @@
   # No Directories are defined
 {%         else %}
 {%             for dir,dir_config in vhost_config.users_apache_directories.items() %}
-{%                 if users_apache_chroot is defined and users_apache_chroot | bool and dir is not regex('^[\/].*$') %}
-  <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
-{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
-{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
-    DocumentRoot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
-{%                         endif %}
-{%                     endif %}
-    <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
+  <IfDefine apache_chroot_dir>
+{%                 if dir is not regex('^[\/].*$') %}
+    Define apache_dir "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}"
 {%                 elif dir is regex('^[\/].*$') %}
-  <IfFile "{{ dir }}">
-{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
-{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
-    DocumentRoot "{{ dir }}"
-{%                         endif %}
-{%                     endif %}
-    <Directory "{{ dir }}">
-{%                 else %}
-  <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
-{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
-{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
-    DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}"
-{%                         endif %}
-{%                     endif %}
-    <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
+    # Note that the following path is not automatically updated when Apache is chrooted
+    Define apache_dir "{{ dir }}"
 {%                 endif %}
+  </IfDefine>
+  <IfDefine !apache_chroot_dir>
+{%                 if dir is not regex('^[\/].*$') %}
+    Define apache_dir "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}"
+{%                 elif dir is regex('^[\/].*$') %}
+    # Note that the following path is not automatically updated when Apache is chrooted
+    Define apache_dir "{{ dir }}"
+{%                 endif %}
+  </IfDefine>
+  <IfFile "${apache_dir}">
+{%                 if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+    DocumentRoot "${apache_dir}">
+{%                 endif %}
+
+
+{%                 if users_apache_chroot is defined and users_apache_chroot | bool and dir is not regex('^[\/].*$') %}
+  # <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
+{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
+{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+  #   DocumentRoot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
+{%                         endif %}
+{%                     endif %}
+  #   <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
+{%                 elif dir is regex('^[\/].*$') %}
+  # <IfFile "{{ dir }}">
+{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
+{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+  #   DocumentRoot "{{ dir }}"
+{%                         endif %}
+{%                     endif %}
+  #   <Directory "{{ dir }}">
+{%                 else %}
+  # <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
+{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
+{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+  #   DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}"
+{%                         endif %}
+{%                     endif %}
+  #   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
+{%                 endif %}
+
+
 {%                 if dir_config.users_apache_options is defined %}
       Options {{ dir_config.users_apache_options | join(' ') }}
 {%                 else %}
@@ -777,15 +809,28 @@
 {%         endif %}
 {%     endif %}
 {%     if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
+  <IfDefine users_apache_chroot>
+    Define apache_vhost_docroot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}"
+  </IfDefine>
+  <IfDefine !users_apache_chroot>
+    Define apache_vhost_docroot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+  </IfDefine>
+  <IfFile "${apache_vhost_docroot}">
+    DocumentRoot "${apache_vhost_docroot}"
+
+
 {%         if users_apache_chroot is defined and users_apache_chroot %}
-  <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}">
-    DocumentRoot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}"
-    <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}">
+  # <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}">
+  #   DocumentRoot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}"
+  #   <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}">
 {%         else %}
-  <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
-    DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
-    <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
+  # <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
+  #   DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
+  #   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}">
 {%         endif %}
+
+
+
 {%         if vhost_config.users_apache_options is defined %}
       Options {{ vhost_config.users_apache_options | join(' ') }}
 {%         elif users_apache_options is defined %}
@@ -1047,11 +1092,22 @@
 {%         if vhost_config.users_apache_auth_type is defined %}
       AuthType "{{ vhost_config.users_apache_auth_type }}"
 {%             if vhost_config.users_apache_auth_type == "Basic" %}
+      <IfDefine users_apache_chroot>
+        AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      </IfDefine>
+      <IfDefine !users_apache_chroot>
+        AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      </IfDefine>
+
+
 {%                 if users_apache_chroot is defined and users_apache_chroot %}
-      AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      # AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 else %}
-      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      # AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
 {%                 endif %}
+
+
+
 {%             endif %}
 {%         else %}
       AuthType "None"
@@ -1078,16 +1134,29 @@
   </IfFile>
 {%     endif %}
 {%     if vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^php') and vhost_config.users_apache_nophp_dirs is defined %}
-{%         for dir in vhost_config.users_apache_nophp_dirs %}
+{%         for users_apache_dir in vhost_config.users_apache_nophp_dirs %}
+  # No PHP allowed in this directory
+  <IfDefine users_apache_chroot>
+    Define apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }} "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}">
+  </IfDefine>
+  <IfDefine !users_apache_chroot>
+    Define apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }} "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}"
+  </IfDefine>
+  <IfFile "${apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }}">
+    <Directory "${apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }}">
+
+
 {%             if users_apache_chroot is defined and users_apache_chroot %}
   # No PHP allowed in this directory
-  <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-    <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+  # <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}">
+  #   <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}">
 {%             else %}
   # No PHP allowed in this directory
-  <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
-    <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
+  # <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}">
+  #   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}">
 {%             endif %}
+
+
 {%             if users.value.users_phpfpm_extensions is defined %}
       RemoveHandler {{ users.value.users_phpfpm_extensions | map('regex_replace', '^', '.') | join(' ') }}
 {%             elif users_phpfpm_extensions is defined %}

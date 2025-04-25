@@ -39,14 +39,7 @@
 
     - name: Set a fact to indicate the Apache chroot state
       ansible.builtin.set_fact:
-        users_apache_chroot_state: >-
-          {%- if users_apache_run_cfg.ChrootDir is defined -%}
-          active
-          {%- elif users_apache_chroot is defined and users_apache_chroot | bool -%}
-          inactive
-          {%- else -%}
-          disabled
-          {%- endif -%}
+        users_apache_chroot_state: "{% if users_apache_run_cfg.ChrootDir is defined %}active{% elif users_apache_chroot is defined and users_apache_chroot | bool %}inactive{% else %}disabled{% endif %}"
 
     - name: Debug users_apache_chroot_state
       ansible.builtin.debug:
