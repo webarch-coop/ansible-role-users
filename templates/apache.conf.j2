@@ -628,24 +628,28 @@
 
 
 
-    <IfDefine users_apache_chroot>
-      SetEnv HOME "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+            <IfDefine users_apache_chroot>
+              SetEnv HOME "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
 {%                     if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
-      SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
+              SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
+              ProxyFCGISetEnvIf "true" PHP_ADMIN_VALUE "listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
 {%                     else %}
-      SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              ProxyFCGISetEnvIf "true" PHP_ADMIN_VALUE "listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
 {%                     endif %}
-      SetEnv TMPDIR "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
-    </IfDefine>
-    <IfDefine !users_apache_chroot>
-      SetEnv HOME "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+              SetEnv TMPDIR "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+            </IfDefine>
+            <IfDefine !users_apache_chroot>
+              SetEnv HOME "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
 {%                     if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
-      SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              ProxyFCGISetEnvIf "true" PHP_ADMIN_VALUE "listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
 {%                     else %}
-      SetEnv PHPFPM_SOCKET "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              SetEnv PHPFPM_SOCKET "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              ProxyFCGISetEnvIf "true" PHP_ADMIN_VALUE "listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
 {%                     endif %}
-      SetEnv TMPDIR "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-    </IfDefine>
+              SetEnv TMPDIR "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            </IfDefine>
 
 
 
@@ -930,6 +934,37 @@
             <IfModule setenvif_module>
               SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
             </IfModule>
+
+
+
+            <IfDefine users_apache_chroot>
+              SetEnv HOME "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
+              # ProxyFCGISetEnvIf "true" "env[TMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+              # ProxyFCGISetEnvIf "true" "env[TMPDIR] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+              # ProxyFCGISetEnvIf "true" "env[TEMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+{%             if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
+              SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
+              ProxyFCGISetEnvIf "true" PHP_ADMIN_VALUE "listen = {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
+{%             else %}
+              SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+{%             endif %}
+              SetEnv TMPDIR "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
+            </IfDefine>
+            <IfDefine !users_apache_chroot>
+              SetEnv HOME "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+{%             if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
+              SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              ProxyFCGISetEnvIf "true" PHP_ADMIN_VALUE "listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+{%             else %}
+              SetEnv PHPFPM_SOCKET "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+              ProxyFCGISetEnvIf "true" PHP_ADMIN_VALUE "listen = {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
+{%             endif %}
+              SetEnv TMPDIR "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            </IfDefine>
+
+
+
+
 {%             if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
             SetHandler "proxy:fcgi://{{ user.key }}"
 {%             elif users_phpfpm_system_version is defined %}
