@@ -446,8 +446,8 @@
   </IfDefine>
   <IfFile "${apache_dir}">
 {%                 if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
+    DocumentRoot "${apache_dir}">
     <Directory "${apache_dir}">
-      DocumentRoot "${apache_dir}">
 {%                 endif %}
 
 
@@ -803,8 +803,8 @@
     Define apache_vhost_docroot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   </IfDefine>
   <IfFile "${apache_vhost_docroot}">
+    DocumentRoot "${apache_vhost_docroot}"
     <Directory "${apache_vhost_docroot}">
-      DocumentRoot "${apache_vhost_docroot}"
 {%         if vhost_config.users_apache_options is defined %}
       Options {{ vhost_config.users_apache_options | join(' ') }}
 {%         elif users_apache_options is defined %}
