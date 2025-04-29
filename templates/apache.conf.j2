@@ -446,7 +446,8 @@
   </IfDefine>
   <IfFile "${apache_dir}">
 {%                 if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
-    DocumentRoot "${apache_dir}">
+    <Directory "${apache_dir}">
+      DocumentRoot "${apache_dir}">
 {%                 endif %}
 
 

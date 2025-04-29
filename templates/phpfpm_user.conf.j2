@@ -12,7 +12,7 @@ group = "{{ user.value.users_group | default(user.key) }}"
 {% if users_phpfpm_chroot | bool %}
 chroot = "{{ users_chroot_users_dir }}/{{ user.key }}"
 {% endif %}
-; listen = "{{ users_phpfpm_socket }}"
+; listen = "{# users_phpfpm_socket #}"
 listen = "${PHPFPM_SOCKET}"
 
 {% if users_phpfpm_chroot | bool %}
