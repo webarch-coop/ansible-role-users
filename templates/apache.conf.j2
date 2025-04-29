@@ -803,7 +803,8 @@
     Define apache_vhost_docroot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   </IfDefine>
   <IfFile "${apache_vhost_docroot}">
-    DocumentRoot "${apache_vhost_docroot}"
+    <Directory "${apache_vhost_docroot}">
+      DocumentRoot "${apache_vhost_docroot}"
 {%         if vhost_config.users_apache_options is defined %}
       Options {{ vhost_config.users_apache_options | join(' ') }}
 {%         elif users_apache_options is defined %}
