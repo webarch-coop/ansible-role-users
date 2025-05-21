@@ -8,101 +8,63 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: "Slay any processes running as user {{ user.key }}"
-  ansible.builtin.command: "slay {{ user.key }}"
-  tags:
-    - users
-
-- name: "Nextcloud logrotate config absent for {{ user.key }}"
-  ansible.builtin.file:
-    path: "/etc/logrotate.d/nextcloud_{{ user.key }}"
-    state: absent
-  tags:
-    - users
-
-- name: "Crontab absent for user {{ user.key }}"
-  ansible.builtin.include_tasks: crontab_user_absent.yml
-  tags:
-    - users
-
-- name: "Include Apache config tasks absent user for {{ user.key }}"
-  ansible.builtin.include_tasks: apache_user_absent.yml
-  when:
-    - ( "apache2" in ansible_local.dpkg.installed )
-    - users_apache is defined
-    - users_apache | bool
-  tags:
-    - users
-
-- name: "Absent user {{ user.key }} MariaDB account and databases absent"
-  ansible.builtin.include_tasks: mariadb_user_absent.yml
-  when: ( users_mariadb is defined ) and ( users_mariadb )
-  tags:
-    - users
-
-- name: "Include PHP FPM user absent tasks for {{ user.key }}"
-  ansible.builtin.include_tasks: phpfpm_user_absent.yml
-  when:
-    - users_phpfpm_versions is defined
-    - users_phpfpm_default_version is defined
-  tags:
-    - users
-
-- name: Chroot user absent tasks
+- name: User absent
   block:
 
-    - name: "Chroot user {{ user.key }} absent"
-      block:
+    - name: "Slay any processes running as user {{ user.key }}"
+      ansible.builtin.command: "slay {{ user.key }}"
 
-        - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
-          ansible.builtin.include_tasks: chroot_user_absent_fstab.yml
-          when: >-
-            ( ( user.value.users_state is defined ) and
-            ( user.value.users_state == "absent" ) ) or
-            ( "chroot" not in user.value.users_groups )
+    - name: "Nextcloud logrotate config absent for {{ user.key }}"
+      ansible.builtin.file:
+        path: "/etc/logrotate.d/nextcloud_{{ user.key }}"
+        state: absent
 
-        - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
-          ansible.builtin.include_tasks: chroot_user_absent.yml
-          when: >-
-            ( ( user.value.users_state is defined ) and
-            ( user.value.users_state == "absent" ) ) or
-            ( "chroot" not in user.value.users_groups )
+    - name: "Crontab absent for user {{ user.key }}"
+      ansible.builtin.include_tasks: crontab_user_absent.yml
 
+    - name: "Include Apache config tasks absent user for {{ user.key }}"
+      ansible.builtin.include_tasks: apache_user_absent.yml
       when:
-        - users_chroot_dir_check is defined
-        - users_chroot_dir_check.stat.exists | bool
+        - ( "apache2" in ansible_local.dpkg.installed )
+        - users_apache is defined
+        - users_apache | bool
 
-  when:
-    - users_chroot is defined
-    - users_chroot | bool
-  tags:
-    - users
+    - name: "Absent user {{ user.key }} MariaDB account and databases absent"
+      ansible.builtin.include_tasks: mariadb_user_absent.yml
+      when: ( users_mariadb is defined ) and ( users_mariadb )
 
-- name: "Absent user {{ user.key }} home directory removed"
-  ansible.builtin.file:
-    path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-    state: absent
-  tags:
-    - users
+    - name: "Include PHP FPM user absent tasks for {{ user.key }}"
+      ansible.builtin.include_tasks: phpfpm_user_absent.yml
+      when:
+        - users_phpfpm_versions is defined
+        - users_phpfpm_default_version is defined
 
-- name: "User account {{ user.key }} absent"
-  ansible.builtin.user:
-    name: "{{ user.key }}"
-    state: absent
-    remove: true
-    force: true
-  tags:
-    - users
+    - name: "Include the chroot user /etc/fstab entries absent tasks for {{ user.key }}"
+      ansible.builtin.include_tasks: chroot_user_absent_fstab.yml
 
-- name: "User {{ user.key }} groups absent"
-  ansible.builtin.group:
-    name: "{{ user.key }}"
-    state: absent
-  tags:
-    - users
+    - name: "Include the chroot user mounts absent tasks for {{ user.key }}"
+      ansible.builtin.include_tasks: chroot_user_absent.yml
+
+    - name: "Absent user {{ user.key }} home directory removed"
+      ansible.builtin.file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+        state: absent
+
+    - name: "User account {{ user.key }} absent"
+      ansible.builtin.user:
+        name: "{{ user.key }}"
+        state: absent
+        remove: true
+        force: true
+
+    - name: "User {{ user.key }} groups absent"
+      ansible.builtin.group:
+        name: "{{ user.key }}"
+        state: absent
 
 - name: Users state files updated
   ansible.builtin.include_tasks: user_updated.yml
+
   tags:
     - users
 ...

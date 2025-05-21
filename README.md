@@ -109,6 +109,12 @@ Update all users which have `users_groups` defined:
 ansible-playbook users.yml --extra-vars "users_update_strategy=groups"
 ```
 
+### Remove absent users
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=absent"
+```
+
 ## How to use this role
 
 To use this role you need to use Ansible Galaxy to install it into another

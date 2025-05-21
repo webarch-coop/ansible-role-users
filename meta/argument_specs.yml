@@ -315,6 +315,7 @@ argument_specs:
         required: true
         description: The strategy to use for updating users when this role is run.
         choices:
+          - absent
           - all
           - apache
           - changed

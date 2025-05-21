@@ -43,6 +43,23 @@
       loop_control:
         loop_var: users_state_file_dir
 
+    - name: Users absent strategy
+      block:
+
+        - name: Delete users when they are set to be absent
+          ansible.builtin.include_tasks: user_absent.yml
+          when:
+            - user.value.users_state is defined
+            - user.value.users_state == "absent"
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "absent"
+
     - name: Write users state files when the update strategy is undefined, all or changed
       block:
 
