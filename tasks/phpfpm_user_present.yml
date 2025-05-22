@@ -71,30 +71,32 @@
           {%- else -%}
           false
           {%- endif -%}
-        # users_phpfpm_socket: >-
-        #   {%- if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups -%}
-        #   {%-     if users_apache_chroot is defined and users_apache_chroot | bool -%}
-        #   {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
-        #   {%-     else -%}
-        #   {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-        #   {%-     endif -%}
-        #   {%- else -%}
-        #   {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-        #   {%- endif -%}
-        # users_phpfpm_apache_socket: >-
-        #   {%- if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups -%}
-        #   {%-     if users_apache_chroot is defined and users_apache_chroot | bool -%}
-        #   {{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
-        #   {%-     else -%}
-        #   {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-        #   {%-     endif -%}
-        #   {%- else -%}
-        #   {%-     if vhost_config.users_apache_php_socket_path is defined -%}
-        #   {{ vhost_config.users_apache_php_socket_path }}
-        #   {%-     else -%}
-        #   {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
-        #   {%-     endif -%}
-        #   {%- endif -%}
+        users_phpfpm_socket: >-
+          {%- if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups -%}
+          {#-     if users_apache_chroot is defined and users_apache_chroot | bool -#}
+          {%-     if users_apache_chroot_state == "active" -%}
+          {{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
+          {%-     else -%}
+          {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+          {%-     endif -%}
+          {%- else -%}
+          {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+          {%- endif -%}
+        users_phpfpm_apache_socket: >-
+          {%- if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups -%}
+          {#-     if users_apache_chroot is defined and users_apache_chroot | bool -#}
+          {%-     if users_apache_chroot_state == "active" -%}
+          {{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock
+          {%-     else -%}
+          {{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+          {%-     endif -%}
+          {%- else -%}
+          {%-     if vhost_config.users_apache_php_socket_path is defined -%}
+          {{ vhost_config.users_apache_php_socket_path }}
+          {%-     else -%}
+          {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock
+          {%-     endif -%}
+          {%- endif -%}
 
 
     - name: Debug users_phpfpm_chroot
@@ -104,19 +106,19 @@
       tags:
         - debug
 
-    # - name: Debug users_phpfpm_socket
-    #   ansible.builtin.debug:
-    #     var: users_phpfpm_socket
-    #     # verbosity: 2
-    #   tags:
-    #     - debug
+    - name: Debug users_phpfpm_socket
+      ansible.builtin.debug:
+        var: users_phpfpm_socket
+        # verbosity: 2
+      tags:
+        - debug
 
-    # - name: Debug users_phpfpm_apache_socket
-    #   ansible.builtin.debug:
-    #     var: users_phpfpm_apache_socket
-    #     # verbosity: 2
-    #   tags:
-    #     - debug
+    - name: Debug users_phpfpm_apache_socket
+      ansible.builtin.debug:
+        var: users_phpfpm_apache_socket
+        # verbosity: 2
+      tags:
+        - debug
 
     - name: "Include tasks to remove PHP-FPM pool.d files for PHP versions other than the default one for {{ user.key }}"
       ansible.builtin.include_tasks: phpfpm_pool_file_absent.yml

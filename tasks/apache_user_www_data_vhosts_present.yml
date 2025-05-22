@@ -36,6 +36,8 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+      tags:
+        - debug
 
     - name: VirtualHosts files present for www-data
       ansible.builtin.template:

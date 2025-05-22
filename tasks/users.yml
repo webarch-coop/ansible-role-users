@@ -181,6 +181,8 @@
       ansible.builtin.debug:
         var: users_update
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: Check individual user variables using meta/user_argument_specs.yml
       ansible.builtin.validate_argument_spec:
@@ -393,6 +395,8 @@
           when:
             - ( user.key is defined ) and ( user.key in users_update )
             - ( user.value.users_state is defined ) and ( user.value.users_state == "ignore" )
+          tags:
+            - debug
 
         - name: Delete users when they are set to be absent
           ansible.builtin.include_tasks: user_absent.yml

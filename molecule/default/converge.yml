@@ -21,14 +21,20 @@
     - name: Debug ansible_facts.effective_user_id
       ansible.builtin.debug:
         var: ansible_facts.effective_user_id
+      tags:
+        - debug
 
     - name: Debug ansible_facts.user_id
       ansible.builtin.debug:
         var: ansible_facts.user_id
+      tags:
+        - debug
 
     - name: Debug ansible_facts.user_dir
       ansible.builtin.debug:
         var: ansible_facts.user_dir
+      tags:
+        - debug
 
     - name: Include Skel role as root
       ansible.builtin.include_role:
