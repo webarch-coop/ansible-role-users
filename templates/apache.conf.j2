@@ -449,33 +449,8 @@
   <IfFile "${apache_dir}">
 {%                 if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
     DocumentRoot "${apache_dir}">
+{%                 endif %}
     <Directory "${apache_dir}">
-{%                 endif %}
-{%                 if users_apache_chroot is defined and users_apache_chroot | bool and dir is not regex('^[\/].*$') %}
-  # <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
-{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
-{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
-  #   DocumentRoot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
-{%                         endif %}
-{%                     endif %}
-  #   <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
-{%                 elif dir is regex('^[\/].*$') %}
-  # <IfFile "{{ dir }}">
-{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
-{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
-  #   DocumentRoot "{{ dir }}"
-{%                         endif %}
-{%                     endif %}
-  #   <Directory "{{ dir }}">
-{%                 else %}
-  # <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
-{%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
-{%                         if dir_config.users_apache_docroot is defined and dir_config.users_apache_docroot | bool %}
-  #   DocumentRoot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}"
-{%                         endif %}
-{%                     endif %}
-  #   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
-{%                 endif %}
 {%                 if dir_config.users_apache_options is defined %}
       Options {{ dir_config.users_apache_options | join(' ') }}
 {%                 else %}
