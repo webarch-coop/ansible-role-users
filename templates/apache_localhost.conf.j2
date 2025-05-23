@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 <Location /phpfpm-{{ user.key }}-status>
-  <IfDefine users_apache_chroot>
+  <IfDefine apache_chroot_dir>
 {% if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
     SetHandler "proxy:unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://localhost/"
 {% else %}
@@ -12,7 +12,7 @@
 {%     endif %}
 {% endif %}
   </IfDefine>
-  <IfDefine !users_apache_chroot>
+  <IfDefine !apache_chroot_dir>
 {% if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
     SetHandler "proxy:unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://localhost/"
 {% else %}

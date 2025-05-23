@@ -52,7 +52,8 @@
         mode: "0644"
         owner: root
         group: root
-      when: users_apache_conf_check.stat.exists
+      changed_when: false
+      when: users_apache_conf_check.stat.exists | bool
 
     - name: "Apache sites-available file present for {{ user.key }}"
       ansible.builtin.template:
@@ -78,7 +79,7 @@
           register: users_a2ensite
           changed_when: ( "already enabled" not in users_a2ensite.stdout )
 
-        - name: "apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
+        - name: "Run apache2ctl configtest to check /etc/apache2/sites-enabled/{{ user.key }}.conf"
           ansible.builtin.command: apache2ctl configtest
           check_mode: false
           changed_when: false

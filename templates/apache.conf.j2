@@ -59,6 +59,8 @@
 # When this file was generated the users role was configured with Apache not set to be chrooted.
 {%         endif %}
 {%     endif %}
+# NOTE That this configuration will auto detech if Apache is chrooted or not so it doesn't need to be changed when the
+#      Apache chroot is enabled or disabled.
 {%     if users_cert is defined %}
 {%         if users_cert == "vhost" %}
 # One cert per vhost using mod_md for {{ vhost_config.users_apache_server_name }}
@@ -216,10 +218,10 @@
 {%             elif loc.authtype is not defined and loc.redirect is defined %}
     # Redirect Location so no AuthUserFile
 {%             else %}
-    <IfDefine users_apache_chroot>
+    <IfDefine apache_chroot_dir>
       AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
     </IfDefine>
-    <IfDefine !users_apache_chroot>
+    <IfDefine !apache_chroot_dir>
       AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
     </IfDefine>
 {%             endif %}
@@ -358,7 +360,7 @@
   <IfModule proxy_fcgi_module>
 {%         if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
 {%             if "chroot" in user.value.users_groups %}
-    <IfDefine users_apache_chroot>
+    <IfDefine apache_chroot_dir>
       <Proxy "unix:{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock|fcgi://{{ user.key }}">
 {%                 if vhost_config.users_apache_php_proxy_timeout is defined %}
         ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
@@ -369,7 +371,7 @@
 {%                 endif %}
       </Proxy>
     </IfDefine>
-    <IfDefine !users_apache_chroot>
+    <IfDefine !apache_chroot_dir>
       <Proxy "unix:{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock|fcgi://{{ user.key }}">
 {%                 if vhost_config.users_apache_php_proxy_timeout is defined %}
         ProxySet timeout={{ vhost_config.users_apache_php_proxy_timeout }}
@@ -449,8 +451,6 @@
     DocumentRoot "${apache_dir}">
     <Directory "${apache_dir}">
 {%                 endif %}
-
-
 {%                 if users_apache_chroot is defined and users_apache_chroot | bool and dir is not regex('^[\/].*$') %}
   # <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ dir }}">
 {%                     if vhost_config.users_apache_vhost_docroot is defined and not vhost_config.users_apache_vhost_docroot | bool %}
@@ -476,8 +476,6 @@
 {%                     endif %}
   #   <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ dir }}">
 {%                 endif %}
-
-
 {%                 if dir_config.users_apache_options is defined %}
       Options {{ dir_config.users_apache_options | join(' ') }}
 {%                 else %}
@@ -625,10 +623,7 @@
             <IfModule setenvif_module>
               SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
             </IfModule>
-
-
-
-            <IfDefine users_apache_chroot>
+            <IfDefine apache_chroot_dir>
               SetEnv HOME "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
 {%                     if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
               SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ users_apache_chroot_users_basedir }}/{{ user.key }}/php-fpm.sock"
@@ -639,7 +634,7 @@
 {%                     endif %}
               SetEnv TMPDIR "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
             </IfDefine>
-            <IfDefine !users_apache_chroot>
+            <IfDefine !apache_chroot_dir>
               SetEnv HOME "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
 {%                     if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
               SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
@@ -650,9 +645,6 @@
 {%                     endif %}
               SetEnv TMPDIR "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             </IfDefine>
-
-
-
 {%                     if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
             SetHandler "proxy:fcgi://{{ user.key }}"
 {%                     elif users_phpfpm_system_version is defined %}
@@ -800,10 +792,10 @@
 {%         endif %}
 {%     endif %}
 {%     if vhost_config.users_apache_vhost_docroot is not defined or vhost_config.users_apache_vhost_docroot | bool %}
-  <IfDefine users_apache_chroot>
+  <IfDefine apache_chroot_dir>
     Define apache_vhost_docroot "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}"
   </IfDefine>
-  <IfDefine !users_apache_chroot>
+  <IfDefine !apache_chroot_dir>
     Define apache_vhost_docroot "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}"
   </IfDefine>
   <IfFile "${apache_vhost_docroot}">
@@ -934,10 +926,7 @@
             <IfModule setenvif_module>
               SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
             </IfModule>
-
-
-
-            <IfDefine users_apache_chroot>
+            <IfDefine apache_chroot_dir>
               SetEnv HOME "{{ users_apache_chroot_users_basedir }}/{{ user.key }}"
               # ProxyFCGISetEnvIf "true" "env[TMP] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
               # ProxyFCGISetEnvIf "true" "env[TMPDIR] = {{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
@@ -950,7 +939,7 @@
 {%             endif %}
               SetEnv TMPDIR "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/tmp"
             </IfDefine>
-            <IfDefine !users_apache_chroot>
+            <IfDefine !apache_chroot_dir>
               SetEnv HOME "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
 {%             if users_chroot is defined and users_chroot | bool and users_chroot_dir is defined and users_chroot_dir_check.stat.exists | bool and user.value.users_groups is defined and "chroot" in user.value.users_groups %}
               SetEnv PHPFPM_SOCKET "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
@@ -961,10 +950,6 @@
 {%             endif %}
               SetEnv TMPDIR "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             </IfDefine>
-
-
-
-
 {%             if user.value.users_groups is defined and "phpfpm" in user.value.users_groups %}
             SetHandler "proxy:fcgi://{{ user.key }}"
 {%             elif users_phpfpm_system_version is defined %}
@@ -1101,10 +1086,10 @@
 {%         if vhost_config.users_apache_auth_type is defined %}
       AuthType "{{ vhost_config.users_apache_auth_type }}"
 {%             if vhost_config.users_apache_auth_type == "Basic" %}
-      <IfDefine users_apache_chroot>
+      <IfDefine apache_chroot_dir>
         AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
-      <IfDefine !users_apache_chroot>
+      <IfDefine !apache_chroot_dir>
         AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
 {%             endif %}
@@ -1135,10 +1120,10 @@
 {%     if vhost_config.users_apache_type is defined and vhost_config.users_apache_type is regex('^php') and vhost_config.users_apache_nophp_dirs is defined %}
 {%         for users_apache_dir in vhost_config.users_apache_nophp_dirs %}
   # No PHP allowed in this directory
-  <IfDefine users_apache_chroot>
-    Define apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }} "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}">
+  <IfDefine apache_chroot_dir>
+    Define apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }} "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}"
   </IfDefine>
-  <IfDefine !users_apache_chroot>
+  <IfDefine !apache_chroot_dir>
     Define apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }} "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ users_apache_dir }}"
   </IfDefine>
   <IfFile "${apache_dir_{{ users_apache_dir | ansible.builtin.regex_replace('[.]', '_') }}">
@@ -1167,7 +1152,7 @@
 {%     endif %}
 {%     if vhost_config.users_apache_deny_dirs is defined %}
 {%         for dir in vhost_config.users_apache_deny_dirs %}
-  <IfDefine users_apache_chroot>
+  <IfDefine apache_chroot_dir>
     # No access allowed for this directory
     <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
       <Directory "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
@@ -1175,7 +1160,7 @@
       </Directory>
     </IfFile>
   </IfDefine>
-  <IfDefine !users_apache_chroot>
+  <IfDefine !apache_chroot_dir>
     # No access allowed for this directory
     <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
       <Directory "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_sites_dir }}/{{ vhost }}/{{ dir }}">
@@ -1247,10 +1232,10 @@
 {%                 else %}
       AuthName "Authorised Users"
 {%                 endif %}
-      <IfDefine users_apache_chroot>
+      <IfDefine apache_chroot_dir>
         AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
-      <IfDefine !users_apache_chroot>
+      <IfDefine !apache_chroot_dir>
         AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
 {%                 if users_apache_chroot is defined and users_apache_chroot %}

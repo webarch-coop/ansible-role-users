@@ -364,6 +364,14 @@ users home directories are also mounted under `/var/www/users` and under the
 same path in the Apache chroot and under the same path in the SSH / PHP-FPM
 chroots.
 
+**NOTE:** When Apache is chrooted the PHP-FPM config needs to be regenerated,
+the Apache config does self -detech if Apache is chrooted and configure itself
+but this isn't the case for PHP-FPM, generate new PHP=FPM config using:
+
+```yaml
+ansible-playbook users.yml --extra-vars "users_update_strategy=phpfpm"
+```
+
 The way this role has been designed to implement this is having a read-write
 chroot at `/chroot` which is then mounted at `/chroots/www-data` read-only and
 then on top of that `/home/USER` is mounted read-write at

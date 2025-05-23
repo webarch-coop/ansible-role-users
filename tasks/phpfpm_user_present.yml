@@ -263,14 +263,126 @@
 
       when: users_phpfpm_pool_conf.changed | bool
 
-    - name: Users Apache PHP FPM localhost.d file present
-      ansible.builtin.template:
-        src: apache_localhost.conf.j2
-        dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
-        mode: "0644"
-        owner: root
-        group: root
-      notify: Restart Apache
+    - name: Apache localhost PHP-FPM status config
+      block:
+
+        - name: "Check if the Apache localhost PHP-FPM status config exists for {{ user.key }}"
+          ansible.builtin.stat:
+            path: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+          register: users_apache_localhost_phpfpm_status_conf_check
+
+        - name: "As the Apache localhost PHP-FPM status config exists create a backup of it for {{ user.key }}"
+          ansible.builtin.copy:
+            src: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+            dest: "/etc/apache2/localhost.d/.{{ user.key }}.conf.bak"
+            remote_src: true
+            mode: "0644"
+            owner: root
+            group: root
+          changed_when: false
+          when: users_apache_localhost_phpfpm_status_conf_check | bool
+
+        - name: Users Apache PHP FPM localhost.d file present
+          ansible.builtin.template:
+            src: apache_localhost.conf.j2
+            dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+            mode: "0644"
+            owner: root
+            group: root
+          register: users_apache_localhost_phpfpm_status_conf_present
+
+        - name: Enable Apache localhost PHP-FPM status, configtest and restart
+          block:
+
+            - name: "Run apache2ctl configtest to check /etc/apache2/localhost.d/{{ user.key }}.conf"
+              ansible.builtin.command: apache2ctl configtest
+              check_mode: false
+              changed_when: false
+              register: users_apache2ctl_configtest
+
+            - name: "Apache restarted for {{ user.key }}"
+              ansible.builtin.systemd_service:
+                name: apache2
+                state: restarted
+              register: users_apache_restarted
+              until:
+                - users_apache_restarted.status.SubState is defined
+                - users_apache_restarted.status.SubState == "running"
+                - users_apache_restarted.status.Result is defined
+                - users_apache_restarted.status.Result == "success"
+              retries: 2
+              delay: 10
+              when:
+                - not ansible_check_mode
+                - users_apache2ctl_configtest is defined
+                - ( "Syntax OK" in users_apache2ctl_configtest.stderr )
+
+          rescue:
+
+            - name: Standard out from apache2ctl configtest
+              ansible.builtin.debug:
+                var: users_apache2ctl_configtest.stdout
+              tags:
+                - debug
+
+            - name: Standard error from apache2ctl configtest
+              ansible.builtin.debug:
+                var: users_apache2ctl_configtest.stderr
+              tags:
+                - debug
+
+            - name: "Apache configtest or restart failed, writing failed config to {{ users_apache_conf_broken }}"
+              ansible.builtin.copy:
+                src: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+                dest: "/etc/apache2/localhost.d/.{{ user.key }}.conf.broken"
+                remote_src: true
+                mode: "0644"
+                owner: root
+                group: root
+              vars:
+                users_apache_conf_broken: "/etc/apache2/localhost.d/.{{ user.key }}.conf.broken"
+
+            - name: "Check if a backup of the Apache config exists for {{ user.key }}"
+              ansible.builtin.stat:
+                path: "/etc/apache2/localhost.d/.{{ user.key }}.conf.bak"
+              register: users_apache_conf_backup_check
+
+            - name: "Apache configtest or restart failed, reverting to previous config from {{ users_apache_conf_backup }}"
+              ansible.builtin.copy:
+                src: "/etc/apache2/localhost.d/.{{ user.key }}.conf.bak"
+                dest: "/etc/apache2/localhost.d/{{ user.key }}.conf"
+                remote_src: true
+                mode: "0644"
+                owner: root
+                group: root
+              vars:
+                users_apache_conf_backup: "/etc/apache2/localhost.d/.{{ user.key }}.conf.bak"
+              when: users_apache_conf_backup_check.stat.exists
+
+            - name: "Apache restarted for {{ user.key }}"
+              ansible.builtin.systemd_service:
+                name: apache2
+                state: restarted
+              register: users_apache_restarted
+              until:
+                - users_apache_restarted.status.SubState is defined
+                - users_apache_restarted.status.SubState == "running"
+                - users_apache_restarted.status.Result is defined
+                - users_apache_restarted.status.Result == "success"
+              retries: 2
+              delay: 10
+
+            - name: "Fail as apache2ctl configtest or apache2ctl restart failed for {{ user.key }}"
+              ansible.builtin.fail:
+                msg: >-
+                  apache2ctl configtest or restart failed for {{ user.key }} and as a result changes that might prevent a restart have been reverted. The broken config is available in
+                  "/etc/apache2/localhost.d/.{{ user.key }}.conf.broken"
+                  The configtest stderr output was {{ users_apache2ctl_configtest.stderr }}
+
+          when:
+            - users_apache_localhost_phpfpm_status_conf_present is defined
+            - users_apache_localhost_phpfpm_status_conf_present.changed | bool
+
       when: ( "apache2" in ansible_facts.packages )
 
     - name: Users Nginx PHP FPM localhost.d file present
