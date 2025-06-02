@@ -59,27 +59,6 @@
             generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
             system: "{{ user.value.users_system | default('false') }}"
 
-        - name: "Find files and directories in {{ user.value.users_home | default(users_basedir + '/' + user.key) }} that are not owned by {{ user.key }}:{{ user.value.users_group | default(user.key) }}"
-          ansible.builtin.command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }} ! -user {{ user.key }}"
-          check_mode: false
-          changed_when: false
-          register: users_home_find_user
-
-        - name: "Find files and directories in {{ user.value.users_home | default(users_basedir + '/' + user.key) }} that are not in the group {{ user.value.users_group | default(user.key) }}"
-          ansible.builtin.command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }} ! -group {{ user.value.users_group | default(user.key) }}"
-          check_mode: false
-          changed_when: false
-          register: users_home_find_group
-
-        - name: "Recursive chown user home directory to {{ user.key }}:{{ user.value.users_group | default(user.key) }}"
-          ansible.builtin.file:
-            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-            recurse: true
-            state: directory
-            owner: "{{ user.value.users_home_owner | default(user.key) }}"
-            group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
-          when: ( users_home_find_user.stdout_lines | length > 0 ) or ( users_home_find_group.stdout_lines | length > 0 )
-
         - name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
           ansible.builtin.file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
