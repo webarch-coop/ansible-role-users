@@ -44,27 +44,38 @@
       tags:
         - debug
 
-    # TODO Check that the user doesn't already exist in ansible_facts.getent_passwd
-    - name: "User account for {{ user.key }} present"
-      ansible.builtin.user:
-        name: "{{ user.key }}"
-        group: "{{ user.value.users_group | default(user.key) }}"
-        groups: "{{ users_all_groups | default([]) | join(',') or omit }}"
-        home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        create_home: true
-        shell: "{{ user.value.users_shell | default('/bin/bash', true) }}"
-        skeleton: "{{ user.value.users_skel | default('') }}"
-        generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
-        system: "{{ user.value.users_system | default('false') }}"
-      when: user.key != "root"
+    - name: Create use and chown and chmod home directory when not root
+      block:
 
-    - name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
-      ansible.builtin.file:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
-        state: directory
-        mode: "{{ user.value.users_home_mode | default('0750') }}"
-        owner: "{{ user.value.users_home_owner | default(user.key) }}"
-        group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+        - name: "User account for {{ user.key }} present"
+          ansible.builtin.user:
+            name: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+            groups: "{{ users_all_groups | default([]) | join(',') or omit }}"
+            home: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            create_home: true
+            shell: "{{ user.value.users_shell | default('/bin/bash', true) }}"
+            skeleton: "{{ user.value.users_skel | default('') }}"
+            generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
+            system: "{{ user.value.users_system | default('false') }}"
+
+        - name: "Recursive chown user home directory to {{ user.key }}:{{ user.value.users_group | default(user.key) }}"
+          ansible.builtin.file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            recurse: true
+            state: directory
+            owner: "{{ user.value.users_home_owner | default(user.key) }}"
+            group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+
+        - name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
+          ansible.builtin.file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+            state: directory
+            mode: "{{ user.value.users_home_mode | default('0750') }}"
+            owner: "{{ user.value.users_home_owner | default(user.key) }}"
+            group: "{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}"
+
+      when: user.key != "root"
 
     - name: Bash ~/.bash_profile present for users with skel set to /usr/local/etc/skel.d/www
       ansible.builtin.copy:
