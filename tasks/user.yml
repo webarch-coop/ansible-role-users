@@ -66,7 +66,7 @@
           register: users_home_find_user
 
         - name: "Find files and directories in {{ user.value.users_home | default(users_basedir + '/' + user.key) }} that are not in the group {{ user.value.users_group | default(user.key) }}"
-          ansible.builtin.command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }} ! ! group {{ user.value.users_group | default(user.key) }}"
+          ansible.builtin.command: "find {{ user.value.users_home | default(users_basedir + '/' + user.key) }} ! -group {{ user.value.users_group | default(user.key) }}"
           check_mode: false
           changed_when: false
           register: users_home_find_group
