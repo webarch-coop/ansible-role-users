@@ -21,10 +21,11 @@
           - dos2unix
           - jq
           - mutt
+          - pwgen
           - python3-dnspython
           - python3-passlib
-          - pwgen
           - quota
+          - rsync
           - slay
           - texlive
           - vim
