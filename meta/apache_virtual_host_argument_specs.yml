@@ -1375,7 +1375,7 @@ users_apache_php_socket_path:
   type: str
   required: false
   description: Path to the Proxy socket.
-users_apache_proxy_pass:
+users_apache_proxy:
   type: list
   elements: dict
   description: Apache ProxyPass list.
@@ -1383,7 +1383,24 @@ users_apache_proxy_pass:
     add_headers:
       type: bool
       required: false
-      descriptionm: Enable or disable Apache ProxyAddHeaders.
+      description: Enable or disable Apache ProxyAddHeaders.
+    authname:
+      type: str
+      required: false
+      description: Proxy Apache AuthName.
+    authtype:
+      type: str
+      required: false
+      description: Proxy Apache AuthType.
+      options:
+        - None
+        - Basic
+        - Digest
+        - Form
+    erroroverride:
+      type: bool
+      required: false
+      descriptionm: Enable or disable Apache ProxyErrorOverride.
     path:
       type: str
       required: false
@@ -1396,6 +1413,11 @@ users_apache_proxy_pass:
       type: bool
       required: false
       description: ProxyPreserveHost directive.
+    require:
+      type: list
+      elements: str
+      required: false
+      description: A list of Require directives for the Apache Proxy.
     rewrite_conditions:
       type: list
       elements: str
@@ -1414,6 +1436,15 @@ users_apache_proxy_pass:
       type: str
       required: true
       description: Apache URL string for ProxyPass.
+    via:
+      type: str
+      required: false
+      description: Apache ProxyVia.
+      options:
+        - Block
+        - Full
+        - "Off"
+        - "On"
 users_apache_readme_name:
   type: str
   required: false

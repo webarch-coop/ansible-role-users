@@ -254,17 +254,17 @@
     - name: "Proxy checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:
 
-        - name: "Check that either a path and URL or regular expression and URL are defined for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that either a path and URL or regular expression and URL or neither are defined for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - ( proxy.path is defined and proxy.url is defined ) or ( proxy.pathmatch and proxy.url is defined )
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop: "{{ vhost.value.users_apache_proxy }}"
           loop_control:
             loop_var: proxy
           when: ( proxy.url is defined ) and ( proxy.path is defined )
 
-        - name: "Check that path and URL appear valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that path and URL appear valid for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - proxy.path is defined
@@ -272,19 +272,19 @@
               - proxy.url is defined
               - ( proxy.url == "!" ) or ( proxy.url is regex('^https?:\/\/.*$') ) or ( proxy.url is regex('^ws:\/\/.*$') )
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop: "{{ vhost.value.users_apache_proxy }}"
           loop_control:
             loop_var: proxy
           when: ( proxy.url is defined ) and ( proxy.path is defined )
 
-        - name: "Check that pathmatch and URL are valid for users_apache_proxy_pass array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+        - name: "Check that pathmatch and URL are valid for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
               - proxy.pathmatch is defined
               - proxy.url is defined
               - proxy.url is regex('^([!])|(https?:\/\/.*)|(wss?:\/\/.*)$')
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop: "{{ vhost.value.users_apache_proxy }}"
           loop_control:
             loop_var: proxy
           when: ( proxy.url is defined ) and ( proxy.pathmatch is defined )
@@ -295,12 +295,12 @@
               - proxy.rewrite_rules is defined
               - proxy.rewrite_rules | type_debug == "list"
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_proxy_pass }}"
+          loop: "{{ vhost.value.users_apache_proxy }}"
           loop_control:
             loop_var: proxy
           when: proxy.rewrite_conditions is defined
 
-      when: vhost.value.users_apache_proxy_pass is defined
+      when: vhost.value.users_apache_proxy is defined
 
     - name: "ErrorDocument checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
       block:

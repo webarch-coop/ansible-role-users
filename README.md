@@ -802,7 +802,7 @@ content and `Alias` and also a proxy, for example:
           api/media:
             users_apache_options:
               - Indexes
-        users_apache_proxy_pass:
+        users_apache_proxy:
           - path: /static
             url: "!"
           - path: /media
@@ -1110,7 +1110,7 @@ server](https://github.com/nextcloud/notify_push#apache) like this you can
 specify:
 
 ```yaml
-        users_apache_proxy_pass:
+        users_apache_proxy:
           - path: /push/ws
             url: ws://127.0.0.1:7867/ws
           - path: /push/
@@ -1132,7 +1132,7 @@ to a [Rocket.Chat server installed using
 snaps](https://docs.rocket.chat/installing-and-updating/snaps):
 
 ```yaml
-        users_apache_proxy_pass:
+        users_apache_proxy:
           - path: /
             url: http://127.0.0.1:3000/
             rewrite_conditions:
@@ -1170,7 +1170,7 @@ server:
           - type: request
             action: setifempty
             argument: X-Forwarded-Host %{THE_HOST}e
-        users_apache_proxy_pass:
+        users_apache_proxy:
           - add_headers: false
             path: /.well-known
             url: !
@@ -1184,7 +1184,7 @@ server:
 A reverse proxy to an applicaton that doesn't have any user authentication can be configured to use HTTP Authentication, for example for [Mailcatcher](https://git.coop/webarch/mailcatcher):
 
 ```yaml
-        users_apache_proxy_pass:
+        users_apache_proxy:
           - path: /
             url: http://127.0.0.1:1080/
             reverse: true

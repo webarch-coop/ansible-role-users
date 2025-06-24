@@ -1099,13 +1099,25 @@
   </IfDefine>
 {%         endfor %}
 {%     endif %}
-{%     if vhost_config.users_apache_proxy_pass is defined %}
+{%     if vhost_config.users_apache_proxy is defined %}
   <IfModule proxy_module>
     # In reverse proxy or gateway configuration, ProxyRequests should be set to Off
     ProxyRequests Off
-    # Serve Apache error documents rather than proxy errors
+{%         for proxy in vhost_config.users_apache_proxy %}
+{%             if proxy.erroroverride is defined %}
+{%                 if proxy.erroroverride | bool %}
     ProxyErrorOverride On
-{%         for proxy in vhost_config.users_apache_proxy_pass %}
+{%                 else %}
+    ProxyErrorOverride Off
+{%                 endif %}
+{%             else %}
+    ProxyErrorOverride On
+{%             endif %}
+{%             if proxy.via is defined %}
+    ProxyVia {{ proxy.via }}
+{%             else %}
+    ProxyVia Off
+{%             endif %}
 {%             if proxy.preserve_host is defined %}
 {%                 if proxy.preserve_host | bool %}
     ProxyPreserveHost on
@@ -1149,36 +1161,27 @@
 {%             if proxy.reverse is defined and proxy.reverse | bool and proxy.path is defined and proxy.url is defined %}
     ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url | regex_replace('[ ].*$') }}"
 {%             endif %}
-{%             if proxy.htauth is defined and proxy.htauth %}
+{%             if proxy.url is defined %}
     <Proxy "{{ proxy.url }}">
 {%                 if proxy.authtype is defined %}
       AuthType "{{ proxy.authtype }}"
-{%                 else %}
-      AuthType "Basic"
 {%                 endif %}
 {%                 if proxy.authname is defined %}
       AuthName "{{ proxy.authname }}"
-{%                 else %}
-      AuthName "Authorised Users"
 {%                 endif %}
+{%             endif %}
+{%             if proxy.require is defined %}
+{%                 for req in proxy.require %}
+      Require {{ req }}
+{%                 endfor %}
+{%             endif %}
+{%             if proxy.authname is defined and proxy.authtype is defined and proxy.require is defined %}
       <IfDefine apache_chroot_dir>
         AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
       <IfDefine !apache_chroot_dir>
         AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
-{%                 if users_apache_chroot is defined and users_apache_chroot %}
-      # AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
-{%                 else %}
-      # AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
-{%                 endif %}
-{%                 if proxy.require is defined %}
-{%                     for req in proxy.require %}
-      Require {{ req }}
-{%                     endfor %}
-{%                 else %}
-      Require valid-user
-{%                 endif %}
     </Proxy>
 {%             endif %}
 {%         endfor %}
