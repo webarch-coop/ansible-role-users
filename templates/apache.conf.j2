@@ -1169,19 +1169,19 @@
 {%                 if proxy.authname is defined %}
       AuthName "{{ proxy.authname }}"
 {%                 endif %}
-{%             endif %}
-{%             if proxy.require is defined %}
-{%                 for req in proxy.require %}
-      Require {{ req }}
-{%                 endfor %}
-{%             endif %}
-{%             if proxy.authname is defined and proxy.authtype is defined and proxy.require is defined %}
+{%                 if proxy.require is defined %}
+{%                     for req in proxy.require %}
+      Require "{{ req }}"
+{%                     endfor %}
+{%                 endif %}
+{%                 if proxy.authname is defined and proxy.authtype is defined and proxy.require is defined %}
       <IfDefine apache_chroot_dir>
         AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
       <IfDefine !apache_chroot_dir>
         AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
       </IfDefine>
+{%                 endif %}
     </Proxy>
 {%             endif %}
 {%         endfor %}
