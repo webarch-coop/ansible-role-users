@@ -1188,7 +1188,9 @@ A reverse proxy to an applicaton that doesn't have any user authentication can b
           - path: /
             url: http://127.0.0.1:1080/
             reverse: true
-            htauth: true
+            authname: Password protected
+            authtype: Basic
+            require: valid-user
         users_apache_htauth_users:
           - name: mailcatcher
             password: foo

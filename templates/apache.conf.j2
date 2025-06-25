@@ -209,60 +209,58 @@
 {%             elif loc.location is defined %}
   <Location "{{ loc.location }}">
 {%             endif %}
-{%             if loc.authtype is defined and loc.authtype == "None" %}
-    # No AuthUserFile for this Location as AuthType is None
-{%             elif loc.authtype is not defined and loc.alias is defined %}
-    # Alias Location so no AuthUserFile
-{%             elif loc.authtype is not defined and loc.proxy_pass is defined %}
-    # ProxyPass Location so no AuthUserFile
-{%             elif loc.authtype is not defined and loc.redirect is defined %}
-    # Redirect Location so no AuthUserFile
-{%             else %}
+{%             if loc.authtype is defined %}
+{%                 if loc.authtype == "None" %}
+    AuthType None
+    Require all granted
+{%                 else %}
+{%                     if loc.authname is defined %}
+    AuthName "{{ loc.authname }}"
+{%                     else %}
+    AuthName "Authorised Users"
+{%                     endif %}
+{%                     if loc.authtype is defined %}
+    AuthType "{{ loc.authtype }}"
+{%                     else %}
+    AuthType "Basic"
+{%                     endif %}
+{%                     if loc.require is defined %}
+{%                         for apache_location_require in loc.require %}
+    Require {{ apache_location_require }}
+{%                         endfor %}
+{%                     else %}
+    Require valid-user
+{%                     endif %}
+{%                 endif %}
     <IfDefine apache_chroot_dir>
-      AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}">
+        AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      </IfFile>
     </IfDefine>
     <IfDefine !apache_chroot_dir>
-      AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}">
+        AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+      </IfFile>
     </IfDefine>
 {%             endif %}
-{%             if loc.alias is not defined and loc.redirect is not defined and loc.proxy_pass is not defined and loc.proxy_pass_reverse is not defined %}
-{%                 if loc.authname is defined %}
-    AuthName "{{ loc.authname }}"
-{%                 else %}
-    AuthName "Authorised Users"
-{%                 endif %}
-{%                 if loc.authtype is defined %}
-    AuthType "{{ loc.authtype }}"
-{%                 else %}
-    AuthType "Basic"
-{%                 endif %}
-{%                 if loc.require is defined %}
-{%                     for req in loc.require %}
-    Require {{ req }}
-{%                     endfor %}
-{%                 else %}
-    Require valid-user
-{%                 endif %}
-{%             else %}
-{%                 if loc.alias is defined %}
+{%             if loc.alias is defined %}
     Alias "{{ loc.alias }}"
-{%                 elif loc.proxy_pass is defined %}
+{%             elif loc.proxy_pass is defined %}
     <IfModule proxy_module>
-{%                     if loc.preserve_host is defined %}
-{%                         if loc.preserve_host | bool %}
+{%                 if loc.preserve_host is defined %}
+{%                     if loc.preserve_host | bool %}
       ProxyPreserveHost on
-{%                         else %}
+{%                     else %}
       ProxyPreserveHost off
-{%                         endif %}
 {%                     endif %}
-      ProxyPass "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ]','" "') }}"
-{%                     if loc.reverse is defined and loc.reverse | bool %}
-      ProxyPassReverse "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ].*$') }}"
-{%                     endif %}
-    </IfModule>
-{%                 elif loc.redirect is defined %}
-    Redirect "{{ loc.redirect }}"
 {%                 endif %}
+      ProxyPass "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ]','" "') }}"
+{%                 if loc.reverse is defined and loc.reverse | bool %}
+      ProxyPassReverse "{{ loc.proxy_pass | ansible.builtin.regex_replace('[ ].*$') }}"
+{%                 endif %}
+    </IfModule>
+{%             elif loc.redirect is defined %}
+    Redirect "{{ loc.redirect }}"
 {%             endif %}
 {%             if loc.match is defined %}
   </LocationMatch>
@@ -1170,23 +1168,36 @@
       AllowOverride {{ proxy.override | join(' ') }}
 {%                 endif %}
 {%                 if proxy.authtype is defined %}
+{%                     if proxy.authtype == "None" %}
+      AuthType None
+      Require all granted
+{%                     else %}
       AuthType "{{ proxy.authtype }}"
-{%                 endif %}
-{%                 if proxy.authname is defined %}
+{%                         if proxy.authname is defined %}
       AuthName "{{ proxy.authname }}"
-{%                 endif %}
-{%                 if proxy.require is defined %}
-{%                     for apache_proxy_require in proxy.require %}
+{%                         else %}
+      AuthName "Authorised Users"
+{%                         endif %}
+{%                         if proxy.require is defined %}
+{%                             for apache_proxy_require in proxy.require %}
       Require {{ apache_proxy_require }}
-{%                     endfor %}
-{%                 endif %}
-{%                 if proxy.authname is defined and proxy.authtype is defined and proxy.require is defined %}
+{%                             endfor %}
+{%                         else %}
+      Require valid-user
+{%                         endif %}
+{%                     endif %}
+{%                     if proxy.authname is defined and proxy.authtype is defined and proxy.require is defined %}
       <IfDefine apache_chroot_dir>
-        AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+        <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}">
+          AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+        </IfFile>
       </IfDefine>
       <IfDefine !apache_chroot_dir>
-        AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+        <IfFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}">
+          AuthUserFile "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
+        </IfFile>
       </IfDefine>
+{%                     endif %}
 {%                 endif %}
     </Proxy>
 {%             endif %}
