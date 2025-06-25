@@ -51,7 +51,8 @@
     - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd file"
       ansible.builtin.lineinfile:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_passwd"
-        line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
+        # line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
+        line: "{{ now(utc=true, fmt='+%Y-%m-%d-%H-%M-%S') }} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
         create: true
         state: present
         insertafter: EOF

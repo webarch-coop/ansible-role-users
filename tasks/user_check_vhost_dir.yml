@@ -8,7 +8,7 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: "Apache Directory directives checks for the {{ vhost.key }} VirtualHost for {{ user.key }}"
+- name: Apache Directory directives checks
   block:
 
     - name: "Debug Directory array for {{ vhost.key }} VirtualHost for {{ user.key }} user"
@@ -47,7 +47,7 @@
         - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - option is regex("^[+-](?i)All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$")
+              - option is regex('(?i)^[+-]All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$')
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_options }}"
           loop_control:
@@ -69,7 +69,7 @@
         - name: "Check that all SSLOptions are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - ssl_option is regex("^[+-](?i)StdEnvVars|ExportCertData|FakeBasicAuth|StrictRequire|OptRenegotiate|LegacyDNStringFormat$")
+              - ssl_option is regex('(?i)^[+-]StdEnvVars|ExportCertData|FakeBasicAuth|StrictRequire|OptRenegotiate|LegacyDNStringFormat$')
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_ssl_options }}"
           loop_control:
@@ -91,7 +91,7 @@
         - name: "Check that all IndexOptions are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - option is regex("^[+-](?i)AddAltClass|Charset|DescriptionWidth|FancyIndexing|FoldersFirst|HTMLTable|IconsAreLinks|IconHeight|IconWidth|IgnoreCase|IgnoreClient|NameWidth|ScanHTMLTitles|ShowForbidden|SuppressColumnSorting|SuppressDescription|SuppressHTMLPreamble|SuppressIcon|SuppressLastModified|SuppressRules|SuppressSize|TrackModified|UseOldDateFormat|VersionSort|XHTML.*$")
+              - option is regex('(?i)^[+-]AddAltClass|Charset|DescriptionWidth|FancyIndexing|FoldersFirst|HTMLTable|IconsAreLinks|IconHeight|IconWidth|IgnoreCase|IgnoreClient|NameWidth|ScanHTMLTitles|ShowForbidden|SuppressColumnSorting|SuppressDescription|SuppressHTMLPreamble|SuppressIcon|SuppressLastModified|SuppressRules|SuppressSize|TrackModified|UseOldDateFormat|VersionSort|XHTML.*$')
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_index_options }}"
           loop_control:
@@ -113,7 +113,7 @@
         - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.assert:
             that:
-              - override is regex("^(?i)All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
+              - override is regex('(?i)^All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$')
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
           loop: "{{ dir.value.users_apache_override }}"
           loop_control:

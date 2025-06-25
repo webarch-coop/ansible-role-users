@@ -1,0 +1,117 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Apache Proxy checks
+  block:
+
+    - name: "Check that either a path and URL or regular expression and URL or neither are defined for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - ( proxy.path is defined and proxy.url is defined ) or ( proxy.pathmatch and proxy.url is defined )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      loop: "{{ vhost.value.users_apache_proxy }}"
+      when: ( proxy.url is defined ) and ( proxy.path is defined )
+
+    - name: "Check that path and URL appear valid for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - proxy.path is defined
+          - proxy.path is regex('^(unix:\/.*)|(\/.*)$')
+          - proxy.url is defined
+          - ( proxy.url == "!" ) or ( proxy.url is regex('^https?:\/\/.*$') ) or ( proxy.url is regex('^ws:\/\/.*$') )
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: ( proxy.url is defined ) and ( proxy.path is defined )
+
+    - name: "Check that pathmatch and URL are valid for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - proxy.pathmatch is defined
+          - proxy.url is defined
+          - proxy.url is regex('^([!])|(https?:\/\/.*)|(wss?:\/\/.*)$')
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: ( proxy.url is defined ) and ( proxy.pathmatch is defined )
+
+    - name: "Check that proxy.rewrite_rules are defined when proxy.rewrite_conditions are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - proxy.rewrite_rules is defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: proxy.rewrite_conditions is defined
+
+    - name: Check that only valid Options are listed for Proxy
+      block:
+
+        - name: Debug proxy.options
+          ansible.builtin.debug:
+            var: proxy.options
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          tags:
+            - debug
+
+        - name: "Check that the Options for {{ vhost.key }} VirtualHost Proxy for {{ user.key }} are a non-empty array"
+          ansible.builtin.assert:
+            that:
+              - proxy.options | length
+              - proxy.options[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        - name: "Check that all Options are valid and start with a + or - for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.assert:
+            that:
+              - option is regex('(?i)^[+-]All|ExecCGI|FollowSymLinks|Includes|IncludesNOEXEC|Indexes|MultiViews|SymLinksIfOwnerMatch$')
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          loop: "{{ proxy.options }}"
+          loop_control:
+            loop_var: option
+            label: "{{ option }}"
+
+      when: proxy.options is defined
+
+    - name: Check that only valid AllowOverride directives are listed for Proxy
+      block:
+
+        - name: "Check that the AllowOverride directives for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
+          ansible.builtin.assert:
+            that:
+              - proxy.override | length
+              - proxy.override[0] is defined
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        - name: "Check that all AllowOverride directives are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.assert:
+            that:
+              - override is regex("(?i)^All|None|AuthConfig|Indexes|Limit|Nonfatal=Override|Unknown|All|Options=All.|ExecCGI.|FollowSymLinks.|Includes.|IncludesNOEXEC.|Indexes.|MultiViews.|SymLinksIfOwnerMatch.|XBitHack.$")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          loop: "{{ proxy.override }}"
+          loop_control:
+            loop_var: override
+            label: "{{ override }}"
+
+      when: proxy.override is defined
+
+    - name: Check that Require is valid for Proxy
+      block:
+
+        - name: "Check that that values other than method for the users_apache_require list are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.assert:
+            that:
+              - req is regex("^all granted|^all denied|^env .*|^method [A-Z ]{3,51}|^expr .*|^user .*|^group .*|^valid-user|^ip .*|^forward-dns .*")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          when: req is not regex("method .*")
+          loop: "{{ proxy.require }}"
+          loop_control:
+            loop_var: req
+            label: "{{ req }}"
+
+      when: ( proxy.require is defined ) and ( proxy.require != [] )
+
+  tags:
+    - users
+...

@@ -251,54 +251,21 @@
 
       when: ( users_apache_vhost_docroot is not defined ) or ( users_apache_vhost_docroot is defined and users_apache_vhost_docroot )
 
-    - name: "Proxy checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: Proxy checks
       block:
 
-        - name: "Check that either a path and URL or regular expression and URL or neither are defined for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - ( proxy.path is defined and proxy.url is defined ) or ( proxy.pathmatch and proxy.url is defined )
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_proxy }}"
-          loop_control:
-            loop_var: proxy
-          when: ( proxy.url is defined ) and ( proxy.path is defined )
+        - name: Debug vhost.value.users_apache_proxy
+          ansible.builtin.debug:
+            var: vhost.value.users_apache_proxy
+            verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+          tags:
+            - debug
 
-        - name: "Check that path and URL appear valid for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - proxy.path is defined
-              - proxy.path is regex('^(unix:\/.*)|(\/.*)$')
-              - proxy.url is defined
-              - ( proxy.url == "!" ) or ( proxy.url is regex('^https?:\/\/.*$') ) or ( proxy.url is regex('^ws:\/\/.*$') )
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        - name: "Proxy checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+          ansible.builtin.include_tasks: user_check_proxy.yml
           loop: "{{ vhost.value.users_apache_proxy }}"
           loop_control:
             loop_var: proxy
-          when: ( proxy.url is defined ) and ( proxy.path is defined )
-
-        - name: "Check that pathmatch and URL are valid for users_apache_proxy array for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - proxy.pathmatch is defined
-              - proxy.url is defined
-              - proxy.url is regex('^([!])|(https?:\/\/.*)|(wss?:\/\/.*)$')
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_proxy }}"
-          loop_control:
-            loop_var: proxy
-          when: ( proxy.url is defined ) and ( proxy.pathmatch is defined )
-
-        - name: "Check that proxy.rewrite_rules are defined when proxy.rewrite_conditions are defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.assert:
-            that:
-              - proxy.rewrite_rules is defined
-              - proxy.rewrite_rules | type_debug == "list"
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          loop: "{{ vhost.value.users_apache_proxy }}"
-          loop_control:
-            loop_var: proxy
-          when: proxy.rewrite_conditions is defined
 
       when: vhost.value.users_apache_proxy is defined
 

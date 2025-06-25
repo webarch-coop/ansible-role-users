@@ -1163,6 +1163,12 @@
 {%             endif %}
 {%             if proxy.url is defined %}
     <Proxy "{{ proxy.url }}">
+{%                 if proxy.options is defined %}
+      Options {{ proxy.options | join(' ') }}
+{%                 endif %}
+{%                 if proxy.override is defined %}
+      AllowOverride {{ proxy.override | join(' ') }}
+{%                 endif %}
 {%                 if proxy.authtype is defined %}
       AuthType "{{ proxy.authtype }}"
 {%                 endif %}
@@ -1170,8 +1176,8 @@
       AuthName "{{ proxy.authname }}"
 {%                 endif %}
 {%                 if proxy.require is defined %}
-{%                     for req in proxy.require %}
-      Require "{{ req }}"
+{%                     for apache_proxy_require in proxy.require %}
+      Require {{ apache_proxy_require }}
 {%                     endfor %}
 {%                 endif %}
 {%                 if proxy.authname is defined and proxy.authtype is defined and proxy.require is defined %}
