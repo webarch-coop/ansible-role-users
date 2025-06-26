@@ -478,11 +478,13 @@
         - name: "Check that www-data is a member of the primary group for user {{ user.key }} when Apache VirtualHosts are defined"
           ansible.builtin.assert:
             that:
+              - ( user.value.users_group_members is defined )
+              - ( user.value.users_group_members != [] )
               - ( "www-data" in user.value.users_group_members )
-            quiet: "{% if ansible_check_mode or ansible_verbosity >= 1 %}false{% else %}true{% endif %}"
-          when:
-            - user.value.users_group_members is defined
-            - user.value.users_group_members != []
+            quiet: "{% if ansible_verbosity >= 1 %}false{% else %}true{% endif %}"
+            fail_msg: >-
+              The www-data user needs to be a member of the primary group for user {{ user.key }},
+              this can be done using the users_group_members list.
 
         # An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml)
         # is needed here because of this issue

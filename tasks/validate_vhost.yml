@@ -14,13 +14,24 @@
     - name: "Debug the VirtualServer's variables for {{ user.key }}"
       ansible.builtin.debug:
         var: vhost
-        verbosity: 2
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
       tags:
         - debug
+
+    - name: Check that users_apache_proxy_pass is not defined
+      ansible.builtin.assert:
+        that:
+          - vhost.value.users_apache_proxy_pass is not defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: "The users_apache_proxy_pass variables should be renamed to users_apache_proxy."
+      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+      loop_control:
+        loop_var: vhost
+        label: "{{ vhost.key }}"
 
     - name: "Check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml for {{ user.key }}"
       ansible.builtin.validate_argument_spec:
@@ -30,6 +41,17 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+      when: users_verify | bool
+
+    - name: "Skipped check users_apache_virtual_hosts variables using meta/apache_virtual_host_argument_specs.yml for {{ user.key }}"
+      ansible.builtin.debug:
+        msg: >-
+          The users_verify variable is false so the meta/apache_virtual_host_argument_specs.yml argument spec checks for {{ user.key }}
+          have been skipped."
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      when: not users_verify | bool
+      tags:
+        - debug
 
     - name: "Debug the VirtualServer's users_apache_directories dictionaries for {{ user.key }}"
       ansible.builtin.debug:
@@ -48,12 +70,23 @@
     - name: "Check users_apache_directories variables using meta/apache_directories_argument_specs.yml for {{ user.key }}"
       ansible.builtin.include_tasks: validate_vhost_dirs.yml
       when:
+        - users_verify | bool
         - vhost.value.users_apache_directories is defined
         - vhost.value.users_apache_directories | length > 0
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+
+    - name: "Skipped check users_apache_directories variables using meta/apache_directories_argument_specs.yml for {{ user.key }}"
+      ansible.builtin.debug:
+        msg: >-
+          The users_verify variable is false so the meta/apache_directories_argument_specs.yml argument spec checks for {{ user.key }}
+          have been skipped."
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      when: not users_verify | bool
+      tags:
+        - debug
 
   # rescue:
 

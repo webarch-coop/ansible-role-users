@@ -209,29 +209,18 @@
 {%             elif loc.location is defined %}
   <Location "{{ loc.location }}">
 {%             endif %}
-{%             if loc.authtype is defined %}
-{%                 if loc.authtype == "None" %}
-    AuthType None
-    Require all granted
-{%                 else %}
-{%                     if loc.authname is defined %}
+{%             if loc.authname is defined %}
     AuthName "{{ loc.authname }}"
-{%                     else %}
-    AuthName "Authorised Users"
-{%                     endif %}
-{%                     if loc.authtype is defined %}
+{%             endif %}
+{%             if loc.authtype is defined %}
     AuthType "{{ loc.authtype }}"
-{%                     else %}
-    AuthType "Basic"
-{%                     endif %}
-{%                     if loc.require is defined %}
-{%                         for apache_location_require in loc.require %}
+{%             endif %}
+{%             if loc.require is defined %}
+{%                 for apache_location_require in loc.require %}
     Require {{ apache_location_require }}
-{%                         endfor %}
-{%                     else %}
-    Require valid-user
-{%                     endif %}
-{%                 endif %}
+{%                 endfor %}
+{%             endif %}
+{%             if loc.authtype is defined and loc.authtype == "Basic" %}
     <IfDefine apache_chroot_dir>
       <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}">
         AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"
@@ -1108,26 +1097,22 @@
 {%                 else %}
     ProxyErrorOverride Off
 {%                 endif %}
-{%             else %}
-    ProxyErrorOverride On
 {%             endif %}
 {%             if proxy.via is defined %}
     ProxyVia {{ proxy.via }}
-{%             else %}
-    ProxyVia Off
 {%             endif %}
 {%             if proxy.preserve_host is defined %}
 {%                 if proxy.preserve_host | bool %}
-    ProxyPreserveHost on
+    ProxyPreserveHost On
 {%                 else %}
-    ProxyPreserveHost off
+    ProxyPreserveHost Off
 {%                 endif %}
 {%             endif %}
 {%             if proxy.add_headers is defined %}
 {%                 if proxy.add_headers | bool %}
-    ProxyAddHeaders on
+    ProxyAddHeaders On
 {%                 else %}
-    ProxyAddHeaders off
+    ProxyAddHeaders Off
 {%                 endif %}
 {%             endif %}
 {%             if apache_conf_enabled is defined %}
@@ -1159,7 +1144,7 @@
 {%             if proxy.reverse is defined and proxy.reverse | bool and proxy.path is defined and proxy.url is defined %}
     ProxyPassReverse "{{ proxy.path }}" "{{ proxy.url | regex_replace('[ ].*$') }}"
 {%             endif %}
-{%             if proxy.url is defined %}
+{%             if proxy.url is defined and proxy.options is defined or proxy.override is defined or proxy.authtype is defined or proxy.authname is defined or apache_proxy_require is defined %}
     <Proxy "{{ proxy.url }}">
 {%                 if proxy.options is defined %}
       Options {{ proxy.options | join(' ') }}
@@ -1175,18 +1160,14 @@
       AuthType "{{ proxy.authtype }}"
 {%                         if proxy.authname is defined %}
       AuthName "{{ proxy.authname }}"
-{%                         else %}
-      AuthName "Authorised Users"
 {%                         endif %}
 {%                         if proxy.require is defined %}
 {%                             for apache_proxy_require in proxy.require %}
       Require {{ apache_proxy_require }}
 {%                             endfor %}
-{%                         else %}
-      Require valid-user
 {%                         endif %}
 {%                     endif %}
-{%                     if proxy.authname is defined and proxy.authtype is defined and proxy.require is defined %}
+{%                     if proxy.authtype is defined and proxy.authtype == "Basic" %}
       <IfDefine apache_chroot_dir>
         <IfFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}">
           AuthUserFile "{{ users_apache_chroot_users_basedir }}/{{ user.key }}/.htpasswd/{{ vhost_config.users_apache_server_name }}"

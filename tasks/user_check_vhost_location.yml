@@ -15,14 +15,28 @@
       ansible.builtin.debug:
         var: loc
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: "Either location or match is required for a Location or LocationMatch directive for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - ( loc.location is defined ) or ( loc.match is defined )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      tags:
-        - debug
+
+    - name: "When authname is defined authtype should also be defined for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - loc.authtype is defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: loc.authname is defined
+
+    - name: "When authtype is defined authname should also be defined for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - loc.authname is defined
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: loc.authtype is defined
 
     # https://httpd.apache.org/docs/2.4/mod/mod_authn_core.html#authtype
     - name: "Check authtype is set to None, Basic, Digest or Form for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
@@ -41,6 +55,7 @@
             that:
               - loc.require | length
               - loc.require[0] is defined
+              - loc.require | ansible.builtin.type_debug == "list"
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
         - name: "Check that require is set to a valid option for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"

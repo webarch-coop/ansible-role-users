@@ -231,6 +231,41 @@
         - name: Include Apache tasks
           ansible.builtin.include_tasks: apache.yml
 
+        - name: Check that www-data is a member of the primary group for users when Apache VirtualHosts are defined for users
+          ansible.builtin.assert:
+            that:
+              - ( user.value.users_group_members is defined )
+              - ( user.value.users_group_members != [] )
+              - ( "www-data" in user.value.users_group_members )
+            quiet: "{% if ansible_verbosity >= 1 %}false{% else %}true{% endif %}"
+            fail_msg: >-
+              The www-data user needs to be a member of the primary group for user {{ user.key }},
+              this can be done using the users_group_members list.
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key != "root" )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+            - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
+            - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( user.value.users_apache_virtual_hosts_enabled | bool )
+
+        # An additional include (user_check_vhosts.yml including a loop through user_check_vhost.yml)
+        # is needed here because of this issue
+        # https://github.com/ansible/ansible/issues/19391#issuecomment-282196876
+        - name: Include the Apache checks
+          ansible.builtin.include_tasks: user_check_vhosts.yml
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - ( user.key != "root" )
+            - ( user.value.users_state is defined ) and ( user.value.users_state == "present" )
+            - ( user.value.users_apache_virtual_hosts is defined ) and ( user.value.users_apache_virtual_hosts | type_debug == "dict" )
+            - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( user.value.users_apache_virtual_hosts_enabled | bool )
+
         - name: Include Apache user tasks
           ansible.builtin.include_tasks: apache_user_vhosts_present.yml
           loop: "{{ users | ansible.builtin.dict2items }}"

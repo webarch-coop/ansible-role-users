@@ -1343,6 +1343,11 @@ users_apache_locations:
       type: str
       required: false
       description: A URL to redirect requests to when they match the parents Location directive.
+    require:
+      type: list
+      elements: str
+      required: false
+      description: A list of strings for the Apache Require directive, each item will result in one Require directive being generated.
     reverse:
       type: bool
       required: false
