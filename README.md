@@ -365,7 +365,7 @@ same path in the Apache chroot and under the same path in the SSH / PHP-FPM
 chroots.
 
 **NOTE:** When Apache is chrooted the PHP-FPM config needs to be regenerated,
-the Apache config does self -detech if Apache is chrooted and configure itself
+the Apache config does self detect if Apache is chrooted and configure itself
 but this isn't the case for PHP-FPM, generate new PHP=FPM config using:
 
 ```yaml
