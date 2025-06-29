@@ -23,8 +23,6 @@
 {%     endif %}
 {% endif %}
   </IfDefine>
-
-  # SetHandler "proxy:unix:{# users_phpfpm_apache_socket #}|fcgi://localhost/"
   Require local
 </Location>
 
