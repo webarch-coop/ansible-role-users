@@ -51,6 +51,29 @@
           - users_phpfpm_versions | reject('ansible.builtin.regex', '^[0-9]{1,2}[.][0-9]$') == []
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
+    - name: Set a fact for an array of users PHP-FPM versions required
+      ansible.builtin.set_fact:
+        users_phpfpm_versions_required: "{{ users | community.general.json_query('*.users_phpfpm_version') | unique | sort }}"
+
+    - name: Debug users_phpfpm_versions_required
+      ansible.builtin.debug:
+        var: users_phpfpm_versions_required
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+
+    - name: Check that required versions of PHP are installed
+      ansible.builtin.assert:
+        that:
+          - users_phpfpm_version_required is in users_phpfpm_versions
+        fail_msg: "The PHP-FPM version {{ users_phpfpm_version_required }} is set for a user but this version is not installed, the installed versions are {{ users_phpfpm_versions | join(', ') }}"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      loop: "{{ users_phpfpm_versions_required }}"
+      loop_control:
+        label: "{{ users_phpfpm_version_required }}"
+        loop_var: users_phpfpm_version_required
+      when:
+        - users_phpfpm_versions_required is defined
+        - users_phpfpm_versions_required | length >= 1
+
     - name: Run update-alternatives to find the default version of PHP
       ansible.builtin.command: update-alternatives --query php
       args:
