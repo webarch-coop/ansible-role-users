@@ -56,7 +56,7 @@
             name: "{{ user_group }}"
             state: present
             system: "{{ user.value.users_system | default('false', false) }}"
-          loop: "{{ user.value.users_groups }}"
+          loop: "{{ users_all_groups }}"
           loop_control:
             loop_var: user_group
 
