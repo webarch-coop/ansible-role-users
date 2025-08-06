@@ -13,7 +13,7 @@
 
     - name: "Set a fact for the users groups which includes the users own group, as a list for {{ user.key }} "
       ansible.builtin.set_fact:
-        users_all_groups: "{{ user.value.users_groups | default(omit) + [ user.value.users_group | default(user.key) ] }}"
+        users_all_groups: "{{ user.value.users_groups + [ user.value.users_group | default(user.key) ] }}"
 
     - name: "Print debugging info for {{ user.key }}"
       ansible.builtin.debug:
