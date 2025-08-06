@@ -42,6 +42,12 @@
       vars:  # noqa var-naming[no-role-prefix]
         skel: true
 
+    - name: Include Sudo role as root
+      ansible.builtin.include_role:
+        name: sudo
+      vars:  # noqa var-naming[no-role-prefix]
+        skel: true
+
     - name: Include MariaDB role as root
       ansible.builtin.include_role:
         name: mariadb
