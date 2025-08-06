@@ -53,7 +53,9 @@
 
     - name: Set a fact for an array of users PHP-FPM versions required
       ansible.builtin.set_fact:
-        users_phpfpm_versions_required: "{{ users | community.general.json_query('*.users_phpfpm_version') | unique | sort }}"
+        users_phpfpm_versions_required: "{{ users | community.general.json_query(users_phpfpm_versions_required_jpq) | unique | sort }}"
+      vars:
+        users_phpfpm_versions_required_jpq: "*|[?users_state=='present'].users_phpfpm_version"
 
     - name: Debug users_phpfpm_versions_required
       ansible.builtin.debug:
