@@ -11,9 +11,20 @@
 - name: Create user tasks
   block:
 
-    - name: "Set a fact for the users groups which includes the users own group, as a list for {{ user.key }} "
+    - name: "Set a fact for all the users groups, including the users own group, for {{ user.key }} "
       ansible.builtin.set_fact:
         users_all_groups: "{{ user.value.users_groups + [ user.value.users_group | default(user.key) ] }}"
+      when:
+        - user.value.users_groups is defined
+        - user.value.users_groups != []
+
+    - name: "Set a fact for all the users groups that includes the users own group, for {{ user.key }} "
+      ansible.builtin.set_fact:
+        users_all_groups:
+          - "{{ user.value.users_group | default(user.key) }}"
+      when: >-
+        (user.value.users_groups is not defined) or
+        (user.value.users_groups == [])
 
     - name: "Print debugging info for {{ user.key }}"
       ansible.builtin.debug:
