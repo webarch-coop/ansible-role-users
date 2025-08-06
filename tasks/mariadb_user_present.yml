@@ -183,7 +183,7 @@
     - name: Notify password
       block:
 
-        - name: "Password notification email sent to {{ user.value.users_email }}"
+        - name: Password notification email sent
           community.general.mail:
             from: "{{ users_notify_from }}"
             to: "{{ user.value.users_name | default(user.key) | quote }} <{{ user.value.users_email }}>"
@@ -194,7 +194,6 @@
             host: localhost
             port: 25
             secure: never
-          when: ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
 
         - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
           ansible.builtin.lineinfile:
@@ -208,7 +207,12 @@
             group: "{{ user.key }}"
             mode: "0640"
 
-      when: ( user.value.users_mariadb_notify_passwd is defined ) and ( user.value.users_mariadb_notify_passwd ) and ( not users_notify_mariadb_passwd_file.stat.exists )
+      when:
+        - user.value.users_mariadb_notify_passwd is defined
+        - user.value.users_mariadb_notify_passwd | bool
+        - not users_notify_mariadb_passwd_file.stat.exists | bool
+        - user.value.users_email is defined
+        - user.value.users_email | ansible.builtin.type_debug != "NoneType"
 
     - name: Directory present for database backups
       ansible.builtin.file:
