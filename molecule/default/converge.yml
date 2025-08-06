@@ -42,11 +42,14 @@
       vars:  # noqa var-naming[no-role-prefix]
         skel: true
 
+    # Don't fail with idempotence test as the nagios user will only exist once the users role has run
     - name: Include Sudo role as root
       ansible.builtin.include_role:
         name: sudo
       vars:  # noqa var-naming[no-role-prefix]
         sudo: true
+      tags:
+        - molecule-idempotence-notest
 
     - name: Include MariaDB role as root
       ansible.builtin.include_role:

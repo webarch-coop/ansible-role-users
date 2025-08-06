@@ -163,7 +163,7 @@
     - name: Quota tasks
       block:
 
-        - name: "Touch {{ quota_dir }}/quota_user.csv"
+        - name: Touch quota_user.csv
           ansible.builtin.file:
             path: "{{ quota_dir }}/quota_user.csv"
             state: touch
@@ -173,13 +173,13 @@
           check_mode: false
           changed_when: false
 
-        - name: "Get the md5sum of {{ quota_dir }}/quota_user.csv"
+        - name: Get the md5sum of quota_user.csv
           ansible.builtin.command: "md5sum {{ quota_dir }}/quota_user.csv"
           check_mode: false
           changed_when: false
           register: users_repquota_md5sum_before
 
-        - name: "Users quotas written to {{ quota_dir }}/quota_user.csv and md5sum printed"
+        - name: Users quotas written to quota_user.csv and md5sum printed
           ansible.builtin.shell: |
             set -e -o pipefail
             repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
