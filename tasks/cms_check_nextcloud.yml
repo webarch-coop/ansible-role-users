@@ -67,7 +67,7 @@
     - name: "Check the nextcloud_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.nextcloud_title | length
+          - vhost.value.nextcloud_title | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.nextcloud_title is defined
 
@@ -81,7 +81,7 @@
     - name: "Check that the nextcloud_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.nextcloud_admin_user | length
+          - vhost.value.nextcloud_admin_user | length > 0
           - vhost.value.nextcloud_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.nextcloud_admin_user is regex("^.{2,17}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"

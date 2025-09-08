@@ -53,7 +53,7 @@
         - name: "Check that require is set to a non-empty array for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
           ansible.builtin.assert:
             that:
-              - loc.require | length
+              - loc.require | length > 0
               - loc.require[0] is defined
               - loc.require | ansible.builtin.type_debug == "list"
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
@@ -73,7 +73,7 @@
     - name: "Check that redirect is set to a URL for users_apache_locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
       ansible.builtin.assert:
         that:
-          - loc.redirect | length
+          - loc.redirect | length > 0
           - loc.redirect is regex("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: loc.redirect is defined

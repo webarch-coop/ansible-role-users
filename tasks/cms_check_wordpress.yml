@@ -82,14 +82,14 @@
     - name: "Check the wordpress_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.wordpress_title | length
+          - vhost.value.wordpress_title | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.wordpress_title is defined
 
     - name: "Check that the wordpress_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.wordpress_admin_user | length
+          - vhost.value.wordpress_admin_user | length > 0
           - vhost.value.wordpress_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.wordpress_admin_user is regex("^.{2,17}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"

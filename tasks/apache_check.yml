@@ -11,55 +11,53 @@
 - name: Apache ServerName and ServerAlias checks
   block:
 
-    - name: Debug enabled Apache VirtualHosts
+    - name: Debug users as a list
       ansible.builtin.debug:
-        var: users_apache_vhosts
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}2{% else %}3{% endif %}"
+        msg: "{{ users | ansible.builtin.dict2items }}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      tags:
+        - debug
+
+    - name: Debug users as a list that don't have users_apache_hosts_enabled set to false
+      ansible.builtin.debug:
+        msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) }}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       vars:
-        users_apache_vhosts: >-
-          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict | community.general.json_query('*.users_apache_virtual_hosts') }}
+        users_query: "[?users_apache_virtual_hosts_enabled != 'false']"
       tags:
         - debug
 
     - name: Debug enabled Apache VirtualHost ServerNames
       ansible.builtin.debug:
-        var: users_apache_vhosts_server_names
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+        msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) }}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       vars:
-        users_apache_vhosts_server_names: >-
-          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]') | sort }}
+        users_query: "[?users_apache_virtual_hosts_enabled != 'false'].value.users_apache_virtual_hosts.*.users_apache_server_name[]"
       tags:
         - debug
 
     - name: Debug enabled Apache VirtualHost ServerAliases
       ansible.builtin.debug:
-        var: users_apache_vhosts_server_aliases
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+        msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) }}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       vars:
-        users_apache_vhosts_server_aliases: >-
-          {{ users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]') | sort }}
+        users_query: "[?users_apache_virtual_hosts_enabled != 'false'].value.users_apache_virtual_hosts.*.users_apache_server_aliases[][]"
       tags:
         - debug
 
     - name: Set a fact for all the enabled Apache ServerNames and ServerAlias
       ansible.builtin.set_fact:
         users_apache_vhosts_server_aliases_and_names: >-
-          {{ (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_name[]')) +
-          (users | ansible.builtin.dict2items | rejectattr("value.users_apache_virtual_hosts_enabled", "false") |
-          ansible.builtin.items2dict |
-          community.general.json_query('*.users_apache_virtual_hosts[].*.users_apache_server_aliases[][]')) | sort }}
+          {{ (users | ansible.builtin.dict2items | community.general.json_query(users_query_servernames)) +
+          (users | ansible.builtin.dict2items | community.general.json_query(users_query_serversaliases)) | sort }}
+      vars:
+        users_query_servernames: "[?users_apache_virtual_hosts_enabled != 'false'].value.users_apache_virtual_hosts.*.users_apache_server_name[]"
+        users_query_serversaliases: "[?users_apache_virtual_hosts_enabled != 'false'].value.users_apache_virtual_hosts.*.users_apache_server_aliases[][]"
 
     - name: Debug users_apache_vhosts_server_aliases_and_names
       ansible.builtin.debug:
         var: users_apache_vhosts_server_aliases_and_names
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       tags:
         - debug
 

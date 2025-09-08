@@ -59,28 +59,28 @@
     - name: "Check the flarum_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.flarum_title | length
+          - vhost.value.flarum_title | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.flarum_title is defined
 
     - name: "Check the flarum_description is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.flarum_description | length
+          - vhost.value.flarum_description | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.flarum_description is defined
 
     - name: "Check the flarum_welcome_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.flarum_welcome_title | length
+          - vhost.value.flarum_welcome_title | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.flarum_welcome_title is defined
 
     - name: "Check the flarum_welcome_message is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.flarum_welcome_message | length
+          - vhost.value.flarum_welcome_message | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.flarum_welcome_message is defined
 
@@ -102,7 +102,7 @@
     - name: "Check that the flarum_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.flarum_dbprefix | length
+          - vhost.value.flarum_dbprefix | length > 0
           - vhost.value.flarum_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.flarum_dbprefix is regex("^.{1,6}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
@@ -111,7 +111,7 @@
     - name: "Check that the flarum_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.flarum_admin_user | length
+          - vhost.value.flarum_admin_user | length > 0
           - vhost.value.flarum_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.flarum_admin_user is regex("^.{2,17}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"

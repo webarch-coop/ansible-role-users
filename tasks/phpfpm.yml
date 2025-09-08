@@ -38,7 +38,7 @@
 
     - name: Set a fact for the PHP-FPM versions
       ansible.builtin.set_fact:
-        users_phpfpm_versions: "{{ users_phpquery.stdout_lines | trim }}"
+        users_phpfpm_versions: "{{ users_phpquery.stdout_lines | map('ansible.builtin.trim') }}"
 
     - name: Debug users_phpfpm_versions
       ansible.builtin.debug:

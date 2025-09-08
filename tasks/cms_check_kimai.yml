@@ -60,7 +60,7 @@
     - name: "Check the kimai_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.kimai_title | length
+          - vhost.value.kimai_title | length > 0
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.kimai_title is defined
 
@@ -75,7 +75,7 @@
     - name: "Check that the kimai_dbprefix is less than 6 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.kimai_dbprefix | length
+          - vhost.value.kimai_dbprefix | length > 0
           - vhost.value.kimai_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.kimai_dbprefix is regex("^.{1,6}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
@@ -84,7 +84,7 @@
     - name: "Check that the kimai_admin_user contains only ascii letters and numbers and is between 2 and 17 characters long for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.kimai_admin_user | length
+          - vhost.value.kimai_admin_user | length > 0
           - vhost.value.kimai_admin_user is regex("^[a-zA-Z0-9]*$")
           - vhost.value.kimai_admin_user is regex("^.{2,17}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"

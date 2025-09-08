@@ -58,7 +58,7 @@
         - name: "Check that the Options for {{ vhost.key }} VirtualHost Proxy for {{ user.key }} are a non-empty array"
           ansible.builtin.assert:
             that:
-              - proxy.options | length
+              - proxy.options | length > 0
               - proxy.options[0] is defined
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
@@ -80,7 +80,7 @@
         - name: "Check that the AllowOverride directives for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
           ansible.builtin.assert:
             that:
-              - proxy.override | length
+              - proxy.override | length > 0
               - proxy.override[0] is defined
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 

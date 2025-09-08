@@ -43,7 +43,7 @@
     - name: "Check that the moodle_dbprefix is less than 8 numbers or letters or underscores for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
-          - vhost.value.moodle_dbprefix | length
+          - vhost.value.moodle_dbprefix | length > 0
           - vhost.value.moodle_dbprefix is regex("^[a-zA-Z0-9_]*$")
           - vhost.value.moodle_dbprefix is regex("^.{1,8}$")
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
