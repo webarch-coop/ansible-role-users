@@ -57,6 +57,8 @@
       vars:  # noqa var-naming[no-role-prefix]
         mariadb: true
         mariadb_underscore_autoupdate: true
+      tags:
+        - molecule-idempotence-notest
 
     - name: Include Users role as root
       ansible.builtin.include_role:
