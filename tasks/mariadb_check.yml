@@ -1,0 +1,66 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: MariaDB checks
+  block:
+
+    - name: Debug users as a list
+      ansible.builtin.debug:
+        msg: "{{ users | ansible.builtin.dict2items }}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      tags:
+        - debug
+
+    - name: Debug users not absent or ignored as a list
+      ansible.builtin.debug:
+        msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) }}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      vars:
+        users_query: "[?value.users_state!='absent']|[?value.users_state!='ignore']"
+      tags:
+        - debug
+
+    - name: Debug MariaDB databases for users not absent or ignored as a list
+      ansible.builtin.debug:
+        msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) | sort }}"
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      vars:
+        users_query: "[?value.users_state!='absent']|[?value.users_state!='ignore'].value.users_mariadb_databases[]"
+      tags:
+        - debug
+
+    - name: Set a fact for all the MariaDB database for the users that are not absent or ignored
+      ansible.builtin.set_fact:
+        users_mariadb_all_databases: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) | sort }}"
+      vars:
+        users_query: "[?value.users_state!='absent']|[?value.users_state!='ignore'].value.users_mariadb_databases[]"
+
+    - name: Debug users_mariadb_all_databases
+      ansible.builtin.debug:
+        var: users_mariadb_all_databases
+        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
+
+    # https://forum.ansible.com/t/detecting-duplicate-items-in-an-aray/39697/2
+    - name: Check that there are no duplicate MariaDB database names
+      ansible.builtin.fail:
+        msg: >-
+          There should be no duplicates in the MariaDB database names but these duplicates are present
+          {{ users_mariadb_all_databases | community.general.counter | ansible.builtin.dict2items | selectattr('value', '>', 1) | map(attribute='key') | join(', ') }}
+
+      when: >-
+        users_mariadb_all_databases != [] and
+        (( users_mariadb_all_databases | length ) !=
+        ( users_mariadb_all_databases | ansible.builtin.unique | length ))
+
+  tags:
+    - users
+...

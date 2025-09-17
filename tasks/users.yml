@@ -29,6 +29,20 @@
           either contain disallowed characters or are shorter or longer than the allowed limit.
       when: users.keys() | reject('ansible.builtin.regex', '^[a-zA-Z0-9-]{2,17}$') != []
 
+    - name: Apache ServerName and ServerAlias checks
+      ansible.builtin.include_tasks: apache_check.yml
+      when:
+        - users_apache is defined
+        - users_apache | bool
+        - ( "apache2" in ansible_local.dpkg.installed )
+
+    - name: Include MariaDB checks
+      ansible.builtin.include_tasks: mariadb_check.yml
+      when:
+        - users_mariadb is defined
+        - users_mariadb | bool
+        - ( "mariadb-server" in ansible_local.dpkg.installed )
+
     - name: Directories for users state files present
       ansible.builtin.file:
         path: "{{ users_state_dir }}/{{ users_state_file_dir }}"
@@ -194,13 +208,6 @@
         label: "{{ user.key }}"
       when: user.key in users_update
 
-    - name: Apache ServerName and ServerAlias checks
-      ansible.builtin.include_tasks: apache_check.yml
-      when:
-        - users_apache is defined
-        - users_apache | bool
-        - ( "apache2" in ansible_local.dpkg.installed )
-
     - name: System setup and checks
       ansible.builtin.include_tasks: system.yml
 
@@ -290,6 +297,9 @@
 
     - name: Update MariaDB config for users present
       block:
+
+        - name: Include MariaDB checks
+          ansible.builtin.include_tasks: mariadb_check.yml
 
         - name: Include MariaDB user present tasks
           ansible.builtin.include_tasks: mariadb_user_present.yml
