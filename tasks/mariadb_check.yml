@@ -14,14 +14,14 @@
     - name: Debug users as a list
       ansible.builtin.debug:
         msg: "{{ users | ansible.builtin.dict2items }}"
-        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       tags:
         - debug
 
     - name: Debug users not absent or ignored as a list
       ansible.builtin.debug:
         msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) }}"
-        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       vars:
         users_query: "[?value.users_state!='absent']|[?value.users_state!='ignore']"
       tags:
@@ -30,7 +30,7 @@
     - name: Debug MariaDB databases for users not absent or ignored as a list
       ansible.builtin.debug:
         msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(users_query) | sort }}"
-        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
       vars:
         users_query: "[?value.users_state!='absent']|[?value.users_state!='ignore'].value.users_mariadb_databases[]"
       tags:
@@ -45,7 +45,7 @@
     - name: Debug users_mariadb_all_databases
       ansible.builtin.debug:
         var: users_mariadb_all_databases
-        # verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
       tags:
         - debug
 
