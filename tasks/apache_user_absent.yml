@@ -8,17 +8,20 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: "Apache user {{ user.key }} absent"
+- name: Apache user absent
   block:
 
-    - name: "Check if the {{ user.key }} site is enabled"
+    - name: "Check the Apache sites-enabled symlink for {{ user.key }}"
       ansible.builtin.stat:
         path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
       register: users_apache_site_enabled
 
-    - name: "Apache {{ user.key }} sites-enabled symlink absent"
-      ansible.builtin.command: "a2dissite {{ user.key }}"
-      register: users_apache_site_enabled_absent
+    - name: "Apache sites-enabled symlink absent for {{ user.key }}"
+      ansible.builtin.command:
+      args:
+        cmd: "a2dissite {{ user.key }}"
+        removes: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
+      register: users_a2dissite
       when:
         - users_apache_site_enabled.stat.exists | bool
         - users_apache_site_enabled.stat.islnk | bool
@@ -26,25 +29,34 @@
     - name: Conditional Apache reload
       block:
 
-        - name: "Run apache2ctl configtest to check deletion of /etc/apache2/sites-enabled/{{ user.key }}.conf"
+        - name: "Run apache2ctl configtest to check deletion of the Apache sites-enabled symlink for {{ user.key }}"
           ansible.builtin.command: apache2ctl configtest
-          changed_when: ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
           check_mode: false
+          changed_when: false
+          failed_when: ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
           register: users_apache2ctl_configtest
 
-        - name: Apache reloaded
-          ansible.builtin.service:
+        - name: "Apache restarted for {{ user.key }}"
+          ansible.builtin.systemd_service:
             name: apache2
-            state: reloaded
+            state: restarted
+          register: users_apache_restarted
+          until:
+            - users_apache_restarted.status.SubState is defined
+            - users_apache_restarted.status.SubState == "running"
+            - users_apache_restarted.status.Result is defined
+            - users_apache_restarted.status.Result == "success"
+          retries: 2
+          delay: 10
           when:
             - users_apachectl_configtest is defined
             - ( "Syntax OK" in users_apachectl_configtest.stderr )
 
       when:
-        - users_apache_site_enabled is defined
-        - users_apache_site_enabled.stat.exists
+        - users_a2dissite.changed is defined
+        - users_a2dissite.changed | bool
 
-    - name: "Apache {{ user.key }} sites-available file(s) absent"
+    - name: "Apache sites-available file(s) absent for {{ user.key }}"
       ansible.builtin.file:
         path: "{{ file }}"
         state: absent
@@ -56,18 +68,18 @@
         loop_var: file
         label: "{{ file }}"
 
-    - name: "Apache suEXEC config for {{ user.key }} absent"
+    - name: "Apache suEXEC config absent for {{ user.key }}"
       ansible.builtin.file:
         path: "/etc/apache2/suexec/{{ user.key }}"
         state: absent
 
-    - name: "Certcheck crontab for {{ user.key }} absent"
+    - name: "Certcheck crontab absent for {{ user.key }}"
       ansible.builtin.cron:
         name: "Cert check for {{ user.key }}.{{ ansible_facts.fqdn }}"
         job: "ssl-cert-check -qac {{ users_cert_dir }}/{{ user.key }}.{{ ansible_facts.fqdn }}.cert.pem -e 'root@localhost'"
         state: absent
 
-    - name: "Keys and certs for {{ user.key }}.{{ ansible_facts.fqdn }} absent"
+    - name: "TLS keys and certs for absent for {{ user.key }}"
       ansible.builtin.file:
         path: "{{ path }}"
         state: absent

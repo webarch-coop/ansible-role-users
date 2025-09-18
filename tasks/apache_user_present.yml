@@ -90,7 +90,7 @@
             - users_apache_certs_present is defined
             - not users_apache_certs_present | bool
 
-        - name: "Apache {{ user.key }} sites-available generated and enabled as the acmesh certs are present"
+        - name: "Apache sites-available generated and enabled as the acmesh certs are present"
           block:
 
             - name: Loop through the VirtualHosts generating one config file per VirtualHost for www-data
@@ -110,13 +110,71 @@
         - ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
         - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( ( user.value.users_apache_virtual_hosts_enabled is defined ) and ( user.value.users_apache_virtual_hosts_enabled | bool ) )
 
-    - name: "Apache {{ user.key }} sites-enabled symlink absent as the sites are not set to be enabled"
-      ansible.builtin.file:
-        path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
-        state: absent
+    - name: Apache sites-enabled symlink absent
+      block:
+
+        - name: "Check the Apache sites-enabled symlink for {{ user.key }}"
+          ansible.builtin.stat:
+            path: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
+          register: users_apache_site_enabled
+
+        - name: "Apache sites-enabled symlink absent for {{ user.key }}"
+          ansible.builtin.command:
+          args:
+            cmd: "a2dissite {{ user.key }}"
+            removes: "/etc/apache2/sites-enabled/{{ user.key }}.conf"
+          register: users_a2dissite
+          when:
+            - users_apache_site_enabled.stat.exists | bool
+            - users_apache_site_enabled.stat.islnk | bool
+
+        - name: Conditional Apache reload
+          block:
+
+            - name: "Run apache2ctl configtest to check deletion of the Apache sites-enabled symlink for {{ user.key }}"
+              ansible.builtin.command: apache2ctl configtest
+              check_mode: false
+              changed_when: false
+              failed_when: ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
+              register: users_apache2ctl_configtest
+
+            - name: "Apache restarted for {{ user.key }}"
+              ansible.builtin.systemd_service:
+                name: apache2
+                state: restarted
+              register: users_apache_restarted
+              until:
+                - users_apache_restarted.status.SubState is defined
+                - users_apache_restarted.status.SubState == "running"
+                - users_apache_restarted.status.Result is defined
+                - users_apache_restarted.status.Result == "success"
+              retries: 2
+              delay: 10
+              when:
+                - users_apachectl_configtest is defined
+                - ( "Syntax OK" in users_apachectl_configtest.stderr )
+
+          when:
+            - users_a2dissite.changed is defined
+            - users_a2dissite.changed | bool
+
       when:
         - user.value.users_apache_virtual_hosts_enabled is defined
         - not user.value.users_apache_virtual_hosts_enabled | bool
+
+    - name: "Apache restarted for {{ user.key }}"
+      ansible.builtin.systemd_service:
+        name: apache2
+        state: restarted
+      register: users_apache_restarted
+      until:
+        - users_apache_restarted.status.SubState is defined
+        - users_apache_restarted.status.SubState == "running"
+        - users_apache_restarted.status.Result is defined
+        - users_apache_restarted.status.Result == "success"
+      retries: 2
+      delay: 10
+      when: users_a2dissite.changed | bool
 
     - name: When mod_md is in use generate and enable the Apache config
       block:
