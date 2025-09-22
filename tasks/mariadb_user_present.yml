@@ -169,6 +169,7 @@
         host: localhost
         priv: "{{ users_mariadb_priv }}"
         state: present
+        column_case_sensitive: true
         update_password: always
         login_user: root
         login_unix_socket: /var/run/mysqld/mysqld.sock
