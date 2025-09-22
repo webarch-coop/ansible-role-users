@@ -17,6 +17,10 @@ provisioner:
     # host_vars:
     #   instance:
     #     ansible_user: ansible
+  config_options:
+    defaults:
+      duplicate_dict_key: error
+      inject_facts_as_vars: false
   options:
     D: true
 verifier:
