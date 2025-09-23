@@ -20,7 +20,7 @@ variables:
   ANSIBLE_ROLES_PATH: "${CI_PROJECT_DIR}/..:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles"
   ANSIBLE_SHELL_ALLOW_WORLD_READABLE_TEMP: "1"
   DEBIAN_FRONTEND: noninteractive
-  MOLECULE_VERBOSITY: "1"
+  MOLECULE_VERBOSITY: "0"
   PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   PRE_COMMIT_COLOR: always
   PY_COLORS: "1"
@@ -38,7 +38,7 @@ before_script:
   - which jc
   - jc --version
   - ansible-galaxy collection list
-  - find ./ -type d
+  - ansible-galaxy role list
 stages:
   - lint
   - bookworm
