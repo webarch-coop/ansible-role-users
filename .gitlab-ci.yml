@@ -38,6 +38,7 @@ before_script:
   - which jc
   - jc --version
   - ansible-galaxy collection list
+  - find ./ -type d
 stages:
   - lint
   - bookworm
