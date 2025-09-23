@@ -15,7 +15,8 @@
 
 - name: mariadb
   src: https://git.coop/webarch/mariadb.git
-  version: 3.7.0  # mariadb
+  # version: 3.7.0  # mariadb
+  version: master  # mariadb
   scm: git
 
 - name: skel
