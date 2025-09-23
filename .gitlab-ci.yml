@@ -41,32 +41,32 @@ before_script:
 stages:
   - lint
   - bookworm
-  - jammy
-  - trixie
+  - forky
   - noble
+  - trixie
 lint:
-  image: registry.git.coop/webarch/containers/images/trixie:20250907
+  image: registry.git.coop/webarch/containers/images/trixie:20250922
   stage: lint
   script:
     - pre-commit install
     - pre-commit run --all-files
 bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20250907
+  image: registry.git.coop/webarch/containers/images/bookworm:20250922
   stage: bookworm
   script:
     - molecule test
-jammy:
-  image: registry.git.coop/webarch/containers/images/jammy:20250907
-  stage: jammy
+forky:
+  image: registry.git.coop/webarch/containers/images/forky:20250922
+  stage: forky
   script:
     - molecule test
 trixie:
-  image: registry.git.coop/webarch/containers/images/trixie:20250907
+  image: registry.git.coop/webarch/containers/images/trixie:20250922
   stage: trixie
   script:
     - molecule test
 noble:
-  image: registry.git.coop/webarch/containers/images/noble:20250907
+  image: registry.git.coop/webarch/containers/images/noble:20250922
   stage: noble
   script:
     - molecule test

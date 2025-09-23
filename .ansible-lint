@@ -19,6 +19,6 @@ skip_list:
   - no-changed-when
   - no-handler
 # TODO:
-# var_naming_pattern: "^[users|molecule]_?[a-z0-9_]*$"
+# var_naming_pattern: "^[ansible|users|molecule]_?[a-z0-9_]*$"
 # vim: syntax=yaml
 ...

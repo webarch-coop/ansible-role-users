@@ -33,6 +33,7 @@
       community.mysql.mysql_user:
         name: "{{ user.key }}"
         state: absent
+        column_case_sensitive: true
         login_user: root
         login_unix_socket: /var/run/mysqld/mysqld.sock
 
