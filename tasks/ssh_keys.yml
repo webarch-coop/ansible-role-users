@@ -1,0 +1,73 @@
+# Copyright 2018-2025 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+# Use ~/.ssh/authorized_keys.d/authorized_keys_* files to assemble
+# ~/.ssh/authorized_keys and leave a ~/.ssh/README.md to explain
+# what happened
+
+- name: SSH keys in place
+  block:
+
+    - name: SSH public keys downloaded
+      ansible.builtin.get_url:
+        url: "{{ key_url }}"
+        dest: "{{ user_ssh_tmpdir.path }}/{{ key_idex }}"
+        mode: "0600"
+        force: true
+        http_agent: "{{ users_http_agent }}"
+      loop: "{{ user.value.users_ssh_public_keys }}"
+      loop_control:
+        loop_var: key_url
+        index_var: key_idex
+        label: "{{ key_url }}"
+      changed_when: false
+
+    - name: "Check and copy SSH public keys from {{ user_ssh_tmpdir.path }} to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
+      ansible.builtin.copy:
+        src: "{{ user_ssh_tmpdir.path }}/{{ key_idex }}"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
+        remote_src: true
+        mode: "0600"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_home_group | default(user.key) }}"
+        validate: ssh-keygen -lf %s
+      loop: "{{ user.value.users_ssh_public_keys }}"
+      loop_control:
+        loop_var: key_url
+        index_var: key_idex
+        label: "{{ key_url }}"
+
+    - name: "Assemble all the {{ user_ssh_tmpdir.path }}/* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
+      ansible.builtin.assemble:
+        src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
+        remote_src: true
+        mode: "0600"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_home_group | default(user.key) }}"
+        validate: ssh-keygen -lf %s
+
+    - name: "SSH README.md in place for {{ user.key }}"
+      ansible.builtin.template:
+        src: SSH_README.md.j2
+        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
+        mode: "0600"
+        owner: "{{ user.key }}"
+        group: "{{ user.value.users_home_group | default(user.key) }}"
+
+    - name: "TMPDIR for SSH public keys absent {{ user_ssh_tmpdir.path }}"
+      ansible.builtin.file:
+        path: "{{ user_ssh_tmpdir.path }}"
+        state: absent
+      changed_when: false
+
+  tags:
+    - users
+...

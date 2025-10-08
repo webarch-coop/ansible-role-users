@@ -8,8 +8,15 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: "Apache VirtualHosts variables checks for {{ user.key }}"
+- name: Apache VirtualHosts variables checks
   block:
+
+    - name: Debug vhost
+      ansible.builtin.debug:
+        var: vhost
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: "Check the DocumentRoot for the {{ vhost.key }} VirtualHost for {{ user.key }} contains valid characters"
       ansible.builtin.assert:
@@ -25,7 +32,7 @@
         users_reverse_proxy: "{% if vhost.value.users_apache_remoteip is defined %}{{ vhost.value.users_apache_remoteip }}{% endif %}"
       when: vhost.value.users_apache_server_name is not regex('^[*][.].*')
 
-    - name: "Check ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: Check ServerAlias' for VirtualHost
       block:
 
         - name: "Check that the ServerAlias' for {{ vhost.key }} VirtualHost for {{ user.key }} is a non-empty array"
@@ -60,7 +67,7 @@
     - name: Check that users_apache_php_socket_path exists and is a socket and the user is not chrooted
       block:
 
-        - name: "Stat {{ vhost.value.users_apache_php_socket_path }}"
+        - name: Stat vhost.value.users_apache_php_socket_path
           ansible.builtin.stat:
             path: "{{ vhost.value.users_apache_php_socket_path }}"
           register: users_apache_php_socket_path_check
@@ -76,7 +83,7 @@
 
       when: vhost.value.users_apache_php_socket_path is defined
 
-    - name: "Check users_apache_htauth_users for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+    - name: Check users_apache_htauth_users for VirtualHost if defined
       block:
 
         - name: "Check the users_apache_htauth_users names for {{ vhost.key }} VirtualHost for {{ user.key }} are valid if defined"
@@ -103,7 +110,7 @@
 
       when: vhost.value.users_apache_htauth_users is defined
 
-    - name: "Check the Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: Check the Redirect and RedirectMatch directives for VirtualHost
       block:
 
         - name: "Check that attributes for Redirect and RedirectMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
@@ -140,7 +147,7 @@
 
       when: vhost.value.users_apache_redirects is defined
 
-    - name: "Check the Alias and AliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: Check the Alias and AliasMatch directives for VirtualHost
       block:
 
         - name: "Check that attributes for Alias, AliasMatch, ScriptAlias and ScriptAliasMatch directives for {{ vhost.key }} VirtualHost for {{ user.key }} are defined"
@@ -155,7 +162,7 @@
 
       when: vhost.value.users_apache_alias is defined
 
-    - name: "Check the users_apache_rewrite array for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: Check the users_apache_rewrite array for VirtualHost
       block:
 
         - name: "Check that the users_apache_rewrite array contains conditions or rules when it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -169,7 +176,7 @@
 
       when: vhost.value.users_apache_rewrite is defined
 
-    - name: "Check the locations for {{ vhost.key }} VirtualHost for {{ user.key }} if defined"
+    - name: Check the locations for VirtualHost if defined"
       block:
 
         - name: "Check that the locations for {{ vhost.key }} VirtualHost for {{ user.key }} are a non-empty array"
@@ -210,7 +217,7 @@
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_deny_dirs is defined
 
-    - name: "Checks for users_apache_directories for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: Checks for users_apache_directories for the VirtualHost
       block:
 
         - name: "Check that the users_apache_directories keys when they are relative paths, for {{ vhost.key }} VirtualHost for {{ user.key }} contain valid characters"
@@ -220,36 +227,26 @@
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
             fail_msg: "With a relative DocumentRoot path, only letters, numbers, underscores, dashes and forward slashes are allowed"
           when: dir.key is not regex("^[\/].*$")
-          loop: "{{ vhost_config.users_apache_directories | dict2items }}"
+          loop: "{{ vhost.value.users_apache_directories | dict2items }}"
           loop_control:
             loop_var: dir
             label: "{{ dir.key }}"
 
         - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
           ansible.builtin.include_tasks: user_check_vhost_dir.yml
-          loop: "{{ vhost_config.users_apache_directories | dict2items }}"
+          loop: "{{ vhost.value.users_apache_directories | dict2items }}"
           loop_control:
             loop_var: dir
             label: "{{ dir.key }}"
 
-      when: vhost_config.users_apache_directories is defined
+      when: vhost.value.users_apache_directories is defined
 
-    - name: "Checks for the Apache DocumentRoot Directory for {{ vhost.key }} VirtualHost for {{ user.key }}"
-      block:
-
-        - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
-          ansible.builtin.assert:
-            that:
-              - vhost.value.users_apache_type is regex('^php|php[+]cgi|php[+]fcgi|cgi|fcgi|static$')
-            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-          when: vhost.value.users_apache_type is defined
-
-        - name: "Include checks for the Apache directives in the users_apache_directories dictionaries for {{ vhost.key }} VirtualHost for {{ user.key }}"
-          ansible.builtin.include_tasks: user_check_vhost_dir.yml
-          vars:
-            dir: "{{ vhost.value | dict2items }}"
-
-      when: ( users_apache_vhost_docroot is not defined ) or ( users_apache_vhost_docroot is defined and users_apache_vhost_docroot )
+    - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
+      ansible.builtin.assert:
+        that:
+          - vhost.value.users_apache_type is regex('^php|php[+]cgi|php[+]fcgi|cgi|fcgi|static$')
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: vhost.value.users_apache_type is defined
 
     - name: Proxy checks
       block:
@@ -269,7 +266,7 @@
 
       when: vhost.value.users_apache_proxy is defined
 
-    - name: "ErrorDocument checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: ErrorDocument checks for the VirtualHost
       block:
 
         - name: "Check that the code and path values for users_apache_error_docs are valid for {{ vhost.key }} VirtualHost for {{ user.key }}"
@@ -285,7 +282,7 @@
 
       when: vhost.value.users_apache_error_docs is defined
 
-    - name: "CMS checks for {{ vhost.key }} VirtualHost for {{ user.key }}"
+    - name: CMS checks for VirtualHost
       block:
 
         - name: "Check that users_cms is set to mediawiki, flarum, moodle, nextcloud, kimai, drupal, wordpress, matomo or phpmyadmin for {{ vhost.key }} VirtualHost for {{ user.key }} if it is defined"

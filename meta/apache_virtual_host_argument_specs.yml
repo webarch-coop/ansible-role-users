@@ -1518,7 +1518,7 @@ users_apache_rewrite:
 users_apache_robots:
   type: str
   required: false
-  description: When set to deny include Apache directives to add a crwaler denying robots.txt files to the VirtualHost.
+  description: When set to deny include Apache directives to add a crawler denying robots.txt files to the VirtualHost.
   choices:
     - deny
 users_apache_server_aliases:
@@ -1584,7 +1584,7 @@ users_apache_type:
 users_apache_vhost_docroot:
   type: bool
   required: false
-  description: Omit a default DocuemntRoot from the Apache configuration.
+  description: Omit a default DocumentRoot from the Apache VirtualHost configuration.
 users_cms:
   type: str
   required: false

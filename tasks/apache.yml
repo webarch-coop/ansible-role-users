@@ -120,7 +120,7 @@
         day: "1"
         job: /usr/bin/find /var/log/apache2/ -mtime +30 -exec  rm {} \;
 
-    - name: "Apache bandwith usage cron task to email {{ users_apache_bandwidth_email }} present"
+    - name: Apache bandwith usage cron task to email address set using users_apache_bandwidth_email present
       ansible.builtin.cron:
         name: "Email monthly Apache bandwidth"
         hour: "1"
