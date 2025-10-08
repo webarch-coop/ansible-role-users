@@ -920,54 +920,94 @@ nextcloud_requirements:
 nextcloud_title:
   type: str
   required: false
-  description: Nextcloud title.
+  description: The Nextcloud instance title.
 nextcloud_trusted_domains:
-  type: list
-  elements: str
+  type: dict
   required: false
-  description: A list of trusted hosts.
+  description: A dictionary of trusted domains for Nextcloud.
+  options:
+    "0":
+      type: str
+      required: true
+      description: The first trusted domain for Nextcloud.
+    "1":
+      type: str
+      required: false
+      description: The second trusted domain for Nextcloud.
+    "2":
+      type: str
+      required: false
+      description: The third trusted domain for Nextcloud.
+    "3":
+      type: str
+      required: false
+      description: The fouth trusted domain for Nextcloud.
+    "4":
+      type: str
+      required: false
+      description: The fifth trusted domain for Nextcloud.
+    "5":
+      type: str
+      required: false
+      description: The sixth trusted domain for Nextcloud.
+    "6":
+      type: str
+      required: false
+      description: The seventh trusted domain for Nextcloud.
+    "7":
+      type: str
+      required: false
+      description: The eighth trusted domain for Nextcloud.
+    "8":
+      type: str
+      required: false
+      description: The ninth trusted domain for Nextcloud.
+    "9":
+      type: str
+      required: false
+      description: The tenth trusted domain for Nextcloud.
 nextcloud_trusted_proxies:
   type: dict
   required: false
   description: A dictionary of trusted proxies for Nextcloud.
   options:
-    "1":
+    "0":
       type: str
       required: true
       description: The first trusted proxy for Nextcloud.
-    "2":
+    "1":
       type: str
       required: false
       description: The second trusted proxy for Nextcloud.
-    "3":
+    "2":
       type: str
       required: false
       description: The third trusted proxy for Nextcloud.
-    "4":
+    "3":
       type: str
       required: false
       description: The fouth trusted proxy for Nextcloud.
-    "5":
+    "4":
       type: str
       required: false
       description: The fifth trusted proxy for Nextcloud.
-    "6":
+    "5":
       type: str
       required: false
       description: The sixth trusted proxy for Nextcloud.
-    "7":
+    "6":
       type: str
       required: false
       description: The seventh trusted proxy for Nextcloud.
-    "8":
+    "7":
       type: str
       required: false
       description: The eighth trusted proxy for Nextcloud.
-    "9":
+    "8":
       type: str
       required: false
       description: The ninth trusted proxy for Nextcloud.
-    "10":
+    "9":
       type: str
       required: false
       description: The tenth trusted proxy for Nextcloud.

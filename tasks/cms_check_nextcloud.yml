@@ -64,6 +64,50 @@
 
       when: vhost.value.nextcloud_url is defined
 
+    - name: "Check that the nextcloud_trusted_domains is defined and is a dictionary for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - vhost.value.nextcloud_trusted_domains is defined
+          - vhost.value.nextcloud_trusted_domains | ansible.builtin.type_debug == "dict"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+    - name: "Check that localhost is in the list of nextcloud_trusted_domains for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - ("localhost" is in users_nextcloud_trusted_domains_list)
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      vars:
+        users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
+
+    - name: "Check that the Apache ServerName is in the list of nextcloud_trusted_domains for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - vhost.value.users_apache_server_name is in users_nextcloud_trusted_domains_list
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      vars:
+        users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
+
+    - name: "Check that all the the Apache ServerAliases are in the list of nextcloud_trusted_domains for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - users_nextcloud_apache_server_alias is in users_nextcloud_trusted_domains_list
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      vars:
+        users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
+      loop: "{{ vhost.value.users_apache_server_aliases }}"
+      loop_control:
+        loop_var: users_nextcloud_apache_server_alias
+      when: vhost.value.users_apache_server_aliases is defined
+
+    - name: "Check that the ONLYOFFICE domain name is in the list of nextcloud_trusted_domains for {{ vhost.key }} VirtualHost for {{ user.key }}"
+      ansible.builtin.assert:
+        that:
+          - vhost.value.nextcloud_onlyoffice_documentserver is in users_nextcloud_trusted_domains_list
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      vars:
+        users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
+      when: vhost.value.nextcloud_onlyoffice_documentserver is defined
+
     - name: "Check the nextcloud_title is not empty if it is defined for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:

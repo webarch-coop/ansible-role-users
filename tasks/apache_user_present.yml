@@ -540,31 +540,6 @@
             label: "{{ vhost.key }}"
           when: ( vhost.value.users_cms == "moodle" )
 
-        - name: "Debug Nextcloud trusted domains for {{ user.key }} with default apps"
-          ansible.builtin.debug:
-            var: users_nextcloud_trusted_domains
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-          vars:
-            users_nextcloud_trusted_domains: |-
-              [
-                "localhost",
-                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
-                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
-                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
-              ]
-          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-          loop_control:
-            loop_var: vhost
-            label: "{{ vhost.key }}"
-          when:
-            - ( vhost.value.users_cms == "nextcloud" )
-            - ( vhost.value.nextcloud_app_remove is not defined )
-            - ( vhost.value.nextcloud_app_install is not defined )
-            - ( vhost.value.nextcloud_app_disable is not defined )
-            - ( vhost.value.nextcloud_app_enable is not defined )
-          tags:
-            - debug
-
         - name: "Include Nextcloud role for {{ user.key }} with default apps"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
             name: nextcloud
@@ -596,14 +571,7 @@
             nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-            nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
-            users_nextcloud_trusted_domains: |-
-              [
-                "localhost",
-                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
-                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
-                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
-              ]
+            nextcloud_trusted_domains: "{{ vhost.value.nextcloud_trusted_domains }}"
           loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
           loop_control:
             loop_var: vhost
@@ -647,18 +615,11 @@
             nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-            nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
+            nextcloud_trusted_domains: "{{ vhost.value.nextcloud_trusted_domains }}"
             nextcloud_redis_host: "{{ vhost.value.nextcloud_redis_host | default('/run/valkey-' + user.key + '/valkey-server.sock') }}"
             nextcloud_redis_port: "{{ vhost.value.nextcloud_redis_port | default(0) }}"
             nextcloud_redis_password: "{{ vhost.value.nextcloud_redis_password }}"
             nextcloud_redis_service: "{{ vhost.value.nextcloud_redis_service | default('valkey-server@' + user.key) }}"
-            users_nextcloud_trusted_domains: |-
-              [
-                "localhost",
-                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
-                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
-                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
-              ]
           loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
           loop_control:
             loop_var: vhost
@@ -670,29 +631,6 @@
             - ( vhost.value.nextcloud_app_install is not defined )
             - ( vhost.value.nextcloud_app_disable is not defined )
             - ( vhost.value.nextcloud_app_enable is not defined )
-
-        - name: "Debug Nextcloud trusted domains for {{ user.key }} with custom apps"
-          ansible.builtin.debug:
-            var: users_nextcloud_trusted_domains
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-          vars:
-            users_nextcloud_trusted_domains: |-
-              [
-                "localhost",
-                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
-                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
-                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
-              ]
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-          loop_control:
-            loop_var: vhost
-            label: "{{ vhost.key }}"
-          when:
-            - ( vhost.value.users_cms == "nextcloud" )
-            - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
-          tags:
-            - debug
 
         - name: "Include Nextcloud role for {{ user.key }} with custom apps"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -729,14 +667,7 @@
             nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-            nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
-            users_nextcloud_trusted_domains: |-
-              [
-                "localhost",
-                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
-                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
-                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
-              ]
+            nextcloud_trusted_domains: "{{ vhost.value.nextcloud_trusted_domains }}"
           loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
           loop_control:
             loop_var: vhost
@@ -781,18 +712,11 @@
             nextcloud_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_phpfpm_user: "{{ vhost.value.nextcloud_user | default(user.key) }}"
             nextcloud_version: "{{ vhost.value.nextcloud_version }}"
-            nextcloud_trusted_domains: "{{ users_nextcloud_trusted_domains }}"
+            nextcloud_trusted_domains: "{{ vhost.value.nextcloud_trusted_domains }}"
             nextcloud_redis_host: "{{ vhost.value.nextcloud_redis_host | default('/run/valkey-' + user.key + '/valkey-server.sock') }}"
             nextcloud_redis_port: "{{ vhost.value.nextcloud_redis_port | default(0) }}"
             nextcloud_redis_password: "{{ vhost.value.nextcloud_redis_password }}"
             nextcloud_redis_service: "{{ vhost.value.nextcloud_redis_service | default('valkey-server@' + user.key) }}"
-            users_nextcloud_trusted_domains: |-
-              [
-                "localhost",
-                "{{ vhost.value.users_apache_server_name }}"{% if vhost.value.users_apache_server_aliases is defined %},
-                {% for users_nextcloud_trusted_domain in vhost.value.users_apache_server_aliases %}"{{ users_nextcloud_trusted_domain }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if vhost.value.nextcloud_onlyoffice_documentserver is defined %},
-                "{{ vhost.value.nextcloud_onlyoffice_documentserver }}"{% endif %}
-              ]
           loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
           loop_control:
             loop_var: vhost
