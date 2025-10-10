@@ -106,7 +106,7 @@
           - users_nextcloud_apache_server_alias is in users_nextcloud_trusted_domains_list
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
         fail_msg: >-
-          The {{ vhost.value.users_apache_server_alias | join(', ') }} domains should be included in the nextcloud_trusted_domains dictionary, see
+          The {{ vhost.value.users_apache_server_aliases | join(', ') }} domains should be included in the nextcloud_trusted_domains dictionary, see
           https://git.coop/webarch/nextcloud/-/blob/4904a42e9c26eb5fd7087bcda2c8a037ec81d203/defaults/main.yml#L82
           currently the nextcloud_trusted_domains dictionary contains {{ users_nextcloud_trusted_domains_list | join(', ') }}
       vars:
