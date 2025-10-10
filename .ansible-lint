@@ -9,8 +9,6 @@
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
 # https://ansible-lint.readthedocs.io/rules/
-exclude_paths:
-  - "*.swp"
 skip_list:
   - command-instead-of-module
   - key-order[task]
@@ -18,6 +16,9 @@ skip_list:
   - name[template]
   - no-changed-when
   - no-handler
+exclude_paths:
+  - .ansible
+  - "*.swp"
 # TODO:
 # var_naming_pattern: "^[ansible|users|molecule]_?[a-z0-9_]*$"
 # vim: syntax=yaml
