@@ -70,12 +70,21 @@
           - vhost.value.nextcloud_trusted_domains is defined
           - vhost.value.nextcloud_trusted_domains | ansible.builtin.type_debug == "dict"
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          {% if vhost.value.nextcloud_trusted_domains is not defined %}The nextcloud_trusted_domains variable needs to be defined, see
+          https://git.coop/webarch/nextcloud/-/blob/4904a42e9c26eb5fd7087bcda2c8a037ec81d203/defaults/main.yml#L82{% endif %}
+          {% if vhost.value.nextcloud_trusted_domains | ansible.builtin.type_debug != "dict" %}The nextcloud_trusted_domains variable
+          should be a dictionary, see https://git.coop/webarch/nextcloud/-/blob/4904a42e9c26eb5fd7087bcda2c8a037ec81d203/defaults/main.yml#L82{% endif %}
 
     - name: "Check that localhost is in the list of nextcloud_trusted_domains for {{ vhost.key }} VirtualHost for {{ user.key }}"
       ansible.builtin.assert:
         that:
           - ("localhost" is in users_nextcloud_trusted_domains_list)
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          The localhost should be included in the nextcloud_trusted_domains dictionary, see
+          https://git.coop/webarch/nextcloud/-/blob/4904a42e9c26eb5fd7087bcda2c8a037ec81d203/defaults/main.yml#L82
+          currently the nextcloud_trusted_domains dictionary contains {{ users_nextcloud_trusted_domains_list | join(', ') }}
       vars:
         users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
 
@@ -84,6 +93,10 @@
         that:
           - vhost.value.users_apache_server_name is in users_nextcloud_trusted_domains_list
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          The {{ vhost.value.users_apache_server_name }} domain should be included in the nextcloud_trusted_domains dictionary, see
+          https://git.coop/webarch/nextcloud/-/blob/4904a42e9c26eb5fd7087bcda2c8a037ec81d203/defaults/main.yml#L82
+          currently the nextcloud_trusted_domains dictionary contains {{ users_nextcloud_trusted_domains_list | join(', ') }}
       vars:
         users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
 
@@ -92,6 +105,10 @@
         that:
           - users_nextcloud_apache_server_alias is in users_nextcloud_trusted_domains_list
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          The {{ vhost.value.users_apache_server_alias | join(', ') }} domains should be included in the nextcloud_trusted_domains dictionary, see
+          https://git.coop/webarch/nextcloud/-/blob/4904a42e9c26eb5fd7087bcda2c8a037ec81d203/defaults/main.yml#L82
+          currently the nextcloud_trusted_domains dictionary contains {{ users_nextcloud_trusted_domains_list | join(', ') }}
       vars:
         users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
       loop: "{{ vhost.value.users_apache_server_aliases }}"
@@ -104,6 +121,10 @@
         that:
           - vhost.value.nextcloud_onlyoffice_documentserver is in users_nextcloud_trusted_domains_list
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+        fail_msg: >-
+          The {{ vhost.value.nextcloud_onlyoffice_documentserver }} domain should be included in the nextcloud_trusted_domains dictionary, see
+          https://git.coop/webarch/nextcloud/-/blob/4904a42e9c26eb5fd7087bcda2c8a037ec81d203/defaults/main.yml#L82
+          currently the nextcloud_trusted_domains dictionary contains {{ users_nextcloud_trusted_domains_list | join(', ') }}
       vars:
         users_nextcloud_trusted_domains_list: "{{ vhost.value.nextcloud_trusted_domains | community.general.json_query('values(@)') }}"
       when: vhost.value.nextcloud_onlyoffice_documentserver is defined
