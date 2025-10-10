@@ -966,6 +966,50 @@ nextcloud_trusted_domains:
       type: str
       required: false
       description: The tenth trusted domain for Nextcloud.
+    "10":
+      type: str
+      required: false
+      description: The eleventh trusted domain for Nextcloud.
+    "11":
+      type: str
+      required: false
+      description: The twelfth trusted domain for Nextcloud.
+    "12":
+      type: str
+      required: false
+      description: The thirteenth trusted domain for Nextcloud.
+    "13":
+      type: str
+      required: false
+      description: The fourteenth trusted domain for Nextcloud.
+    "14":
+      type: str
+      required: false
+      description: The fifteenth trusted domain for Nextcloud.
+    "15":
+      type: str
+      required: false
+      description: The sixteenth trusted domain for Nextcloud.
+    "16":
+      type: str
+      required: false
+      description: The seventeenth trusted domain for Nextcloud.
+    "17":
+      type: str
+      required: false
+      description: The eightheenth trusted domain for Nextcloud.
+    "18":
+      type: str
+      required: false
+      description: The nineteenth trusted domain for Nextcloud.
+    "19":
+      type: str
+      required: false
+      description: The twentyeth trusted domain for Nextcloud.
+    "20":
+      type: str
+      required: false
+      description: The twenty first trusted domain for Nextcloud.
 nextcloud_trusted_proxies:
   type: dict
   required: false
