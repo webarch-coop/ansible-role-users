@@ -15,7 +15,7 @@
 
 - name: mariadb
   src: https://git.coop/webarch/mariadb.git
-  version: 3.9.1  # mariadb
+  version: 3.9.3  # mariadb
   scm: git
 
 - name: skel
@@ -25,11 +25,11 @@
 
 - name: sudo
   src: https://git.coop/webarch/sudo.git
-  version: 1.6.1  # sudo
+  version: 1.6.2  # sudo
   scm: git
 
 - name: systemd
   src: https://git.coop/webarch/systemd.git
-  version: 2.6.0  # systemd
+  version: 2.8.1  # systemd
   scm: git
 ...

@@ -111,23 +111,18 @@
         that:
           - user.value.users_shell in users_shells
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: ( users_shells is defined ) and ( user.value.users_shell is defined )
+      when:
+        - users_shells is defined
+        - user.value.users_shell is defined
 
     - name: "Check users_skel is an existing path for {{ user.key }}"
       ansible.builtin.stat:
         path: "{{ user.value.users_skel }}"
       register: user_skel_path
-      failed_when:
-        - not user_skel_path.stat.exists | bool
-        - not user_skel_path.stat.isdir | bool
+      failed_when: >-
+        (not user_skel_path.stat.exists | bool) or
+        ((user_skel_path.stat.isdir is defined) and (not user_skel_path.stat.isdir | bool))
       when: user.value.users_skel is defined
-
-    - name: "Check system for {{ user.key }} is true or false"
-      ansible.builtin.assert:
-        that:
-          - ( user.value.users_system ) or ( not user.value.users_system )
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-      when: user.value.users_system is defined
 
     # TODO check users_home_owner
     # TODO users_home_mode
