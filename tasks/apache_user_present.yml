@@ -106,9 +106,10 @@
             - users_apache_certs_present | bool
 
       when:
-        - ( users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded )
-        - ( users_cert is defined ) and ( users_cert is regex('^user|vhost$') )
-        - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( ( user.value.users_apache_virtual_hosts_enabled is defined ) and ( user.value.users_apache_virtual_hosts_enabled | bool ) )
+        - (users_apache_ssl_state is defined) and (users_apache_ssl_state == "active")
+        - (users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded)
+        - (users_cert is defined ) and ( users_cert is regex('^user|vhost$'))
+        - (user.value.users_apache_virtual_hosts_enabled is not defined) or ((user.value.users_apache_virtual_hosts_enabled is defined) and (user.value.users_apache_virtual_hosts_enabled | bool))
 
     - name: Apache sites-enabled symlink absent
       block:

@@ -51,6 +51,57 @@
       tags:
         - molecule-idempotence-notest
 
+    - name: Include the Apache role
+      ansible.builtin.include_role:
+        name: apache
+      vars:  # noqa var-naming[no-role-prefix]
+        apache: true
+        apache_mods_disabled:
+          - ssl
+        apache_mods_enabled:
+          - access_compat
+          - alias
+          - auth_basic
+          - authn_core
+          - authn_file
+          - authz_core
+          - authz_host
+          - authz_user
+          - autoindex
+          - deflate
+          - dir
+          - env
+          - expires
+          - filter
+          - headers
+          - http2
+          - include
+          - mime
+          - mpm_event
+          - negotiation
+          - proxy
+          - proxy_fcgi
+          - proxy_http2
+          - proxy_http
+          - proxy_wstunnel
+          - reqtimeout
+          - remoteip
+          - rewrite
+          - security2
+          - setenvif
+          - socache_shmcb
+          - status
+        apache_conf_disabled:
+          - le
+        apache_conf_enabled:
+          - charset
+          - localized-error-pages
+          - other-vhosts-access-log
+          - security
+          - version-control
+      tags:
+        - molecule-idempotence-notest
+
     - name: Include MariaDB role as root
       ansible.builtin.include_role:
         name: mariadb
@@ -64,7 +115,7 @@
       ansible.builtin.include_role:
         name: users
       vars:  # noqa var-naming[no-role-prefix]
-        users_apache: false
+        users_apache: true
         users_chroot: false
         users_mariadb: true
         users_matomo: false

@@ -8,6 +8,11 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
+- name: apache
+  src: https://git.coop/webarch/apache.git
+  version: 3.11.0  # apache
+  scm: git
+
 - name: apt
   src: https://git.coop/webarch/apt.git
   version: 4.12.1  # apt
