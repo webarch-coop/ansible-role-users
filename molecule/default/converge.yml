@@ -173,7 +173,6 @@
                   - iconv
                   - igbinary
                   - imagick
-                  - imap
                   - intl
                   - ldap
                   - mbstring
@@ -221,7 +220,6 @@
               - php8.2-gmp
               - php8.2-fpm
               - php8.2-imagick
-              - php8.2-imap
               - php8.2-intl
               - php8.2-ldap
               - php8.2-mbstring
@@ -360,7 +358,6 @@
                   - iconv
                   - igbinary
                   - imagick
-                  - imap
                   - intl
                   - ldap
                   - mbstring
@@ -408,7 +405,6 @@
               - php8.3-gmp
               - php8.3-fpm
               - php8.3-imagick
-              - php8.3-imap
               - php8.3-intl
               - php8.3-ldap
               - php8.3-mbstring
@@ -547,7 +543,6 @@
                   - iconv
                   - igbinary
                   - imagick
-                  - imap
                   - intl
                   - ldap
                   - mbstring
@@ -595,7 +590,6 @@
               - php8.4-gmp
               - php8.4-fpm
               - php8.4-imagick
-              - php8.4-imap
               - php8.4-intl
               - php8.4-ldap
               - php8.4-mbstring
