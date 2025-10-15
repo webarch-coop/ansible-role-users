@@ -25,6 +25,7 @@
           ( "php8.2-fpm" in ansible_local.dpkg.installed ) or
           ( "php8.3-fpm" in ansible_local.dpkg.installed ) or
           ( "php8.4-fpm" in ansible_local.dpkg.installed ) or
+          ( "php8.5-fpm" in ansible_local.dpkg.installed ) or
           ( "php-fpm" in ansible_local.dpkg.installed )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
