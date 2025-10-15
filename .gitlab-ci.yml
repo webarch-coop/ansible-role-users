@@ -44,7 +44,8 @@ stages:
   - bookworm
   # the php role doesn't support forky
   # - forky
-  - noble
+  # the php role doesn't support noble
+  # - noble
   - trixie
 lint:
   image: registry.git.coop/webarch/containers/images/trixie:20251009
@@ -67,9 +68,9 @@ trixie:
   stage: trixie
   script:
     - molecule test
-noble:
-  image: registry.git.coop/webarch/containers/images/noble:20251009
-  stage: noble
-  script:
-    - molecule test
+# noble:
+#   image: registry.git.coop/webarch/containers/images/noble:20251009
+#   stage: noble
+#   script:
+#     - molecule test
 ...
