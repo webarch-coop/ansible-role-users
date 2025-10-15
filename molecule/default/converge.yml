@@ -682,7 +682,7 @@
         users_chroot: false
         users_mariadb: true
         users_matomo: false
-        users_php: true
+        users_phpfpm: true
         users:
           root:
             users_state: present
