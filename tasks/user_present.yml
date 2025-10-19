@@ -141,7 +141,7 @@
         - name: When the Matomo user is present check if a Matomo config file exists
           block:
 
-            - name: "Stat {{ matomo_html }}/config/config.ini.php"
+            - name: Stat Matomo config/config.ini.php
               ansible.builtin.stat:
                 path: "{{ matomo_html }}/config/config.ini.php"
               check_mode: false
@@ -197,7 +197,9 @@
 
               when: user_matomo_config.stat.exists | bool
 
-          when: matomo_user in ansible_facts.getent_passwd.keys()
+          when:
+            - matomo_html is defined
+            - matomo_user in ansible_facts.getent_passwd.keys()
 
       when:
         - ( user.key != "root" )
