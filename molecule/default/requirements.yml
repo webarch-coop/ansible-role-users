@@ -10,7 +10,7 @@
 ---
 - name: apache
   src: https://git.coop/webarch/apache.git
-  version: 3.11.0  # apache
+  version: 3.12.0  # apache
   scm: git
 
 - name: apt
