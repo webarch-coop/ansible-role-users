@@ -130,7 +130,7 @@
         - ( user.key != "root" )
         - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
 
-    - name: "Matomo login account tasks for {{ user.key }}"
+    - name: Matomo login account tasks
       block:
 
         - name: Get all users
@@ -147,7 +147,7 @@
               check_mode: false
               register: user_matomo_config
 
-            - name: "Matomo user login account tasks for {{ user.key }}"
+            - name: Matomo user login account tasks
               block:
 
                 - name: Set a fact for the Matomo users PHP version
@@ -197,17 +197,16 @@
 
               when: user_matomo_config.stat.exists | bool
 
-          when:
-            - matomo_html is defined
-            - matomo_user in ansible_facts.getent_passwd.keys()
+          when: matomo_user in ansible_facts.getent_passwd.keys()
 
       when:
-        - ( user.key != "root" )
-        - ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account | bool )
-        - ( user.value.users_email is defined )
-        - ( matomo_user is defined ) and ( matomo_user | length > 0 )
-        - ( matomo_password is defined ) and ( matomo_password | length > 0 )
-        - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
+        - (user.key != "root" )
+        - (user.value.users_matomo_account is defined) and (user.value.users_matomo_account | bool)
+        - (user.value.users_email is defined) and (user.value.users_email | length > 0)
+        - (matomo_user is defined) and (matomo_user | length > 0)
+        - (matomo_password is defined) and (matomo_password | length > 0)
+        - (matomo_token_auth is defined) and (matomo_token_auth | length > 0)
+        - (matomo_html is defined) and (matomo_html | length > 0)
 
     - name: "Include Apache config tasks present for user {{ user.key }}"
       ansible.builtin.include_tasks: apache_user_present.yml
