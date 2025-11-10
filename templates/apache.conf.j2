@@ -1090,6 +1090,13 @@
   <IfModule proxy_module>
     # In reverse proxy or gateway configuration, ProxyRequests should be set to Off
     ProxyRequests Off
+{%         if apache_conf_enabled is defined %}
+{%             if "webarch" in apache_conf_enabled %}
+    ProxyPass "/wsh/" "!"
+{%             elif "mc3" in apache_conf_enabled %}
+    ProxyPass "/mc3/" "!"
+{%             endif %}
+{%         endif %}
 {%         for proxy in vhost_config.users_apache_proxy %}
 {%             if proxy.erroroverride is defined %}
 {%                 if proxy.erroroverride | bool %}
@@ -1113,13 +1120,6 @@
     ProxyAddHeaders On
 {%                 else %}
     ProxyAddHeaders Off
-{%                 endif %}
-{%             endif %}
-{%             if apache_conf_enabled is defined %}
-{%                 if "webarch" in apache_conf_enabled %}
-    ProxyPass "/wsh/" "!"
-{%                 elif "mc3" in apache_conf_enabled %}
-    ProxyPass "/mc3/" "!"
 {%                 endif %}
 {%             endif %}
 {%             if proxy.path is defined and proxy.url is defined %}

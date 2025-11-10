@@ -16,9 +16,6 @@ platforms:
   - name: instance
 provisioner:
   name: ansible
-    # host_vars:
-    #   instance:
-    #     ansible_user: ansible
   config_options:
     defaults:
       duplicate_dict_key: error
@@ -27,7 +24,4 @@ provisioner:
     D: true
 verifier:
   name: ansible
-    # host_vars:
-    #   instance:
-    #     ansible_user: ansible
 ...

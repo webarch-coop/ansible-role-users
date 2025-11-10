@@ -26,7 +26,7 @@
 - name: php
   scm: git
   src: https://git.coop/webarch/php.git
-  version: 4.5.1  # php
+  version: 4.6.2  # php
 
 - name: skel
   src: https://git.coop/webarch/skel.git
@@ -40,6 +40,6 @@
 
 - name: systemd
   src: https://git.coop/webarch/systemd.git
-  version: 2.8.1  # systemd
+  version: 2.11.4  # systemd
   scm: git
 ...
