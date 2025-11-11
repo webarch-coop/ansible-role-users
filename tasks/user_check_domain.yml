@@ -13,7 +13,7 @@
 
     - name: "Lookup IPv4 address using community.general.dig for {{ users_domain }}"
       ansible.builtin.set_fact:
-        users_domain_dig: "{{ query('community.general.dig', users_domain_dig_fqdn, fail_on_error=true, real_empty=true, retry_servfail =true) }}"
+        users_domain_dig: "{{ query('community.general.dig', users_domain_dig_fqdn, fail_on_error=true, real_empty=true, retry_servfail=true) }}"
       vars:
         users_domain_dig_fqdn: "{{ users_domain }}."
       until:
