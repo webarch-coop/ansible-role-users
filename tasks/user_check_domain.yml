@@ -11,14 +11,21 @@
 - name: Skip the checks if the domain starts with an asterisk
   block:
 
-    # Locally test that users_domain resolves to a IP address
-    - name: Variable users_domain_dig set to empty
+    - name: "Lookup IPv4 address using community.general.dig for {{ users_domain }}"
       ansible.builtin.set_fact:
-        users_domain_dig: ""
+        users_domain_dig: "{{ query('community.general.dig', users_domain_dig_fqdn, fail_on_error=true, real_empty=true, retry_servfail =true) }}"
+      vars:
+        users_domain_dig_fqdn: "{{ users_domain }}."
+      until:
+        - users_domain_dig != []
+        - users_domain_dig[0] is ansible.utils.ipv4
+      retries: 10
+      delay: 1
 
-    - name: Set a fact for the domain we are testing
-      ansible.builtin.set_fact:
-        users_domain_dig: "{{ query('community.general.dig', users_domain) | ansible.utils.ipv4 }}"
+    - name: Debug users_domain_dig
+      ansible.builtin.debug:
+        var: users_domain_dig
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
 
     - name: Debug domain name and IP address
       ansible.builtin.debug:
@@ -26,12 +33,13 @@
           - "users_domain: {{ users_domain }}"
           - "ansible_default_ipv4.address: {{ ansible_facts.default_ipv4.address }}"
           - "ansible_all_ipv4_addresses: {{ ansible_facts.all_ipv4_addresses }}"
-          - "users_domain_dig: {{ users_domain_dig }}"
+          - "users_domain_dig: {{ users_domain_dig | join(', ') }}"
           - "users_domain_check: {{ users_domain_check }}"
-        verbosity: 1
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
       when:
-        - ( users_domain_check is defined )
-        - ( users_domain_dig is defined ) and ( users_domain_dig[0] is not defined )
+        - users_domain_check is defined
+        - users_domain_dig is defined
+        - users_domain_dig[0] is not defined
       tags:
         - debug
 
@@ -43,10 +51,11 @@
           - "ansible_all_ipv4_addresses: {{ ansible_facts.all_ipv4_addresses }}"
           - "users_domain_dig[0]: {{ users_domain_dig[0] }}"
           - "users_domain_check: {{ users_domain_check }}"
-        verbosity: 1
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
       when:
-        - ( users_domain_check is defined )
-        - ( users_domain_dig is defined ) and ( users_domain_dig[0] is defined )
+        - users_domain_check is defined
+        - users_domain_dig is defined
+        - users_domain_dig[0] is defined
       tags:
         - debug
 
@@ -54,15 +63,16 @@
       ansible.builtin.debug:
         msg: "{{ users_domain }} appears not to resolve to a IP address"
       when:
-        - ( users_domain_dig == [] ) or ( users_domain_dig | length == 0 )
-        - ( users_domain_checks is not defined ) or ( users_domain_check != "strict" )
+        - users_domain_dig == []
+        - (users_domain_checks is not defined) or (users_domain_check != "strict")
 
     - name: "Fail if {{ users_domain }} which resolves to {{ users_domain_dig }} is not a IPv4 address"
       ansible.builtin.fail:
         msg: "{{ users_domain }} appears not to resolve to a IP address"
       when:
-        - ( users_domain_dig == [] ) or ( users_domain_dig | length == 0 )
-        - ( users_domain_check is defined ) and ( users_domain_check == "strict" )
+        - users_domain_dig == []
+        - users_domain_check is defined
+        - users_domain_check == "strict"
 
     - name: "Warn if {{ users_domain }} which resolves to {{ users_domain_dig[0] }} doesn't resolve to an IP address assigned to this server"
       ansible.builtin.debug:
@@ -70,8 +80,8 @@
       when:
         - users_domain_dig[0] is defined
         - users_domain_dig[0] not in ansible_facts.all_ipv4_addresses
-        - ( users_domain_check is not defined ) or ( users_domain_check is defined and users_domain_check != "strict" )
-        - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
+        - (users_domain_check is not defined) or (users_domain_check is defined and users_domain_check != "strict")
+        - (users_reverse_proxy is not defined) or (users_reverse_proxy != "cloudflare")
       tags:
         - debug
 
@@ -83,7 +93,7 @@
         - users_domain_dig[0] not in ansible_facts.all_ipv4_addresses
         - users_domain_check is defined
         - users_domain_check == "strict"
-        - ( users_reverse_proxy is not defined ) or ( users_reverse_proxy != "cloudflare" )
+        - (users_reverse_proxy is not defined) or (users_reverse_proxy != "cloudflare")
 
   when: users_domain is not regex('^[*][.].*$')
   tags:
