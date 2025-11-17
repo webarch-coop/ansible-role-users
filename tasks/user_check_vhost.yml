@@ -223,9 +223,9 @@
         - name: "Check that the users_apache_directories keys when they are relative paths, for {{ vhost.key }} VirtualHost for {{ user.key }} contain valid characters"
           ansible.builtin.assert:
             that:
-              - dir.key is regex("^[a-zA-Z0-9/_.-]*$")
+              - dir.key is regex("^[a-zA-Z0-9/@_.-]*$")
             quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-            fail_msg: "With a relative DocumentRoot path, only letters, numbers, underscores, dashes and forward slashes are allowed"
+            fail_msg: "With a relative DocumentRoot path, only letters, numbers, @, underscores, dashes and forward slashes are allowed"
           when: dir.key is not regex("^[\/].*$")
           loop: "{{ vhost.value.users_apache_directories | dict2items }}"
           loop_control:
