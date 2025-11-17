@@ -61,6 +61,7 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
+      when: (user.value.users_apache_virtual_hosts_enabled is not defined) or (user.value.users_apache_virtual_hosts_enabled | bool)
 
   # rescue:
 
