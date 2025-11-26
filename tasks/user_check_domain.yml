@@ -21,6 +21,22 @@
         - users_domain_dig[0] is ansible.utils.ipv4
       retries: 10
       delay: 1
+      when: (users_domain_dig_dns is not defined) or (users_domain_dig_dns | length == 0)
+
+    - name: "Lookup IPv4 address using community.general.dig via {{ users_domain_dig_dns }} for {{ users_domain }}"
+      ansible.builtin.set_fact:
+        users_domain_dig: "{{ query('community.general.dig', users_domain_dig_fqdn, fail_on_error=true, real_empty=true, retry_servfail=true) }}"
+      vars:
+        users_domain_dig_fqdn: "{{ users_domain }}."
+        users_domain_dig_query: "'community.general.dig', users_domain_dig_fqdn, fail_on_error=true, real_empty=true, retry_servfail=true, {{ users_domain_dig_dns }}"
+      until:
+        - users_domain_dig != []
+        - users_domain_dig[0] is ansible.utils.ipv4
+      retries: 10
+      delay: 1
+      when:
+        - users_domain_dig_dns is defined
+        - users_domain_dig_dns | length > 0
 
     - name: Debug users_domain_dig
       ansible.builtin.debug:
