@@ -145,10 +145,6 @@ argument_specs:
         choices:
           - slack
           - strict
-      users_domain_dig_dns:
-        type: str
-        required: false
-        description: Optional @@DNS_SERVER_1,DNS_SERVER_2,... argument for the community.general.dig lookup.
       users_forward:
         type: bool
         required: true

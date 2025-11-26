@@ -62,7 +62,7 @@
 
     - name: Set a fact for the path to Bash
       ansible.builtin.set_fact:
-        users_bash: "{{ ansible_local.bash.path }}"
+        users_bash: "{{ ansible_facts.ansible_local.bash.path }}"
 
     - name: Print available shells and the path for Bash
       ansible.builtin.debug:
