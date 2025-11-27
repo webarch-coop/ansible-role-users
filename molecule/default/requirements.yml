@@ -11,7 +11,7 @@
 - name: apache
   src: https://git.coop/webarch/apache.git
   # https://git.coop/webarch/apache/-/releases
-  version: 3.12.0  # apache
+  version: 3.13.0  # apache
   scm: git
 
 - name: apt
@@ -47,6 +47,6 @@
 - name: systemd
   src: https://git.coop/webarch/systemd.git
   # https://git.coop/webarch/systemd/-/releases
-  version: 2.11.4  # systemd
+  version: 2.11.5  # systemd
   scm: git
 ...
