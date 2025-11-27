@@ -41,10 +41,10 @@
         tasks_from: local_facts.yml
       when: >-
         ( users_pkgs_installed.changed | bool ) or
-        ( ( ansible_local.dpkg.arch is not defined ) or
-        ( ansible_local.gpg.version is not defined ) or
-        ( ansible_local.bash.path is not defined ) or
-        ( ansible_local.sh.path is not defined ) )
+        ( ( ansible_facts.ansible_local.dpkg.arch is not defined ) or
+        ( ansible_facts.ansible_local.gpg.version is not defined ) or
+        ( ansible_facts.ansible_local.bash.path is not defined ) or
+        ( ansible_facts.ansible_local.sh.path is not defined ) )
 
     - name: Slurp /etc/shells
       ansible.builtin.slurp:
@@ -108,13 +108,13 @@
     - name: Include Apache tasks
       ansible.builtin.include_tasks: apache.yml
       when:
-        - ( "apache2" in ansible_local.dpkg.installed )
+        - ( "apache2" in ansible_facts.ansible_local.dpkg.installed )
         - ( users_apache is defined ) and ( users_apache | bool )
 
     - name: Include MariaDB tasks
       ansible.builtin.include_tasks: mariadb.yml
       when:
-        - ( "mariadb-server" in ansible_local.dpkg.installed )
+        - ( "mariadb-server" in ansible_facts.ansible_local.dpkg.installed )
         - ( users_mariadb is defined ) and ( users_mariadb | bool )
 
     - name: Include Valkey checks when one for more users are in the valkey group

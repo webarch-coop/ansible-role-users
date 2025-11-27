@@ -14,7 +14,7 @@
     - name: The Valkey server package is required when users are in the valkey group
       ansible.builtin.assert:
         that:
-          - ( "valkey-server" in ansible_local.dpkg.installed )
+          - ( "valkey-server" in ansible_facts.ansible_local.dpkg.installed )
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: Include the Valkey user checks for users in the valkey and chroot groups

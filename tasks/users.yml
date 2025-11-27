@@ -34,14 +34,14 @@
       when:
         - users_apache is defined
         - users_apache | bool
-        - ( "apache2" in ansible_local.dpkg.installed )
+        - ( "apache2" in ansible_facts.ansible_local.dpkg.installed )
 
     - name: Include MariaDB checks
       ansible.builtin.include_tasks: mariadb_check.yml
       when:
         - users_mariadb is defined
         - users_mariadb | bool
-        - ( "mariadb-server" in ansible_local.dpkg.installed )
+        - ( "mariadb-server" in ansible_facts.ansible_local.dpkg.installed )
 
     - name: Directories for users state files present
       ansible.builtin.file:
@@ -293,7 +293,7 @@
         - users_update_strategy == "apache"
         - users_apache is defined
         - users_apache | bool
-        - ( "apache2" in ansible_local.dpkg.installed )
+        - ( "apache2" in ansible_facts.ansible_local.dpkg.installed )
 
     - name: Update MariaDB config for users present
       block:

@@ -87,9 +87,11 @@
         src: .bash_profile
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.bash_profile"
         force: false
-        mode: "0600"
+        mode: "{{ users_private_files | community.general.json_query(users_mode_query) | default('0600') }}"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
+      vars:
+        users_mode_query: "[?path=='.bash_profile'].mode|[0]"
       when:
         - user.value.users_skel is defined
         - user.value.users_skel == "/usr/local/etc/skel.d/www"
@@ -162,9 +164,11 @@
       ansible.builtin.copy:
         src: "files/{{ user.value.users_editor }}/selected_editor"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.selected_editor"
-        mode: "0600"
+        mode: "{{ users_private_files | community.general.json_query(users_mode_query) | default('0600') }}"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
+      vars:
+        users_mode_query: "[?path=='.selected_editor'].mode|[0]"
       when:
         - ( user.value.users_editor is defined ) and ( user.value.users_editor | length > 0 )
 
@@ -176,9 +180,11 @@
             src: "files/vim/vimrc"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.vimrc"
             force: false
-            mode: "0600"
+            mode: "{{ users_private_files | community.general.json_query(users_mode_query) | default('0600') }}"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          vars:
+            users_mode_query: "[?path=='.vimrc'].mode|[0]"
 
         - name: "vim set to be default editor for {{ user.key }}"
           ansible.builtin.lineinfile:
@@ -187,20 +193,25 @@
             line: 'export EDITOR="vim"'
             state: present
             create: true
-            mode: "0600"
+            mode: "{{ users_private_files | community.general.json_query(users_mode_query) | default('0600') }}"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          vars:
+            users_mode_query: "[?path=='.bashrc'].mode|[0]"
           when:
-            - ( user.value.users_editor is defined ) and ( user.value.users_editor == "vim" )
+            - user.value.users_editor is defined
+            - user.value.users_editor == "vim"
 
         - name: "~/.nanorc present for {{ user.key }}"
           ansible.builtin.copy:
             src: "files/nano/nanorc"
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.nanorc"
             force: false
-            mode: "0400"
+            mode: "{{ users_private_files | community.general.json_query(users_mode_query) | default('0600') }}"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          vars:
+            users_mode_query: "[?path=='.nanorc'].mode|[0]"
 
         - name: "nano set to be default editor for {{ user.key }}"
           ansible.builtin.lineinfile:
@@ -209,11 +220,14 @@
             line: 'export EDITOR="nano"'
             state: present
             create: true
-            mode: "0400"
+            mode: "{{ users_private_files | community.general.json_query(users_mode_query) | default('0600') }}"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          vars:
+            users_mode_query: "[?path=='.bashrc'].mode|[0]"
           when:
-            - ( user.value.users_editor is defined ) and ( user.value.users_editor == "nano" )
+            - user.value.users_editor is defined
+            - user.value.users_editor == "nano"
 
       when:
         - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
@@ -223,9 +237,11 @@
         src: gitconfig.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.gitconfig"
         force: false
-        mode: "0400"
+        mode: "{{ users_private_files | community.general.json_query(users_mode_query) | default('0600') }}"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
+      vars:
+        users_mode_query: "[?path=='.gitconfig'].mode|[0]"
       when:
         - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system )
         - ( user.value.users_name is defined ) and ( user.value.users_name | length > 0 )

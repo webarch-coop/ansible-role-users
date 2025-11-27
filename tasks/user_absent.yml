@@ -25,7 +25,7 @@
     - name: Include Apache config absent tasks
       ansible.builtin.include_tasks: apache_user_absent.yml
       when:
-        - ( "apache2" in ansible_local.dpkg.installed )
+        - ( "apache2" in ansible_facts.ansible_local.dpkg.installed )
         - users_apache is defined
         - users_apache | bool
 
