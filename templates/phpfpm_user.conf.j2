@@ -6,19 +6,16 @@ group = "{{ user.value.users_group | default(user.key) }}"
 
 {% if users_phpfpm_chroot | bool %}
 chroot = "{{ users_chroot_users_dir }}/{{ user.key }}"
-{% endif %}
-listen = "{{ users_phpfpm_socket }}"
-
-{% if users_phpfpm_chroot | bool %}
 access.log = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
 slowlog = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
 php_admin_value[error_log] = "{{ users_chroot_users_dir }}/{{ user.key }}{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log"
 {% else %}
-listen = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/php-fpm.sock"
 access.log = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.access.log"
 slowlog = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/php-fpm.slow.log"
 php_admin_value[error_log] = "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs/fpm-php.error.log"
 {% endif %}
+
+listen = "{{ users_phpfpm_socket }}"
 listen.owner = root
 listen.group = "{{ user.key }}"
 listen.mode = 0660
