@@ -102,21 +102,21 @@
     - name: Debug users_phpfpm_chroot
       ansible.builtin.debug:
         var: users_phpfpm_chroot
-        # verbosity: 2
+        verbosity: 2
       tags:
         - debug
 
     - name: Debug users_phpfpm_socket
       ansible.builtin.debug:
         var: users_phpfpm_socket
-        # verbosity: 2
+        verbosity: 2
       tags:
         - debug
 
     - name: Debug users_phpfpm_apache_socket
       ansible.builtin.debug:
         var: users_phpfpm_apache_socket
-        # verbosity: 2
+        verbosity: 2
       tags:
         - debug
 
@@ -499,7 +499,7 @@
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             section: PHP
             option: sys_temp_dir
-            value: "/home/{{ user.key }}/tmp"
+            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             state: present
             create: true
             mode: "0640"
@@ -588,9 +588,11 @@
             - option: "opcache.enable_cli"
               value: "1"
             - option: "opcache.file_cache"
-              value: "/home/{{ user.key }}/tmp"
+              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.file_cache_only"
               value: "1"
+            - option: "opcache.file_update_protection"
+              value: "2"
             - option: "opcache.jit"
               value: "0"
             - option: "opcache.max_accelerated_files"
