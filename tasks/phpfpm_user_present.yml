@@ -590,7 +590,7 @@
             - option: "opcache.file_cache"
               value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.file_cache_only"
-              value: "1"
+              value: "0"
             - option: "opcache.file_update_protection"
               value: "2"
             - option: "opcache.jit"
