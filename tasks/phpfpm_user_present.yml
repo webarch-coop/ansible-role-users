@@ -506,6 +506,18 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
+        - name: Users ~/.php.ini file present and upload_tmp_dir in PHP section set to ~/tmp
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            section: PHP
+            option: upload_tmp_dir
+            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            state: present
+            create: true
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
         - name: Users ~/.php.ini file present and memory_limit not in PHP section absent
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
@@ -521,6 +533,27 @@
             section: PHP
             option: memory_limit
             value: "-1"
+            state: present
+            create: true
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and max_input_vars not in PHP section absent
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            option: max_input_vars
+            state: absent
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and max_input_vars in PHP section set to 100000
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            section: PHP
+            option: max_input_vars
+            value: 100000
             state: present
             create: true
             mode: "0640"
@@ -549,26 +582,31 @@
             group: "{{ user.value.users_group | default(user.key) }}"
           when: users_phpapcu_pkg in ansible_facts.ansible_local.dpkg.installed
 
-        - name: Users ~/.php.ini file present and max_input_vars not in PHP section absent
+        - name: Users ~/.php.ini file present and session.save_path in Session section set to ~/tmp
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            option: max_input_vars
-            state: absent
-            mode: "0640"
-            owner: "{{ user.key }}"
-            group: "{{ user.value.users_group | default(user.key) }}"
-
-        - name: Users ~/.php.ini file present and max_input_vars in PHP section set to 100000
-          community.general.ini_file:
-            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            section: PHP
-            option: max_input_vars
-            value: 100000
+            section: Session
+            option: "session.save_path"
+            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             state: present
             create: true
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          when: users_phpapcu_pkg in ansible_facts.ansible_local.dpkg.installed
+
+        - name: Users ~/.php.ini file present and soap.wsdl_cache_dir in soap section set to ~/tmp
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            section: soap
+            option: "soap.wsdl_cache_dir"
+            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            state: present
+            create: true
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+          when: users_phpapcu_pkg in ansible_facts.ansible_local.dpkg.installed
 
         # https://stackoverflow.com/questions/77778860/proper-opcache-configuration-for-cli
         - name: Users ~/.php.ini file present and opcache configured
@@ -595,6 +633,8 @@
               value: "2"
             - option: "opcache.jit"
               value: "0"
+            - option: "opcache.lockfile_path"
+              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.max_accelerated_files"
               value: "100000"
             - option: "opcache.revalidate_freq"
