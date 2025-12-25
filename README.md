@@ -1264,23 +1264,30 @@ And `~/.php.ini` is created with the following three lines (with `example` repla
 
 ```ini
 [PHP]
-sys_temp_dir = /home/example/tmp
-memory_limit = -1
 max_input_vars = 100000
+memory_limit = -1
+sys_temp_dir = /home/example/tmp
+upload_tmp_dir = /home/example/tmp
 [apc]
 apc.enable_cli = 1
 [opcache]
 opcache.enable = 1
 opcache.enable_cli = 1
 opcache.file_cache = /home/example/tmp
-opcache.file_cache_only = 1
+opcache.file_cache_only = 0
+opcache.file_update_protection = 2
 opcache.jit = 0
+opcache.lockfile_path = /home/example/tmp
 opcache.max_accelerated_files = 100000
 opcache.revalidate_freq = 2
 opcache.use_cwd = 1
 opcache.validate_permission = 1
 opcache.validate_root = 1
 opcache.validate_timestamps = 1
+[Session]
+session.save_path = /home/example/tmp
+[soap]
+soap.wsdl_cache_dir = /home/example/tmp
 ```
 
 Setting `memory_limit = -1` overides the default of 128M, this is required for the Nextcloud CLI updater.
