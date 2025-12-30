@@ -518,7 +518,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and memory_limit not in PHP section
+        - name: Users ~/.php.ini file present and memory_limit not no section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: memory_limit
@@ -539,7 +539,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and max_input_vars not in PHP section
+        - name: Users ~/.php.ini file present and max_input_vars not in no section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: max_input_vars
@@ -560,7 +560,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and apc.enable_cli not in apc section
+        - name: Users ~/.php.ini file present and apc.enable_cli not in no section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: "apc.enable_cli"
