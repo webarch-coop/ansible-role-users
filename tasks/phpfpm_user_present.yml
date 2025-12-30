@@ -485,7 +485,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and sys_temp_dir not in PHP section absent
+        - name: Users ~/.php.ini file present and sys_temp_dir not in PHP section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: sys_temp_dir
@@ -518,7 +518,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and memory_limit not in PHP section absent
+        - name: Users ~/.php.ini file present and memory_limit not in PHP section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: memory_limit
@@ -539,7 +539,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and max_input_vars not in PHP section absent
+        - name: Users ~/.php.ini file present and max_input_vars not in PHP section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: max_input_vars
@@ -560,7 +560,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and apc.enable_cli not in apc section absent
+        - name: Users ~/.php.ini file present and apc.enable_cli not in apc section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: "apc.enable_cli"
@@ -608,7 +608,26 @@
             group: "{{ user.value.users_group | default(user.key) }}"
           when: users_phpapcu_pkg in ansible_facts.ansible_local.dpkg.installed
 
-        # https://stackoverflow.com/questions/77778860/proper-opcache-configuration-for-cli
+        - name: Users ~/.php.ini file present and opcache.file_cache not in opcache section
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            option: "opcache.file_cache"
+            section: opcache
+            state: absent
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
+        - name: Users ~/.php.ini file present and opcache.interned_strings_buffer not in opcache section
+          community.general.ini_file:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
+            option: "opcache.interned_strings_buffer"
+            section: opcache
+            state: absent
+            mode: "0640"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_group | default(user.key) }}"
+
         - name: Users ~/.php.ini file present and opcache configured
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
@@ -625,8 +644,6 @@
               value: "1"
             - option: "opcache.enable_cli"
               value: "1"
-            - option: "opcache.file_cache"
-              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.file_cache_only"
               value: "0"
             - option: "opcache.file_update_protection"
