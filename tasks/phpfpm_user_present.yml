@@ -1,4 +1,4 @@
-# Copyright 2018-2025 Chris Croome
+# Copyright 2018-2026 Chris Croome
 #
 # This file is part of the Webarchitects Users Ansible role.
 #
@@ -518,7 +518,7 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
 
-        - name: Users ~/.php.ini file present and memory_limit not no section
+        - name: Users ~/.php.ini file present and memory_limit not in no section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             option: memory_limit
@@ -644,6 +644,8 @@
               value: "1"
             - option: "opcache.enable_cli"
               value: "1"
+            - option: "opcache.file_cache"
+              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.file_cache_only"
               value: "0"
             - option: "opcache.file_update_protection"
