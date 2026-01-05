@@ -608,16 +608,6 @@
             group: "{{ user.value.users_group | default(user.key) }}"
           when: users_phpapcu_pkg in ansible_facts.ansible_local.dpkg.installed
 
-        - name: Users ~/.php.ini file present and opcache.file_cache not in opcache section
-          community.general.ini_file:
-            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            option: "opcache.file_cache"
-            section: opcache
-            state: absent
-            mode: "0640"
-            owner: "{{ user.key }}"
-            group: "{{ user.value.users_group | default(user.key) }}"
-
         - name: Users ~/.php.ini file present and opcache.interned_strings_buffer not in opcache section
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
