@@ -27,8 +27,9 @@
     - name: SSH key configuration when ~/.ssh/authorized_keys.d exists
       block:
 
-        - name: "SSH keys present when ~/.ssh/authorized_keys.d exists and not runing in check mode for {{ user.key }}"
+        - name: "SSH keys present when ~/.ssh/authorized_keys.d exists for {{ user.key }}"
           ansible.builtin.include_tasks: ssh_keys.yml
+          when:
             - user.value.users_ssh_public_keys is defined
             - user.value.users_ssh_public_keys != []
 
