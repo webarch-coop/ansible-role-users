@@ -15,7 +15,21 @@
 - name: SSH keys in place
   block:
 
-    - name: SSH public keys downloaded
+    - name: "TMPDIR for SSH public keys to be downloaded to present for {{ user.key }}"
+      ansible.builtin.tempfile:
+        state: directory
+      changed_when: false
+      register: user_ssh_tmpdir
+
+    - name: Debug user_ssh_tmpdir
+      ansible.builtin.debug:
+        var: user_ssh_tmpdir
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+      when: user_ssh_tmpdir is defined
+      tags:
+        - debug
+
+    - name: "SSH public keys downloaded for {{ user.key }}"
       ansible.builtin.get_url:
         url: "{{ key_url }}"
         dest: "{{ user_ssh_tmpdir.path }}/{{ key_idex }}"
@@ -29,7 +43,7 @@
         label: "{{ key_url }}"
       changed_when: false
 
-    - name: "Check and copy SSH public keys from {{ user_ssh_tmpdir.path }} to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
+    - name: "Check and copy SSH public keys from {{ user_ssh_tmpdir.path }} to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d for {{ user.key }}"
       ansible.builtin.copy:
         src: "{{ user_ssh_tmpdir.path }}/{{ key_idex }}"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d/authorized_keys_{{ key_idex }}"
@@ -44,7 +58,7 @@
         index_var: key_idex
         label: "{{ key_url }}"
 
-    - name: "Assemble all the {{ user_ssh_tmpdir.path }}/* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
+    - name: "Assemble all the {{ user_ssh_tmpdir.path }}/* public keys to ~/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }} for {{ user.key }}"
       ansible.builtin.assemble:
         src: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/{{ users_ssh_authorized_keys_file_name | default('authorized_keys') }}"
@@ -54,15 +68,7 @@
         group: "{{ user.value.users_home_group | default(user.key) }}"
         validate: ssh-keygen -lf %s
 
-    - name: "SSH README.md in place for {{ user.key }}"
-      ansible.builtin.template:
-        src: SSH_README.md.j2
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
-        mode: "0600"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-
-    - name: "TMPDIR for SSH public keys absent {{ user_ssh_tmpdir.path }}"
+    - name: "TMPDIR for SSH public keys absent {{ user_ssh_tmpdir.path }} for {{ user.key }}"
       ansible.builtin.file:
         path: "{{ user_ssh_tmpdir.path }}"
         state: absent

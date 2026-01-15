@@ -358,6 +358,21 @@ users_cron_tmpdir_max_age_days: 2
 # users_matomo_delete_users is set to true
 users_matomo_delete_users: false
 users_ssh_authorized_keys_file_name: authorized_keys
+# Lines to remove from ~/.ssh/known_hosts
+users_ssh_known_hosts_absent: []
+# Lines to add to ~/.ssh/known_hosts
+# ssh-keyscan git.coop | grep -v '^#' | sed 's/^/\x27/' | sed 's/$/\x27/' | sed 's/^/  - /'
+# ssh-keyscan github.com | grep -v '^#' | sed 's/^/\x27/' | sed 's/$/\x27/' | sed 's/^/  - /'
+# ssh-keyscan gitlab.com | grep -v '^#' | sed 's/^/\x27/' | sed 's/$/\x27/' | sed 's/^/  - /'
+users_ssh_known_hosts_present:
+  - 'git.coop ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCkhAnUQcXqMCh83nRLooCVJYThbzxRvyUK39WxXE6lv8Peadn2x+sLbgtgyZ9rMhkzyF9Hcw9SpOOr+LL+KQmUZAJhc4huTqfjiF3vqU+UFj6Z8fmtTMvfToSaQnXyz9bsR6vLAYQRm71M2riLioZrUoo4tYaDcajDUG9RroI9BDiiammV9cVM7+2Kmz9hhAmeGtrOlV2/hye1qeaLRY7fcv7miGP+zS131HOLHjQiB1suERE+UpARtS6OrX6Wj8cl8FXBA3HsJzshvnKmqbpTGMbfCqyuifwa+7GpBD6CKVrKvsHuv54Txh/WxnqFgmWAxozDNLoRikrd0smF4jIMdJtbYRo0O46w90fOuAblqZ9a8sO3mAv6LR+8f1PPS7/vi8pBmJNj/+jozZE6oLqpa1j+Q2d7j6dGcX0KjgwTISk0bYRPTpazwVDPxV5OuklN6PeONedsrh16d+aO1UZKR/wKmQsfTST0vaosDv3tTbR0E9A0l/5FEnMWZIau0uPYz8cqvU+6zSEa/hFKVYke2vmeKuiJgGiXCp4K/4ViN9EYIlTqM+d8RuRqc7T1G5y0aHsc9/1+b4PL59H06udsrUDCfXSPG8+Amg3wAqDTBMlA0AnEsDm1hCCB5Dh4gSHHlY+wELjn0T97K7NwWLiYCTmBJ/VIjEt6kEIcZMabAQ=='
+  - 'git.coop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAjKiXIDVWRXYtX9EruObbJT8vzNOUsDeL9x//wso5SG'
+  - 'github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg='
+  - 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk='
+  - 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl'
+  - 'gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY='
+  - 'gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/StKDHMoX4/OKyIzuS0q/T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9'
+  - 'gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf'
 # On Bullseye Bash is /bin/bash, on Xenial it is also in /usr/bin/bash, on
 # Bookworm it will be in /usr/bin/bash, this role will set users_bash to the
 # last option in /etc/shells ending in /bash, so set it manually if this isn't

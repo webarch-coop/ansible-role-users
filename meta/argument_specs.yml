@@ -297,6 +297,16 @@ argument_specs:
         type: str
         required: true
         description: The file name to use for the SSH authorized_keys.
+      users_ssh_known_hosts_absent:
+        type: list
+        elements: str
+        required: false
+        description: A list of lines that should be absent from ~/.ssh/known_hosts.
+      users_ssh_known_hosts_present:
+        type: list
+        elements: str
+        required: false
+        description: A list of lines that should be present in ~/.ssh/known_hosts.
       users_state_dir:
         type: str
         required: true

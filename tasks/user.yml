@@ -138,9 +138,8 @@
         loop_var: file
         label: "{{ file.path }}"
 
-    - name: "SSH public keys present for {{ user.key }}"
+    - name: "Include SSH configuration for {{ user.key }}"
       ansible.builtin.include_tasks: ssh.yml
-      when: ( user.value.users_ssh_public_keys is defined ) and ( user.value.users_ssh_public_keys != [] )
 
     - name: "Stat {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh"
       ansible.builtin.stat:
