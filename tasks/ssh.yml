@@ -24,57 +24,59 @@
         group: "{{ user.value.users_home_group | default(user.key) }}"
       register: user_ssh_authorized_keys_d
 
-    - name: "SSH keys present when ~/.ssh/authorized_keys.d exists and not runing in check mode for {{ user.key }}"
-      ansible.builtin.include_tasks: ssh_keys.yml
+    - name: SSH key configuration when ~/.ssh/authorized_keys.d exists
+      block:
+
+        - name: "SSH keys present when ~/.ssh/authorized_keys.d exists and not runing in check mode for {{ user.key }}"
+          ansible.builtin.include_tasks: ssh_keys.yml
+            - user.value.users_ssh_public_keys is defined
+            - user.value.users_ssh_public_keys != []
+
+        - name: "SSH known hosts absent from ~/.ssh/known_hosts for {{ user.key }}"
+          ansible.builtin.lineinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/knowd_hosts"
+            state: absent
+            line: "{{ users_ssh_known_host }}"
+            mode: "0600"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
+          loop: "{{ users_ssh_known_hosts_absent }}"
+          loop_control:
+            loop_var: users_ssh_known_host
+            label: "{{ users_ssh_known_host | ansible.builtin.regex_search('^.*[ ]') }}"
+          when:
+            - users_ssh_known_hosts_absent is defined
+            - users_ssh_known_hosts_absent != []
+
+        - name: "SSH known hosts present in ~/.ssh/known_hosts for {{ user.key }}"
+          ansible.builtin.lineinfile:
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/knowd_hosts"
+            state: present
+            create: true
+            line: "{{ users_ssh_known_host }}"
+            regexp: "^{{ users_ssh_known_host | ansible.builtin.regex_search('^.*[ ]') | ansible.builtin.regex_escape }}"
+            mode: "0600"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
+          loop: "{{ users_ssh_known_hosts_present }}"
+          loop_control:
+            loop_var: users_ssh_known_host
+            label: "{{ users_ssh_known_host | ansible.builtin.regex_search('^.*[ ]') }}"
+          when:
+            - users_ssh_known_hosts_present is defined
+            - users_ssh_known_hosts_present != []
+
+        - name: "SSH ~/.ssh/README.md in place for {{ user.key }}"
+          ansible.builtin.template:
+            src: SSH_README.md.j2
+            dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
+            mode: "0600"
+            owner: "{{ user.key }}"
+            group: "{{ user.value.users_home_group | default(user.key) }}"
+
       when:
-        - not ansible_check_mode | bool
-        - user_ssh_tmpdir is defined
         - user_ssh_authorized_keys_d.state is defined
         - user_ssh_authorized_keys_d.state == "directory"
-        - user.value.users_ssh_public_keys is defined
-        - user.value.users_ssh_public_keys != []
-
-    - name: "SSH known hosts absent from ~/.ssh/known_hosts for {{ user.key }}"
-      ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/knowd_hosts"
-        state: absent
-        line: "{{ users_ssh_known_host }}"
-        mode: "0600"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-      loop: "{{ users_ssh_known_hosts_absent }}"
-      loop_control:
-        loop_var: users_ssh_known_host
-        label: "{{ users_ssh_known_host | ansible.builtin.regex_search('^.*[ ]') }}"
-      when:
-        - users_ssh_known_hosts_absent is defined
-        - users_ssh_known_hosts_absent != []
-
-    - name: "SSH known hosts present in ~/.ssh/known_hosts for {{ user.key }}"
-      ansible.builtin.lineinfile:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/knowd_hosts"
-        state: present
-        create: true
-        line: "{{ users_ssh_known_host }}"
-        regexp: "^{{ users_ssh_known_host | ansible.builtin.regex_search('^.*[ ]') | ansible.builtin.regex_escape }}"
-        mode: "0600"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
-      loop: "{{ users_ssh_known_hosts_present }}"
-      loop_control:
-        loop_var: users_ssh_known_host
-        label: "{{ users_ssh_known_host | ansible.builtin.regex_search('^.*[ ]') }}"
-      when:
-        - users_ssh_known_hosts_present is defined
-        - users_ssh_known_hosts_present != []
-
-    - name: "SSH README.md in place for {{ user.key }}"
-      ansible.builtin.template:
-        src: SSH_README.md.j2
-        dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/README.md"
-        mode: "0600"
-        owner: "{{ user.key }}"
-        group: "{{ user.value.users_home_group | default(user.key) }}"
 
   tags:
     - users
