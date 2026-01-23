@@ -74,10 +74,15 @@
           block:
 
             - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script using /bin/sh as {{ user.key }}"
-              ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
-              args:
-                executable: "{{ ansible_facts.ansible_local.sh.path | default('/bin/sh') }}"
+              ansible.builtin.shell:
                 chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+                cmd: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
+                executable: "{{ ansible_facts.ansible_local.sh.path | default('/bin/sh') }}"
+              environment:
+                HOME: "{{ users_basedir }}/{{ user.key }}"
+                PATH: "{{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin"
+                TMPDIR: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+                USER: "{{ user.key }}"
               become: true
               become_user: "{{ user.key }}"
               register: users_cron_daily_test_run
@@ -165,10 +170,15 @@
           block:
 
             - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script using /bin/sh as {{ user.key }}"
-              ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
-              args:
-                executable: "{{ ansible_facts.ansible_local.sh.path | default('/bin/sh') }}"
+              ansible.builtin.shell:
                 chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+                cmd: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
+                executable: "{{ ansible_facts.ansible_local.sh.path | default('/bin/sh') }}"
+              environment:
+                HOME: "{{ users_basedir }}/{{ user.key }}"
+                PATH: "{{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin"
+                TMPDIR: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+                USER: "{{ user.key }}"
               become: true
               become_user: "{{ user.key }}"
               register: users_cron_hourly_test_run
@@ -256,10 +266,15 @@
           block:
 
             - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script using /bin/sh as {{ user.key }}"
-              ansible.builtin.shell: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
-              args:
-                executable: "{{ ansible_facts.ansible_local.sh.path | default('/bin/sh') }}"
+              ansible.builtin.shell:
                 chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
+                cmd: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+                executable: "{{ ansible_facts.ansible_local.sh.path | default('/bin/sh') }}"
+              environment:
+                HOME: "{{ users_basedir }}/{{ user.key }}"
+                PATH: "{{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin"
+                TMPDIR: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+                USER: "{{ user.key }}"
               become: true
               become_user: "{{ user.key }}"
               register: users_cron_minutely_test_run
