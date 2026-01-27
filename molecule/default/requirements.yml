@@ -30,7 +30,7 @@
   scm: git
   src: https://git.coop/webarch/php.git
   # https://git.coop/webarch/php/-/releases
-  version: 4.6.2  # php
+  version: 4.10.1  # php
 
 - name: skel
   src: https://git.coop/webarch/skel.git

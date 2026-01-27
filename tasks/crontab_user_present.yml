@@ -261,14 +261,25 @@
             insertafter: USER
             state: present
 
-        - name: "PATH env var added to {{ user.key }} crontab"
+        - name: "Generic PATH env var added to crontab for {{ user.key }}"
           ansible.builtin.cron:
             env: true
             name: PATH
             value: "/usr/local/bin:/usr/bin:/bin"
             user: "{{ user.key }}"
             insertafter: USER
-            state: "{% if users_home_bin_path.stat.exists %}present{% else %}absent{% endif %}"
+            state: present
+          when: not users_home_bin_path.stat.exists | bool
+
+        - name: "Users PATH env var added to crontab for {{ user.key }}"
+          ansible.builtin.cron:
+            env: true
+            name: PATH
+            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin"
+            user: "{{ user.key }}"
+            insertafter: USER
+            state: present
+          when: users_home_bin_path.stat.exists | bool
 
         - name: "MAILTO env var added to {{ user.key }} crontab"
           ansible.builtin.cron:
