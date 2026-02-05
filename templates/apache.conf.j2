@@ -28,6 +28,7 @@
   ServerName {{ vhost_config.users_apache_server_name }}
 {%     if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias {{ vhost_config.users_apache_server_aliases | join(' ') }}
+  StrictHostCheck on
 {%     endif %}
   <If "%{HTTP_HOST} == '{{ vhost_config.users_apache_server_name }}'">
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
@@ -87,6 +88,7 @@
   ServerName {{ vhost_config.users_apache_server_name }}
 {%     if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias {{ vhost_config.users_apache_server_aliases | join(' ') }}
+  StrictHostCheck on
 {%     endif %}
 {%     if users_apache_chroot_suexec and "suexec" in users_apache_modules_loaded %}
   <IfModule suexec_module>
