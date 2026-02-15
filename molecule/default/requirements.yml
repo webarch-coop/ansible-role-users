@@ -11,13 +11,13 @@
 - name: apache
   src: https://git.coop/webarch/apache.git
   # https://git.coop/webarch/apache/-/releases
-  version: 3.13.0  # apache
+  version: 3.14.0  # apache
   scm: git
 
 - name: apt
   src: https://git.coop/webarch/apt.git
   # https://git.coop/webarch/apt/-/releases
-  version: 4.12.1  # apt
+  version: 4.13.1  # apt
   scm: git
 
 - name: mariadb
@@ -30,7 +30,7 @@
   scm: git
   src: https://git.coop/webarch/php.git
   # https://git.coop/webarch/php/-/releases
-  version: 4.10.1  # php
+  version: 4.10.3  # php
 
 - name: skel
   src: https://git.coop/webarch/skel.git
@@ -41,7 +41,7 @@
 - name: sudo
   src: https://git.coop/webarch/sudo.git
   # https://git.coop/webarch/sudo/-/releases
-  version: 1.6.2  # sudo
+  version: 1.7.0  # sudo
   scm: git
 
 - name: systemd
