@@ -1,4 +1,4 @@
-" {{ ansible_managed }}
+" Ansible managed
 "
 " UTF-8
 " set encoding=utf-8
@@ -11,7 +11,7 @@ set fileencoding&       " auto-sensed charset of current buffer
 syntax on
 set background=dark
 
-" http://vim.wikia.com/wiki/256_colors_in_vim
+" http://vim.wikia.com/wiki/256_colors_in_vim
 set t_Co=256
 
 " use F9 and F10 to switch between insert / paste whitespace modes
