@@ -492,6 +492,10 @@
         - >-
           ( user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool ) or
           ( users_apache_virtual_hosts_enabled is not defined )
+        - >-
+          (user.value.users_state is not defined) or
+          (user.value.users_state != "absent") or
+          (user.value.users_state != "ignore")
 
   tags:
     - users
