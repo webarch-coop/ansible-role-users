@@ -28,9 +28,7 @@
   ServerName {{ vhost_config.users_apache_server_name }}
 {%     if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias {{ vhost_config.users_apache_server_aliases | join(' ') }}
-  <IfModule md_module>
-    StrictHostCheck on
-  </IfModule>
+  StrictHostCheck on
 {%     endif %}
   <If "%{HTTP_HOST} == '{{ vhost_config.users_apache_server_name }}'">
     RedirectMatch 301 ^(?!/\.well-known/acme-challenge/).* https://{{ vhost_config.users_apache_server_name }}$0
