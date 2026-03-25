@@ -95,7 +95,7 @@
         path: /etc/logrotate.d/apache_users_logrotate
       register: users_apache_logrotate
 
-    - name: Chreck and run the Apache logrotation
+    - name: Check and run the Apache logrotation
       block:
 
         - name: Check Apache logrotation config
