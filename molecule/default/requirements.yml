@@ -11,13 +11,13 @@
 - name: apache
   src: https://git.coop/webarch/apache.git
   # https://git.coop/webarch/apache/-/releases
-  version: 3.16.0  # apache
+  version: 3.19.1  # apache
   scm: git
 
 - name: apt
   src: https://git.coop/webarch/apt.git
   # https://git.coop/webarch/apt/-/releases
-  version: 4.13.1  # apt
+  version: 4.13.2  # apt
   scm: git
 
 - name: mariadb
