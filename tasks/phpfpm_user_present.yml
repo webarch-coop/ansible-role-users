@@ -640,7 +640,7 @@
               value: "2"
             - option: "opcache.jit"
               value: "0"
-            - options: "opcache.interned_strings_buffer"
+            - option: "opcache.interned_strings_buffer"
               value: "16"
             - option: "opcache.lockfile_path"
               value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
