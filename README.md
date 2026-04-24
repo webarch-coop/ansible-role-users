@@ -1319,6 +1319,8 @@ This can be achieved by setting the following at a user level:
 
 If `output_buffering` needs to be set to a value other than on / off then this need to be set at the PHP version level rather than a users level.
 
+If `users_phpfpm_sendmail_from` is set this is used for `php_admin_value[sendmail_from]` and also the Apache `ServerAdmin`.
+
 ### Example Apache VirtualHost
 
 If a user has a set of variables like this:

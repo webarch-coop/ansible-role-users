@@ -133,7 +133,9 @@
 {%         endif %}
   </IfModule>
 {%     endif %}
-{%     if user.value.users_email is defined and user.value.users_email | length > 0 %}
+{%     if user.value.users_phpfpm_sendmail_from is defined and user.value.users_phpfpm_sendmail_from | length > 0 %}
+  ServerAdmin "{{ user.value.users_phpfpm_sendmail_from }}"
+{%     elif user.value.users_email is defined and user.value.users_email | length > 0 %}
   ServerAdmin "{{ user.value.users_email }}"
 {%     endif %}
 {%     if users_apache_env is defined or vhost_config.users_apache_env is defined %}
