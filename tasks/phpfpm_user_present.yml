@@ -632,8 +632,8 @@
               value: "0"
             - option: "opcache.interned_strings_buffer"
               value: "16"
-            - option: "opcache.lockfile_path"
-              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            # - option: "opcache.lockfile_path"
+            #   value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.max_accelerated_files"
               value: "100000"
             - option: "opcache.revalidate_freq"
@@ -650,33 +650,48 @@
             loop_var: users_php_ini_opcache_config
             label: "{{ users_php_ini_opcache_config.option }}={{ users_php_ini_opcache_config.value }}"
 
-        - name: Users ~/.php.ini file present and opcache.file_cache path present for PHP >= 8.3
+        - name: Users ~/.php.ini file present and opcache.file_cache and opcache.lockfile_path path present for PHP >= 8.3
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             section: opcache
-            option: "opcache.file_cache"
-            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            option: "{{ users_php_ini_opcache_config.option }}"
+            value: "{{ users_php_ini_opcache_config.value }}"
             state: present
             create: true
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          loop:
+            - option: "opcache.file_cache"
+              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            - option: "opcache.lockfile_path"
+              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+          loop_control:
+            loop_var: users_php_ini_opcache_config
+            label: "{{ users_php_ini_opcache_config.option }}={{ users_php_ini_opcache_config.value }}"
           when: users_phpfpm_version is ansible.builtin.version('8.3', '>=')
 
-        # When this is enabled on PHP < 8.3 it caused erroer with WP-CLI, this might be related to
-        # the note at https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.file-cache-only
-        # Note: Prior to PHP 8.1.0, disabling this directive with an already populated file cache required to manually clear the file cache.
+        # When this is enabled on PHP < 8.3 it caused erroer with WP-CLI, this
+        # might be related to the note at
+        # https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.file-cache-only
+        # Note: Prior to PHP 8.1.0, disabling this directive with an already
+        # populated file cache required to manually clear the file cache.
         - name: Users ~/.php.ini file present and opcache.file_cache path absent for PHP < 8.3
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             section: opcache
-            option: "opcache.file_cache"
-            value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
+            option: "{{ users_php_ini_opcache_config }}"
             state: absent
             create: true
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
+          loop:
+            - "opcache.file_cache"
+            - "opcache.lockfile_path"
+          loop_control:
+            loop_var: users_php_ini_opcache_config
+            label: "{{ users_php_ini_opcache_config }}"
           when: users_phpfpm_version is ansible.builtin.version('8.3', '<')
 
       when: users_phpcli_pkg in ansible_facts.ansible_local.dpkg.installed
