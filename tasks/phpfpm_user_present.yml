@@ -632,8 +632,6 @@
               value: "0"
             - option: "opcache.interned_strings_buffer"
               value: "16"
-            # - option: "opcache.lockfile_path"
-            #   value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.max_accelerated_files"
               value: "100000"
             - option: "opcache.revalidate_freq"
