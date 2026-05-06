@@ -1337,6 +1337,13 @@ users_apache_headers:
       type: str
       required: false
       description: The Apache header argument.
+    con:
+      type: str
+      required: false
+      description: The Apache header condition.
+      choices:
+        - always
+        - onsuccess
     expr:
       type: str
       required: false
