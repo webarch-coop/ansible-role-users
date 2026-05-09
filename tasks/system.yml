@@ -20,11 +20,11 @@
           - curl
           - dos2unix
           - jq
+          - jo
           - mutt
           - pwgen
           - python3-dnspython
           - python3-passlib
-          - quota
           - rsync
           - slay
           - texlive
@@ -35,16 +35,26 @@
         cache_valid_time: 300
       register: users_pkgs_installed
 
+    - name: Quota package present
+      ansible.builtin.apt:
+        pkg:
+          - quota
+          - quotatool
+        state: present
+      when: users_quotaon | ansible.builtin.bool
+      register: users_quota_pkgs_installed
+
     - name: Include apt role local fact tasks if variables are not defined
       ansible.builtin.include_role:
         name: apt
         tasks_from: local_facts.yml
       when: >-
-        ( users_pkgs_installed.changed | bool ) or
-        ( ( ansible_facts.ansible_local.dpkg.arch is not defined ) or
-        ( ansible_facts.ansible_local.gpg.version is not defined ) or
-        ( ansible_facts.ansible_local.bash.path is not defined ) or
-        ( ansible_facts.ansible_local.sh.path is not defined ) )
+        (users_pkgs_installed.changed | bool) or
+        (users_quota_pkgs_installed.changed | bool) or
+        ((ansible_facts.ansible_local.dpkg.arch is not defined) or
+        (ansible_facts.ansible_local.gpg.version is not defined) or
+        (ansible_facts.ansible_local.bash.path is not defined) or
+        (ansible_facts.ansible_local.sh.path is not defined))
 
     - name: Slurp /etc/shells
       ansible.builtin.slurp:
