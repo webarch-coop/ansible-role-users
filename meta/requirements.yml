@@ -11,7 +11,7 @@
 - name: apache
   src: https://git.coop/webarch/apache.git
   # https://git.coop/webarch/apache/-/releases
-  version: 3.19.1  # apache
+  version: 3.19.2  # apache
   scm: git
 
 - name: apt
