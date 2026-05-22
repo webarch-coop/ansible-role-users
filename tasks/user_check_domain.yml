@@ -11,55 +11,86 @@
 - name: Skip the checks if the domain starts with an asterisk
   block:
 
-    - name: Lookup IPv4 address in a block to enable alternative lookup on failure
+    - name: Lookup IPv4 address via domains nameservers
       block:
 
-        - name: "Lookup IPv4 address using community.general.dig for {{ users_domain }}"
-          ansible.builtin.set_fact:
-            users_domain_dig_query: "{{ query('community.general.dig', users_domain_dig_fqdn, fail_on_error=true, real_empty=true, retry_servfail=true) }}"
-          vars:
-            users_domain_dig_fqdn: "{{ users_domain }}."
-          until:
-            - users_domain_dig_query != []
-            - users_domain_dig_query[0] is ansible.utils.ipv4
-          retries: 10
-          delay: 1
+        - name: "Lookup IPv4 address using community.dns.nameserver_record_info for {{ users_domain }}"
+          community.dns.nameserver_record_info:
+            name: "{{ users_domain }}"
+            type: A
+          register: users_domain_nameserver_record_info
 
-        - name: "Set a fact for the domain query result for {{ users_domain }}"
-          ansible.builtin.set_fact:
-            users_domain_dig_result: "{{ users_domain_dig_query[0] }}"
-
-      rescue:
-
-        - name: Debug users_domain_dig_query
+        - name: Debug users_domain_nameserver_record_info.results
           ansible.builtin.debug:
-            var: users_domain_dig_query
+            var: users_domain_nameserver_record_info.results
 
-        - name: "Lookup IPv4 address using dig on {{ inventory_hostname }} for {{ users_domain }}"
-          ansible.builtin.command:
-            cmd: "dig +short {{ users_domain }}"
-          register: users_domain_dig_command
-
-        - name: Debug users_domain_dig_command.stdout_lines
-          ansible.builtin.debug:
-            var: users_domain_dig_command.stdout_lines
-
-        - name: "DNS lookup failed for {{ users_domain }}"
-          ansible.builtin.fail:
-            msg:
-              - "The result from running: dig +short {{ users_domain }}"
-              - "On {{ inventory_hostname }} was:"
-              - "{{ users_domain_dig_command.stdout }}"
-          when: >-
-            (users_domain_dig_command.stdout_lines ==[]) or
-            (users_domain_dig_command.stdout_lines[-1] is not ansible.utils.ipv4_address)
-
-        - name: "Set a fact for the result from running dig +short {{ users_domain }}"
+        - name: "Set a fact for the community.dns.nameserver_record_info results for {{ users_domain }}"
           ansible.builtin.set_fact:
-            users_domain_dig_result: "{{ users_domain_dig_command.stdout_lines[-1] }}"
+            users_domain_dig_result: "{{ users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].values[0].address') }}"
           when:
-            - users_domain_dig_command.stdout_lines != []
-            - users_domain_dig_command.stdout_lines[-1] is ansible.utils.ipv4_address
+            - users_domain_nameserver_record_info.results is defined
+            - users_domain_nameserver_record_info.results | ansible.builtin.type_debug == "list"
+            - users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].values[0].address') is ansible.utils.ipv4
+
+        - name: Debug users_domain_dig_result
+          ansible.builtin.debug:
+            var: users_domain_dig_result
+          when: users_domain_dig_result is defined
+
+        - name: Lookup IPv4 address in a block to enable alternative lookup on failure
+          block:
+
+            - name: "Lookup IPv4 address using community.general.dig for {{ users_domain }}"
+              ansible.builtin.set_fact:
+                users_domain_dig_query: "{{ query('community.general.dig', users_domain_dig_fqdn, fail_on_error=true, real_empty=true, retry_servfail=true) }}"
+              vars:
+                users_domain_dig_fqdn: "{{ users_domain }}."
+              until:
+                - users_domain_dig_query != []
+                - users_domain_dig_query[0] is ansible.utils.ipv4
+              retries: 10
+              delay: 1
+
+            - name: "Set a fact for the domain query result for {{ users_domain }}"
+              ansible.builtin.set_fact:
+                users_domain_dig_result: "{{ users_domain_dig_query[0] }}"
+
+          rescue:
+
+            - name: Debug users_domain_dig_query
+              ansible.builtin.debug:
+                var: users_domain_dig_query
+
+            - name: "Lookup IPv4 address using dig on {{ inventory_hostname }} for {{ users_domain }}"
+              ansible.builtin.command:
+                cmd: "dig +short {{ users_domain }}"
+              register: users_domain_dig_command
+
+            - name: Debug users_domain_dig_command.stdout_lines
+              ansible.builtin.debug:
+                var: users_domain_dig_command.stdout_lines
+
+            - name: "DNS lookup failed for {{ users_domain }}"
+              ansible.builtin.fail:
+                msg:
+                  - "The result from running: dig +short {{ users_domain }}"
+                  - "On {{ inventory_hostname }} was:"
+                  - "{{ users_domain_dig_command.stdout }}"
+              when: >-
+                (users_domain_dig_command.stdout_lines ==[]) or
+                (users_domain_dig_command.stdout_lines[-1] is not ansible.utils.ipv4_address)
+
+            - name: "Set a fact for the result from running dig +short {{ users_domain }}"
+              ansible.builtin.set_fact:
+                users_domain_dig_result: "{{ users_domain_dig_command.stdout_lines[-1] }}"
+              when:
+                - users_domain_dig_command.stdout_lines != []
+                - users_domain_dig_command.stdout_lines[-1] is ansible.utils.ipv4_address
+
+          when: >-
+            (users_domain_nameserver_record_info.results is not defined) or
+            (users_domain_nameserver_record_info.results | ansible.builtin.type_debug != "list") or
+            (users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].values[0].address') is not ansible.utils.ipv4)
 
     - name: Debug domain name and IP address
       ansible.builtin.debug:
