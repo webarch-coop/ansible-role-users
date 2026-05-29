@@ -43,11 +43,11 @@ before_script:
   - ansible-galaxy role list
 stages:
   - lint
+  - resolute
+  - trixie
   - bookworm
   - forky
   - noble
-  - resolute
-  - trixie
 lint:
   image: registry.git.coop/webarch/containers/images/trixie:20260518
   stage: lint

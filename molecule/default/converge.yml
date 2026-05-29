@@ -764,14 +764,14 @@
                   - mbstring
                   - mysqli
                   - mysqlnd
-                  - opcache
+                  # - opcache
                   - pdo
                   - pdo_mysql
                   - pdo_sqlite
                   - phar
                   - posix
                   - readline
-                  - redis
+                  # - redis
                   - shmop
                   - simplexml
                   - soap
