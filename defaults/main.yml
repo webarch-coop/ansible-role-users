@@ -380,5 +380,10 @@ users_ssh_known_hosts_present:
 # users_bash: /usr/bin/bash
 # HTTP UserAgent for the get_url and uri modules
 users_http_agent: "Lynx/2.9.0dev.6 libwww-FM/2.14 SSL-MM/1.4.1 GNUTLS/3.7.1"
+# List of domain name servers for the community.dns.nameserver_record_info module
+users_dns:
+  - 1.1.1.1
+  - 8.8.8.8
+  - 9.9.9.9
 users_verify: true
 ...

@@ -23,14 +23,14 @@
 - name: mariadb
   src: https://git.coop/webarch/mariadb.git
   # https://git.coop/webarch/mariadb/-/releases
-  version: 3.12.0  # mariadb
+  version: 3.13.1  # mariadb
   scm: git
 
 - name: php
   scm: git
   src: https://git.coop/webarch/php.git
   # https://git.coop/webarch/php/-/releases
-  version: 4.11.0  # php
+  version: 4.12.0  # php
 
 - name: skel
   src: https://git.coop/webarch/skel.git

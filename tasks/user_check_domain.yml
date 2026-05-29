@@ -18,6 +18,11 @@
           community.dns.nameserver_record_info:
             name: "{{ users_domain }}"
             type: A
+            servfail_retries: 5
+            server:
+              - 1.1.1.1
+              - 8.8.8.8
+              - 9.9.9.9
           register: users_domain_nameserver_record_info
 
         - name: Debug users_domain_nameserver_record_info.results
