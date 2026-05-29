@@ -42,10 +42,9 @@ before_script:
 stages:
   - lint
   - bookworm
-  # the php role doesn't support forky
-  # - forky
-  # the php role doesn't support noble
-  # - noble
+  - forky
+  - noble
+  - resolute
   - trixie
 lint:
   image: registry.git.coop/webarch/containers/images/trixie:20260518
@@ -58,19 +57,24 @@ bookworm:
   stage: bookworm
   script:
     - molecule test
-# forky:
-#   image: registry.git.coop/webarch/containers/images/forky:20260518
-#   stage: forky
-#   script:
-#     - molecule test
+forky:
+  image: registry.git.coop/webarch/containers/images/forky:20260518
+  stage: forky
+  script:
+    - molecule test
 trixie:
   image: registry.git.coop/webarch/containers/images/trixie:20260518
   stage: trixie
   script:
     - molecule test
-# noble:
-#   image: registry.git.coop/webarch/containers/images/noble:20260518
-#   stage: noble
-#   script:
-#     - molecule test
+noble:
+  image: registry.git.coop/webarch/containers/images/noble:20260518
+  stage: noble
+  script:
+    - molecule test
+resolute:
+  image: registry.git.coop/webarch/containers/images/resolute:20260518
+  stage: resolute
+  script:
+    - molecule test
 ...
