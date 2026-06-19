@@ -16,7 +16,7 @@
       register: users_mariadb_list
 
     - name: "Databases absent for {{ user.key }}"
-      community.mysql.mysql_db:
+      community.mysql.mysql_db:  # noqa: fqcn[canonical]
         name: "{{ db }}"
         state: absent
         login_user: root
@@ -30,7 +30,7 @@
         label: "{{ db }}"
 
     - name: "MariaDB user {{ user.key }} absent"
-      community.mysql.mysql_user:
+      community.mysql.mysql_user:  # noqa: fqcn[canonical]
         name: "{{ user.key }}"
         state: absent
         column_case_sensitive: true

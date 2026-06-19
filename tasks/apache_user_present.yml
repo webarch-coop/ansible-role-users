@@ -19,8 +19,8 @@
         owner: root
         group: root
       when:
-        - ( users_apache_chroot_suexec is defined ) and ( users_apache_chroot_suexec | bool )
-        - ( "suexec" in users_apache_modules_loaded )
+        - (users_apache_chroot_suexec is defined) and (users_apache_chroot_suexec | bool)
+        - ("suexec" in users_apache_modules_loaded)
 
     # /home/USER/sites
     - name: "Apache {{ user.key }}/{{ users_sites_dir }} directory present"
@@ -39,7 +39,7 @@
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
-      when: ( vhost.value.users_apache_vhost_docroot is not defined ) or ( vhost.value.users_apache_vhost_docroot )
+      when: (vhost.value.users_apache_vhost_docroot is not defined) or (vhost.value.users_apache_vhost_docroot)
       loop: "{{ user.value.users_apache_virtual_hosts | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: vhost
@@ -47,20 +47,20 @@
 
     - name: "HTTP Authentication htpasswd files present for {{ user.key }}"
       ansible.builtin.include_tasks: htauth.yml
-      when: ( vhost.value.users_apache_htauth_users is defined ) and ( vhost.value.users_apache_htauth_users != [] )
+      when: (vhost.value.users_apache_htauth_users is defined) and (vhost.value.users_apache_htauth_users != [])
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
 
-    - name: "Apache log directory {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs present for non-system users"
+    - name: "Apache log dir present for non-system users {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
       ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/logs"
         state: directory
         owner: root
         group: "{{ user.key }}"
         mode: "0750"
-      when: ( user.value.users_system is not defined ) or ( not user.value.users_system )
+      when: (user.value.users_system is not defined) or (not user.value.users_system)
 
     - name: Check Apache status
       ansible.builtin.command: service apache2 status
@@ -107,9 +107,12 @@
 
       when:
         - (users_apache_ssl_state is defined) and (users_apache_ssl_state == "active")
-        - (users_apache_modules_loaded is defined ) and ( "md" not in users_apache_modules_loaded)
-        - (users_cert is defined ) and ( users_cert is regex('^user|vhost$'))
-        - (user.value.users_apache_virtual_hosts_enabled is not defined) or ((user.value.users_apache_virtual_hosts_enabled is defined) and (user.value.users_apache_virtual_hosts_enabled | bool))
+        - (users_apache_modules_loaded is defined) and ("md" not in users_apache_modules_loaded)
+        - (users_cert is defined) and (users_cert is regex('^user|vhost$'))
+        - >-
+          (user.value.users_apache_virtual_hosts_enabled is not defined) or
+          ((user.value.users_apache_virtual_hosts_enabled is defined) and
+          (user.value.users_apache_virtual_hosts_enabled | bool))
 
     - name: Apache sites-enabled symlink absent
       block:
@@ -136,7 +139,7 @@
               ansible.builtin.command: apache2ctl configtest
               check_mode: false
               changed_when: false
-              failed_when: ( "Syntax OK" not in users_apache2ctl_configtest.stderr )
+              failed_when: ("Syntax OK" not in users_apache2ctl_configtest.stderr)
               register: users_apache2ctl_configtest
 
             - name: "Apache restarted for {{ user.key }}"
@@ -153,7 +156,7 @@
               delay: 10
               when:
                 - users_apachectl_configtest is defined
-                - ( "Syntax OK" in users_apachectl_configtest.stderr )
+                - ("Syntax OK" in users_apachectl_configtest.stderr)
 
           when:
             - users_a2dissite.changed is defined
@@ -188,7 +191,7 @@
           ansible.builtin.include_tasks: apache_user_vhosts_present.yml
           when: user.key != "www-data"
 
-      when: ( users_apache_modules_loaded is defined ) and ( "md" in users_apache_modules_loaded )
+      when: (users_apache_modules_loaded is defined) and ("md" in users_apache_modules_loaded)
 
     - name: "Matomo site tasks for {{ user.key }}"
       block:
@@ -264,14 +267,24 @@
                             msg:
                               - "matomo_site_name: {{ vhost.value.users_apache_server_name }}"
                               - "matomo_site_main_url: http://{{ vhost.value.users_apache_server_name }}"
-                              - "matomo_site_urls: {% if vhost.value.users_apache_server_aliases is defined %}{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}{% else %}[]{% endif %}"
+                              - >-
+                                matomo_site_urls:
+                                {% if vhost.value.users_apache_server_aliases is defined %}
+                                {{ vhost.value.users_apache_server_aliases
+                                | reject('regex', '^[*][.].*$')
+                                | map('regex_replace', '^', 'http://')
+                                | list }}{% else %}[]{% endif %}"
                               - "matomo_login: {{ user.key }}"
                               - "matomo_login_email: {{ user.value.users_email }}"
                               - "users_cms: {{ vhost.value.users_cms | default('') }}"
                             verbosity: 1
                           when:
-                            - ( vhost.value.users_matomo_site is not defined ) or ( vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site )
-                            - ( vhost.value.users_cms is not defined ) or ( vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$') )
+                            - >-
+                              (vhost.value.users_matomo_site is not defined) or
+                              (vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site)
+                            - >-
+                              (vhost.value.users_cms is not defined) or
+                              (vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$'))
                           loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
                           loop_control:
                             loop_var: vhost
@@ -279,60 +292,72 @@
                           tags:
                             - debug
 
-                        - name: "Matomo sites present when Apache server aliases are defined for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
+                        - name: "Matomo site present with Apache server aliases for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
                           ansible.builtin.include_role:
                             name: matomo
                             tasks_from: site_present.yml
-                          when:
-                            - (vhost.value.users_apache_server_aliases is defined) and (vhost.value.users_apache_server_aliases != [])
-                            - (vhost.value.users_matomo_site is not defined) or (vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site)
-                            - (vhost.value.users_cms is not defined) or (vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$'))
-                          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-                          loop_control:
-                            loop_var: vhost
-                            label: "{{ vhost.key }}"
                           vars:
                             matomo_login: "{{ user.key }}"
                             matomo_login_email: "{{ user.value.users_email }}"
                             matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
                             matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
                             # https://gist.github.com/halberom/b1f6eaed16dba1b298e8#gistcomment-2706913
-                            matomo_site_urls: "{{ vhost.value.users_apache_server_aliases | map('regex_replace', '^(.*)$', 'http://\\1') | list }}"
-
-                        - name: "Matomo sites present when Apache server aliases are not defined for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
-                          ansible.builtin.include_role:
-                            name: matomo
-                            tasks_from: site_present.yml
-                          when:
-                            - (vhost.value.users_apache_server_aliases is not defined) or (vhost.value.users_apache_server_aliases == [])
-                            - (vhost.value.users_matomo_site is not defined) or (vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site)
-                            - (vhost.value.users_cms is not defined) or (vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$'))
+                            matomo_site_urls: >-
+                              {{ vhost.value.users_apache_server_aliases
+                              | reject('regex', '^[*][.].*$')
+                              | map('regex_replace', '^', 'http://')
+                              | list }}
                           loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
                           loop_control:
                             loop_var: vhost
                             label: "{{ vhost.key }}"
+                          when:
+                            - (vhost.value.users_apache_server_aliases is defined) and (vhost.value.users_apache_server_aliases != [])
+                            - >-
+                              (vhost.value.users_matomo_site is not defined) or
+                              (vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site)
+                            - >-
+                              (vhost.value.users_cms is not defined) or
+                              (vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$'))
+
+                        - name: "Matomo sites present without Apache server aliases for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
+                          ansible.builtin.include_role:
+                            name: matomo
+                            tasks_from: site_present.yml
                           vars:
                             matomo_login: "{{ user.key }}"
                             matomo_login_email: "{{ user.value.users_email }}"
                             matomo_site_name: "{{ vhost.value.users_apache_server_name }}"
                             matomo_site_main_url: "http://{{ vhost.value.users_apache_server_name }}"
                             matomo_site_urls: []
+                          loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
+                          loop_control:
+                            loop_var: vhost
+                            label: "{{ vhost.key }}"
+                          when:
+                            - >-
+                              (vhost.value.users_apache_server_aliases is not defined) or
+                              (vhost.value.users_apache_server_aliases == [])
+                            - (vhost.value.users_matomo_site is not defined) or
+                              (vhost.value.users_matomo_site is defined and vhost.value.users_matomo_site)
+                            - (vhost.value.users_cms is not defined) or
+                              (vhost.value.users_cms is not regex('^matomo|phpmyadmin|nextcloud|kimai$'))
 
-                      when: ( matomo_super_user_access is defined ) and ( matomo_super_user_access )
+                      when: (matomo_super_user_access is defined) and (matomo_super_user_access)
 
-                  when: ( matomo_installed is defined ) and ( matomo_installed is version('3.14.1', '>=') )
+                  when: (matomo_installed is defined) and (matomo_installed is version('3.14.1', '>='))
 
               when: user_matomo_config.stat.exists
 
           when: matomo_user in ansible_facts.getent_passwd.keys()
 
       when:
-        - ( user.key != "root" )
-        - ( user.value.users_matomo_account is defined ) and ( user.value.users_matomo_account | bool )
-        - ( user.value.users_email is defined )
-        - ( matomo_user is defined ) and ( matomo_user | length > 0 )
-        - ( matomo_password is defined ) and ( matomo_password | length > 0 )
-        - ( matomo_token_auth is defined ) and ( matomo_token_auth | length > 0 )
+        - (user.key != "root")
+        - (user.value.users_matomo_account is defined) and (user.value.users_matomo_account | bool)
+        - (user.value.users_email is defined)
+        - (matomo_user is defined) and (matomo_user | length > 0)
+        - (matomo_password is defined) and (matomo_password | length > 0)
+        - (matomo_token_auth is defined) and (matomo_token_auth | length > 0)
 
     # WIP for https://git.coop/webarch/users/-/issues/57
     # - name: Include CMS roles
@@ -411,9 +436,9 @@
             loop_var: vhost
             label: "{{ vhost.key }}"
           when:
-            - ( vhost.value.users_cms == "wordpress" )
-            - ( users_matomo is defined ) and ( users_matomo )
-            - ( user.value.users_matomo_account is not defined ) or ( user.value.users_matomo_account is defined and user.value.users_matomo_account | bool )
+            - (vhost.value.users_cms == "wordpress")
+            - (users_matomo is defined) and (users_matomo)
+            - (user.value.users_matomo_account is not defined) or (user.value.users_matomo_account is defined and user.value.users_matomo_account | bool)
 
         - name: "Include WordPress role for {{ user.key }} without Matomo"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -450,8 +475,8 @@
             loop_var: vhost
             label: "{{ vhost.key }}"
           when:
-            - ( vhost.value.users_cms == "wordpress" )
-            - ( ( users_matomo is defined and users_matomo | bool and user.value.users_matomo_account is defined and not user.value.users_matomo_account | bool ) or ( users_matomo is not defined or not users_matomo | bool ) )
+            - (vhost.value.users_cms == "wordpress")
+            - ((users_matomo is defined and users_matomo | bool and user.value.users_matomo_account is defined and not user.value.users_matomo_account | bool) or (users_matomo is not defined or not users_matomo | bool))
 
         - name: "Include Drupal role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -517,7 +542,7 @@
           loop_control:
             loop_var: vhost
             label: "{{ vhost.key }}"
-          when: ( vhost.value.users_cms == "kimai" )
+          when: (vhost.value.users_cms == "kimai")
 
         - name: "Include Moodle role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -559,7 +584,7 @@
           loop_control:
             loop_var: vhost
             label: "{{ vhost.key }}"
-          when: ( vhost.value.users_cms == "moodle" )
+          when: (vhost.value.users_cms == "moodle")
 
         - name: "Include Nextcloud role for {{ user.key }} with default apps"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -599,12 +624,12 @@
             loop_var: vhost
             label: "{{ vhost.key }}"
           when:
-            - ( vhost.value.users_cms == "nextcloud" )
-            - ( "valkey" not in user.value.users_groups )
-            - ( vhost.value.nextcloud_app_remove is not defined )
-            - ( vhost.value.nextcloud_app_install is not defined )
-            - ( vhost.value.nextcloud_app_disable is not defined )
-            - ( vhost.value.nextcloud_app_enable is not defined )
+            - (vhost.value.users_cms == "nextcloud")
+            - ("valkey" not in user.value.users_groups)
+            - (vhost.value.nextcloud_app_remove is not defined)
+            - (vhost.value.nextcloud_app_install is not defined)
+            - (vhost.value.nextcloud_app_disable is not defined)
+            - (vhost.value.nextcloud_app_enable is not defined)
 
         - name: "Include Nextcloud role for {{ user.key }} with default apps and valkey config"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -648,12 +673,12 @@
             loop_var: vhost
             label: "{{ vhost.key }}"
           when:
-            - ( vhost.value.users_cms == "nextcloud" )
-            - ( "valkey" in user.value.users_groups )
-            - ( vhost.value.nextcloud_app_remove is not defined )
-            - ( vhost.value.nextcloud_app_install is not defined )
-            - ( vhost.value.nextcloud_app_disable is not defined )
-            - ( vhost.value.nextcloud_app_enable is not defined )
+            - (vhost.value.users_cms == "nextcloud")
+            - ("valkey" in user.value.users_groups)
+            - (vhost.value.nextcloud_app_remove is not defined)
+            - (vhost.value.nextcloud_app_install is not defined)
+            - (vhost.value.nextcloud_app_disable is not defined)
+            - (vhost.value.nextcloud_app_enable is not defined)
 
         - name: "Include Nextcloud role for {{ user.key }} with custom apps"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -697,9 +722,9 @@
             loop_var: vhost
             label: "{{ vhost.key }}"
           when:
-            - ( vhost.value.users_cms == "nextcloud" )
-            - ( "valkey" not in user.value.users_groups )
-            - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
+            - (vhost.value.users_cms == "nextcloud")
+            - ("valkey" not in user.value.users_groups)
+            - (vhost.value.nextcloud_app_remove is defined) or (vhost.value.nextcloud_app_install is defined) or (vhost.value.nextcloud_app_disable is defined) or (vhost.value.nextcloud_app_enable is defined)
 
         - name: "Include Nextcloud role for {{ user.key }} with custom apps and valkey config"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -747,9 +772,9 @@
             loop_var: vhost
             label: "{{ vhost.key }}"
           when:
-            - ( vhost.value.users_cms == "nextcloud" )
-            - ( "valkey" in user.value.users_groups )
-            - ( vhost.value.nextcloud_app_remove is defined ) or ( vhost.value.nextcloud_app_install is defined ) or ( vhost.value.nextcloud_app_disable is defined ) or ( vhost.value.nextcloud_app_enable is defined )
+            - (vhost.value.users_cms == "nextcloud")
+            - ("valkey" in user.value.users_groups)
+            - (vhost.value.nextcloud_app_remove is defined) or (vhost.value.nextcloud_app_install is defined) or (vhost.value.nextcloud_app_disable is defined) or (vhost.value.nextcloud_app_enable is defined)
 
         - name: "Include Flarum role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -829,8 +854,8 @@
     #         loop_var: vhost
     #         label: "{{ vhost.key }}"
     #       when:
-    #         - ( vhost.value.users_cms == "mediawiki" )
-    #         - ( users_matomo is defined ) and ( not users_matomo )
+    #         - (vhost.value.users_cms == "mediawiki")
+    #         - (users_matomo is defined) and (not users_matomo)
 
         - name: "Include MediaWiki role for {{ user.key }} without Matomo configuration"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -868,7 +893,7 @@
             loop_var: vhost
             label: "{{ vhost.key }}"
           when:
-            - ( vhost.value.users_cms == "mediawiki" )
+            - (vhost.value.users_cms == "mediawiki")
 
         - name: "Include Matomo role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -905,7 +930,7 @@
           loop_control:
             loop_var: vhost
             label: "{{ vhost.key }}"
-          when: ( vhost.value.users_cms == "matomo" )
+          when: (vhost.value.users_cms == "matomo")
 
         - name: "Include phpMyAdmin role for {{ user.key }}"  # noqa: var-naming[no-role-prefix]
           ansible.builtin.include_role:
@@ -934,13 +959,13 @@
           loop_control:
             loop_var: vhost
             label: "{{ vhost.key }}"
-          when: ( vhost.value.users_cms == "phpmyadmin" )
+          when: (vhost.value.users_cms == "phpmyadmin")
 
       when:
-        - ( vhost.value.users_cms is defined )
-        - ( users_mariadb is defined ) and ( users_mariadb | bool )
-        - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
-        - ( user.value.users_apache_virtual_hosts_enabled is not defined ) or ( user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool )
+        - (vhost.value.users_cms is defined)
+        - (users_mariadb is defined) and (users_mariadb | bool)
+        - (user.value.users_mariadb_databases is defined) and (user.value.users_mariadb_databases != [])
+        - (user.value.users_apache_virtual_hosts_enabled is not defined) or (user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool)
 
     - name: Check if the user HOME bin directory exists
       ansible.builtin.stat:
@@ -954,10 +979,10 @@
         loop_var: vhost
         label: "{{ vhost.key }}"
       when: >
-        ( users_home_bin_path.stat.exists ) and ( user.value.users_system is not defined or not user.value.users_system ) and
-        ( ( vhost.value.users_daily_scripts is defined ) and ( vhost.value.users_daily_scripts != [] ) or
-        ( vhost.value.users_hourly_scripts is defined ) and ( vhost.value.users_hourly_scripts != [] ) or
-        ( vhost.value.users_minutely_scripts is defined ) and ( vhost.value.users_minutely_scripts != [] ) )
+        (users_home_bin_path.stat.exists) and (user.value.users_system is not defined or not user.value.users_system) and
+        ((vhost.value.users_daily_scripts is defined) and (vhost.value.users_daily_scripts != []) or
+        (vhost.value.users_hourly_scripts is defined) and (vhost.value.users_hourly_scripts != []) or
+        (vhost.value.users_minutely_scripts is defined) and (vhost.value.users_minutely_scripts != []))
 
     - name: "Chown and potentially chmod CMS DocumentRoot for {{ user.key }}"
       ansible.builtin.include_tasks: cms_chown.yml
@@ -965,7 +990,7 @@
       loop_control:
         loop_var: vhost
         label: "{{ vhost.key }}"
-      when: ( vhost.value.users_cms_owner is defined ) and ( vhost.value.users_cms_group is defined )
+      when: (vhost.value.users_cms_owner is defined) and (vhost.value.users_cms_group is defined)
 
   tags:
     - users
