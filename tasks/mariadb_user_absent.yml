@@ -12,8 +12,15 @@
   block:
 
     - name: "The databases that {{ user.key }} has access to"
-      ansible.builtin.command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
+      ansible.builtin.command:
+        cmd: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
       register: users_mariadb_list
+
+    - name: Debug users_mariadb_list
+      ansible.builtin.debug:
+        var: users_mariadb_list
+      tags:
+        - debug
 
     - name: "Databases absent for {{ user.key }}"
       community.mysql.mysql_db:  # noqa: fqcn[canonical]
