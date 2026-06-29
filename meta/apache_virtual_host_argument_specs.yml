@@ -1475,6 +1475,7 @@ users_apache_protocols:
   elements: str
   choices:
     - h2
+    - h2c
     - 'http/1.1'
   required: false
   description: Apache VirtualHost Protocols.

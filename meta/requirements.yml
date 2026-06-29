@@ -17,7 +17,7 @@
 - name: apt
   src: https://git.coop/webarch/apt.git
   # https://git.coop/webarch/apt/-/releases
-  version: 4.14.0  # apt
+  version: 4.14.2  # apt
   scm: git
 
 - name: mariadb
@@ -30,7 +30,7 @@
   scm: git
   src: https://git.coop/webarch/php.git
   # https://git.coop/webarch/php/-/releases
-  version: 4.12.0  # php
+  version: 4.12.1  # php
 
 - name: skel
   src: https://git.coop/webarch/skel.git
