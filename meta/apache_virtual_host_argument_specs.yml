@@ -1376,6 +1376,10 @@ users_apache_htauth_users:
       choices:
         - absent
         - present
+users_apache_h2websockets:
+  type: bool
+  required: false
+  description: Enable or disable H2WebSockets.
 users_apache_include_optional:
   type: list
   elements: str
@@ -1466,6 +1470,14 @@ users_apache_php_socket_path:
   type: str
   required: false
   description: Path to the Proxy socket.
+users_apache_protocols:
+  type: list
+  elements: str
+  choices:
+    - h2
+    - 'http/1.1'
+  required: false
+  description: Apache VirtualHost Protocols.
 users_apache_proxy:
   type: list
   elements: dict

@@ -89,6 +89,16 @@
   ServerAlias {{ vhost_config.users_apache_server_aliases | join(' ') }}
   StrictHostCheck on
 {%     endif %}
+{%     if users_apache_protocols is defined %}
+  Protocols {{ users_apache_protocols | ansible.builtin.join(' ') }}
+{%     endif %}
+{%     if users_apache_h2websockets is defined %}
+{%         if users_apache_h2websockets | ansible.builtin.bool %}
+  H2WebSockets on
+{%         else %}
+  H2WebSockets off
+{%         endif %}
+{%     endif %}
 {%     if users_apache_chroot_suexec and "suexec" in users_apache_modules_loaded %}
   <IfModule suexec_module>
     SuexecUserGroup {{ user.key }} {{ user.value.users_group | default(user.key) }}
