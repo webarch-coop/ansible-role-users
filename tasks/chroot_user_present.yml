@@ -12,7 +12,8 @@
   block:
 
     - name: "Read {{ user.key }} entry from /etc/passwd"
-      ansible.builtin.command: "grep ^{{ user.key }}: /etc/passwd"
+      ansible.builtin.command:
+        cmd: "grep ^{{ user.key }}: /etc/passwd"
       check_mode: false
       changed_when: false
       register: users_etc_passwd
@@ -38,7 +39,8 @@
             group: root
 
         - name: "Read {{ user.key }} entry from /etc/group"
-          ansible.builtin.command: "grep ^{{ user.key }}: /etc/group"
+          ansible.builtin.command:
+            cmd: "grep ^{{ user.key }}: /etc/group"
           check_mode: false
           changed_when: false
           register: users_etc_group
@@ -63,7 +65,8 @@
 
         # /chroots/USER
         - name: "Check if the ro chroot is mounted for {{ user.key }}"
-          ansible.builtin.command: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"
+          ansible.builtin.command:
+            cmd: "findmnt {{ users_chroot_users_dir }}/{{ user.key }}"
           check_mode: false
           changed_when: false
           register: users_findmnt

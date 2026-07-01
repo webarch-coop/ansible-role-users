@@ -14,7 +14,8 @@
   block:
 
     - name: Run dig to lookup an IPv4 address
-      ansible.builtin.command: "dig -4 +short {{ users_host }}"
+      ansible.builtin.command:
+        cmd: "dig -4 +short {{ users_host }}"
       check_mode: false
       changed_when: false
       register: users_host_ipv4

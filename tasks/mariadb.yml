@@ -15,7 +15,8 @@
       block:
 
         - name: "Read mysql entry from /etc/passwd"
-          ansible.builtin.command: "grep ^mysql: /etc/passwd"
+          ansible.builtin.command:
+            cmd: "grep ^mysql: /etc/passwd"
           check_mode: false
           changed_when: false
           register: users_etc_passwd
@@ -30,7 +31,8 @@
             group: root
 
         - name: "Read mysql entry from /etc/group"
-          ansible.builtin.command: "grep ^mysql: /etc/group"
+          ansible.builtin.command:
+            cmd: "grep ^mysql: /etc/group"
           check_mode: false
           changed_when: false
           register: users_etc_group

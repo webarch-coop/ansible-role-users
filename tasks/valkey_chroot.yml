@@ -12,7 +12,8 @@
   block:
 
     - name: Read valkey entry from /etc/passwd
-      ansible.builtin.command: "grep ^valkey: /etc/passwd"
+      ansible.builtin.command:
+        cmd: "grep ^valkey: /etc/passwd"
       check_mode: false
       changed_when: false
       register: users_etc_passwd_valkey
@@ -27,7 +28,8 @@
         group: root
 
     - name: Valkey group entry from /etc/group"
-      ansible.builtin.command: "grep ^valkey: /etc/group"
+      ansible.builtin.command:
+        cmd: "grep ^valkey: /etc/group"
       check_mode: false
       changed_when: false
       register: users_etc_group_valkey

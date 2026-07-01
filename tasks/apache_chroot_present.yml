@@ -90,7 +90,8 @@
 
         # /chroots/www-data
         - name: "Check if {{ users_apache_chroot_dir }} is mounted"
-          ansible.builtin.command: "findmnt {{ users_apache_chroot_dir }}"
+          ansible.builtin.command:
+            cmd: findmnt {{ users_apache_chroot_dir }}
           check_mode: false
           changed_when: false
           register: users_findmnt

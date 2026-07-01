@@ -30,8 +30,8 @@
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
 
     - name: Query the version of PHP using phpquery -V
-      ansible.builtin.command: phpquery -V
-      args:
+      ansible.builtin.command:
+        cmd: phpquery -V
         strip_empty_ends: true
       check_mode: false
       changed_when: false
@@ -78,8 +78,8 @@
         - users_phpfpm_versions_required | length >= 1
 
     - name: Run update-alternatives to find the default version of PHP
-      ansible.builtin.command: update-alternatives --query php
-      args:
+      ansible.builtin.command:
+        cmd: update-alternatives --query php
         strip_empty_ends: true
       check_mode: false
       changed_when: false

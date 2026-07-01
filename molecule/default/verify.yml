@@ -19,7 +19,8 @@
   tasks:
 
     - name: User getent passwd to check chris account is present
-      ansible.builtin.command: getent passwd chris
+      ansible.builtin.command:
+        cmd: getent passwd chris
       check_mode: false
       changed_when: false
       register: molecule_getent_passwd_chris

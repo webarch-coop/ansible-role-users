@@ -19,12 +19,14 @@
   block:
 
     - name: "Random passwd for {{ user.key }} generated"
-      ansible.builtin.command: "pwgen -n {{ 30 | random(20) }} 1"
+      ansible.builtin.command:
+        cmd: "pwgen -n {{ 30 | random(20) }} 1"
       no_log: true
       register: users_passwd
 
     - name: "SHA 512 hash of passwd generated"
-      ansible.builtin.command: "mkpasswd --method=sha-512 {{ users_passwd.stdout }}"
+      ansible.builtin.command:
+        cmd: "mkpasswd --method=sha-512 {{ users_passwd.stdout }}"
       no_log: true
       register: users_passwd_hash
 

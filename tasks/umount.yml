@@ -12,14 +12,16 @@
   block:
 
     - name: "Check if {{ users_mount_path }} is mounted"
-      ansible.builtin.command: "findmnt {{ users_mount_path }}"
+      ansible.builtin.command:
+        cmd: "findmnt {{ users_mount_path }}"
       check_mode: false
       changed_when: false
       register: users_findmnt
       failed_when: users_findmnt.rc is not regex('^0|1$')
 
     - name: "Disk {{ users_mount_path }} unmounted"
-      ansible.builtin.command: "umount -l {{ users_mount_path }}"
+      ansible.builtin.command:
+        cmd: "umount -l {{ users_mount_path }}"
       when: users_findmnt.rc == 0
       register: users_umount
       changed_when: ( "not mounted" not in users_umount.stderr )

@@ -184,18 +184,19 @@
           changed_when: false
 
         - name: Get the md5sum of quota_user.csv
-          ansible.builtin.command: "md5sum {{ quota_dir }}/quota_user.csv"
+          ansible.builtin.command:
+            cmd: "md5sum {{ quota_dir }}/quota_user.csv"
           check_mode: false
           changed_when: false
           register: users_repquota_md5sum_before
 
         - name: Users quotas written to quota_user.csv and md5sum printed
-          ansible.builtin.shell: |
-            set -e -o pipefail
-            repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
-            chmod 600 {{ quota_dir }}/quota_user.csv
-            md5sum {{ quota_dir }}/quota_user.csv
-          args:
+          ansible.builtin.shell:
+            cmd: |-
+              set -e -o pipefail
+              repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
+              chmod 600 {{ quota_dir }}/quota_user.csv
+              md5sum {{ quota_dir }}/quota_user.csv
             chdir: "{{ quota_dir | dirname }}"
             executable: "{{ users_bash }}"
           check_mode: false

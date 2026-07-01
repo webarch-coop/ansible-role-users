@@ -26,7 +26,8 @@
       block:
 
         - name: "PHP FPM configtest for version {{ users_phpfpm_ver }}"
-          ansible.builtin.command: "php-fpm{{ users_phpfpm_ver }} --test"
+          ansible.builtin.command:
+            cmd: "php-fpm{{ users_phpfpm_ver }} --test"
           register: users_phpfpm_pool_configtest
 
         - name: "PHP FPM restarted for version {{ users_phpfpm_ver }}"

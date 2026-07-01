@@ -12,7 +12,8 @@
   block:
 
     - name: Dump Apache configuration using apache2ctl -t -D DUMP_RUN_CFG
-      ansible.builtin.command: apache2ctl -t -D DUMP_RUN_CFG
+      ansible.builtin.command:
+        cmd: apache2ctl -t -D DUMP_RUN_CFG
       check_mode: false
       changed_when: false
       register: users_apache_dump_run_cfg

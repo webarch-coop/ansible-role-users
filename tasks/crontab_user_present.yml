@@ -28,10 +28,10 @@
         - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
 
     - name: "Cron minute file {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
-      ansible.builtin.shell: |-
-        set -e -o pipefail
-        echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
-      args:
+      ansible.builtin.shell:
+        cmd: |-
+          set -e -o pipefail
+          echo {{ 59 | random }} > {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
         executable: "{{ users_bash }}"
         creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       when: ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
@@ -164,7 +164,8 @@
         - ( user.value.users_groups is not defined ) or ( user.value.users_groups is defined and "chroot" not in user.value.users_groups )
 
     - name: "Check if a crontab exists for {{ user.key }}"
-      ansible.builtin.command: "crontab -l -u {{ user.key }}"
+      ansible.builtin.command:
+        cmd: "crontab -l -u {{ user.key }}"
       check_mode: false
       changed_when: false
       register: users_crontab_list

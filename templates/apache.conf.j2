@@ -93,11 +93,13 @@
   Protocols {{ vhost_config.users_apache_protocols | ansible.builtin.join(' ') }}
 {%     endif %}
 {%     if vhost_config.users_apache_h2websockets is defined %}
+  <IfModule mod_http2>
 {%         if vhost_config.users_apache_h2websockets | ansible.builtin.bool %}
-  H2WebSockets on
+    H2WebSockets on
 {%         else %}
-  H2WebSockets off
+    H2WebSockets off
 {%         endif %}
+  </IfModule>
 {%     endif %}
 {%     if users_apache_chroot_suexec and "suexec" in users_apache_modules_loaded %}
   <IfModule suexec_module>
@@ -1103,6 +1105,12 @@
   <IfModule proxy_module>
     # In reverse proxy or gateway configuration, ProxyRequests should be set to Off
     ProxyRequests Off
+    <IfModule mod_http2>
+      # Similar to ProxyRequests, this triggers the needed treatment of
+      # requests when HTTP/2 is enabled in a forward proxy configuration. Both
+      # directive should be enabled.
+      H2ProxyRequests Off
+    </IfModule>
 {%         if apache_conf_enabled is defined %}
 {%             if "webarch" in apache_conf_enabled %}
     ProxyPass "/wsh/" "!"

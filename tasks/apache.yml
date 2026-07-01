@@ -15,7 +15,8 @@
       block:
 
         - name: Register the loaded Apache modules
-          ansible.builtin.command: a2query -m
+          ansible.builtin.command:
+            cmd: a2query -m
           check_mode: false
           changed_when: false
           register: users_apache_modules_check
@@ -99,12 +100,14 @@
       block:
 
         - name: Check Apache logrotation config
-          ansible.builtin.command: /usr/sbin/logrotate -d /etc/logrotate.d/apache_users_logrotate
+          ansible.builtin.command:
+            cmd: /usr/sbin/logrotate -d /etc/logrotate.d/apache_users_logrotate
           check_mode: false
           changed_when: false
 
         - name: Run Apache logrotation config
-          ansible.builtin.command: /usr/sbin/logrotate -v /etc/logrotate.d/apache_users_logrotate
+          ansible.builtin.command:
+            cmd: /usr/sbin/logrotate -v /etc/logrotate.d/apache_users_logrotate
           register: users_apache_logrotate_run
           changed_when:
             - ( "not running prerotate script, since no logs will be rotated" not in users_apache_logrotate_run.stderr )

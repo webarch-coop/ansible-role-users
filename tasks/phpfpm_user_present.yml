@@ -170,12 +170,14 @@
       block:
 
         - name: Check PHP FPM log rotation config
-          ansible.builtin.command: "/usr/sbin/logrotate -d /etc/logrotate.d/phpfpm_{{ user.key }}"
+          ansible.builtin.command:
+            cmd: "/usr/sbin/logrotate -d /etc/logrotate.d/phpfpm_{{ user.key }}"
           check_mode: false
           changed_when: false
 
         - name: Run PHP FPM log rotation config
-          ansible.builtin.command: "/usr/sbin/logrotate -f /etc/logrotate.d/phpfpm_{{ user.key }}"
+          ansible.builtin.command:
+            cmd: "/usr/sbin/logrotate -f /etc/logrotate.d/phpfpm_{{ user.key }}"
           register: users_phpfpm_logrotate_run
           failed_when:
             - users_phpfpm_logrotate_run.rc != 0
@@ -215,7 +217,8 @@
       block:
 
         - name: "PHP FPM pool.d configtest for {{ user.key }}"
-          ansible.builtin.command: "php-fpm{{ users_phpfpm_version }} --test"
+          ansible.builtin.command:
+            cmd: "php-fpm{{ users_phpfpm_version }} --test"
           register: users_phpfpm_pool_configtest
 
         - name: "PHP FPM restarted for changes for {{ user.key }}"
@@ -295,7 +298,8 @@
           block:
 
             - name: "Run apache2ctl configtest to check /etc/apache2/localhost.d/{{ user.key }}.conf"
-              ansible.builtin.command: apache2ctl configtest
+              ansible.builtin.command:
+                cmd: apache2ctl configtest
               check_mode: false
               changed_when: false
               register: users_apache2ctl_configtest

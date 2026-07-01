@@ -20,7 +20,8 @@
       block:
 
         - name: "Generate a random password for {{ user.key }} MariaDB account as ~/.my.cnf doesn't exist"
-          ansible.builtin.command: "pwgen -n {{ 30 | random(20) }} 1"
+          ansible.builtin.command:
+            cmd: "pwgen -n {{ 30 | random(20) }} 1"
           no_log: true
           register: users_mariadb_password_gen
 
@@ -35,7 +36,9 @@
       block:
 
         - name: "MariaDB password read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
-          ansible.builtin.command: "my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client"
+          ansible.builtin.command:
+            cmd: >-
+              my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client
           changed_when: false
           check_mode: false
           register: users_my_print_defaults
@@ -79,7 +82,8 @@
         group: "{{ user.value.users_group | default(user.key) }}"
 
     - name: "The databases that {{ user.key }} has access to"
-      ansible.builtin.command: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
+      ansible.builtin.command:
+        cmd: mysql -B -N -e "SELECT Db FROM mysql.db WHERE User='{{ user.key }}';" mysql
       changed_when: false
       check_mode: false
       register: users_mariadb_list
@@ -89,7 +93,7 @@
         users_mariadb_delete_list: "{{ users_mariadb_list.stdout_lines | difference(user.value.users_mariadb_databases) }}"
 
     - name: "Databases absent for {{ user.key }}"
-      community.mysql.mysql_db:  # noqa: fqcn[canonical]
+      ansible.mysql.mysql_db:  # noqa: fqcn[canonical]
         name: "{{ db }}"
         state: absent
         login_user: root
@@ -101,7 +105,7 @@
         label: "{{ db }}"
 
     - name: "Databases present for {{ user.key }}"
-      community.mysql.mysql_db:  # noqa: fqcn[canonical]
+      ansible.mysql.mysql_db:  # noqa: fqcn[canonical]
         name: "{{ db }}"
         state: present
         login_user: root
@@ -163,7 +167,7 @@
         - debug
 
     - name: "MariaDB {{ user.key }} user present"
-      community.mysql.mysql_user:  # noqa: fqcn[canonical]
+      ansible.mysql.mysql_user:  # noqa: fqcn[canonical]
         name: "{{ user.key }}"
         password: "{{ users_mariadb_password }}"
         host: localhost

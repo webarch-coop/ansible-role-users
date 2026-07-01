@@ -12,7 +12,8 @@
   block:
 
     - name: "Processes slayed for user {{ user.key }}"
-      ansible.builtin.command: "slay {{ user.key }}"
+      ansible.builtin.command:
+        cmd: "slay {{ user.key }}"
 
     - name: "Nextcloud logrotate config absent for {{ user.key }}"
       ansible.builtin.file:

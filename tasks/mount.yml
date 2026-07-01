@@ -35,7 +35,8 @@
       block:
 
         - name: "Check if {{ users_mount_path }} is mounted"
-          ansible.builtin.command: "findmnt {{ users_mount_path }}"
+          ansible.builtin.command:
+            cmd: "findmnt {{ users_mount_path }}"
           check_mode: false
           changed_when: false
           register: users_findmnt

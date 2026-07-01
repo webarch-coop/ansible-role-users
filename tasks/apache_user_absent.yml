@@ -30,7 +30,8 @@
       block:
 
         - name: "Run apache2ctl configtest to check deletion of the Apache sites-enabled symlink for {{ user.key }}"
-          ansible.builtin.command: apache2ctl configtest
+          ansible.builtin.command:
+            cmd: apache2ctl configtest
           check_mode: false
           changed_when: false
           failed_when: ( "Syntax OK" not in users_apache2ctl_configtest.stderr )

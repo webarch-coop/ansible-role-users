@@ -522,12 +522,12 @@
       block:
 
         - name: Updated users quotas written and md5sum printed
-          ansible.builtin.shell: |
-            set -e -o pipefail
-            repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
-            chmod 600 {{ quota_dir }}/quota_user.csv
-            md5sum {{ quota_dir }}/quota_user.csv
-          args:
+          ansible.builtin.shell:
+            cmd: |-
+              set -e -o pipefail
+              repquota {{ quota_dir }}  --output=csv > {{ quota_dir }}/quota_user.csv
+              chmod 600 {{ quota_dir }}/quota_user.csv
+              md5sum {{ quota_dir }}/quota_user.csv
             executable: "{{ users_bash }}"
           register: users_repquota_md5sum_after
           check_mode: false
