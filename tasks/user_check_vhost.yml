@@ -241,12 +241,43 @@
 
       when: vhost.value.users_apache_directories is defined
 
-    - name: "Check that users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is set to php, fcgi, cgi or static if it is defined"
+    - name: "Check users_apache_type for {{ vhost.key }} VirtualHost for {{ user.key }} is php, fcgi, cgi or static if defined"
       ansible.builtin.assert:
         that:
           - vhost.value.users_apache_type is regex('^php|php[+]cgi|php[+]fcgi|cgi|fcgi|static$')
         quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
       when: vhost.value.users_apache_type is defined
+
+    - name: "Check that users_apache_h2websockets is a boolean"
+      ansible.builtin.assert:
+        that:
+          - vhost.value.users_apache_h2websockets | ansible.builtin.type_debug == "bool"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: vhost.value.users_apache_h2websockets is defined
+
+    - name: Protocols checks
+      block:
+
+        - name: "Check users_apache_protocols for {{ vhost.key }} VirtualHost for {{ user.key }} is a list."
+          ansible.builtin.assert:
+            that:
+              - vhost.value.users_apache_protocols | ansible.builtin.type_debug == "list"
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+
+        - name: "Check users_apache_protocols list values for {{ vhost.key }} VirtualHost for {{ user.key }} are htp/1.1, h2 or h2c"
+          ansible.builtin.assert:
+            that:
+              - >-
+                (users_apache_protocol == "http/1.1") or
+                (users_apache_protocol == "h2") or
+                (users_apache_protocol == "h2c")
+            quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+          loop: "{{ vhost.value.users_apache_protocols }}"
+          loop_control:
+            loop_var: users_apache_protocol
+            label: "{{ users_apache_protocol }}"
+
+      when: vhost.value.users_apache_protocols is defined
 
     - name: Proxy checks
       block:
