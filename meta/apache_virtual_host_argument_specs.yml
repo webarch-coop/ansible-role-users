@@ -793,6 +793,64 @@ nextcloud_occ_autocompletion:
   type: str
   required: false
   description: Bash autocompletion for the occ command.
+nextcloud_eurooffice_documentserver:
+  type: str
+  required: false
+  description: Domain name of the Euro-Office document server.
+nextcloud_eurooffice_documentserver_community_settings:
+  type: list
+  elements: dict
+  required: false
+  description: Euro-Office system settings for the Community Documentserver.
+  options:
+    setting:
+      type: str
+      required: false
+      description: Euro-Office system setting name for the Community Documentserver.
+    value:
+      type: str
+      required: false
+      description: Euro-Office system setting value for the Community Documentserver.
+nextcloud_eurooffice_documentserver_app_settings:
+  type: list
+  elements: dict
+  required: false
+  description: Euro-Office app settings for the Documentserver.
+  options:
+    setting:
+      type: str
+      required: false
+      description: Euro-Office app setting name for the Documentserver.
+    value:
+      type: str
+      required: false
+      description: Euro-Office app setting value for the Documentserver.
+nextcloud_eurooffice_documentserver_system_settings:
+  type: list
+  elements: dict
+  required: false
+  description: Euro-Office system settings for the Documentserver.
+  options:
+    setting:
+      type: str
+      required: false
+      description: Euro-Office setting name for the Documentserver.
+    value:
+      type: str
+      required: false
+      description: Euro-Office setting value for the Documentserver.
+nextcloud_eurooffice_jwt_header:
+  type: str
+  required: false
+  description: Euro-Office Documentserver JWT HTTP header.
+nextcloud_eurooffice_jwt_leeway:
+  type: int
+  required: false
+  description: Euro-Office Documentserver time jitter leeway.
+nextcloud_eurooffice_jwt_secret:
+  type: str
+  required: false
+  description: Euro-Office Documentserver JWT secret.
 nextcloud_onlyoffice_documentserver:
   type: str
   required: false
