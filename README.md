@@ -329,6 +329,14 @@ default, see the users_ssh_authorized_keys_file_name variable) this means if
 you want to add additional keys then you can simply add them to this directory,
 with a suitable filename, eg `~/.ssh/authorized_keys.d/authorized_keys_extra`.
 
+## MariaDB
+
+Accounts with `users_mariadb` set to `true` have a MariaDB account created and
+the password is written to `~/.my.cnf`, to change a users password either
+remove or edit `~/.my.cnf` and re-run the role &mdash; if `~/.my.cnf` doesn't
+exist a new password will be generated and if `~/.my.cnf` does exist the
+password is read from it and MariaDB is updated.
+
 ## Apache
 
 When `users_apache_virtual_hosts_enabled` is not defined for a user or it is
