@@ -58,8 +58,8 @@
 
       when: >-
         users_mariadb_all_databases != [] and
-        (( users_mariadb_all_databases | length ) !=
-        ( users_mariadb_all_databases | ansible.builtin.unique | length ))
+        ((users_mariadb_all_databases | ansible.builtin.length) !=
+        (users_mariadb_all_databases | ansible.builtin.unique | ansible.builtin.length))
 
   tags:
     - users

@@ -30,7 +30,7 @@
             users_mariadb_password: "{{ users_mariadb_password_gen.stdout | trim | quote }}"
           no_log: true
 
-      when: not users_mycnf.stat.exists
+      when: not users_mycnf.stat.exists | ansible.builtin.bool
 
     - name: "Read the MariaDB password for {{ user.key }}"
       block:
@@ -39,26 +39,26 @@
           ansible.builtin.command:
             cmd: >-
               my_print_defaults --defaults-file='{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf' client
-          changed_when: false
           check_mode: false
-          register: users_my_print_defaults
           no_log: true
+          changed_when: false
+          register: users_my_print_defaults
 
         - name: Set a fact for the mariadb_password
           ansible.builtin.set_fact:
             users_mariadb_password: "{{ line | regex_replace('^--password=') | trim }}"
-          when: line is regex('^--password=')
+          no_log: true
+          when: line is ansible.builtin.regex('^--password=')
           loop: "{{ users_my_print_defaults.stdout_lines }}"
           loop_control:
             loop_var: line
-          no_log: true
 
-      when: users_mycnf.stat.exists
+      when: users_mycnf.stat.exists | ansible.builtin.bool
 
     - name: Fail when MariaDB password not set
       ansible.builtin.fail:
         msg: "The mariadb_password appears not to be set"
-      when: ( users_mariadb_password is not defined ) or ( users_mariadb_password | length == 0 )
+      when: (users_mariadb_password is not defined) or (users_mariadb_password | ansible.builtin.length == 0)
 
     - name: "mariadb_password written to {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.my.cnf"
       ansible.builtin.template:
@@ -99,7 +99,9 @@
         login_user: root
         login_unix_socket: /var/run/mysqld/mysqld.sock
       loop: "{{ users_mariadb_delete_list }}"
-      when: ( users_mariadb_delete_list is defined ) and ( users_mariadb_delete_list != [] )
+      when:
+        - users_mariadb_delete_list is defined
+        - users_mariadb_delete_list != []
       loop_control:
         loop_var: db
         label: "{{ db }}"
@@ -133,7 +135,7 @@
       loop_control:
         loop_var: users_db
       when:
-        - users_myclirc_conf.stat.exists | bool
+        - users_myclirc_conf.stat.exists | ansible.builtin.bool
         - user.value.users_mariadb_databases is defined
         - user.value.users_mariadb_databases != []
 
@@ -146,7 +148,7 @@
         mode: "0600"
         force: true
       when:
-        - not users_myclirc_conf.stat.exists | bool
+        - not users_myclirc_conf.stat.exists | ansible.builtin.bool
         - user.value.users_mariadb_databases is defined
         - user.value.users_mariadb_databases != []
 
@@ -214,8 +216,8 @@
 
       when:
         - user.value.users_mariadb_notify_passwd is defined
-        - user.value.users_mariadb_notify_passwd | bool
-        - not users_notify_mariadb_passwd_file.stat.exists | bool
+        - user.value.users_mariadb_notify_passwd | ansible.builtin.bool
+        - not users_notify_mariadb_passwd_file.stat.exists | ansible.builtin.bool
         - user.value.users_email is defined
         - user.value.users_email | ansible.builtin.type_debug != "NoneType"
 

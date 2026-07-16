@@ -47,8 +47,9 @@
             group: root
 
       when:
-        - ( users_chroot is defined ) and ( users_chroot )
-        - ( users_chroot_dir is defined )
+        - users_chroot is defined
+        - users_chroot | ansible.builtin.bool
+        - users_chroot_dir is defined
 
   tags:
     - users
