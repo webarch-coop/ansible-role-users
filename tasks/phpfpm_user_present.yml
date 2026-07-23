@@ -213,7 +213,10 @@
         group: root
       register: users_phpfpm_pool_conf
 
-    - name: "PHP FPM pool.d configtest for {{ user.key }}"
+    # TODO Add a handler to restart PHP-FPM to the above task to ensure the
+    # pool is up and running if the pool.d files has not been changed
+
+    - name: "PHP-FPM pool.d configtest and PHP-FPM restart of {{ users_phpfpm_version }} for {{ user.key }}"
       block:
 
         - name: "PHP FPM pool.d configtest for {{ user.key }}"
