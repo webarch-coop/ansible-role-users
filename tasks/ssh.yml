@@ -15,6 +15,11 @@
 - name: SSH key configuration
   block:
 
+    - name: File ~/.ssh/knowd_hosts, which this role created due to a typo, absent
+      ansible.builtin.file:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/knowd_hosts"
+        state: absent
+
     - name: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d directory present for {{ user.key }}"
       ansible.builtin.file:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/authorized_keys.d"
@@ -35,7 +40,7 @@
 
         - name: "SSH known hosts absent from ~/.ssh/known_hosts for {{ user.key }}"
           ansible.builtin.lineinfile:
-            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/knowd_hosts"
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/known_hosts"
             state: absent
             line: "{{ users_ssh_known_host }}"
             mode: "0600"
@@ -51,7 +56,7 @@
 
         - name: "SSH known hosts present in ~/.ssh/known_hosts for {{ user.key }}"
           ansible.builtin.lineinfile:
-            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/knowd_hosts"
+            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/known_hosts"
             state: present
             create: true
             line: "{{ users_ssh_known_host }}"
