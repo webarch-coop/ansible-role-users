@@ -17,7 +17,7 @@
       register: users_home_bin_path
 
     - name: "Include daily script tasks for {{ user.key }}"
-      ansible.builtin.include_tasks: user_scripts.yml
+      ansible.builtin.include_tasks: user_script.yml
       when:
         - users_home_bin_path.stat.exists | ansible.builtin.bool
 
