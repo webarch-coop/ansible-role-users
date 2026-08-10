@@ -365,6 +365,7 @@
             label: "{{ user.key }}"
           when:
             - (user.key != "root")
+            - (user.value.users_groups is not defined) or ("sudo" not in user.value.users_groups)
             - (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)
             - >-
               ((user.value.users_state is not defined) or
