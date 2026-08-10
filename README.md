@@ -95,6 +95,12 @@ ansible-playbook users.yml --extra-vars "users_update_strategy=quotas"
 ansible-playbook users.yml --extra-vars "users_update_strategy=phpfpm"
 ```
 
+### Update users cron scripts
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=scripts"
+```
+
 ### Update users SSH public keys
 
 ```bash

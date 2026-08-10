@@ -340,6 +340,7 @@ argument_specs:
           - matomo
           - phpfpm
           - quotas
+          - scripts
           - sshkeys
           - users
       users_update_users:

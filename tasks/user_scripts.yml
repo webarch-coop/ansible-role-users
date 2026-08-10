@@ -25,8 +25,8 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+        - (users_home_bin_path.stat.exists | bool)
+        - (user.value.users_system is not defined) or (not user.value.users_system | bool)
 
     - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh file exists"
       ansible.builtin.stat:
@@ -108,9 +108,9 @@
           when: users_cron_daily_script_lines != []
 
       when:
-        - ( users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
-        - ( users_cron_daily_path.stat.exists | bool )
+        - (users_home_bin_path.stat.exists | bool)
+        - (user.value.users_system is not defined) or (not user.value.users_system | bool)
+        - (users_cron_daily_path.stat.exists | bool)
 
     - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh in place"
       ansible.builtin.template:
@@ -121,8 +121,8 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+        - (users_home_bin_path.stat.exists | bool)
+        - (user.value.users_system is not defined) or (not user.value.users_system | bool)
 
     - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh file exists"
       ansible.builtin.stat:
@@ -204,9 +204,9 @@
           when: users_cron_hourly_script_lines != []
 
       when:
-        - ( users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
-        - ( users_cron_hourly_path.stat.exists | bool )
+        - (users_home_bin_path.stat.exists | bool)
+        - (user.value.users_system is not defined) or (not user.value.users_system | bool)
+        - (users_cron_hourly_path.stat.exists | bool)
 
     - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh in place"
       ansible.builtin.template:
@@ -217,8 +217,8 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0750"
       when:
-        - ( users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
+        - (users_home_bin_path.stat.exists | bool)
+        - (user.value.users_system is not defined) or (not user.value.users_system | bool)
 
     - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh file exists"
       ansible.builtin.stat:
@@ -300,9 +300,9 @@
           when: users_cron_hourly_script_lines != []
 
       when:
-        - ( users_home_bin_path.stat.exists | bool )
-        - ( user.value.users_system is not defined ) or ( not user.value.users_system | bool )
-        - ( users_cron_minutely_path.stat.exists | bool )
+        - (users_home_bin_path.stat.exists | bool)
+        - (user.value.users_system is not defined) or (not user.value.users_system | bool)
+        - (users_cron_minutely_path.stat.exists | bool)
 
   tags:
     - users
