@@ -1,0 +1,26 @@
+# Copyright 2018-2026 Chris Croome
+#
+# This file is part of the Webarchitects Users Ansible role.
+#
+# The Webarchitects Users Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Users Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: User scripts present tasks
+  block:
+
+    - name: "Check if the HOME bin directory exists for {{ user.key }}"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
+      register: users_home_bin_path
+
+    - name: "Include daily script tasks for {{ user.key }}"
+      ansible.builtin.include_tasks: user_scripts.yml
+      when:
+        - users_home_bin_path.stat.exists | ansible.builtin.bool
+
+  tags:
+    - users
+...
