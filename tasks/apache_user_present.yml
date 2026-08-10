@@ -973,23 +973,6 @@
         - (user.value.users_mariadb_databases is defined) and (user.value.users_mariadb_databases != [])
         - (user.value.users_apache_virtual_hosts_enabled is not defined) or (user.value.users_apache_virtual_hosts_enabled is defined and user.value.users_apache_virtual_hosts_enabled | bool)
 
-    - name: Check if the user HOME bin directory exists
-      ansible.builtin.stat:
-        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
-      register: users_home_bin_path
-
-    - name: "Include scripts role for {{ user.key }}"
-      ansible.builtin.include_tasks: user_scripts.yml
-      loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"
-      loop_control:
-        loop_var: vhost
-        label: "{{ vhost.key }}"
-      when: >
-        (users_home_bin_path.stat.exists) and (user.value.users_system is not defined or not user.value.users_system) and
-        ((vhost.value.users_daily_scripts is defined) and (vhost.value.users_daily_scripts != []) or
-        (vhost.value.users_hourly_scripts is defined) and (vhost.value.users_hourly_scripts != []) or
-        (vhost.value.users_minutely_scripts is defined) and (vhost.value.users_minutely_scripts != []))
-
     - name: "Chown and potentially chmod CMS DocumentRoot for {{ user.key }}"
       ansible.builtin.include_tasks: cms_chown.yml
       loop: "{{ user.value.users_apache_virtual_hosts | dict2items }}"

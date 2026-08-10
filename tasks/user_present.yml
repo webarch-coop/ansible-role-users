@@ -8,13 +8,13 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: "User present tasks for {{ user.key }}"
+- name: User present tasks
   block:
 
     - name: "User groups present for {{ user.key }}"
       ansible.builtin.include_tasks: groups.yml
       when:
-        - ( user.value.users_groups is defined ) and ( user.value.users_groups != [] )
+        - (user.value.users_groups is defined) and (user.value.users_groups != [])
 
     - name: "User group present for {{ user.key }}"
       ansible.builtin.group:
@@ -23,7 +23,7 @@
 
     - name: "Users group members present for {{ user.key }}"
       ansible.builtin.include_tasks: group_members.yml
-      when: ( user.value.users_group_members is defined ) and ( user.value.users_group_members != [] )
+      when: (user.value.users_group_members is defined) and (user.value.users_group_members != [])
 
     - name: Get all groups
       ansible.builtin.getent:
@@ -37,8 +37,8 @@
       ansible.builtin.include_tasks: mariadb_user_present.yml
       when:
         - user.key != "root"
-        - ( users_mariadb is defined ) and ( users_mariadb )
-        - ( user.value.users_mariadb_databases is defined ) and ( user.value.users_mariadb_databases != [] )
+        - (users_mariadb is defined) and (users_mariadb)
+        - (user.value.users_mariadb_databases is defined) and (user.value.users_mariadb_databases != [])
 
     - name: Debug quota settings
       ansible.builtin.debug:
@@ -75,14 +75,14 @@
     - name: "Crontab tasks present for user {{ user.key }}"
       ansible.builtin.include_tasks: crontab_user_present.yml
       when:
-        # - ( user.key != "root" )
-        # - ( user.value.users_groups is defined ) and ( "sudo" not in user.value.users_groups )
-        - ( users_cron is defined ) and ( users_cron )
-        - ( user.value.users_email is defined ) and ( user.value.users_email | length > 0 )
+        # - (user.key != "root")
+        # - (user.value.users_groups is defined) and ("sudo" not in user.value.users_groups)
+        - (users_cron is defined) and (users_cron)
+        - (user.value.users_email is defined) and (user.value.users_email | length > 0)
 
     - name: "Crontab tasks absent for user {{ user.key }} as they have no email address"
       ansible.builtin.include_tasks: crontab_user_absent.yml
-      when: ( user.value.users_email is not defined ) or ( user.value.users_email | length == 0 )
+      when: (user.value.users_email is not defined) or (user.value.users_email | length == 0)
 
     - name: "Create or remove a .forward file for {{ user.key }}"
       block:
@@ -91,7 +91,7 @@
           ansible.builtin.file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
             state: absent
-          when: ( not users_forward ) or ( user.value.users_email is not defined or user.value.users_email | length == 0 )
+          when: (not users_forward) or (user.value.users_email is not defined or user.value.users_email | length == 0)
 
         - name: "Email address in .forward for {{ user.key }}"
           ansible.builtin.template:
@@ -100,7 +100,7 @@
             mode: "0640"
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
-          when: ( users_forward ) and ( user.value.users_email is defined and user.value.users_email | length > 0 )
+          when: (users_forward) and (user.value.users_email is defined and user.value.users_email | length > 0)
 
       when: users_forward is defined
 
@@ -113,22 +113,22 @@
         group: "{{ user.value.users_group | default(user.key) }}"
         mode: "0644"
       when:
-        - ( user.value.users_system is not defined ) or ( user.value.users_system is defined and not user.value.users_system | bool )
-        - ( users_muttrc is defined ) and ( users_muttrc | bool )
+        - (user.value.users_system is not defined) or (user.value.users_system is defined and not user.value.users_system | bool)
+        - (users_muttrc is defined) and (users_muttrc | bool)
 
     - name: "Include the chroot present users tasks for {{ user.key }}"
       ansible.builtin.include_tasks: chroot_user_present.yml
       when:
-        - ( user.key != "root" )
-        - ( users_chroot is defined ) and ( users_chroot | bool )
-        - ( users_chroot_dir is defined ) and ( users_chroot_dir_check.stat.exists | bool )
-        - ( user.value.users_groups is defined ) and ( "chroot" in user.value.users_groups )
+        - (user.key != "root")
+        - (users_chroot is defined) and (users_chroot | bool)
+        - (users_chroot_dir is defined) and (users_chroot_dir_check.stat.exists | bool)
+        - (user.value.users_groups is defined) and ("chroot" in user.value.users_groups)
 
     - name: "Include the PHP FPM user present tasks for {{ user.key }}"
       ansible.builtin.include_tasks: phpfpm_user_present.yml
       when:
-        - ( user.key != "root" )
-        - ( user.value.users_groups is defined ) and ( "phpfpm" in user.value.users_groups )
+        - (user.key != "root")
+        - (user.value.users_groups is defined) and ("phpfpm" in user.value.users_groups)
 
     - name: Matomo login account tasks
       block:
@@ -200,7 +200,7 @@
           when: matomo_user in ansible_facts.getent_passwd.keys()
 
       when:
-        - (user.key != "root" )
+        - (user.key != "root")
         - (user.value.users_matomo_account is defined) and (user.value.users_matomo_account | bool)
         - (user.value.users_email is defined) and (user.value.users_email | length > 0)
         - (matomo_user is defined) and (matomo_user | length > 0)
@@ -211,12 +211,22 @@
     - name: "Include Apache config tasks present for user {{ user.key }}"
       ansible.builtin.include_tasks: apache_user_present.yml
       when:
-        - ( user.key != "root" ) and ( "apache2" in ansible_facts.packages )
-        - ( users_apache is defined ) and ( users_apache | bool )
-        - ( user.value.users_apache_virtual_hosts is defined )
+        - (user.key != "root") and ("apache2" in ansible_facts.packages)
+        - (users_apache is defined) and (users_apache | bool)
+        - (user.value.users_apache_virtual_hosts is defined)
+
+    - name: "Check if the HOME bin directory exists for {{ user.key }}"
+      ansible.builtin.stat:
+        path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}"
+      register: users_home_bin_path
 
     - name: "Include daily script tasks for {{ user.key }}"
-      ansible.builtin.include_tasks: user_scripts.yml
+      ansible.builtin.include_tasks: user_script.yml
+      when:
+        - (user.key != "root")
+        - users_home_bin_path.stat.exists | ansible.builtin.bool
+        - (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)
+        - ((user.value.users_state is not defined) or ((user.value.users_state is defined) and (user.value.users_state == "present")))
 
     - name: "User state files updated for {{ user.key }}"
       ansible.builtin.include_tasks: user_updated.yml
