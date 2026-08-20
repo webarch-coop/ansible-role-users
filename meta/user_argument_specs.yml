@@ -91,6 +91,10 @@ users_daily_scripts:
   elements: str
   required: false
   description: A list of Bash command lines to run daily.
+users_daily_scripts_test_ignore_fail_regex:
+  type: str
+  required: false
+  description: A regular expression for stderr lines to ignore when the users_daily_scripts fail the test run.
 users_editor:
   type: str
   required: false
@@ -141,11 +145,19 @@ users_hourly_scripts:
   elements: str
   required: false
   description: A list of Bash command lines to be run hourly.
+users_hourly_scripts_test_ignore_fail_regex:
+  type: str
+  required: false
+  description: A regular expression for stderr lines to ignore when the users_hourly_scripts fail the test run.
 users_minutely_scripts:
   type: list
   elements: str
   required: false
   description: A list of Bash command lines to be run minutely.
+users_minutely_scripts_test_ignore_fail_regex:
+  type: str
+  required: false
+  description: A regular expression for stderr lines to ignore when the users_minutely_scripts fail the test run.
 users_mariadb_databases:
   type: list
   elements: str
