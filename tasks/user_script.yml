@@ -322,7 +322,7 @@
                 ((users_minutely_scripts_test.rc != 0) and
                 (user.value.users_minutely_scripts_test_ignore_fail_regex is not defined)) or
                 ((users_minutely_scripts_test.rc != 0) and
-                (user.value.users_minutely_scripts_test_ignore_fail_regex is defined) or
+                (user.value.users_minutely_scripts_test_ignore_fail_regex is defined) and
                 (users_minutely_scripts_test.stdout_lines
                 | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
                 | ansible.builtin.length != 0))
