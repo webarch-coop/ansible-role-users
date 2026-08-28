@@ -107,9 +107,9 @@ ansible-playbook users.yml --extra-vars "users_update_strategy=scripts"
 ansible-playbook users.yml --extra-vars "users_update_strategy=sshkeys"
 ```
 
-### Updated users in additional groups
+### Update users groups
 
-Update all users which have `users_groups` defined:
+Update both the groups that users are members of and members of users groups, (is `users_groups` and `users_group_members`):
 
 ```bash
 ansible-playbook users.yml --extra-vars "users_update_strategy=groups"

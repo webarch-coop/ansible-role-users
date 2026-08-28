@@ -320,11 +320,6 @@ argument_specs:
         type: list
         required: true
         description: A list of users to update that starts as an empty array and is set as the role runs.
-      users_update_groups:
-        type: list
-        elements: str
-        required: false
-        description: Update the users who are members of one or more of the groups.
       users_update_strategy:
         type: str
         required: true

@@ -114,6 +114,10 @@ users_generate_ssh_key:
   type: bool
   required: false
   description: Users generate SSH keypair.
+users_group:
+  type: str
+  required: false
+  description: The users group, defauls to the users name when not defined.
 users_group_members:
   type: list
   elements: str

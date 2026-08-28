@@ -173,28 +173,6 @@
         - users_update_strategy is defined
         - users_update_strategy == "users"
 
-    - name: Set users to update by group
-      block:
-
-        - name: Loop through the users with additional groups
-          ansible.builtin.include_tasks: users_groups.yml
-          when:
-            - (user.value.users_groups is defined and user.value.users_groups != []) or (user.key in users_update_groups)
-            - (user.key not in users_update) and (user.value.users_state != "ignore")
-          loop: "{{ users | ansible.builtin.dict2items }}"
-          loop_control:
-            loop_var: user
-            label: "{{ user.key }}"
-
-        - name: Print the users in the groups to update
-          ansible.builtin.debug:
-            msg: "User{% if users_update | length > 1 %}s{% endif %} to update: {{ users_update | join(', ') }}"
-
-      when:
-        - users_update_strategy == "groups"
-        - users_update_groups is defined
-        - users_update_groups != []
-
     - name: Debug users_update
       ansible.builtin.debug:
         var: users_update
@@ -235,6 +213,24 @@
       when:
         - users_update_strategy is defined
         - users_update_strategy == "check"
+
+    - name: Set users to update by group
+      block:
+
+        - name: Loop through users present to configure groups
+          ansible.builtin.include_tasks: groups.yml
+          loop: "{{ users | ansible.builtin.dict2items }}"
+          loop_control:
+            loop_var: user
+            label: "{{ user.key }}"
+          when:
+            - user.key != "root"
+            - user.value.users_state is defined
+            - user.value.users_state == "present"
+
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "groups"
 
     - name: Update Apache config for users present
       block:

@@ -11,19 +11,8 @@
 - name: User present tasks
   block:
 
-    - name: "User groups present for {{ user.key }}"
+    - name: "Include user groups tasks for {{ user.key }}"
       ansible.builtin.include_tasks: groups.yml
-      when:
-        - (user.value.users_groups is defined) and (user.value.users_groups != [])
-
-    - name: "User group present for {{ user.key }}"
-      ansible.builtin.group:
-        name: "{{ user.key }}"
-        state: present
-
-    - name: "Users group members present for {{ user.key }}"
-      ansible.builtin.include_tasks: group_members.yml
-      when: (user.value.users_group_members is defined) and (user.value.users_group_members != [])
 
     - name: Get all groups
       ansible.builtin.getent:
