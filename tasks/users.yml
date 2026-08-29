@@ -399,7 +399,6 @@
         - name: Matomo variables are required in order for this role to configure Matomo sites and users
           ansible.builtin.assert:
             that:
-              - users_matomo | bool
               - (matomo_user is defined) and (matomo_user | length > 0)
               - (matomo_password is defined) and (matomo_password | length > 0)
               - (matomo_token_auth is defined) and (matomo_token_auth | length > 0)
@@ -412,6 +411,8 @@
           ansible.builtin.meta: end_play
 
       when:
+        - users_matomo is defined
+        - users_matomo | ansible.builtin.bool
         - users_update_strategy is defined
         - users_update_strategy == "matomo"
 
