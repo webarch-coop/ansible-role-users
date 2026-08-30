@@ -24,10 +24,18 @@
 - name: Webarchitects Ansible User Role
   block:
 
-    - name: Include group.yml
-      ansible.builtin.include_tasks: group.yml
+    # - name: "Write the users as a list to /tmp on {{ inventory_hostname }}"
+    #   ansible.builtin.template:
+    #     src: users.yml.j2
+    #     dest: "/tmp/{{ inventory_hostname }}_users.yml"
+    #     mode: "0644"
+    #   tags:
+    #     - debug
 
-    # - fail:
+    - name: Include groups tasks
+      ansible.builtin.include_tasks: groups.yml
+
+      # - fail:
 
     - name: Debug the hostvars variable names that start with users_
       ansible.builtin.debug:
@@ -58,14 +66,6 @@
         verbosity: 2
       tags:
         - debug
-
-     # - name: "Write the users as a list to /tmp on {{ inventory_hostname }}"
-     #   ansible.builtin.template:
-     #     src: users.yml.j2
-     #     dest: "/tmp/{{ inventory_hostname }}_users.yml"
-     #     mode: "0644"
-     #   tags:
-     #     - debug
 
     - name: Check users_ variables using meta/argument_specs.yml
       ansible.builtin.validate_argument_spec:

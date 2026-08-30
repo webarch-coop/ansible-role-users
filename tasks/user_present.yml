@@ -12,7 +12,7 @@
   block:
 
     - name: "Include user groups tasks for {{ user.key }}"
-      ansible.builtin.include_tasks: groups.yml
+      ansible.builtin.include_tasks: group.yml
 
     - name: Get all groups
       ansible.builtin.getent:
