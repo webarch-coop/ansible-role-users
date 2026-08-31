@@ -12,7 +12,15 @@
   block:
 
     - name: "Include user groups tasks for {{ user.key }}"
-      ansible.builtin.include_tasks: group.yml
+      ansible.builtin.include_tasks: groups.yml
+
+    # - name: "Include user groups tasks for {{ user.key }}"
+    #   ansible.builtin.include_tasks: group.yml
+
+    - name: "User group present for {{ user.key }}"
+      ansible.builtin.group:
+        name: "{{ user.value.users_group | default(user.key) }}"
+        state: present
 
     - name: Get all groups
       ansible.builtin.getent:

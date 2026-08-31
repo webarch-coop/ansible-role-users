@@ -32,11 +32,6 @@
     #   tags:
     #     - debug
 
-    - name: Include groups tasks
-      ansible.builtin.include_tasks: groups.yml
-
-      # - fail:
-
     - name: Debug the hostvars variable names that start with users_
       ansible.builtin.debug:
         var: usersvarnames
