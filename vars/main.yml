@@ -17,4 +17,5 @@ usershostvars: "{{ dict(usersvarnames | list | zip(q('vars', *usersvarnames))) }
 # Set variables to an empty list
 users_apache_modules_loaded: []
 users_update: []
+users_update_groups: []
 ...

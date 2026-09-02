@@ -30,7 +30,7 @@
 
     - name: "Generate a list of users that are members of the users group for {{ user_member }}"
       ansible.builtin.set_fact:
-        users_grp_mbrs: "{{ users_grp_mbrs + [ user.key ] }}"
+        users_grp_mbrs: "{{ users_grp_mbrs + [user.key] }}"
       loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
         loop_var: user
