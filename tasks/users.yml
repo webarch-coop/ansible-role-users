@@ -220,17 +220,6 @@
         - name: Include the groups tasks
           ansible.builtin.include_tasks: groups.yml
 
-        # - name: Loop through users present to configure groups
-        #   ansible.builtin.include_tasks: group.yml
-        #   loop: "{{ users | ansible.builtin.dict2items }}"
-        #   loop_control:
-        #     loop_var: user
-        #     label: "{{ user.key }}"
-        #   when:
-        #     - user.key != "root"
-        #     - user.value.users_state is defined
-        #     - user.value.users_state == "present"
-
       when:
         - users_update_strategy is defined
         - users_update_strategy == "groups"

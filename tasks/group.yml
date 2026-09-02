@@ -8,74 +8,122 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-
-# WIP This needs lots more work!
-#
-# This file should:
-#
-# 1. Get a list of all groups for users present and ensure they all exist
-# 2. Get a list of all users_group_members for users present and ensure that these user accounts exist
-# 3. Loop though the users present to ensure that are in the right groups and not others
-# 4. Loop through the users_group_members and ensure they have the right members
-
 - name: User groups configured
   block:
 
-    - name: User groups
-      block:
+    - name: "Set user_update_groups to an empty list for user {{ user_update }}"
+      ansible.builtin.set_fact:
+        user_update_groups: []
 
-        - name: "Debug users_groups for {{ user.key }}"
-          ansible.builtin.debug:
-            var: user.value.users_groups
-            verbosity: 2
-          tags:
-            - debug
-
-        - name: "Groups present for {{ user.key }}"
-          ansible.builtin.group:
-            name: "{{ users_grp }}"
-            state: present
-          loop: "{{ user.value.users_groups }}"
-          loop_control:
-            loop_var: users_grp
-            label: "{{ users_grp }}"
-
-      when:
-        - user.value.users_groups is defined
-        - user.value.users_groups != []
-
-    - name: "Debug users_group for {{ user.key }}"
+    - name: "Debug user_update_groups for user {{ user_update }}"
       ansible.builtin.debug:
-        var: users_grp
-        verbosity: 2
-      vars:
-        users_grp: "{{ user.value.users_group | default(user.key) }}"
+        var: user_update
+        verbosity: >-
+          {% if ansible_check_mode | ansible.builtin.bool or ansible_diff_mode | ansible.builtin.bool %}2{% else %}3{% endif %}
       tags:
         - debug
 
-    - name: "User group present for {{ user.key }}"
-      ansible.builtin.group:
-        name: "{{ user.value.users_group | default(user.key) }}"
-        state: present
+    - name: "Debug users_groups for user {{ user_update }}"
+      ansible.builtin.debug:
+        msg: "{{ users | ansible.builtin.dict2items | community.general.json_query(user_update_groups_jpq) }}"
+        verbosity: >-
+          {% if ansible_check_mode | ansible.builtin.bool or ansible_diff_mode | ansible.builtin.bool %}1{% else %}2{% endif %}
+      vars:
+        user_update_groups_jpq: "[?key=='{{ user_update }}'].value.users_groups|[]"
+      tags:
+        - debug
 
-    - name: Users group members present
-      block:
-
-        - name: "Debug users_group_members for {{ user.key }}"
-          ansible.builtin.debug:
-            var: users_grp
-            verbosity: 2
-          vars:
-            users_grp: "{{ user.value.users_group | default(user.key) }}"
-          tags:
-            - debug
-
-        - name: "Users group members present for {{ user.key }}"
-          ansible.builtin.include_tasks: group_members.yml
-
+    - name: "Add groups to user_update_groups for user {{ user_update }}"
+      ansible.builtin.set_fact:
+        user_update_groups: "{{ user_update_groups + (users | ansible.builtin.dict2items | community.general.json_query(user_update_groups_jpq)) }}"
+      vars:
+        user_update_groups_jpq: "[?key=='{{ user_update }}'].value.users_groups|[]"
       when:
-        - user.value.users_group_members is defined
-        - user.value.users_group_members != []
+        - users | ansible.builtin.dict2items | community.general.json_query(user_update_groups_jpq) is defined
+        - users | ansible.builtin.dict2items | community.general.json_query(user_update_groups_jpq) != []
+        - users | ansible.builtin.dict2items | community.general.json_query(user_update_groups_jpq) | ansible.builtin.type_debug =="list"
+
+    - name: "Debug user_update_groups for user {{ user_update }}"
+      ansible.builtin.debug:
+        var: user_update_groups
+        verbosity: >-
+          {% if ansible_check_mode | ansible.builtin.bool or ansible_diff_mode | ansible.builtin.bool %}2{% else %}3{% endif %}
+      tags:
+        - debug
+
+    - name: "Debug users who have user {{ user_update }} listed in users_group_members"
+      ansible.builtin.debug:
+        msg: "User {{ user.key }} has user {{ user_update }} as one of their group members, their users_group_members are {{ user.value.users_group_members | ansible.builtin.join(', ') }}"
+        verbosity: >-
+          {% if ansible_check_mode | ansible.builtin.bool or ansible_diff_mode | ansible.builtin.bool %}2{% else %}3{% endif %}
+      loop: "{{ users | ansible.builtin.dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key != "root"
+        - user.key in users_existing
+        - >-
+          ((user.value.users_state is not defined) or
+          ((user.value.users_state is defined) and (user.value.users_state != "absent")))
+        - (user.value.users_group_members is defined) and (user.value.users_group_members != [])
+        - user_update in user.value.users_group_members
+      tags:
+        - debug
+
+    - name: "Add users who have user {{ user_update }} listed in users_group_members to user_update_groups"
+      ansible.builtin.set_fact:
+        user_update_groups: "{{ user_update_groups + [user.key] }}"
+      loop: "{{ users | ansible.builtin.dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - user.key != "root"
+        - user.key in users_existing
+        - >-
+          ((user.value.users_state is not defined) or
+          ((user.value.users_state is defined) and (user.value.users_state != "absent")))
+        - (user.value.users_group_members is defined) and (user.value.users_group_members != [])
+        - user_update in user.value.users_group_members
+
+    - name: "Debug user_update_groups for user {{ user_update }}"
+      ansible.builtin.debug:
+        var: user_update_groups
+        verbosity: >-
+          {% if ansible_check_mode | ansible.builtin.bool or ansible_diff_mode | ansible.builtin.bool %}2{% else %}3{% endif %}
+      tags:
+        - debug
+
+    - name: "Ensure that user_update_groups is sorted and unique for user {{ user_update }}"
+      ansible.builtin.set_fact:
+        user_update_groups: "{{ user_update_groups | ansible.builtin.sort | ansible.builtin.unique }}"
+
+    - name: "Debug user_update_groups for user {{ user_update }}"
+      ansible.builtin.debug:
+        var: user_update_groups
+        verbosity: >-
+          {% if ansible_check_mode | ansible.builtin.bool or ansible_diff_mode | ansible.builtin.bool %}2{% else %}3{% endif %}
+      tags:
+        - debug
+
+    - name: "User {{ user_update }} in groups {{ user_update_groups | ansible.builtin.join(', ') }}"
+      ansible.builtin.user:
+        name: "{{ user_update }}"
+        groups: "{{ user_update_groups }}"
+        append: false
+      register: user_update_changed
+
+    - name: Debug user_update_changed
+      ansible.builtin.debug:
+        var: user_update_changed
+        verbosity: >-
+          {% if ansible_check_mode | ansible.builtin.bool or ansible_diff_mode | ansible.builtin.bool %}2{% else %}3{% endif %}
+      when:
+        - user_update_changed is defined
+        - user_update_changed.changed | ansible.builtin.bool
+      tags:
+        - debug
 
   tags:
     - users
