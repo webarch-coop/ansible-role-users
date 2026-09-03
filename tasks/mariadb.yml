@@ -35,12 +35,12 @@
             cmd: "grep ^mysql: /etc/group"
           check_mode: false
           changed_when: false
-          register: users_etc_group
+          register: users_etc_group_mysql
 
         - name: "mysql present in {{ users_chroot_dir }}/etc/group"
           ansible.builtin.lineinfile:
             path: "{{ users_chroot_dir }}/etc/group"
-            line: "{{ users_etc_group.stdout }}"
+            line: "{{ users_etc_group_mysql.stdout }}"
             state: present
             mode: "0644"
             owner: root
