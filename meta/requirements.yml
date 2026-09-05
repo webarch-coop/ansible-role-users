@@ -17,7 +17,7 @@
 - name: apt
   src: https://git.coop/webarch/apt.git
   # https://git.coop/webarch/apt/-/releases
-  version: 4.14.2  # apt
+  version: 5.0.0  # apt
   scm: git
 
 - name: mariadb
