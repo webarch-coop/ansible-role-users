@@ -73,19 +73,19 @@
 
     - name: "Add users who have user {{ user_update }} listed in users_group_members to user_update_groups"
       ansible.builtin.set_fact:
-        user_update_groups: "{{ user_update_groups + [user.key] }}"
+        user_update_groups: "{{ user_update_groups + [user_grp.key] }}"
       loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
+        loop_var: user_grp
+        label: "{{ user_grp.key }}"
       when:
-        - user.key != "root"
-        - user.key in users_existing
+        - user_grp.key != "root"
+        - user_grp.key in users_existing
         - >-
-          ((user.value.users_state is not defined) or
-          ((user.value.users_state is defined) and (user.value.users_state != "absent")))
-        - (user.value.users_group_members is defined) and (user.value.users_group_members != [])
-        - user_update in user.value.users_group_members
+          ((user_grp.value.users_state is not defined) or
+          ((user_grp.value.users_state is defined) and (user_grp.value.users_state != "absent")))
+        - (user_grp.value.users_group_members is defined) and (user_grp.value.users_group_members != [])
+        - user_update in user_grp.value.users_group_members
 
     - name: "Debug user_update_groups for user {{ user_update }}"
       ansible.builtin.debug:

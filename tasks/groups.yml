@@ -79,17 +79,17 @@
 
     - name: Add users that have no state or have a state not set to absent and have groups defined to the list of users to update
       ansible.builtin.set_fact:
-        users_update_groups: "{{ users_update_groups + [user.key] }}"
+        users_update_groups: "{{ users_update_groups + [user_grp.key] }}"
       loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
+        loop_var: user_grp
+        label: "{{ user_grp.key }}"
       when:
-        - (user.key != "root")
+        - (user_grp.key != "root")
         - >-
-          ((user.value.users_state is not defined) or
-          ((user.value.users_state is defined) and (user.value.users_state != "absent")))
-        - (user.value.users_groups is defined) and (user.value.users_groups != [])
+          ((user_grp.value.users_state is not defined) or
+          ((user_grp.value.users_state is defined) and (user_grp.value.users_state != "absent")))
+        - (user_grp.value.users_groups is defined) and (user_grp.value.users_groups != [])
 
     - name: Debug users_update_groups
       ansible.builtin.debug:
@@ -100,19 +100,20 @@
         - debug
 
     - name: >-
-        Add users that that have no state or have a state not set to absent and are listed in users groups members to the list of users to update
+        Add users that that have no state or have a state not set to absent and are listed in users groups members to the list of
+        users to update
       ansible.builtin.set_fact:
-        users_update_groups: "{{ users_update_groups + user.value.users_group_members }}"
+        users_update_groups: "{{ users_update_groups + user_grp.value.users_group_members }}"
       loop: "{{ users | ansible.builtin.dict2items }}"
       loop_control:
-        loop_var: user
-        label: "{{ user.key }}"
+        loop_var: user_grp
+        label: "{{ user_grp.key }}"
       when:
-        - (user.key != "root")
+        - (user_grp.key != "root")
         - >-
-          ((user.value.users_state is not defined) or
-          ((user.value.users_state is defined) and (user.value.users_state != "absent")))
-        - (user.value.users_group_members is defined) and (user.value.users_group_members != [])
+          ((user_grp.value.users_state is not defined) or
+          ((user_grp.value.users_state is defined) and (user_grp.value.users_state != "absent")))
+        - (user_grp.value.users_group_members is defined) and (user_grp.value.users_group_members != [])
 
     - name: Debug users_update_groups
       ansible.builtin.debug:

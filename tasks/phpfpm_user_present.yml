@@ -615,7 +615,12 @@
             group: "{{ user.value.users_group | default(user.key) }}"
           when: users_phpapcu_pkg in ansible_facts.ansible_local.dpkg.installed
 
-        - name: Users ~/.php.ini file present and opcache configured
+        # NOTE For PHP <= 8.3 the opcache options being present in ~/.php.ini cause one of the following errors with php -v
+        #      when run in a chroot, so they are omitted
+        # Sat Sep  5 09:15:06 2026 (589839): Fatal Error Unable to create lock file: Bad file descriptor (9)
+        # Sat Sep  5 09:21:48 2026 (595231): Fatal Error Unable to create lock file: Read-only file system (30)
+
+        - name: Users ~/.php.ini file present and opcache configured for PHP >= 8.3
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             section: opcache
@@ -631,6 +636,8 @@
               value: "1"
             - option: "opcache.enable_cli"
               value: "1"
+            - option: "opcache.file_cache"
+              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.file_cache_only"
               value: "0"
             - option: "opcache.file_update_protection"
@@ -639,6 +646,8 @@
               value: "0"
             - option: "opcache.interned_strings_buffer"
               value: "16"
+            - option: "opcache.lockfile_path"
+              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
             - option: "opcache.max_accelerated_files"
               value: "100000"
             - option: "opcache.revalidate_freq"
@@ -654,34 +663,9 @@
           loop_control:
             loop_var: users_php_ini_opcache_config
             label: "{{ users_php_ini_opcache_config.option }}={{ users_php_ini_opcache_config.value }}"
-
-        - name: Users ~/.php.ini file present and opcache.file_cache and opcache.lockfile_path path present for PHP >= 8.3
-          community.general.ini_file:
-            path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
-            section: opcache
-            option: "{{ users_php_ini_opcache_config.option }}"
-            value: "{{ users_php_ini_opcache_config.value }}"
-            state: present
-            create: true
-            mode: "0640"
-            owner: "{{ user.key }}"
-            group: "{{ user.value.users_group | default(user.key) }}"
-          loop:
-            - option: "opcache.file_cache"
-              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-            - option: "opcache.lockfile_path"
-              value: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp"
-          loop_control:
-            loop_var: users_php_ini_opcache_config
-            label: "{{ users_php_ini_opcache_config.option }}={{ users_php_ini_opcache_config.value }}"
           when: users_phpfpm_version is ansible.builtin.version('8.3', '>=')
 
-        # When this is enabled on PHP < 8.3 it caused erroer with WP-CLI, this
-        # might be related to the note at
-        # https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.file-cache-only
-        # Note: Prior to PHP 8.1.0, disabling this directive with an already
-        # populated file cache required to manually clear the file cache.
-        - name: Users ~/.php.ini file present and opcache.file_cache path absent for PHP < 8.3
+        - name: Users ~/.php.ini file present and opcache section values absent for PHP < 8.3
           community.general.ini_file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.php.ini"
             section: opcache
@@ -692,8 +676,20 @@
             owner: "{{ user.key }}"
             group: "{{ user.value.users_group | default(user.key) }}"
           loop:
+            - "opcache.enable"
+            - "opcache.enable_cli"
             - "opcache.file_cache"
+            - "opcache.file_cache_only"
+            - "opcache.file_update_protection"
+            - "opcache.jit"
+            - "opcache.interned_strings_buffer"
             - "opcache.lockfile_path"
+            - "opcache.max_accelerated_files"
+            - "opcache.revalidate_freq"
+            - "opcache.use_cwd"
+            - "opcache.validate_permission"
+            - "opcache.validate_root"
+            - "opcache.validate_timestamps"
           loop_control:
             loop_var: users_php_ini_opcache_config
             label: "{{ users_php_ini_opcache_config }}"
