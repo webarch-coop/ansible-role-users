@@ -118,11 +118,25 @@
         - (users_chroot_dir is defined) and (users_chroot_dir_check.stat.exists | bool)
         - (user.value.users_groups is defined) and ("chroot" in user.value.users_groups)
 
+    - name: "Include the chroot absent users tasks for {{ user.key }}"
+      ansible.builtin.include_tasks: chroot_user_absent.yml
+      when:
+        - (user.key != "root")
+        - (users_chroot is defined) and (users_chroot | bool)
+        - (users_chroot_dir is defined) and (users_chroot_dir_check.stat.exists | bool)
+        - (user.value.users_groups is defined) and ("chroot" not in user.value.users_groups)
+
     - name: "Include the PHP FPM user present tasks for {{ user.key }}"
       ansible.builtin.include_tasks: phpfpm_user_present.yml
       when:
         - (user.key != "root")
         - (user.value.users_groups is defined) and ("phpfpm" in user.value.users_groups)
+
+    - name: "Include the PHP FPM user absent tasks for {{ user.key }}"
+      ansible.builtin.include_tasks: phpfpm_user_absent.yml
+      when:
+        - (user.key != "root")
+        - (user.value.users_groups is defined) and ("phpfpm" not in user.value.users_groups)
 
     - name: Matomo login account tasks
       block:
@@ -194,6 +208,7 @@
           when: matomo_user in ansible_facts.getent_passwd.keys()
 
       when:
+        - (users_matomo is defined) and (users_matomo | bool)
         - (user.key != "root")
         - (user.value.users_matomo_account is defined) and (user.value.users_matomo_account | bool)
         - (user.value.users_email is defined) and (user.value.users_email | length > 0)
@@ -202,12 +217,19 @@
         - (matomo_token_auth is defined) and (matomo_token_auth | length > 0)
         - (matomo_html is defined) and (matomo_html | length > 0)
 
-    - name: "Include Apache config tasks present for user {{ user.key }}"
+    - name: "Include Apache config present tasks for user {{ user.key }}"
       ansible.builtin.include_tasks: apache_user_present.yml
       when:
         - (user.key != "root") and ("apache2" in ansible_facts.packages)
         - (users_apache is defined) and (users_apache | bool)
         - (user.value.users_apache_virtual_hosts is defined)
+
+    - name: "Include Apache config absent tasks for user {{ user.key }}"
+      ansible.builtin.include_tasks: apache_user_absent.yml
+      when:
+        - (user.key != "root") and ("apache2" in ansible_facts.packages)
+        - (users_apache is defined) and (users_apache | bool)
+        - (user.value.users_apache_virtual_hosts is not defined)
 
     - name: "Check if the HOME bin directory exists for {{ user.key }}"
       ansible.builtin.stat:
