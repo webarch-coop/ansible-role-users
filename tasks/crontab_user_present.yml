@@ -45,7 +45,7 @@
           {%- endif -%}
 
     - name: Debug users_cron_path
-      ansbile.builtin.debug:
+      ansible.builtin.debug:
         var: users_cron_path
         verbosity: >-
           {% if (ansible_check_mode | ansible.builtin.bool) or (ansible_diff_mode | ansible.builtin.bool) %}0{% else %}1{% endif %}

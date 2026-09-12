@@ -899,6 +899,7 @@
       vars:  # noqa var-naming[no-role-prefix]
         users_apache: true
         users_chroot: false
+        users_cron: true
         users_mariadb: true
         users_matomo: false
         users_phpfpm: true
