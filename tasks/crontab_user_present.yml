@@ -27,7 +27,32 @@
         - (users_home_bin_path.stat.exists | bool)
         - (user.value.users_system is not defined) or (not user.value.users_system | bool)
 
-    - name: "Cron minute file {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
+    - name: "PATH variable set for {{ user.key }}"
+      ansible.builtin.set_fact:
+        users_cron_path: >-
+          {%- if users_home_bin_path.stat.exists | bool -%}
+          {%-     if user.key == "root" -%}
+          {{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          {%-     else -%}
+          {{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
+          {%-     endif -%}
+          {%- else -%}
+          {%-     if user.key == "root" -%}
+          /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          {%-     else -%}
+          /usr/local/bin:/usr/bin:/bin
+          {%-     endif -%}
+          {%- endif -%}
+
+    - name: Debug users_cron_path
+      ansbile.builtin.debug:
+        var: users_cron_path
+        verbosity: >-
+          {% if (ansible_check_mode | ansible.builtin.bool) or (ansible_diff_mode | ansible.builtin.bool) %}0{% else %}1{% endif %}
+      tags:
+        - debug
+
+    - name: "Cron minute file present at {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       ansible.builtin.shell:
         cmd: |-
           set -e -o pipefail
@@ -36,7 +61,8 @@
         creates: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       when: (user.value.users_system is not defined) or (not user.value.users_system | bool)
 
-    - name: "Check that the minute file is present at {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min present"
+    - name: >-
+        Check that the minute file is present at {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
       ansible.builtin.stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
       register: users_cron_min_path
@@ -47,14 +73,18 @@
       register: users_cron_min_b64encoded
       when: users_cron_min_path.stat.exists | bool
 
-    - name: "Set a variable for the users crontab minute based on the value in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+    - name: >-
+        Set a variable for the users crontab minute based on the value in
+        {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
       ansible.builtin.set_fact:
         users_cron_min: "{{ users_cron_min_b64encoded['content'] | b64decode | trim }}"
       when:
         - users_cron_min_path.stat.exists | bool
         - users_cron_min_b64encoded is defined
 
-    - name: "Set a variable for the users crontab minute when a value can't be read from {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min"
+    - name: >-
+        Set a variable for the users crontab minute when a value can't be read from
+        {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.cron_min
       ansible.builtin.set_fact:
         users_cron_min: "{{ 60 | ansible.builtin.random }}"
       when: not users_cron_min_path.stat.exists | bool
@@ -181,7 +211,12 @@
         - name: "Debug the crontab for {{ user.key }}"
           ansible.builtin.debug:
             var: users_crontab
-            verbosity: 1
+            verbosity: >-
+              {%- if (ansible_check_mode | ansible.builtin.bool) or (ansible_diff_mode | ansible.builtin.bool) -%}
+              0
+              {%- else -%}
+              1
+              {%- endif -%}
           tags:
             - debug
 
@@ -244,6 +279,12 @@
             - name: Debug users_daily_cron_clean_tmp_test
               ansible.builtin.debug:
                 var: users_daily_cron_clean_tmp_test
+                verbosity: >-
+                  {%- if (ansible_check_mode | ansible.builtin.bool) or (ansible_diff_mode | ansible.builtin.bool) -%}
+                  0
+                  {%- else -%}
+                  1
+                  {%- endif -%}
               when:
                 - users_daily_cron_clean_tmp_test.stdout_lines is defined
                 - users_daily_cron_clean_tmp_test.stdout_lines | length > 0

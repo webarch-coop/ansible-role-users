@@ -352,8 +352,8 @@ users_cron_mysqldump_hour: "00"
 # Set users_cron_tmpdir_hour to false to disable deletion of users TMPDIR
 # files and directories which are older than a week for the whole server
 users_cron_tmpdir_hour: "00"
-# How old are TMPDIR files allowed to be before they are deleted
-users_cron_tmpdir_max_age_days: 2
+# How old are TMPDIR files and empty directories allowed to be before they are deleted
+users_cron_tmpdir_max_age_days: 7
 # Matomo user accounts will only be deleted when user accounts are deleted if
 # users_matomo_delete_users is set to true
 users_matomo_delete_users: false
