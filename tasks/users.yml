@@ -287,6 +287,18 @@
         - users_apache | bool
         - ("apache2" in ansible_facts.ansible_local.dpkg.installed)
 
+    - name: Update cron for users present
+      ansible.builtin.include_tasks: crontab_user_present.yml
+      loop: "{{ users | ansible.builtin.dict2items }}"
+      loop_control:
+        loop_var: user
+        label: "{{ user.key }}"
+      when:
+        - users_update_strategy is defined
+        - users_update_strategy == "cron"
+        - (users_cron is defined) and (users_cron | bool)
+        - (user.value.users_email is defined) and (user.value.users_email | length > 0)
+
     - name: Update MariaDB config for users present
       block:
 

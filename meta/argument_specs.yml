@@ -330,6 +330,7 @@ argument_specs:
           - apache
           - changed
           - check
+          - cron
           - groups
           - mariadb
           - matomo

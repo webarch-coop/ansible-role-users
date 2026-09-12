@@ -71,6 +71,12 @@ ansible-playbook users.yml --extra-vars "users_update_strategy=check"
 ansible-playbook users.yml --extra-vars "users_update_strategy=apache"
 ```
 
+### Only update cron tasks for users present
+
+```bash
+ansible-playbook users.yml --extra-vars "users_update_strategy=cron"
+```
+
 ## Only update users MariaDB configuration
 
 ```bash
