@@ -294,6 +294,8 @@
         loop_var: user
         label: "{{ user.key }}"
       when:
+        - user.value.users_state is defined
+        - user.value.users_state == "present"
         - users_update_strategy is defined
         - users_update_strategy == "cron"
         - (users_cron is defined) and (users_cron | bool)
