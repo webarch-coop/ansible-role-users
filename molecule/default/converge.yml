@@ -925,6 +925,11 @@
             users_email: chris@webarchitects.co.uk
             users_ssh_public_keys:
               - https://git.coop/chris.keys
+            users_cron_jobs:
+              - name: printenv
+                job: printenv
+                state: present
+                minute: 5
             users_minutely_scripts:
               - uptime
             users_groups:
