@@ -80,6 +80,10 @@ argument_specs:
         type: int
         required: false
         description: The timeout in seconds for requests proxied from Apache to PHP-FPM.
+      users_apache_variable_slash_replace:
+        type: str
+        required: true
+        description: The character(s) to replace forward slashes in users_apache_virtual_hosts and users_apache_directories fir generating variable names.
       users_backup_script:
         type: str
         required: false

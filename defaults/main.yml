@@ -33,6 +33,9 @@ users_apache_chroot_mount_dirs:
   - html
   - localhost
   - wsh
+# A variable conflict is possible when replacing forward slashes if any users_apache_virtual_hosts or
+# users_apache_directories use the same characters as the users_apache_variable_slash_replace value
+users_apache_variable_slash_replace: _-_
 users_disallowed_usernames:
   - "{{ users_basedir | regex_replace('^\/') }}"
   - html
