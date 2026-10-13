@@ -1986,6 +1986,10 @@ wordpress_plugins:
   required: false
   description: A list of WordPress plugins to configure.
   options:
+    auto_update:
+      type: bool
+      required: false
+      description: Enable / disable automatic updates for the WordPress plugin.
     name:
       type: str
       required: true
