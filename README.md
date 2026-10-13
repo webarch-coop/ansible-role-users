@@ -1312,7 +1312,7 @@ soap.wsdl_cache_dir = /home/example/tmp
 
 Setting `memory_limit = -1` overides the default of 128M, this is required for the Nextcloud CLI updater.
 
-By default, for users in the `phpfpm` group, the PHP socket is created in the `$HOME` directory as `~/php-fpm.sock`, the use of this path by the Apache configuratoon can be overridden when Apache is not chrooted and the users is not chrooted, per `VirtualHost` by setting `users_apache_php_socket_path` to a path to another socket _however_ this variable is not used by this roles PHP tasks, the socket configuration needs to be done by the [PHP role](https://git.coop/webarch/php).
+By default, for users in the `phpfpm` group, the PHP socket is created in the `$HOME` directory as `~/php-fpm.sock`, the use of this path by the Apache configuratoon can be overridden when Apache is not chrooted and the users is not chrooted, per `VirtualHost` by setting `users_apache_php_socket_path` to a path to another socket *however* this variable is not used by this roles PHP tasks, the socket configuration needs to be done by the [PHP role](https://git.coop/webarch/php).
 
 The optional `users_phpfpm_admin_flags` array can be used to set per-pool configuration, for example Nextcloud uses [SabreDav](https://sabre.io/dav/webservers/#apache) so requires the following in the PHP-FPM `pool.d` file:
 
