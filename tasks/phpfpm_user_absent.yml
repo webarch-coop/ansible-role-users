@@ -11,6 +11,9 @@
 - name: "PHP FPM config absent for {{ user.key }}"
   block:
 
+    - name: Include PHP-FPM default version check tasks
+      ansible.builtin.include_tasks: phpfpm_default_version.yml
+
     - name: Debug users_phpfpm_version
       ansible.builtin.debug:
         var: users_phpfpm_version

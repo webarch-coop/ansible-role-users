@@ -77,53 +77,8 @@
         - users_phpfpm_versions_required is defined
         - users_phpfpm_versions_required | length >= 1
 
-    - name: Run update-alternatives to find the default version of PHP
-      ansible.builtin.command:
-        cmd: update-alternatives --query php
-        strip_empty_ends: true
-      check_mode: false
-      changed_when: false
-      register: apache_update_alternatives_query_php
-
-    - name: Set a fact for the default version of PHP
-      ansible.builtin.set_fact:
-        users_phpfpm_update_alt_q: "{{ apache_update_alternatives_query_php.stdout | string | community.general.jc('update_alt_q') }}"
-
-    - name: Debug PHP update-alternatives --query php | jc --update-alt-q | jp value
-      ansible.builtin.debug:
-        var: users_phpfpm_update_alt_q.value
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
-
-    - name: Check if the default version of PHP is a symlink
-      ansible.builtin.stat:
-        path: "{{ users_phpfpm_update_alt_q.value }}"
-      register: users_phpfpm_update_alt_q_value_path
-
-    - name: Debug PHP default version path
-      ansible.builtin.debug:
-        var: users_phpfpm_update_alt_q_value_path.stat
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
-
-    - name: Set a fact for the default version of PHP when it is a symlink
-      ansible.builtin.set_fact:
-        users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q_value_path.stat.lnk_target | ansible.builtin.regex_replace('^php') }}"
-      when: users_phpfpm_update_alt_q_value_path.stat.islnk | bool
-
-    - name: Set a fact for the default version of PHP when it is a not symlink
-      ansible.builtin.set_fact:
-        users_phpfpm_default_version: "{{ users_phpfpm_update_alt_q.value | ansible.builtin.regex_replace('^/usr/bin/php') }}"
-      when: not users_phpfpm_update_alt_q_value_path.stat.islnk | bool
-
-    - name: A default PHP version is required
-      ansible.builtin.assert:
-        that:
-          - users_phpfpm_default_version is regex('^[5-9][.][0-9]')
-        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
-
-    - name: Debug PHP default version
-      ansible.builtin.debug:
-        var: users_phpfpm_default_version
-        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"
+    - name: Include PHP-FPM default version check tasks
+      ansible.builtin.include_tasks: phpfpm_default_version.yml
 
     - name: Legacy /etc/logrotate.d/phpfpm_users_logrotate absent
       ansible.builtin.file:

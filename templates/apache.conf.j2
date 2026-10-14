@@ -87,8 +87,8 @@
   ServerName {{ vhost_config.users_apache_server_name }}
 {%     if vhost_config.users_apache_server_aliases is defined %}
   ServerAlias {{ vhost_config.users_apache_server_aliases | join(' ') }}
-  StrictHostCheck on
 {%     endif %}
+  StrictHostCheck on
 {%     if vhost_config.users_apache_protocols is defined %}
   Protocols {{ vhost_config.users_apache_protocols | ansible.builtin.join(' ') }}
 {%     endif %}
