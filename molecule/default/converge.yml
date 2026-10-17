@@ -838,6 +838,7 @@
         name: apache
       vars:  # noqa var-naming[no-role-prefix]
         apache: true
+        apache_md_cert_copy: []
         apache_mods_disabled:
           - ssl
         apache_mods_enabled:
@@ -875,6 +876,7 @@
           - status
         apache_conf_disabled:
           - le
+          - webarch
         apache_conf_enabled:
           - charset
           - localized-error-pages
