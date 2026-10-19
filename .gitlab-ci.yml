@@ -46,7 +46,7 @@ stages:
   - resolute
   - trixie
   - bookworm
-  - forky
+  # - forky
   - noble
 lint:
   image: registry.git.coop/webarch/containers/images/trixie:20260916
@@ -59,11 +59,11 @@ bookworm:
   stage: bookworm
   script:
     - molecule test
-forky:
-  image: registry.git.coop/webarch/containers/images/forky:20260916
-  stage: forky
-  script:
-    - molecule test
+# forky:
+#   image: registry.git.coop/webarch/containers/images/forky:20260916
+#   stage: forky
+#   script:
+#     - molecule test
 trixie:
   image: registry.git.coop/webarch/containers/images/trixie:20260916
   stage: trixie

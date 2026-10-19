@@ -11,7 +11,7 @@
 - name: apache
   src: https://git.coop/webarch/apache.git
   # https://git.coop/webarch/apache/-/releases
-  version: 4.3.0  # apache
+  version: 4.4.0  # apache
   scm: git
 
 - name: apt
