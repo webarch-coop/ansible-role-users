@@ -594,6 +594,11 @@
 {%                     else %}
         <FilesMatch "\.php$">
 {%                     endif %}
+{%                     if users_phpfpm_deny_multipart | ansible.builtin.bool %}
+          <If "req('Content-Type') =~ /multipart/i">
+            Require all denied
+          </If>
+{%                     endif %}
           <If "-f %{REQUEST_FILENAME}">
             <IfModule setenvif_module>
               SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
@@ -874,6 +879,11 @@
         <FilesMatch "\.({{ users_phpfpm_extensions | join('|') }})$">
 {%             else %}
         <FilesMatch "\.php$">
+{%             endif %}
+{%             if users_phpfpm_deny_multipart | ansible.builtin.bool %}
+          <If "req('Content-Type') =~ /multipart/i">
+            Require all denied
+          </If>
 {%             endif %}
           <If "-f %{REQUEST_FILENAME}">
             <IfModule setenvif_module>

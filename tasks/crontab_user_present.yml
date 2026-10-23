@@ -27,7 +27,7 @@
         - (users_home_bin_path.stat.exists | bool)
         - (user.value.users_system is not defined) or (not user.value.users_system | bool)
 
-    - name: "PATH variable set for {{ user.key }}"
+    - name: "PATH variable set for {{ user.key }}"  # noqa: jinja[spacing]
       ansible.builtin.set_fact:
         users_cron_path: >-
           {%- if users_home_bin_path.stat.exists | bool -%}
@@ -208,7 +208,7 @@
           ansible.builtin.set_fact:
             users_crontab: "{{ users_crontab_list.stdout | string | community.general.jc('crontab') }}"
 
-        - name: "Debug the crontab for {{ user.key }}"
+        - name: "Debug the crontab for {{ user.key }}"  # noqa: jinja[spacing]
           ansible.builtin.debug:
             var: users_crontab
             verbosity: >-
@@ -276,7 +276,7 @@
                 - users_daily_cron_clean_tmp_test.stdout_lines is defined
                 - users_daily_cron_clean_tmp_test.stdout_lines | length > 0
 
-            - name: Debug users_daily_cron_clean_tmp_test
+            - name: Debug users_daily_cron_clean_tmp_test  # noqa: jinja[spacing]
               ansible.builtin.debug:
                 var: users_daily_cron_clean_tmp_test
                 verbosity: >-
@@ -348,7 +348,7 @@
             state: present
           when: users_home_bin_path.stat.exists | bool
 
-        - name: "MAILTO env var added to crontab for {{ user.key }}"
+        - name: "MAILTO env var added to crontab for {{ user.key }}"  # noqa: jinja[spacing]
           ansible.builtin.cron:
             env: true
             name: MAILTO
