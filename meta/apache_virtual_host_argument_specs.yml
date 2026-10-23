@@ -1795,6 +1795,10 @@ wordpress_config:
       type: str
       required: true
       description: The WordPress configuration name.
+    raw:
+      type: bool
+      required: false
+      description: Set the WordPress configuration value using the raw flag.
     value:
       type: str
       required: true

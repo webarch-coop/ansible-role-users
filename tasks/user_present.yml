@@ -91,9 +91,9 @@
           ansible.builtin.template:
             src: forward.j2
             dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.forward"
-            mode: "0640"
-            owner: "{{ user.key }}"
-            group: "{{ user.value.users_group | default(user.key) }}"
+            mode: "0644"
+            owner: root
+            group: root
           when: (users_forward) and (user.value.users_email is defined and user.value.users_email | length > 0)
 
       when: users_forward is defined
