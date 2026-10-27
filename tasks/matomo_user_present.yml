@@ -35,7 +35,7 @@
         matomo_notify_passwd: "{{ user.value.users_matomo_notify_passwd | default(true) }}"
         matomo_notify_from: "{{ users_notify_from }}"
         matomo_notify_reply_to: "{{ users_notify_reply_to }}"
-        matomo_notify_subject_tag: "{{ users_notify_subject_tag }}"
+        matomo_notify_subject_tag: "{{ users_notify_subject_tag | default('') }}"
         matomo_notify_headers: "{{ users_notify_headers }}"
         matomo_notify_signature: "{{ users_notify_signature }}"
         matomo_php: "/usr/bin/php{{ users_matomo_php_version }}"

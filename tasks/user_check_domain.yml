@@ -31,11 +31,11 @@
 
         - name: "Set a fact for the community.dns.nameserver_record_info results for {{ users_domain }}"
           ansible.builtin.set_fact:
-            users_domain_dig_result: "{{ users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].values[0].address') }}"
+            users_domain_dig_result: "{{ users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].entries[0].address') }}"
           when:
             - users_domain_nameserver_record_info.results is defined
             - users_domain_nameserver_record_info.results | ansible.builtin.type_debug == "list"
-            - users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].values[0].address') is ansible.utils.ipv4
+            - users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].entries[0].address') is ansible.utils.ipv4
 
         - name: Debug users_domain_dig_result
           ansible.builtin.debug:
@@ -95,14 +95,14 @@
           when: >-
             (users_domain_nameserver_record_info.results is not defined) or
             (users_domain_nameserver_record_info.results | ansible.builtin.type_debug != "list") or
-            (users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].values[0].address') is not ansible.utils.ipv4)
+            (users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].entries[0].address') is not ansible.utils.ipv4)
 
     - name: Debug domain name and IP address
       ansible.builtin.debug:
         msg:
           - "users_domain: {{ users_domain }}"
           - "ansible_default_ipv4.address: {{ ansible_facts.default_ipv4.address }}"
-          - "ansible_all_ipv4_addresses: {{ ansible_facts.all_ipv4_addresses }}"
+          - "ansible_all_ipv4_addresses: {{ ansible_facts.all_ipv4_addresses | ansible.builtin.join(', ') }}"
           - "users_domain_dig_result: {{ users_domain_dig_result }}"
           - "users_domain_check: {{ users_domain_check }}"
         verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}0{% else %}1{% endif %}"

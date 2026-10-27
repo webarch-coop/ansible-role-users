@@ -194,7 +194,11 @@
           community.general.mail:
             from: "{{ users_notify_from }}"
             to: "{{ user.value.users_name | default(user.key) | quote }} <{{ user.value.users_email }}>"
-            subject: "[{{ users_notify_subject_tag | default('webarchitects') }}] MariaDB Password for {{ user.key }} on {{ inventory_hostname }}"
+            subject: >-
+              {% if users_notify_subject_tag is defined and users_notify_subject_tag | length > 0 %}
+              [{{ users_notify_subject_tag }}]
+              {% endif %}
+              MariaDB Password for {{ user.key }} on {{ inventory_hostname }}
             headers: "{{ users_notify_headers }}"
             charset: us-ascii
             body: "{{ lookup('template', 'notify_passwd_mariadb.j2') }}"
@@ -205,8 +209,13 @@
         - name: "Notification date recorded in {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd file"
           ansible.builtin.lineinfile:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.notify_mariadb_passwd"
-            # line: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
-            line: "{{ now(utc=true, fmt='+%Y-%m-%d-%H-%M-%S') }} : {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}>"
+            line: >-
+              {{ now(utc=true, fmt='%Y-%m-%d_%H:%M:%S') }} :
+              {{ user.value.users_name | default(user.key) }} <{{ user.value.users_email }}> :
+              {% if users_notify_subject_tag is defined and users_notify_subject_tag | length > 0 %}
+              [{{ users_notify_subject_tag }}]
+              {% endif %}
+              MariaDB Password for {{ user.key }} on {{ inventory_hostname }}
             create: true
             state: present
             insertafter: EOF

@@ -8,7 +8,7 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Users Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: User scripts file in place
+- name: User scripts files in place
   block:
 
     - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh in place"
@@ -21,7 +21,8 @@
         mode: "0750"
       when: (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)
 
-    - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh file exists"
+    - name: >-
+        Check the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh file
       ansible.builtin.stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
       register: users_cron_daily_path
@@ -34,9 +35,9 @@
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
             block: |
               {% if user.value.users_daily_scripts is defined %}
-              {% for users_daily_script in user.value.users_daily_scripts %}
+              {%     for users_daily_script in user.value.users_daily_scripts %}
               {{ users_daily_script }}
-              {% endfor %}
+              {%     endfor %}
               {% else %}
               # None
               {% endif %}
@@ -54,16 +55,108 @@
 
         - name: "Set a fact for the content of the daily script file omitting comments and env vars for {{ user.key }} "
           ansible.builtin.set_fact:
-            users_cron_daily_script_lines: "{{ (users_cron_daily_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('ansible.builtin.regex', '^[#]') | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}"
+            users_cron_daily_script_lines: >-
+              {{ (users_cron_daily_script_b64encoded['content']
+              | ansible.builtin.b64decode
+              | trim).split('\n')
+              | reject('ansible.builtin.regex', '^[#]')
+              | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}
 
         - name: Debug users_cron_daily_script_lines
           ansible.builtin.debug:
             var: users_cron_daily_script_lines
+            verbosity: >-
+              {% if (ansible_check_mode | ansible.builtin.bool) or (ansible_diff_mode | ansible.builtin.bool) %}0{% else %}1{% endif %}
+          tags:
+            - debug
 
-        - name: Test run the users daily script when it contains content
+        - name: Test run the users daily script when it contains content for chrooted users
           block:
 
-            - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script using /bin/sh as {{ user.key }}"
+            - name: >-
+                Run the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh
+                script in the chroot as {{ user.key }}
+              ansible.builtin.command:
+                argv:
+                  - /usr/sbin/chroot
+                  - "{{ users_chroot_users_dir }}/{{ user.key }}"
+                  - sudo
+                  - -u
+                  - "{{ user.key }}"
+                  - /bin/sh
+                  - "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
+              register: users_daily_scripts_test
+              failed_when: >-
+                ((users_daily_scripts_test.rc != 0) and
+                (user.value.users_daily_scripts_test_ignore_fail_regex is not defined)) or
+                ((users_daily_scripts_test.rc != 0) and
+                (user.value.users_daily_scripts_test_ignore_fail_regex is defined) and
+                (users_daily_scripts_test.stdout_lines
+                | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex)
+                | ansible.builtin.length != 0))
+
+            - name: Debug result from runing the users daily script
+              block:
+
+                - name: Debug users_daily_scripts_test.rc
+                  ansible.builtin.debug:
+                    var: users_daily_scripts_test.stdout_lines
+
+                - name: Debug user.value.users_daily_scripts_test_ignore_fail_regex
+                  ansible.builtin.debug:
+                    var: user.value.users_daily_scripts_test_ignore_fail_regex
+                  when: user.value.users_daily_scripts_test_ignore_fail_regex is defined
+
+                - name: >-
+                    Debug users_daily_scripts_test.stdout_lines
+                    | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex)
+                  ansible.builtin.debug:
+                    msg: >-
+                      {{ users_daily_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex) }}
+
+                - name: >-
+                    Debug users_daily_scripts_test.stdout_lines
+                    | reject('regex', user.value.users_daily_scripts_test_ignore_fail_regex) | length
+                  ansible.builtin.debug:
+                    msg: >-
+                      {{ users_daily_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex)
+                      | ansible.builtin.length }}
+
+              when: users_daily_scripts_test.rc != 0
+              tags:
+                - debug
+
+            - name: >-
+                Debug the stdout from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script
+              ansible.builtin.debug:
+                var: users_daily_scripts_test.stdout_lines
+              when:
+                - users_daily_scripts_test.stdout_lines is defined
+                - users_daily_scripts_test.stdout_lines | ansible.builtin.length > 0
+
+            - name: >-
+                Debug the stderr from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script
+              ansible.builtin.debug:
+                var: users_daily_scripts_test.stderr_lines
+              when:
+                - users_daily_scripts_test.stderr_lines is defined
+                - users_daily_scripts_test.stderr_lines | ansible.builtin.length > 0
+
+          when:
+            - users_cron_daily_script_lines != []
+            - (user.value.users_groups is defined) and ("chroot" in user.value.users_groups)
+
+        - name: Test run the users daily script when it contains content for non-chrooted users
+          block:
+
+            - name: >-
+                Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh
+                script using /bin/sh as {{ user.key }}
               ansible.builtin.shell:
                 chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
                 cmd: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh"
@@ -97,11 +190,17 @@
                     var: user.value.users_daily_scripts_test_ignore_fail_regex
                   when: user.value.users_daily_scripts_test_ignore_fail_regex is defined
 
-                - name: Debug users_daily_scripts_test.stdout_lines | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex)
+                - name: >-
+                    Debug users_daily_scripts_test.stdout_lines
+                    | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex)
                   ansible.builtin.debug:
-                    msg: "{{ users_daily_scripts_test.stdout_lines | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex) }}"
+                    msg: >-
+                      {{ users_daily_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_daily_scripts_test_ignore_fail_regex) }}
 
-                - name: Debug users_daily_scripts_test.stdout_lines | reject('regex', user.value.users_daily_scripts_test_ignore_fail_regex) | length
+                - name: >-
+                    Debug users_daily_scripts_test.stdout_lines
+                    | reject('regex', user.value.users_daily_scripts_test_ignore_fail_regex) | length
                   ansible.builtin.debug:
                     msg: >-
                       {{ users_daily_scripts_test.stdout_lines
@@ -112,27 +211,36 @@
               tags:
                 - debug
 
-            - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
+            - name: >-
+                Debug the stdout from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script
               ansible.builtin.debug:
                 var: users_daily_scripts_test.stdout_lines
               when:
                 - users_daily_scripts_test.stdout_lines is defined
                 - users_daily_scripts_test.stdout_lines | ansible.builtin.length > 0
 
-            - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script"
+            - name: >-
+                Debug the stderr from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh script
               ansible.builtin.debug:
                 var: users_daily_scripts_test.stderr_lines
               when:
                 - users_daily_scripts_test.stderr_lines is defined
                 - users_daily_scripts_test.stderr_lines | ansible.builtin.length > 0
 
-          when: users_cron_daily_script_lines != []
+          when:
+            - users_cron_daily_script_lines != []
+            - >-
+              (user.value.users_groups is not defined) or
+              (user.value.users_groups is defined and "chroot" not in user.value.users_groups)
 
       when:
         - (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)
         - (users_cron_daily_path.stat.exists | ansible.builtin.bool)
 
-    - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh in place"
+    - name: >-
+        Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh in place
       ansible.builtin.template:
         src: cron_hourly.sh.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
@@ -142,7 +250,8 @@
         mode: "0750"
       when: (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)
 
-    - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh file exists"
+    - name: >-
+        Check the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh file
       ansible.builtin.stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
       register: users_cron_hourly_path
@@ -155,9 +264,9 @@
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
             block: |
               {% if user.value.users_hourly_scripts is defined %}
-              {% for users_hourly_script in user.value.users_hourly_scripts %}
+              {%     for users_hourly_script in user.value.users_hourly_scripts %}
               {{ users_hourly_script }}
-              {% endfor %}
+              {%     endfor %}
               {% else %}
               # None
               {% endif %}
@@ -175,16 +284,107 @@
 
         - name: "Set a fact for the content of the hourly script file omitting comments and env vars for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_cron_hourly_script_lines: "{{ (users_cron_hourly_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('ansible.builtin.regex', '^[#]')  | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}"
+            users_cron_hourly_script_lines: >-
+              {{ (users_cron_hourly_script_b64encoded['content']
+              | ansible.builtin.b64decode
+              | ansible.builtin.trim).split('\n')
+              | ansible.builtin.reject('ansible.builtin.regex', '^[#]')
+              | ansible.builtin.reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}
 
         - name: Debug users_cron_hourly_script_lines
           ansible.builtin.debug:
             var: users_cron_hourly_script_lines
+            verbosity: >-
+              {% if (ansible_check_mode | ansible.builtin.bool) or (ansible_diff_mode | ansible.builtin.bool) %}0{% else %}1{% endif %}
+          tags:
+            - debug
 
-        - name: Test run the users hourly script when it contains content
+        - name: Test run the users hourly script when it contains content for chrooted users
           block:
 
-            - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script using /bin/sh as {{ user.key }}"
+            - name: >-
+                Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh
+                script in the chroot as {{ user.key }}
+              ansible.builtin.command:
+                argv:
+                  - /usr/sbin/chroot
+                  - "{{ users_chroot_users_dir }}/{{ user.key }}"
+                  - sudo
+                  - -u
+                  - "{{ user.key }}"
+                  - /bin/sh
+                  - "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
+              register: users_hourly_scripts_test
+              failed_when: >-
+                ((users_hourly_scripts_test.rc != 0) and
+                (user.value.users_hourly_scripts_test_ignore_fail_regex is not defined)) or
+                ((users_hourly_scripts_test.rc != 0) and
+                (user.value.users_hourly_scripts_test_ignore_fail_regex is defined) and
+                (users_hourly_scripts_test.stdout_lines
+                | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex)
+                | ansible.builtin.length != 0))
+
+            - name: Debug result from runing the users hourly script
+              block:
+
+                - name: Debug users_hourly_scripts_test.rc
+                  ansible.builtin.debug:
+                    var: users_hourly_scripts_test.stdout_lines
+
+                - name: Debug user.value.users_hourly_scripts_test_ignore_fail_regex
+                  ansible.builtin.debug:
+                    var: user.value.users_hourly_scripts_test_ignore_fail_regex
+                  when: user.value.users_hourly_scripts_test_ignore_fail_regex is defined
+
+                - name: >-
+                    Debug users_hourly_scripts_test.stdout_lines
+                    | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex)
+                  ansible.builtin.debug:
+                    msg: >-
+                      {{ users_hourly_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex) }}
+
+                - name: >-
+                    Debug users_hourly_scripts_test.stdout_lines
+                    | reject('regex', user.value.users_hourly_scripts_test_ignore_fail_regex) | length
+                  ansible.builtin.debug:
+                    msg: >-
+                      {{ users_hourly_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex)
+                      | ansible.builtin.length }}
+
+              when: users_hourly_scripts_test.rc != 0
+              tags:
+                - debug
+
+            - name: >-
+                Debug the stdout from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script
+              ansible.builtin.debug:
+                var: users_hourly_scripts_test.stdout_lines
+              when:
+                - users_hourly_scripts_test.stdout_lines is defined
+                - users_hourly_scripts_test.stdout_lines | ansible.builtin.length > 0
+
+            - name: >-
+                Debug the stderr from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script
+              ansible.builtin.debug:
+                var: users_hourly_scripts_test.stderr_lines
+              when:
+                - users_hourly_scripts_test.stderr_lines is defined
+                - users_hourly_scripts_test.stderr_lines | ansible.builtin.length > 0
+
+          when:
+            - users_cron_hourly_script_lines != []
+            - (user.value.users_groups is defined) and ("chroot" in user.value.users_groups)
+
+        - name: Test run the users hourly script when it contains content for non-chrooted users
+          block:
+
+            - name: >-
+                Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh
+                script using /bin/sh as {{ user.key }}
               ansible.builtin.shell:
                 chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
                 cmd: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh"
@@ -218,11 +418,17 @@
                     var: user.value.users_hourly_scripts_test_ignore_fail_regex
                   when: user.value.users_hourly_scripts_test_ignore_fail_regex is defined
 
-                - name: Debug users_hourly_scripts_test.stdout_lines | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex)
+                - name: >-
+                    Debug users_hourly_scripts_test.stdout_lines
+                    | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex)
                   ansible.builtin.debug:
-                    msg: "{{ users_hourly_scripts_test.stdout_lines | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex) }}"
+                    msg: >-
+                      {{ users_hourly_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_hourly_scripts_test_ignore_fail_regex) }}
 
-                - name: Debug users_hourly_scripts_test.stdout_lines | reject('regex', user.value.users_hourly_scripts_test_ignore_fail_regex) | length
+                - name: >-
+                    Debug users_hourly_scripts_test.stdout_lines
+                    | reject('regex', user.value.users_hourly_scripts_test_ignore_fail_regex) | length
                   ansible.builtin.debug:
                     msg: >-
                       {{ users_hourly_scripts_test.stdout_lines
@@ -233,27 +439,36 @@
               tags:
                 - debug
 
-            - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
+            - name: >-
+                Debug the stdout from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script
               ansible.builtin.debug:
                 var: users_hourly_scripts_test.stdout_lines
               when:
                 - users_hourly_scripts_test.stdout_lines is defined
                 - users_hourly_scripts_test.stdout_lines | ansible.builtin.length > 0
 
-            - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script"
+            - name: >-
+                Debug the stderr from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh script
               ansible.builtin.debug:
                 var: users_hourly_scripts_test.stderr_lines
               when:
                 - users_hourly_scripts_test.stderr_lines is defined
                 - users_hourly_scripts_test.stderr_lines | ansible.builtin.length > 0
 
-          when: users_cron_hourly_script_lines != []
+          when:
+            - users_cron_hourly_script_lines != []
+            - >-
+              (user.value.users_groups is not defined) or
+              (user.value.users_groups is defined and "chroot" not in user.value.users_groups)
 
       when:
         - (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)
         - (users_cron_hourly_path.stat.exists | ansible.builtin.bool)
 
-    - name: "Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh in place"
+    - name: >-
+        Blank {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh in place
       ansible.builtin.template:
         src: cron_minutely.sh.j2
         dest: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
@@ -263,7 +478,8 @@
         mode: "0750"
       when: (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)
 
-    - name: "Check that the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh file exists"
+    - name: >-
+        Check the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh file
       ansible.builtin.stat:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
       register: users_cron_minutely_path
@@ -276,9 +492,9 @@
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
             block: |
               {% if user.value.users_minutely_scripts is defined %}
-              {% for users_minutely_script in user.value.users_minutely_scripts %}
+              {%     for users_minutely_script in user.value.users_minutely_scripts %}
               {{ users_minutely_script }}
-              {% endfor %}
+              {%     endfor %}
               {% else %}
               # None
               {% endif %}
@@ -296,16 +512,109 @@
 
         - name: "Set a fact for the content of the minutely script file omitting comments and env vars for {{ user.key }}"
           ansible.builtin.set_fact:
-            users_cron_minutely_script_lines: "{{ (users_cron_minutely_script_b64encoded['content'] | ansible.builtin.b64decode | trim).split('\n') | reject('ansible.builtin.regex', '^[#]')  | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}"
+            users_cron_minutely_script_lines: >-
+              {{ (users_cron_minutely_script_b64encoded['content']
+              | ansible.builtin.b64decode
+              | ansible.builtin.trim).split('\n')
+              | ansible.builtin.reject('ansible.builtin.regex', '^[#]')
+              | reject('ansible.builtin.regex', '^[A-Z_]{1,24}[=].*$') }}"
 
         - name: Debug users_cron_minutely_script_lines
           ansible.builtin.debug:
             var: users_cron_minutely_script_lines
+            verbosity: >-
+              {% if (ansible_check_mode | ansible.builtin.bool) or (ansible_diff_mode | ansible.builtin.bool) %}0{% else %}1{% endif %}
+          tags:
+            - debug
 
-        - name: Test run the users minutely script when it contains content
+        - name: Test run the users minutely script when it contains content for chrooted users
           block:
 
-            - name: "Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script using /bin/sh as {{ user.key }}"
+            - name: >-
+                Run the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh
+                script in the chroot as {{ user.key }}
+              ansible.builtin.command:
+                argv:
+                  - /usr/sbin/chroot
+                  - "{{ users_chroot_users_dir }}/{{ user.key }}"
+                  - sudo
+                  - -u
+                  - "{{ user.key }}"
+                  - /bin/sh
+                  - "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
+              register: users_minutely_scripts_test
+              failed_when: >-
+                ((users_minutely_scripts_test.rc != 0) and
+                (user.value.users_minutely_scripts_test_ignore_fail_regex is not defined)) or
+                ((users_minutely_scripts_test.rc != 0) and
+                (user.value.users_minutely_scripts_test_ignore_fail_regex is defined) and
+                (users_minutely_scripts_test.stdout_lines
+                | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
+                | ansible.builtin.length != 0))
+
+            - name: Debug result from runing the users minutely script
+              block:
+
+                - name: Debug users_minutely_scripts_test.rc
+                  ansible.builtin.debug:
+                    var: users_minutely_scripts_test.stdout_lines
+
+                - name: Debug user.value.users_minutely_scripts_test_ignore_fail_regex
+                  ansible.builtin.debug:
+                    var: user.value.users_minutely_scripts_test_ignore_fail_regex
+                  when: user.value.users_minutely_scripts_test_ignore_fail_regex is defined
+
+                - name: >-
+                    Debug users_minutely_scripts_test.stdout_lines
+                    | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
+                  ansible.builtin.debug:
+                    msg: >-
+                      {{ users_minutely_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex) }}
+
+                - name: >-
+                    Debug users_minutely_scripts_test.stdout_lines
+                    | ansible.builtin.reject('regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
+                    | ansible.builtin.length
+                  ansible.builtin.debug:
+                    msg: >-
+                      {{ users_minutely_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
+                      | ansible.builtin.length }}
+
+              when: users_minutely_scripts_test.rc != 0
+              tags:
+                - debug
+
+            - name: >-
+                Debug the stdout from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script
+              ansible.builtin.debug:
+                var: users_minutely_scripts_test.stdout_lines
+              when:
+                - users_minutely_scripts_test.stdout_lines is defined
+                - users_minutely_scripts_test.stdout_lines | ansible.builtin.length > 0
+
+            - name: >-
+                Debug the stderr from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script
+              ansible.builtin.debug:
+                var: users_minutely_scripts_test.stderr_lines
+              when:
+                - users_minutely_scripts_test.stderr_lines is defined
+                - users_minutely_scripts_test.stderr_lines | ansible.builtin.length > 0
+
+          when:
+            - users_cron_minutely_script_lines != []
+            - (user.value.users_groups is defined) and ("chroot" in user.value.users_groups)
+
+        - name: Test run the users minutely script when it contains content for non-chrooted users
+          block:
+
+            - name: >-
+                Run the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh
+                script using /bin/sh as {{ user.key }}
               ansible.builtin.shell:
                 chdir: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
                 cmd: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh"
@@ -339,11 +648,18 @@
                     var: user.value.users_minutely_scripts_test_ignore_fail_regex
                   when: user.value.users_minutely_scripts_test_ignore_fail_regex is defined
 
-                - name: Debug users_minutely_scripts_test.stdout_lines | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
+                - name: >-
+                    Debug users_minutely_scripts_test.stdout_lines
+                    | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
                   ansible.builtin.debug:
-                    msg: "{{ users_minutely_scripts_test.stdout_lines | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex) }}"
+                    msg: >-
+                      {{ users_minutely_scripts_test.stdout_lines
+                      | ansible.builtin.reject('ansible.builtin.regex', user.value.users_minutely_scripts_test_ignore_fail_regex) }}
 
-                - name: Debug users_minutely_scripts_test.stdout_lines | reject('regex', user.value.users_minutely_scripts_test_ignore_fail_regex) | length
+                - name: >-
+                    Debug users_minutely_scripts_test.stdout_lines
+                    | ansible.builtin.reject('regex', user.value.users_minutely_scripts_test_ignore_fail_regex)
+                    | ansible.builtin.length
                   ansible.builtin.debug:
                     msg: >-
                       {{ users_minutely_scripts_test.stdout_lines
@@ -354,21 +670,29 @@
               tags:
                 - debug
 
-            - name: "Debug the stdout from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
+            - name: >-
+                Debug the stdout from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script
               ansible.builtin.debug:
                 var: users_minutely_scripts_test.stdout_lines
               when:
                 - users_minutely_scripts_test.stdout_lines is defined
                 - users_minutely_scripts_test.stdout_lines | ansible.builtin.length > 0
 
-            - name: "Debug the stderr from the test run of the {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script"
+            - name: >-
+                Debug the stderr from the test run of the
+                {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh script
               ansible.builtin.debug:
                 var: users_minutely_scripts_test.stderr_lines
               when:
                 - users_minutely_scripts_test.stderr_lines is defined
                 - users_minutely_scripts_test.stderr_lines | ansible.builtin.length > 0
 
-          when: users_cron_minutely_script_lines != []
+          when:
+            - users_cron_minutely_script_lines != []
+            - >-
+              (user.value.users_groups is not defined) or
+              (user.value.users_groups is defined and "chroot" not in user.value.users_groups)
 
       when:
         - (user.value.users_system is not defined) or (not user.value.users_system | ansible.builtin.bool)

@@ -108,10 +108,16 @@
               PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
               /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh 2>&1 |
-              mail -E -s '[{{ users_notify_subject_tag }}] Daily cron output from the {{ user.key }} account on {{ inventory_hostname }}'
+              mail -E -s '{{ users_cron_email_subject_line }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
             hour: "{{ users_cron_daily_hour | default('05') }}"
+          vars:
+            users_cron_email_subject_line: >-
+              {% if (users_notify_subject_tag is defined) and (users_notify_subject_tag | length > 0) %}
+              [{{ users_notify_subject_tag }}]
+              {% endif %}
+              Daily cron output from the {{ user.key }} account on {{ inventory_hostname }}
 
         - name: "Hourly cron jobs for {{ user.key }}"
           ansible.builtin.cron:
@@ -125,10 +131,16 @@
               PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
               /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh 2>&1 |
-              mail -E -s '[{{ users_notify_subject_tag }}] Hourly cron output from the {{ user.key }} account on {{ inventory_hostname }}'
+              mail -E -s '{{ users_cron_email_subject_line }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "{{ users_cron_min }}"
             hour: "*"
+          vars:
+            users_cron_email_subject_line: >-
+              {% if (users_notify_subject_tag is defined) and (users_notify_subject_tag | length > 0) %}
+              [{{ users_notify_subject_tag }}]
+              {% endif %}
+              Hourly cron output from the {{ user.key }} account on {{ inventory_hostname }}
 
         - name: "Minutely cron jobs for {{ user.key }}"
           ansible.builtin.cron:
@@ -142,10 +154,16 @@
               PATH={{ users_basedir }}/{{ user.key }}/{{ users_home_bin }}:/usr/local/bin:/usr/bin:/bin
               TMPDIR={{ user.value.users_home | default(users_basedir + '/' + user.key) }}/tmp
               /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh 2>&1 |
-              mail -E -s '[{{ users_notify_subject_tag }}] Minutely cron output from the {{ user.key }} account on {{ inventory_hostname }}'
+              mail -E -s '{{ users_cron_email_subject_line }}'
               -r '{{ users_notify_from }}' -a '{{ users_notify_cron_append }}' {{ user.value.users_email }}; fi
             minute: "*"
             hour: "*"
+          vars:
+            users_cron_email_subject_line: >-
+              {% if (users_notify_subject_tag is defined) and (users_notify_subject_tag | length > 0) %}
+              [{{ users_notify_subject_tag }}]
+              {% endif %}
+              Minutely cron output from the {{ user.key }} account on {{ inventory_hostname }}
 
       when:
         - (users_home_bin_path.stat.exists | bool)
@@ -159,7 +177,7 @@
           ansible.builtin.cron:
             name: "Daily cron jobs"
             user: "{{ user.key }}"
-            job: >
+            job: >-
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh | wc -l) -gt 0 ];
               then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_daily.sh; fi
@@ -170,7 +188,7 @@
           ansible.builtin.cron:
             name: "Hourly cron jobs"
             user: "{{ user.key }}"
-            job: >
+            job: >-
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh | wc -l) -gt 0 ];
               then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_hourly.sh; fi
@@ -181,7 +199,7 @@
           ansible.builtin.cron:
             name: "Minutely cron jobs"
             user: "{{ user.key }}"
-            job: >
+            job: >-
               if [ -f {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh ] &&
               [ $(grep -Ev '^\s*($|#)' {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh | wc -l) -gt 0 ];
               then /bin/sh {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/{{ users_home_bin }}/cron_minutely.sh; fi
