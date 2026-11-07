@@ -25,17 +25,17 @@
               - 9.9.9.9
           register: users_domain_nameserver_record_info
 
-        - name: Debug users_domain_nameserver_record_info.entries
+        - name: Debug users_domain_nameserver_record_info.results
           ansible.builtin.debug:
-            var: users_domain_nameserver_record_info.entries
+            var: users_domain_nameserver_record_info.results
 
-        - name: "Set a fact for the community.dns.nameserver_record_info entries for {{ users_domain }}"
+        - name: "Set a fact for the community.dns.nameserver_record_info results for {{ users_domain }}"
           ansible.builtin.set_fact:
-            users_domain_dig_result: "{{ users_domain_nameserver_record_info.entries | community.general.json_query('[0].result[0].entries[0].address') }}"
+            users_domain_dig_result: "{{ users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].entries[0].address') }}"
           when:
-            - users_domain_nameserver_record_info.entries is defined
-            - users_domain_nameserver_record_info.entries | ansible.builtin.type_debug == "list"
-            - users_domain_nameserver_record_info.entries | community.general.json_query('[0].result[0].entries[0].address') is ansible.utils.ipv4
+            - users_domain_nameserver_record_info.results is defined
+            - users_domain_nameserver_record_info.results | ansible.builtin.type_debug == "list"
+            - users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].entries[0].address') is ansible.utils.ipv4
 
         - name: Debug users_domain_dig_result
           ansible.builtin.debug:
@@ -93,9 +93,9 @@
                 - users_domain_dig_command.stdout_lines[-1] is ansible.utils.ipv4_address
 
           when: >-
-            (users_domain_nameserver_record_info.entries is not defined) or
-            (users_domain_nameserver_record_info.entries | ansible.builtin.type_debug != "list") or
-            (users_domain_nameserver_record_info.entries | community.general.json_query('[0].result[0].entries[0].address') is not ansible.utils.ipv4)
+            (users_domain_nameserver_record_info.results is not defined) or
+            (users_domain_nameserver_record_info.results | ansible.builtin.type_debug != "list") or
+            (users_domain_nameserver_record_info.results | community.general.json_query('[0].result[0].entries[0].address') is not ansible.utils.ipv4)
 
     - name: Debug domain name and IP address
       ansible.builtin.debug:
