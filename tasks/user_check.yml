@@ -99,6 +99,14 @@
 
       when: user.value.users_group_members is defined
 
+    - name: "Check that the home directory for root is defined and /root"
+      ansible.builtin.assert:
+        that:
+          - user.value.users_home is ansible.builtin.defined
+          - user.value.users_home == "/root"
+        quiet: "{% if ansible_verbosity == 0 %}true{% else %}false{% endif %}"
+      when: user.key == "root"
+
     - name: "Check that the home directory for {{ user.key }} starts with a slash"
       ansible.builtin.assert:
         that:

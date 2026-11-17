@@ -82,7 +82,7 @@
 
       when: user.key != "root"
 
-    - name: "Ensure SSH key pair present for {{ user.key }}"
+    - name: "Ensure SSH key pair present for {{ user.key }} at {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
       community.crypto.openssh_keypair:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
         type: ed25519
@@ -91,6 +91,9 @@
         mode: "0640"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
+      when:
+        - user.value.users_generate_ssh_key is ansible.builtin.defined
+        - user.value.users_generate_ssh_key | ansible.builtin.bool
 
     - name: Bash ~/.bash_profile present for users with skel set to /usr/local/etc/skel.d/www
       ansible.builtin.copy:
