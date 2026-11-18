@@ -72,7 +72,11 @@
             generate_ssh_key: "{{ user.value.users_generate_ssh_key | default('false') }}"
             system: "{{ user.value.users_system | default('false') }}"
 
-        - name: "Chown and chmod user home directory owner to {{ user.value.users_home_owner | default(user.key) }}:{{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }} {{ user.value.users_home_mode | default('0750') }}"
+        - name: >-
+            Chown and chmod user home directory owner to
+            {{ user.value.users_home_owner | default(user.key) }} :
+            {{ user.value.users_home_group | default(user.value.users_group) | default(user.key) }}
+            {{ user.value.users_home_mode | default('0750') }}
           ansible.builtin.file:
             path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}"
             state: directory
@@ -88,7 +92,7 @@
         type: ed25519
         comment: "{{ user.key }}@{{ inventory_hostname }}"
         regenerate: fail
-        mode: "0640"
+        mode: "0600"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
       when:
