@@ -82,12 +82,12 @@
 
       when: user.key != "root"
 
-    - name: "Ensure SSH key pair present for {{ user.key }} at {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
+    - name: "SSH key pair present at {{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
       community.crypto.openssh_keypair:
         path: "{{ user.value.users_home | default(users_basedir + '/' + user.key) }}/.ssh/id_ed25519"
         type: ed25519
         comment: "{{ user.key }}@{{ inventory_hostname }}"
-        regenerate: full_idempotence
+        regenerate: fail
         mode: "0640"
         owner: "{{ user.key }}"
         group: "{{ user.value.users_group | default(user.key) }}"
