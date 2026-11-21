@@ -17,10 +17,12 @@
           - bash-completion
           - bc
           - bind9-dnsutils
+          - cron
+          - cron-daemon-common
           - curl
           - dos2unix
-          - jq
           - jo
+          - jq
           - mutt
           - pwgen
           - python3-dnspython
