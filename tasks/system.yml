@@ -17,8 +17,6 @@
           - bash-completion
           - bc
           - bind9-dnsutils
-          - cron
-          - cron-daemon-common
           - curl
           - dos2unix
           - jo
@@ -37,7 +35,16 @@
         cache_valid_time: 300
       register: users_pkgs_installed
 
-    - name: Quota package present
+    - name: Cron packages present
+      ansible.builtin.apt:
+        pkg:
+          - cron
+          - cron-daemon-common
+        state: present
+      when: users_cron | ansible.builtin.bool
+      register: users_cron_pkgs_installed
+
+    - name: Quota packages present
       ansible.builtin.apt:
         pkg:
           - quota
@@ -52,6 +59,7 @@
         tasks_from: local_facts.yml
       when: >-
         (users_pkgs_installed.changed | bool) or
+        (users_cron_pkgs_installed.changed | bool) or
         (users_quota_pkgs_installed.changed | bool) or
         ((ansible_facts.ansible_local.dpkg.arch is not defined) or
         (ansible_facts.ansible_local.gpg.version is not defined) or
