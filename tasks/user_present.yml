@@ -71,12 +71,16 @@
       when:
         # - (user.key != "root")
         # - (user.value.users_groups is defined) and ("sudo" not in user.value.users_groups)
-        - (users_cron is defined) and (users_cron)
+        - (users_cron is defined) and (users_cron | bool)
         - (user.value.users_email is defined) and (user.value.users_email | length > 0)
+        - ("cron" in ansible_facts.ansible_local.dpkg.installed)
 
     - name: "Crontab tasks absent for user {{ user.key }} as they have no email address"
       ansible.builtin.include_tasks: crontab_user_absent.yml
-      when: (user.value.users_email is not defined) or (user.value.users_email | length == 0)
+      when:
+        - (users_cron is defined) and (users_cron | bool)
+        - (user.value.users_email is not defined) or (user.value.users_email | length == 0)
+        - ("cron" in ansible_facts.ansible_local.dpkg.installed)
 
     - name: "Create or remove a .forward file for {{ user.key }}"
       block:

@@ -299,6 +299,7 @@
         - users_update_strategy is defined
         - users_update_strategy == "cron"
         - (users_cron is defined) and (users_cron | bool)
+        - ("cron" in ansible_facts.ansible_local.dpkg.installed)
         - (user.value.users_email is defined) and (user.value.users_email | length > 0)
 
     - name: Update MariaDB config for users present
